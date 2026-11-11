@@ -5,7 +5,7 @@
 
 Запуск (без окна):
   blender -b -noaudio --factory-startup -P tools/blender/previz_hero.py -- <out_dir> [width height] [start end]
-Кадры пишутся в <out_dir>/f####.png (24 к/с, 35 с = 840 кадров). Сцену можно сохранить: --save <file.blend>
+Кадры пишутся в <out_dir>/f####.png (24 к/с, 42 с = 1008 кадров). Сцену можно сохранить: --save <file.blend>
 
 Координаты: раскладка взята из three.js-сцены (y — вверх) и переводится в Blender (z — вверх) функцией P().
 """
@@ -15,10 +15,10 @@ from mathutils import Vector
 argv = sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else []
 OUT = argv[0] if argv else '/tmp/previz'
 RW, RH = (int(argv[1]), int(argv[2])) if len(argv) >= 3 else (960, 540)
-F0, F1 = (int(argv[3]), int(argv[4])) if len(argv) >= 5 else (0, 840)
+F0, F1 = (int(argv[3]), int(argv[4])) if len(argv) >= 5 else (0, 1008)
 SAVE = argv[argv.index('--save') + 1] if '--save' in argv else None
 
-FPS, DUR = 24, 35.0
+FPS, DUR = 24, 42.0
 N = int(FPS * DUR)
 
 # ---------------- утилиты ----------------
@@ -223,167 +223,267 @@ tapeL = box('tapeL', 1, 1, 1, G['tape'], 0, 0, 0, boxRoot, 0)
 tapeT = box('tapeT', 1, 1, 1, G['tape'], 0, 0, 0, boxRoot, 0)
 tapeR = box('tapeR', 1, 1, 1, G['tape'], 0, 0, 0, boxRoot, 0)
 for t_ in (tapeL, tapeT, tapeR): t_.location = (0, 0, 0)
-BOXA, BOXB = (0.75, RY, 1.55), (BX + 1.75, RY, 1.95)
+# раскладка коробки: в квартире А и Б (координаты three)
+BOXA, BOXB = (0.6, RY, 1.4), (BX - 1.0, RY, 1.95)
+VAN_A, VAN_B = 2.2, BX + 2.2          # где стоит бус (центр) при погрузке и выгрузке: задняя дверь ≈ x−2.22
 
-# ---------------- бус ----------------
+# ---------------- бус: пустой кузов, задние двери, пандус, днище ----------------
 van = empty('van')
-box('van_cargo', 3.35, 2.0, 1.86, G['white'], -.55, .36, 0, van, .1)
+CX0, CX1 = -2.22, 1.12                 # кузов по x
+box('van_floor', 3.34, .06, 1.86, G['mid'], -.55, .36, 0, van, 0)
+box('van_roof', 3.34, .07, 1.86, G['white'], -.55, 2.29, 0, van, .03)
+box('van_side_l', 3.34, 1.9, .05, G['white'], -.55, .42, .905, van, .02)
+box('van_side_r', 3.34, 1.9, .05, G['white'], -.55, .42, -.905, van, .02)
+box('van_front', .05, 1.9, 1.86, G['light'], 1.1, .42, 0, van, 0)
+box('van_inner', 3.2, .02, 1.7, G['light'], -.55, .43, 0, van, 0)      # пол внутри светлее — видно, что кузов пустой
 box('van_cab', 1.3, 1.36, 1.86, G['white'], 1.62, .36, 0, van, .12)
 ws = box('van_wind', .05, .78, 1.66, G['glass'], 1.92, 1.0, 0, van, 0); ws.rotation_euler = (0, .5, 0)
 box('van_sidewin', .62, .5, .02, G['glass'], 1.45, 1.06, .935, van, 0)
+box('van_sidewin2', .62, .5, .02, G['glass'], 1.45, 1.06, -.935, van, 0)
 box('van_bump_f', .2, .26, 1.9, G['dark'], 2.28, .32, 0, van, .04)
-box('van_bump_r', .16, .24, 1.9, G['dark'], -2.24, .32, 0, van, .04)
-box('van_stripe', 3.36, .1, 1.885, G['tape'], -.55, .55, 0, van, 0)
-# боковая сдвижная дверь (видимая сторона): проём тёмный, дверь отъезжает назад
-DOOR_X = 0.45
-box('van_opening', .95, 1.6, .02, G['dark'], DOOR_X, .55, .925, van, 0)
-vanDoor = box('van_door', .97, 1.62, .04, G['white'], DOOR_X, .54, .95, van, .01)
+box('van_bump_r', .16, .18, 1.9, G['dark'], -2.24, .2, 0, van, .03)
+box('van_stripe_l', 3.36, .1, .02, G['tape'], -.55, .55, .935, van, 0)
+box('van_stripe_r', 3.36, .1, .02, G['tape'], -.55, .55, -.935, van, 0)
+# днище (для пролёта камеры под бусом): рама, мосты, выхлоп
+box('van_chassis', 3.9, .08, 1.1, G['dark'], -.3, .28, 0, van, .01)
+box('van_tank', .7, .16, .5, G['mid'], .2, .2, -.35, van, .02)
+cyl('van_axle_r', .05, .05, 1.7, G['dark'], -1.45, .37, 0, van, 10, axis='z')
+cyl('van_axle_f', .05, .05, 1.7, G['dark'], 1.5, .37, 0, van, 10, axis='z')
+box('van_exhaust', 2.4, .06, .06, G['mid'], -.9, .24, .45, van, 0)
+# задние двери на петлях
+DOORS = []
+for s_ in (1, -1):
+    hg = empty('van_door_h', P(CX0, .39, s_ * .93), van)
+    box('van_door', .05, 1.92, .92, G['white'], 0, 0, -s_ * .46, hg, .01)
+    box('van_door_win', .02, .4, .5, G['glass'], -.03, 1.25, -s_ * .46, hg, 0)
+    DOORS.append((hg, s_))
+# пандус
+rampG = empty('van_ramp', P(CX0, .42, 0), van)
+ramp = box('van_ramp_plank', 1.6, .04, 1.2, G['mid'], -.8, -.02, 0, rampG, 0)
 WHEELS = []
 for wx_ in (-1.45, 1.5):
     for wz in (.82, -.82):
         w = cyl('wheel', .37, .37, .28, G['dark'], wx_, .37, wz, van, 24, axis='z'); WHEELS.append(w)
 
-# ---------------- камера ----------------
-cam_data = bpy.data.cameras.new('cam'); cam_data.lens = 38; cam_data.sensor_width = 36
-cam = bpy.data.objects.new('cam', cam_data); col.objects.link(cam); sc.camera = cam
-tgt = empty('cam_target')
-con = cam.constraints.new('TRACK_TO'); con.target = tgt; con.track_axis = 'TRACK_NEGATIVE_Z'; con.up_axis = 'UP_Y'
-# опорные точки камеры: (секунда, позиция камеры, точка взгляда) в координатах three
-CAM_KEYS = [
-    (0.0, (9.5, 8.8, 11.0), (0.2, 0.8, 0.0)),
-    (7.0, (7.2, 6.6, 8.6), (0.5, 0.9, 0.8)),
-    (15.0, (4.0, 5.8, 9.4), (0.8, 1.0, 1.4)),
-    (20.5, (6.5, 4.2, 13.0), (2.0, 1.0, 3.2)),
-    (21.5, (8.5, 3.6, 13.2), (4.0, 1.0, 4.0)),
-    (28.2, (33.0, 3.9, 13.0), (29.2, 1.0, 3.8)),
-    (35.0, (34.5, 10.5, 12.0), (26.3, 0.6, 0.0)),
-]
-for t_, c, g in CAM_KEYS:
-    f = round(t_ * FPS)
-    cam.location = P(*c); cam.keyframe_insert('location', frame=f)
-    tgt.location = P(*g); tgt.keyframe_insert('location', frame=f)
-# на проезде камера едет вместе с бусом (тот же разгон и торможение), с небольшим упреждением
-def van_x(t):
-    return lerp(VX, VX + BX, eio(seg(t, 21.0, 27.8)))
-f = round(21.6 * FPS)
-while f <= round(27.8 * FPS):
-    t_ = f / FPS; vx_ = van_x(t_); k = math.sin(math.pi * seg(t_, 21.6, 27.8))
-    cam.location = P(vx_ + 4.6, 3.7 + .4 * k, 13.1); cam.keyframe_insert('location', frame=f)
-    tgt.location = P(vx_ + 1.2, 1.0, 4.0); tgt.keyframe_insert('location', frame=f)
-    f += 6
-for ob in (cam, tgt):
-    for fc in ob.animation_data.action.fcurves:
-        for kp in fc.keyframe_points: kp.interpolation = 'BEZIER'; kp.handle_left_type = kp.handle_right_type = 'AUTO_CLAMPED'
+# ---------------- тайминг (секунды) ----------------
+T_BOX_POP, T_WALLS, T_OPEN = (8.0, 8.4), (8.6, 10.4), (10.2, 10.9)
+IN0, IN_STEP, IN_DUR = 11.6, 0.62, 1.2
+T_CLOSE_S, T_CLOSE_F = (18.5, 19.2), (18.8, 19.5)
+T_TAPE = (19.5, 19.7, 20.5, 20.7)
+T_STICK = (20.7, 21.1)
+T_VAN_IN = (17.0, 21.0)
+T_DOORS_A = (21.4, 22.0, 25.0, 25.6)       # открыть / закрыть
+T_HOP_A, T_RAMP_A = (22.2, 23.3), (23.4, 24.7)
+CUT = 25.8
+T_DRIVE = (26.2, 31.8)
+T_DOORS_B = (32.2, 32.9, 35.3, 35.9)
+T_RAMP_B, T_HOP_B = (33.0, 34.0), (34.1, 35.2)
+T_OPEN_B = (35.9, 36.1, 36.1, 36.7)        # скотч снят, клапаны раскрылись
+OUT0, OUT_STEP, OUT_DUR = 36.8, 0.32, 1.1
+T_FLAT, T_GONE = (40.6, 41.3), (41.3, 41.7)
+T_VAN_OUT = (38.0, 42.0)
 
-# ---------------- анимация: состояние сцены как функция времени ----------------
-IN0, IN_STEP, IN_DUR = 7.0, 0.7, 1.3
-OUT0, OUT_STEP, OUT_DUR = 30.2, 0.3, 1.1
+def van_x(t):
+    if t < T_VAN_IN[1]: return lerp(-32, VAN_A, eout(seg(t, *T_VAN_IN)))
+    if t < T_DRIVE[0]: return VAN_A
+    if t < T_VAN_OUT[0]: return lerp(VAN_A, VAN_B, eio(seg(t, *T_DRIVE)))
+    return lerp(VAN_B, VAN_B + 36, ein(seg(t, *T_VAN_OUT)))
+
+def doors(t):
+    a = eio(seg(t, T_DOORS_A[0], T_DOORS_A[1])) * (1 - eio(seg(t, T_DOORS_A[2], T_DOORS_A[3])))
+    b = eio(seg(t, T_DOORS_B[0], T_DOORS_B[1])) * (1 - eio(seg(t, T_DOORS_B[2], T_DOORS_B[3])))
+    return max(a, b)
+
+def ramp_k(t):
+    a = eout(seg(t, 21.9, 22.3)) * (1 - ein(seg(t, 24.8, 25.1)))
+    b = eout(seg(t, 32.8, 33.0)) * (1 - ein(seg(t, 35.1, 35.4)))
+    return max(a, b)
 
 def bez(a, b, lift, k):
     q = ((a[0] + b[0]) / 2, max(a[1], b[1]) + lift, (a[2] + b[2]) / 2)
     u = 1 - k
     return tuple(u * u * a[i] + 2 * u * k * q[i] + k * k * b[i] for i in range(3))
+def lerp3(a, b, k): return tuple(a[i] + (b[i] - a[i]) * k for i in range(3))
 
-def state(t):
-    S = {}
-    # бус: приезжает, ждёт, везёт, стоит у новой квартиры
-    vx = -30.0
-    if t >= 14.5: vx = lerp(-30, VX, eout(seg(t, 14.5, 18.5)))
-    if t >= 21.0: vx = lerp(VX, VX + BX, eio(seg(t, 21.0, 27.8)))
-    if t >= 33.0: vx = lerp(VX + BX, VX + BX + 34, ein(seg(t, 33.0, 35.0)))
-    S['door'] = eio(seg(t, 18.6, 19.0)) * (1 - eio(seg(t, 20.5, 20.9))) + eio(seg(t, 27.9, 28.2)) * (1 - eio(seg(t, 29.5, 29.9)))
-    drive = seg(t, 21.0, 27.8)
-    S['van'] = ((vx, math.sin(drive * math.pi * 16) * .02 * math.sin(drive * math.pi), 4.45), vx)
-    # коробка
-    pop = eback(seg(t, 2.0, 2.5))
-    walls = eio(seg(t, 2.5, 4.5))
-    opn = -0.28 * eout(seg(t, 4.2, 5.0))
-    cS, cF = eio(seg(t, 15.0, 15.6)), eio(seg(t, 15.4, 16.0))
-    rS, rF = eio(seg(t, 29.8, 30.2)), eio(seg(t, 29.6, 30.0))
-    flat = eio(seg(t, 33.6, 34.4))
-    off = seg(t, 29.4, 29.6)
-    S['walls'] = walls * (1 - flat)
-    S['flS'] = lerp(lerp(opn, 1, cS), -0.28, rS) * (1 - flat)
-    S['flF'] = lerp(lerp(opn, 1, cF), -0.28, rF) * (1 - flat)
-    S['tape'] = (eout(seg(t, 16.1, 16.4)) * (1 - off), eio(seg(t, 16.4, 17.2)) * (1 - off), eout(seg(t, 17.2, 17.5)) * (1 - off))
-    S['sticker'] = seg(t, 17.5, 18.0)
+def box_state(t):
+    """позиция коробки (three), поворот, масштаб"""
+    vA, vB = van_x(t), van_x(t)
+    cargoA = (VAN_A - 1.05, .43, 4.45); cargoB = (VAN_B - 1.05, .43, 4.45)
+    streetA = (VAN_A - 2.22 - 2.4, 0.0, 4.45); streetB = (VAN_B - 2.22 - 2.4, 0.0, 4.45)
+    rampTopA = (VAN_A - 2.22 - .2, .42, 4.45); rampTopB = (VAN_B - 2.22 - .2, .42, 4.45)
+    s = eback(seg(t, *T_BOX_POP)) * (1 - ein(seg(t, *T_GONE)))
+    rot = 0.0
+    if t < T_HOP_A[0]: pos = BOXA
+    elif t < T_HOP_A[1]:
+        k = eio(seg(t, *T_HOP_A)); pos = bez(BOXA, streetA, 1.5, k); rot = math.sin(math.pi * k) * .35
+    elif t < T_RAMP_A[1]:
+        k = eio(seg(t, *T_RAMP_A))
+        pos = lerp3(streetA, rampTopA, min(1, k / .55)) if k < .55 else lerp3(rampTopA, cargoA, (k - .55) / .45)
+    elif t < CUT: pos = cargoA
+    elif t < T_RAMP_B[0]: pos = (van_x(t) - 1.05, .43, 4.45)         # едет в кузове
+    elif t < T_RAMP_B[1]:
+        k = eio(seg(t, *T_RAMP_B))
+        pos = lerp3(cargoB, rampTopB, min(1, k / .45)) if k < .45 else lerp3(rampTopB, streetB, (k - .45) / .55)
+    elif t < T_HOP_B[1]:
+        k = eio(seg(t, *T_HOP_B)); pos = bez(streetB, BOXB, 1.5, k); rot = -math.sin(math.pi * k) * .35
+    else: pos = BOXB
+    return pos, rot, max(s, .0001)
+
+# ---------------- камера: опорные точки + процедурные участки, гладкая интерполяция ----------------
+BOXC = (BOXA[0], BOXA[1] + .55, BOXA[2])
+KEYS_1 = [  # до склейки (двери закрываются перед камерой)
+    (0.0, (16.0, 17.0, 20.0), (1.0, 0.0, 1.0), 30),
+    (2.5, (10.0, 8.0, 11.0), (0.5, 0.6, 0.5), 28),
+    (4.2, (4.2, 2.4, 5.2), (0.5, 0.8, 0.2), 24),
+    (5.2, (2.4, 1.25, 2.6), (-0.8, 0.9, -1.2), 20),
+    (6.6, (0.4, 1.1, 0.9), (-2.4, 0.9, -1.4), 20),
+    (7.6, (-1.2, 1.5, 0.4), (-2.2, 0.8, -1.6), 22),
+    (8.6, (0.2, 4.5, 2.8), (0.6, 0.35, 1.4), 26),
+    (9.6, (0.9, 7.2, 1.9), (0.6, 0.35, 1.4), 32),
+    (10.8, (0.1, 7.0, 0.9), (0.6, 0.35, 1.4), 32),
+]
+# облёт коробки: дуга спереди (камера не уходит за стены)
+for k in range(13):
+    u = k / 12; t_ = 11.8 + u * 6.4; a = lerp(0.25, 1.95, eio(u))
+    KEYS_1.append((t_, (BOXA[0] + 5.0 * math.cos(a), lerp(3.2, 2.6, u), BOXA[2] + 5.0 * math.sin(a)), BOXC, 26))
+KEYS_1 += [
+    (18.9, (-0.9, 3.3, 3.0), (BOXA[0] - .3, 1.65, 1.4), 34),          # сверху над крышкой
+    (19.6, (-1.3, 3.4, 3.0), (BOXA[0] - .95, 1.65, 1.4), 38),         # начало скотча
+    (20.5, (2.3, 3.4, 3.0), (BOXA[0] + .95, 1.65, 1.4), 38),          # камера едет вдоль скотча
+    (21.15, (1.45, 1.05, 3.15), (BOXA[0] + .45, 0.7, BOXA[2] + .7), 42), # наклейка крупно (между квартирой и бусом)
+    (21.9, (0.3, 3.0, 3.3), (-0.8, 0.6, 2.6), 30),                      # вверх, над бусом
+    (22.7, (-2.0, 2.6, 5.8), (-1.8, 0.4, 4.45), 28),                    # за задними дверями
+    (23.4, (-4.6, 1.5, 6.4), (-1.6, 0.6, 4.45), 26),
+    (24.4, (-3.6, 1.3, 5.3), (-0.5, 0.9, 4.45), 24),
+    (25.3, (-1.7, 1.25, 4.6), (1.0, 1.1, 4.45), 22),
+    (25.75, (-1.65, 1.25, 4.58), (1.0, 1.1, 4.45), 22),
+]
+KEYS_2 = [  # после склейки: асфальт → под бусом → за бусом → выгрузка → финал
+    (CUT, (8.6, 0.17, 4.45), (2.2, 0.8, 4.45), 18),
+    (27.9, (8.4, 0.17, 4.45), (5.5, 0.6, 4.45), 18),
+    (28.3, (8.4, 0.17, 4.45), (7.6, 0.7, 4.45), 17),
+    (28.75, (8.3, 0.25, 4.45), (13.0, 0.8, 4.45), 18),
+]
+for k in range(1, 13):
+    u = k / 12; t_ = 28.75 + u * 3.05; vx = van_x(t_)
+    KEYS_2.append((t_, (vx - 5.5, lerp(0.3, 2.4, eout(u)), lerp(4.45, 6.4, eout(u))), (vx + 1.2, 1.0, 4.45), lerp(20, 26, u)))
+KEYS_2 += [
+    (32.6, (BX - 4.4, 1.7, 6.4), (BX - 1.0, 0.8, 4.45), 26),
+    (34.0, (BX - 3.8, 1.5, 6.0), (BX - 1.4, 0.6, 4.45), 26),
+    (35.4, (BX - 2.2, 4.6, 6.4), (BOXB[0], 0.6, BOXB[2]), 28),
+    (36.4, (BX - 0.4, 4.0, 4.6), (BOXB[0], 0.9, BOXB[2]), 30),
+    (38.5, (BX + 4.5, 4.2, 6.5), (BX - 0.5, 0.8, 0.3), 30),
+    (40.2, (BX + 7.5, 6.5, 8.6), (BX - 0.2, 0.7, 0.1), 31),
+    (42.0, (BX + 9.0, 8.8, 11.0), (BX, 0.6, 0.0), 32),
+]
+
+def hermite(keys, t):
+    """гладкая кривая через опорные точки (Catmull-Rom по времени), на концах — плавный старт/стоп"""
+    if t <= keys[0][0]: return keys[0][1:]
+    if t >= keys[-1][0]: return keys[-1][1:]
+    i = max(j for j in range(len(keys) - 1) if keys[j][0] <= t)
+    t0, t1 = keys[i][0], keys[i + 1][0]; h = t1 - t0; s = (t - t0) / h
+    h00, h10, h01, h11 = 2*s**3 - 3*s**2 + 1, s**3 - 2*s**2 + s, -2*s**3 + 3*s**2, s**3 - s**2
+    def tang(j, c):
+        if j == 0 or j == len(keys) - 1: return 0.0
+        return (keys[j + 1][c] - keys[j - 1][c]) / (keys[j + 1][0] - keys[j - 1][0])
+    out = []
+    for c in (1, 2, 3):
+        if isinstance(keys[i][c], tuple):
+            v = []
+            for d in range(3):
+                p0, p1 = keys[i][c][d], keys[i + 1][c][d]
+                m0 = 0.0 if i == 0 else (keys[i + 1][c][d] - keys[i - 1][c][d]) / (keys[i + 1][0] - keys[i - 1][0])
+                m1 = 0.0 if i + 1 == len(keys) - 1 else (keys[i + 2][c][d] - keys[i][c][d]) / (keys[i + 2][0] - keys[i][0])
+                v.append(h00 * p0 + h10 * h * m0 + h01 * p1 + h11 * h * m1)
+            out.append(tuple(v))
+        else:
+            p0, p1 = keys[i][c], keys[i + 1][c]
+            m0 = 0.0 if i == 0 else (keys[i + 1][c] - keys[i - 1][c]) / (keys[i + 1][0] - keys[i - 1][0])
+            m1 = 0.0 if i + 1 == len(keys) - 1 else (keys[i + 2][c] - keys[i][c]) / (keys[i + 2][0] - keys[i][0])
+            out.append(h00 * p0 + h10 * h * m0 + h01 * p1 + h11 * h * m1)
+    return out
+
+def cam_state(t):
+    return hermite(KEYS_1 if t < CUT else KEYS_2, t)
+
+cam_data = bpy.data.cameras.new('cam'); cam_data.sensor_width = 36; cam_data.clip_start = .02; cam_data.clip_end = 300
+cam = bpy.data.objects.new('cam', cam_data); col.objects.link(cam); sc.camera = cam
+tgt = empty('cam_target')
+con = cam.constraints.new('TRACK_TO'); con.target = tgt; con.track_axis = 'TRACK_NEGATIVE_Z'; con.up_axis = 'UP_Y'
+
+# ---------------- анимация: всё — функция времени, ключ на каждый кадр ----------------
+TH, TW_, DROP = .012, .3, BH * .3
+def three_scale(s): return (s[0], s[2], s[1])
+
+def apply(t, f):
+    c, g, lens = cam_state(t)
+    cam.location = P(*c); tgt.location = P(*g); cam_data.lens = lens
+    cam.keyframe_insert('location', frame=f); tgt.keyframe_insert('location', frame=f); cam_data.keyframe_insert('lens', frame=f)
+    # бус
+    vx = van_x(t)
+    drive = seg(t, *T_DRIVE)
+    van.location = P(vx, math.sin(drive * math.pi * 18) * .015 * math.sin(drive * math.pi), 4.45); van.keyframe_insert('location', frame=f)
+    for w in WHEELS:
+        w.rotation_euler = (math.pi / 2, -vx / .37, 0); w.keyframe_insert('rotation_euler', frame=f)
+    d = doors(t)
+    for hg, s_ in DOORS:
+        hg.rotation_euler = (0, 0, s_ * (math.pi * .6) * d); hg.keyframe_insert('rotation_euler', frame=f)
+    rk = ramp_k(t)
+    rampG.scale = (max(rk, .0001), 1, 1); rampG.rotation_euler = (0, -.27 * rk, 0)
+    rampG.keyframe_insert('scale', frame=f); rampG.keyframe_insert('rotation_euler', frame=f)
+    # коробка: сборка, клапаны, скотч
+    walls = eio(seg(t, *T_WALLS)) * (1 - eio(seg(t, *T_FLAT)))
+    opn = -0.28 * eout(seg(t, *T_OPEN))
+    cS, cF = eio(seg(t, *T_CLOSE_S)), eio(seg(t, *T_CLOSE_F))
+    rOpen = eio(seg(t, T_OPEN_B[2], T_OPEN_B[3])); flat = eio(seg(t, *T_FLAT))
+    flS = lerp(lerp(opn, 1, cS), -0.28, rOpen) * (1 - flat)
+    flF = lerp(lerp(opn, 1, cF), -0.28, rOpen) * (1 - flat)
+    for i, (hinge, flap) in enumerate(SIDES):
+        hinge.rotation_euler = ((math.pi / 2) * (1 - walls), 0, 0)
+        flap.rotation_euler = (-(math.pi / 2) * (flF if i < 2 else flS * .985), 0, 0)
+        hinge.keyframe_insert('rotation_euler', frame=f); flap.keyframe_insert('rotation_euler', frame=f)
+    off = seg(t, T_OPEN_B[0], T_OPEN_B[1])
+    a, b_, c_ = (eout(seg(t, T_TAPE[0], T_TAPE[1])) * (1 - off), eio(seg(t, T_TAPE[1], T_TAPE[2])) * (1 - off), eout(seg(t, T_TAPE[2], T_TAPE[3])) * (1 - off))
+    top = BH + BT * 2.2
+    tapeL.scale = three_scale((TH, max(.001, DROP * a), TW_)); tapeL.location = P(-BW / 2 - TH / 2, top - DROP * a / 2, 0)
+    tapeT.scale = three_scale((max(.001, (BW + .02) * b_), TH, TW_)); tapeT.location = P(-BW / 2 + (BW + .02) * b_ / 2, top, 0)
+    tapeR.scale = three_scale((TH, max(.001, DROP * c_), TW_)); tapeR.location = P(BW / 2 + TH / 2, top - DROP * c_ / 2, 0)
+    for t_ in (tapeL, tapeT, tapeR): t_.keyframe_insert('scale', frame=f); t_.keyframe_insert('location', frame=f)
+    pos, rot, s = box_state(t)
     gulp = sum(math.sin(math.pi * seg(t, IN0 + i * IN_STEP + IN_DUR - .1, IN0 + i * IN_STEP + IN_DUR + .35)) for i in range(len(ITEMS)))
     gulp += sum(.6 * math.sin(math.pi * seg(t, OUT0 + i * OUT_STEP, OUT0 + i * OUT_STEP + .3)) for i in range(len(ITEMS)))
-    hopIn, hopOut = seg(t, 19.0, 20.4), seg(t, 28.2, 29.4)
-    doorPt = lambda vx_: (vx_ + DOOR_X, 1.25, 4.45 + .75)
-    inVan = doorPt(VX)
-    s = pop * (1 - ein(seg(t, 34.4, 34.9)))
-    rot = 0.0
-    if hopIn <= 0: pos = BOXA
-    elif hopIn < 1: pos = bez(BOXA, inVan, 2.8, eio(hopIn)); s = lerp(1, .42, eio(hopIn)); rot = math.sin(math.pi * hopIn) * .5
-    elif hopOut <= 0: pos = inVan; s = 0.0001
-    else:
-        pos = bez(doorPt(VX + BX), BOXB, 2.8, eio(hopOut)); s = lerp(.42, 1, eout(hopOut)); rot = -math.sin(math.pi * hopOut) * .5
-    s *= (1 - ein(seg(t, 34.4, 34.9)))   # сложенная коробка исчезает в конце
-    s = max(s, .0001)
     sq = min(1, gulp) * .07
-    S['box'] = (pos, rot, (s * (1 + sq * .6), s * (1 - sq), s * (1 + sq * .6)))
-    # вещи
+    boxRoot.location = P(*pos); boxRoot.rotation_euler = (0, 0, rot); boxRoot.scale = three_scale((s * (1 + sq * .6), s * (1 - sq), s * (1 + sq * .6)))
+    for path in ('location', 'rotation_euler', 'scale'): boxRoot.keyframe_insert(path, frame=f)
+    # вещи: в коробку и из коробки
     mouthA = (BOXA[0], RY + BH * .55, BOXA[2]); mouthB = (BOXB[0], RY + BH * .55, BOXB[2])
-    its = []
     for i, it in enumerate(ITEMS):
         ax, az, ar = it['a']; bx_, bz, br = it['b']
         k = seg(t, IN0 + i * IN_STEP, IN0 + i * IN_STEP + IN_DUR)
         o_ = seg(t, OUT0 + i * OUT_STEP, OUT0 + i * OUT_STEP + OUT_DUR)
         if o_ > 0:
-            e = eout(o_)
-            pos = bez(mouthB, (BX + bx_, RY, bz), 2.2 + it['h'] * .4, e)
-            sc_ = max(.0001, eback(o_)); st_ = math.sin(math.pi * o_) * .22
-            its.append((pos, br - (1 - e) * math.pi * 1.2, (sc_ * (1 - st_ * .5), sc_ * (1 + st_), sc_ * (1 - st_ * .5))))
+            e = eout(o_); p_ = bez(mouthB, (BX + bx_, RY, bz), 2.2 + it['h'] * .4, e)
+            sc_ = max(.0001, eback(o_)); st_ = math.sin(math.pi * o_) * .22; r_ = br - (1 - e) * math.pi * 1.2
         elif k <= 0:
-            its.append(((ax, RY, az), ar, (1, 1, 1)))
+            p_, sc_, st_, r_ = (ax, RY, az), 1.0, 0.0, ar
         elif k < 1:
-            e = eio(k)
-            pos = bez((ax, RY, az), mouthA, 2.4 + it['h'] * .4, e)
-            sc_ = max(.0001, 1 - ein(k)); st_ = math.sin(math.pi * k) * .28
-            its.append((pos, ar + e * math.pi * 1.2, (sc_ * (1 - st_ * .5), sc_ * (1 + st_), sc_ * (1 - st_ * .5))))
+            e = eio(k); p_ = bez((ax, RY, az), mouthA, 2.4 + it['h'] * .4, e)
+            sc_ = max(.0001, 1 - ein(k)); st_ = math.sin(math.pi * k) * .28; r_ = ar + e * math.pi * 1.2
         else:
-            its.append(((ax, RY, az), ar, (.0001, .0001, .0001)))
-    S['items'] = its
-    return S
-
-def three_scale(s):  # (sx, sy, sz) three → Blender
-    return (s[0], s[2], s[1])
-
-TW, TH, DROP = .44 * BD / 2 * 2 * .5, .012, BH * .3
-def apply(S, f):
-    (vp, vx) = S['van']
-    van.location = P(*vp); van.keyframe_insert('location', frame=f)
-    d = S['door']
-    vanDoor.location = P(DOOR_X - 1.0 * d, .54 + .81, .95 + .06 * min(1, d * 4)); vanDoor.keyframe_insert('location', frame=f)
-    for w in WHEELS:
-        w.rotation_euler = (math.pi / 2, 0, -vx / .37 * 0)  # базовый поворот
-        w.rotation_euler[1] = -vx / .37
-        w.keyframe_insert('rotation_euler', frame=f)
-    pos, rot, s = S['box']
-    boxRoot.location = P(*pos); boxRoot.rotation_euler = (0, 0, rot); boxRoot.scale = three_scale(s)
-    for path in ('location', 'rotation_euler', 'scale'): boxRoot.keyframe_insert(path, frame=f)
-    for i, (hinge, flap) in enumerate(SIDES):
-        hinge.rotation_euler = ((math.pi / 2) * (1 - S['walls']), 0, 0)
-        fold = S['flF'] if i < 2 else S['flS']
-        flap.rotation_euler = (-(math.pi / 2) * fold * (1 if i < 2 else .985), 0, 0)
-        hinge.keyframe_insert('rotation_euler', frame=f); flap.keyframe_insert('rotation_euler', frame=f)
-    a, b, c = S['tape']; top = BH + BT * 2.2; tw = .3
-    tapeL.scale = three_scale((TH, max(.001, DROP * a), tw)); tapeL.location = P(-BW / 2 - TH / 2, top - DROP * a / 2, 0)
-    tapeT.scale = three_scale((max(.001, (BW + .02) * b), TH, tw)); tapeT.location = P(-BW / 2 + (BW + .02) * b / 2, top, 0)
-    tapeR.scale = three_scale((TH, max(.001, DROP * c), tw)); tapeR.location = P(BW / 2 + TH / 2, top - DROP * c / 2, 0)
-    for t_ in (tapeL, tapeT, tapeR):
-        t_.keyframe_insert('scale', frame=f); t_.keyframe_insert('location', frame=f)
-    for it, (pos, rot, s) in zip(ITEMS, S['items']):
-        o = it['o']; o.location = P(*pos); o.rotation_euler = (0, 0, rot); o.scale = three_scale(s)
+            p_, sc_, st_, r_ = (ax, RY, az), .0001, 0.0, ar
+        o = it['o']; o.location = P(*p_); o.rotation_euler = (0, 0, r_)
+        o.scale = three_scale((sc_ * (1 - st_ * .5), sc_ * (1 + st_), sc_ * (1 - st_ * .5)))
         for path in ('location', 'rotation_euler', 'scale'): o.keyframe_insert(path, frame=f)
 
 for f in range(0, N + 1):
-    apply(state(f / FPS), f)
-for ob in bpy.data.objects:
-    if ob.animation_data and ob.animation_data.action and ob not in (cam, tgt):
-        for fc in ob.animation_data.action.fcurves:
+    apply(f / FPS, f)
+for ob in list(bpy.data.objects) + [cam_data]:
+    ad = ob.animation_data
+    if ad and ad.action:
+        for fc in ad.action.fcurves:
             for kp in fc.keyframe_points: kp.interpolation = 'LINEAR'
+
 
 # ---------------- рендер: Workbench (серый превиз, быстро) ----------------
 sc.render.engine = 'BLENDER_WORKBENCH'
