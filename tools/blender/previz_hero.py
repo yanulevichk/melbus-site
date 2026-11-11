@@ -255,13 +255,22 @@ CAM_KEYS = [
     (15.0, (4.0, 5.8, 9.4), (0.8, 1.0, 1.4)),
     (20.5, (6.5, 4.2, 13.0), (2.0, 1.0, 3.2)),
     (21.5, (8.5, 3.6, 13.2), (4.0, 1.0, 4.0)),
-    (28.0, (32.5, 3.8, 13.0), (28.5, 1.0, 3.6)),
+    (28.2, (33.0, 3.9, 13.0), (29.2, 1.0, 3.8)),
     (35.0, (34.5, 10.5, 12.0), (26.3, 0.6, 0.0)),
 ]
 for t_, c, g in CAM_KEYS:
     f = round(t_ * FPS)
     cam.location = P(*c); cam.keyframe_insert('location', frame=f)
     tgt.location = P(*g); tgt.keyframe_insert('location', frame=f)
+# на проезде камера едет вместе с бусом (тот же разгон и торможение), с небольшим упреждением
+def van_x(t):
+    return lerp(VX, VX + BX, eio(seg(t, 21.0, 27.8)))
+f = round(21.6 * FPS)
+while f <= round(27.8 * FPS):
+    t_ = f / FPS; vx_ = van_x(t_); k = math.sin(math.pi * seg(t_, 21.6, 27.8))
+    cam.location = P(vx_ + 4.6, 3.7 + .4 * k, 13.1); cam.keyframe_insert('location', frame=f)
+    tgt.location = P(vx_ + 1.2, 1.0, 4.0); tgt.keyframe_insert('location', frame=f)
+    f += 6
 for ob in (cam, tgt):
     for fc in ob.animation_data.action.fcurves:
         for kp in fc.keyframe_points: kp.interpolation = 'BEZIER'; kp.handle_left_type = kp.handle_right_type = 'AUTO_CLAMPED'
