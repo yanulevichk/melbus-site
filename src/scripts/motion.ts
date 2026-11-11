@@ -239,7 +239,7 @@ function initPage() {
     /* Vanta только на компьютере */
     if (desktop && !reduceNow) {
       document.querySelectorAll<HTMLElement>('[data-vanta]').forEach((el) => {
-        const stop = mountVanta(el, 'fog', { highlightColor: 0x2b4bff, midtoneColor: 0x1a2340, lowlightColor: 0x0c0e11, baseColor: 0x0c0e11, blurFactor: 0.7, speed: 0.8, zoom: 0.8 });
+        const stop = mountVanta(el, 'fog', { highlightColor: 0x14dcd5, midtoneColor: 0x0b3a3d, lowlightColor: 0x10161d, baseColor: 0x10161d, blurFactor: 0.7, speed: 0.8, zoom: 0.8 });
         if (stop) cleanups.push(stop);
       });
     }

@@ -1,27 +1,32 @@
 @import "tailwindcss";
 @import "@fontsource-variable/onest";
+@import "@fontsource-variable/unbounded";
 
 /*
  * ДИЗАЙН-ТОКЕНЫ. Фирменные цвета MELBUS подставляются сюда после утверждения логотипа.
  * --accent — главный фирменный цвет (сейчас временный).
  */
 :root {
-  --bg: #F3F4F6;
+  /* MELBUS — фирменная палитра (контраст проверен по WCAG) */
+  --bg: #F4F6F8;            /* бумага */
   --surface: #FFFFFF;
-  --ink: #0C0E11;
-  --muted: #5D6570;
-  --line: #DCDFE3;
-  --accent: #1F48FF;        /* TODO: фирменный цвет */
-  --accent-ink: #FFFFFF;
-  --dark: #0C0E11;
-  --dark-2: #15181D;
-  --dark-ink: #ECEEF1;
-  --dark-muted: #8E97A3;
+  --ink: #10161D;           /* графит */
+  --muted: #5B6673;         /* 5.4:1 на бумаге */
+  --line: #DDE2E7;
+  --accent: #14DCD5;        /* бирюза: знак, кнопки, акценты на тёмном */
+  --accent-ink: #10161D;    /* текст на бирюзовой кнопке, 10.6:1 */
+  --accent-text: #077E79;   /* бирюза для текста на светлом, 4.9:1 */
+  --silver: #DCE1E7;
+  --dark: #10161D;
+  --dark-2: #0B1016;
+  --dark-ink: #F4F6F8;
+  --dark-muted: #9AA5B1;    /* 7.3:1 на графите */
 
   --font: "Onest Variable", "Segoe UI", system-ui, sans-serif;
+  --font-display: "Unbounded Variable", "Arial Black", system-ui, sans-serif;
 
-  --fs-hero: clamp(2.6rem, 1.4rem + 6.2vw, 7.5rem);
-  --fs-h2: clamp(2rem, 1.3rem + 3.4vw, 4.25rem);
+  --fs-hero: clamp(2.2rem, 1.2rem + 5.2vw, 6.25rem);
+  --fs-h2: clamp(1.75rem, 1.15rem + 2.9vw, 3.6rem);
   --fs-h3: clamp(1.25rem, 1.05rem + 1vw, 1.75rem);
   --fs-lead: clamp(1.06rem, 1rem + .35vw, 1.3rem);
 
@@ -51,9 +56,9 @@ body {
 img, video, canvas, svg { display: block; max-width: 100%; }
 a { color: inherit; text-decoration: none; }
 button { font: inherit; color: inherit; }
-h1, h2, h3 { margin: 0; font-weight: 650; letter-spacing: -0.035em; line-height: 1.02; text-wrap: balance; }
+h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; letter-spacing: -0.025em; line-height: 1.04; text-wrap: balance; }
 p { margin: 0; }
-:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
+:focus-visible { outline: 2px solid var(--accent-text); outline-offset: 3px; border-radius: 6px; }
 ::selection { background: var(--accent); color: var(--accent-ink); }
 
 /* ---------- раскладка ---------- */
@@ -61,16 +66,16 @@ p { margin: 0; }
 @media (min-width: 768px) { :root { --gutter: max(32px, env(safe-area-inset-left, 0px)); --gutter-r: max(32px, env(safe-area-inset-right, 0px)); --header-h: 76px; } }
 .section { padding-block: clamp(72px, 10vw, 160px); }
 .section--tight { padding-block: clamp(48px, 6vw, 96px); }
-.dark { background: var(--dark); color: var(--dark-ink); --muted: var(--dark-muted); --line: #262A31; }
+.dark { background: var(--dark); color: var(--dark-ink); --muted: var(--dark-muted); --line: #26303B; --surface: #161E27; --accent-text: var(--accent); --ink: var(--dark-ink); --bg: var(--dark); }
 
 /* ---------- типографика ---------- */
-.t-hero { font-size: var(--fs-hero); font-weight: 680; letter-spacing: -0.05em; line-height: .95; }
+.t-hero { font-family: var(--font-display); font-size: var(--fs-hero); font-weight: 640; letter-spacing: -0.035em; line-height: .98; }
 .t-h2 { font-size: var(--fs-h2); }
-.t-h3 { font-size: var(--fs-h3); letter-spacing: -0.02em; line-height: 1.15; }
+.t-h3 { font-size: var(--fs-h3); font-family: var(--font); font-weight: 620; letter-spacing: -0.02em; line-height: 1.2; }
 .t-lead { font-size: var(--fs-lead); color: var(--muted); max-width: 46ch; line-height: 1.5; }
 .t-eyebrow { font-size: .8125rem; font-weight: 550; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
 .t-muted { color: var(--muted); }
-.accent { color: var(--accent); }
+.accent { color: var(--accent-text); }
 
 /* ---------- кнопки ---------- */
 .btn {
@@ -82,10 +87,9 @@ p { margin: 0; }
   will-change: transform;
 }
 .btn--primary { background: var(--accent); color: var(--accent-ink); }
-.btn--primary:hover { background: color-mix(in oklab, var(--accent) 86%, black); }
+.btn--primary:hover { background: color-mix(in oklab, var(--accent) 80%, white); }
 .btn--ghost { border-color: currentColor; color: inherit; background: transparent; }
 .btn--ghost:hover { background: var(--ink); color: var(--bg); border-color: var(--ink); }
-.dark .btn--ghost:hover { background: var(--dark-ink); color: var(--dark); border-color: var(--dark-ink); }
 .btn--sm { --h: 44px; padding: 0 1.15em; font-size: .9375rem; }
 .btn .arrow { transition: transform .35s var(--ease); }
 .btn:hover .arrow { transform: translateX(3px); }

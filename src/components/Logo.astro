@@ -1,18 +1,12 @@
 ---
-/** TODO: заменить на SVG-логотип MELBUS после утверждения */
+/** Логотип MELBUS (знак + надпись в кривых). variant: dark — для тёмного фона, light — для светлого */
 import { brand } from '../config/brand';
-const { class: cls = '' } = Astro.props;
+interface Props { variant?: 'dark' | 'light'; class?: string; height?: number }
+const { variant = 'dark', class: cls = '', height = 30 } = Astro.props;
 ---
-<span class={`logo ${cls}`} aria-label={brand.name}>
-  <svg class="logo__mark" viewBox="0 0 32 32" aria-hidden="true">
-    <rect x="3" y="7" width="26" height="20" rx="3" fill="currentColor" />
-    <path d="M3 13h26" stroke="var(--logo-cut, var(--bg))" stroke-width="2" />
-    <path d="M13 7v6M19 7v6" stroke="var(--logo-cut, var(--bg))" stroke-width="2" />
-  </svg>
-  <span class="logo__word">{brand.name}</span>
-</span>
+<img class={`logo ${cls}`} src={`/brand/melbus-${variant}.svg`} alt={brand.name} height={height} width={Math.round(height * 4.83)} decoding="async" />
 
 <style>
-  .logo { display: inline-flex; align-items: center; gap: 10px; font-weight: 720; letter-spacing: .02em; font-size: 1.15rem; line-height: 1; }
-  .logo__mark { width: 28px; height: 28px; color: var(--accent); }
+  .logo { display: block; height: var(--logo-h, 28px); width: auto; }
+  @media (min-width: 768px) { .logo { --logo-h: 32px; } }
 </style>

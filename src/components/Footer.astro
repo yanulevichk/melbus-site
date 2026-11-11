@@ -11,7 +11,7 @@ const year = new Date().getFullYear();
   <div class="container">
     <div class="ftr__top">
       <div class="ftr__brand">
-        <Logo />
+        <Logo variant="dark" />
         <p class="t-muted">{ui.footer.note}</p>
         <a href={`tel:${brand.contact.phoneHref}`} class="ftr__phone">{brand.contact.phone}</a>
         <a href={`mailto:${brand.contact.email}`} class="t-muted">{brand.contact.email}</a>
@@ -55,6 +55,6 @@ const year = new Date().getFullYear();
   .ftr__col { display: grid; gap: 10px; align-content: start; }
   .ftr__col a { color: var(--dark-ink); opacity: .82; transition: opacity .2s; }
   .ftr__col a:hover { opacity: 1; }
-  .ftr__word { font-size: clamp(4rem, 22vw, 20rem); font-weight: 760; letter-spacing: -0.06em; line-height: .8; margin-top: 64px; color: #1B1F25; user-select: none; }
-  .ftr__legal { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; margin-top: 24px; padding-top: 20px; border-top: 1px solid #23272D; font-size: .8rem; color: var(--dark-muted); }
+  .ftr__word { font-family: var(--font-display); font-size: clamp(3.4rem, 17vw, 16rem); font-weight: 700; letter-spacing: -0.04em; line-height: .8; margin-top: 64px; color: #18212B; user-select: none; }
+  .ftr__legal { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; margin-top: 24px; padding-top: 20px; border-top: 1px solid #26303B; font-size: .8rem; color: var(--dark-muted); }
 </style>

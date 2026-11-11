@@ -36,7 +36,7 @@ const others = services.filter((x) => x.slug !== s.slug && x.group === s.group).
   .inc { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; border-top: 1px solid var(--line); }
   @media (min-width: 900px) { .inc { grid-template-columns: 1fr 1fr; column-gap: 48px; } }
   .inc li { display: flex; gap: 18px; align-items: baseline; padding: 22px 0; border-bottom: 1px solid var(--line); font-size: clamp(1.1rem, 1rem + .6vw, 1.5rem); font-weight: 560; letter-spacing: -0.02em; }
-  .inc li span { font-size: .8rem; color: var(--accent); font-weight: 600; letter-spacing: .08em; }
+  .inc li span { font-size: .8rem; color: var(--accent-text); font-weight: 600; letter-spacing: .08em; }
   .more { display: grid; gap: 12px; margin-top: 18px; }
   @media (min-width: 900px) { .more { grid-template-columns: repeat(3, 1fr); } }
   .more a { display: grid; gap: 6px; padding: 22px; border-radius: var(--radius); border: 1px solid var(--line); background: var(--surface); transition: transform .4s var(--ease); }

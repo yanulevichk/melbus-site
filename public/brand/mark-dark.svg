@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-14 -14 668 535">
+<defs>
+<clipPath id="R"><rect x="320" y="-50" width="400" height="700"/></clipPath>
+<clipPath id="L"><rect x="-50" y="-50" width="370" height="700"/></clipPath>
+<mask id="m0" maskUnits="userSpaceOnUse" x="-60" y="-60" width="760" height="640"><rect x="-60" y="-60" width="760" height="640" fill="#fff"/>
+<polygon points="0,361 320,182 640,361 640,481 320,302 0,481" fill="#000" stroke="#000" stroke-width="58" stroke-linejoin="round"/>
+<polygon points="0,179 320,0 640,179 640,299 320,120 0,299" fill="#000" stroke="#000" stroke-width="58" stroke-linejoin="round"/>
+</mask>
+<mask id="m1" maskUnits="userSpaceOnUse" x="-60" y="-60" width="760" height="640"><rect x="-60" y="-60" width="760" height="640" fill="#fff"/>
+<polygon points="0,179 320,0 640,179 640,299 320,120 0,299" fill="#000" stroke="#000" stroke-width="58" stroke-linejoin="round"/>
+</mask>
+<mask id="m2" maskUnits="userSpaceOnUse" x="-60" y="-60" width="760" height="640"><rect x="-60" y="-60" width="760" height="640" fill="#fff"/>
+</mask>
+</defs>
+<g mask="url(#m0)">
+<polygon points="0,208 320,387 640,208 640,328 320,507 0,328" fill="#0A9C97" stroke="#0A9C97" stroke-width="26" stroke-linejoin="round" clip-path="url(#L)"/>
+<polygon points="0,208 320,387 640,208 640,328 320,507 0,328" fill="#8F9AA7" stroke="#8F9AA7" stroke-width="26" stroke-linejoin="round" clip-path="url(#R)"/>
+</g>
+<g mask="url(#m1)">
+<polygon points="0,361 320,182 640,361 640,481 320,302 0,481" fill="#14DCD5" stroke="#14DCD5" stroke-width="26" stroke-linejoin="round" clip-path="url(#L)"/>
+<polygon points="0,361 320,182 640,361 640,481 320,302 0,481" fill="#DCE1E7" stroke="#DCE1E7" stroke-width="26" stroke-linejoin="round" clip-path="url(#R)"/>
+</g>
+<g mask="url(#m2)">
+<polygon points="0,179 320,0 640,179 640,299 320,120 0,299" fill="#14DCD5" stroke="#14DCD5" stroke-width="26" stroke-linejoin="round" clip-path="url(#L)"/>
+<polygon points="0,179 320,0 640,179 640,299 320,120 0,299" fill="#DCE1E7" stroke="#DCE1E7" stroke-width="26" stroke-linejoin="round" clip-path="url(#R)"/>
+</g>
+</svg>
