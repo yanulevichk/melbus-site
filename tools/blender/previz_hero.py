@@ -196,8 +196,8 @@ while x < 46:
 # ---------------- мебель по местам: A и Б ----------------
 PLAN = [
     ('bed', -2.2, -1.5, 0, 2.35, -1.5, 0), ('sofa', 0.3, -2.1, 0, 0.0, -2.1, 0), ('fridge', 3.25, -2.25, 0, -3.25, -2.25, 0),
-    ('dining', 2.45, -0.55, 0, -2.2, -0.55, math.pi / 2), ('bookcase', -3.32, 1.75, math.pi / 2, -3.32, -1.0, math.pi / 2),
-    ('tv', -3.33, -0.05, math.pi / 2, 0.0, 0.95, math.pi), ('armchair', -1.45, 0.65, 0.9, 1.45, 0.55, -0.75),
+    ('dining', 2.55, -0.85, 0, -2.2, -0.55, math.pi / 2), ('bookcase', -3.32, 1.75, math.pi / 2, -3.32, -1.0, math.pi / 2),
+    ('tv', -3.33, -0.05, math.pi / 2, 0.0, 0.95, math.pi), ('armchair', -2.0, 1.5, 0.9, 1.45, 0.55, -0.75),
     ('rug', 0.3, -0.7, 0, 0.0, -0.65, 0), ('lamp', -1.1, -2.3, 0, -1.55, -2.3, 0), ('plant', 3.3, 1.95, 0, 3.3, 1.1, 0),
 ]
 ITEMS = []
@@ -232,7 +232,7 @@ cyl('roll_outer', .12, .12, .3, G['tape'], 0, 0, 0, tapeRoll, 24, axis='z')
 cyl('roll_core', .06, .06, .32, G['light'], 0, 0, 0, tapeRoll, 16, axis='z')
 for t_ in (tapeL, tapeT, tapeR): t_.location = (0, 0, 0)
 # раскладка коробки: в квартире А и Б (координаты three)
-BOXA, BOXB = (0.6, RY, 1.4), (BX - 1.0, RY, 1.95)
+BOXA, BOXB = (0.6, RY, 0.9), (BX - 1.0, RY, 1.95)
 VAN_A, VAN_B = 2.2, BX + 2.2          # где стоит бус (центр) при погрузке и выгрузке: задняя дверь ≈ x−2.22
 
 # ---------------- бус: пустой кузов, задние двери, пандус, днище ----------------
@@ -292,7 +292,7 @@ for wx_ in (-1.45, 1.5):
         w = cyl('wheel', .37, .37, .28, G['dark'], wx_, .37, wz, van, 24, axis='z'); WHEELS.append(w)
 
 # ---------------- тайминг (секунды) ----------------
-T_BOX_POP, T_WALLS, T_OPEN = (8.0, 8.4), (8.6, 10.4), (10.2, 10.9)
+T_BOX_POP, T_WALLS, T_OPEN = (8.3, 8.9), (8.9, 10.4), (10.2, 10.9)   # заготовка лежит с начала: клапаны раскрываются, потом стенки встают
 IN0, IN_STEP, IN_DUR = 11.6, 0.62, 1.2
 T_CLOSE_S, T_CLOSE_F = (18.5, 19.1), (18.8, 19.4)
 T_TAPE = (19.5, 19.8, 20.6, 20.9)
@@ -337,7 +337,7 @@ def box_state(t):
     cargoA = (VAN_A - 1.05, .43, 4.45); cargoB = (VAN_B - 1.05, .43, 4.45)
     streetA = (VAN_A - 2.22 - 2.4, 0.0, 4.45); streetB = (VAN_B - 2.22 - 2.4, 0.0, 4.45)
     rampTopA = (VAN_A - 2.22 - .2, .42, 4.45); rampTopB = (VAN_B - 2.22 - .2, .42, 4.45)
-    s = eback(seg(t, *T_BOX_POP)) * (1 - ein(seg(t, *T_GONE)))
+    s = 1.0 - ein(seg(t, *T_GONE))
     rot = 0.0
     if t < T_HOP_A[0]: pos = BOXA
     elif t < T_HOP_A[1]:
@@ -375,8 +375,8 @@ for k in range(0, 25):
     r = lerp(0.9, 2.2, eio(u)); y = lerp(7.2, 5.0, eio(u))
     KEYS.append((t_, (BOXA[0] + r * math.cos(ang), y, BOXA[2] + r * math.sin(ang)), MOUTH_A, lerp(32, 30, u)))
 KEYS += [
-    (19.4, (-1.6, 3.6, 4.2), (0.6, 1.5, 1.4), 32),          # скотч: спокойный ракурс три четверти сверху
-    (20.9, (-0.9, 3.2, 3.7), (0.8, 1.55, 1.4), 34),
+    (19.4, (-1.6, 3.6, BOXA[2] + 2.8), (BOXA[0], 1.5, BOXA[2]), 32),          # скотч: спокойный ракурс три четверти сверху
+    (20.9, (-0.9, 3.2, BOXA[2] + 2.3), (BOXA[0] + .2, 1.55, BOXA[2]), 34),
     (22.0, (-1.0, 6.4, 6.4), (-0.6, 0.6, 3.2), 28),          # общий план: коробка, бус, двери, пандус
     (22.8, (-3.8, 3.6, 7.4), (-1.8, 0.5, 4.3), 27),
     (23.4, (-4.6, 1.5, 6.4), (-1.6, 0.6, 4.45), 26),
@@ -478,8 +478,9 @@ def apply(t, f):
     opn = -0.28 * eout(seg(t, *T_OPEN))
     cS, cF = eio(seg(t, *T_CLOSE_S)), eio(seg(t, *T_CLOSE_F))
     rOpen = eio(seg(t, T_OPEN_B[2], T_OPEN_B[3])); flat = eio(seg(t, *T_FLAT))
-    flS = lerp(lerp(opn, 1, cS), -0.28, rOpen) * (1 - flat)
-    flF = lerp(lerp(opn, 1, cF), -0.28, rOpen) * (1 - flat)
+    pack = 2.0 * (1 - eio(seg(t, *T_BOX_POP)))      # до 8,3 с клапаны сложены на стенки — компактная заготовка
+    flS = lerp(lerp(opn, 1, cS), -0.28, rOpen) * (1 - flat) + pack
+    flF = lerp(lerp(opn, 1, cF), -0.28, rOpen) * (1 - flat) + pack
     for i, (hinge, flap) in enumerate(SIDES):
         hinge.rotation_euler = ((math.pi / 2) * (1 - walls), 0, 0)
         flap.rotation_euler = (-(math.pi / 2) * (flF if i < 2 else flS * .985), 0, 0)
