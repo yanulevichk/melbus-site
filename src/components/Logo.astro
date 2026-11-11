@@ -4,7 +4,7 @@ import { brand } from '../config/brand';
 interface Props { variant?: 'dark' | 'light'; class?: string; height?: number }
 const { variant = 'dark', class: cls = '', height = 30 } = Astro.props;
 ---
-<img class={`logo ${cls}`} src={`/brand/melbus-${variant}.svg`} alt={brand.name} height={height} width={Math.round(height * 4.83)} decoding="async" />
+<img class={`logo ${cls}`} src={`/brand/melbus-${variant}.svg`} alt={brand.name} height={height} width={Math.round(height * 4.61)} decoding="async" />
 
 <style>
   .logo { display: block; height: var(--logo-h, 28px); width: auto; }

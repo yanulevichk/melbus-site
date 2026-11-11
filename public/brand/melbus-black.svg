@@ -1,32 +1,28 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 483.2 100">
-<g transform="scale(0.18691588785046728)"><svg viewBox="-14 -14 668 535" width="668" height="535">
-<defs>
-<clipPath id="melbus-blackR"><rect x="320" y="-50" width="400" height="700"/></clipPath>
-<clipPath id="melbus-blackL"><rect x="-50" y="-50" width="370" height="700"/></clipPath>
-<mask id="melbus-blackm0" maskUnits="userSpaceOnUse" x="-60" y="-60" width="760" height="640"><rect x="-60" y="-60" width="760" height="640" fill="#fff"/>
-<polygon points="0,361 320,182 640,361 640,481 320,302 0,481" fill="#000" stroke="#000" stroke-width="58" stroke-linejoin="round"/>
-<polygon points="0,179 320,0 640,179 640,299 320,120 0,299" fill="#000" stroke="#000" stroke-width="58" stroke-linejoin="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 460.6 100">
+<g transform="scale(0.15220700152207)"><svg viewBox="-16.0 -16.0 672.0 657.0" width="672.0" height="657.0"><defs>
+<clipPath id="melbus-blackL"><rect x="-60" y="-60" width="380" height="900"/></clipPath>
+<clipPath id="melbus-blackR"><rect x="320" y="-60" width="400" height="900"/></clipPath>
+<mask id="melbus-blackm0" maskUnits="userSpaceOnUse" x="-80" y="-80" width="800" height="900"><rect x="-80" y="-80" width="800" height="900" fill="#fff"/>
+<path d="M0.0,185.0 L320.0,370.0 L640.0,185.0 L640.0,290.0 L320.0,475.0 L0.0,290.0 Z" fill="#000" stroke="#000" stroke-width="46" stroke-linejoin="round"/>
+<path d="M0.0,335.0 L320.0,150.0 L640.0,335.0 L640.0,440.0 L320.0,255.0 L0.0,440.0 Z" fill="#000" stroke="#000" stroke-width="46" stroke-linejoin="round"/>
+<path d="M0.0,185.0 L320.0,0.0 L640.0,185.0 L640.0,290.0 L320.0,105.0 L0.0,290.0 Z" fill="#000" stroke="#000" stroke-width="46" stroke-linejoin="round"/>
 </mask>
-<mask id="melbus-blackm1" maskUnits="userSpaceOnUse" x="-60" y="-60" width="760" height="640"><rect x="-60" y="-60" width="760" height="640" fill="#fff"/>
-<polygon points="0,179 320,0 640,179 640,299 320,120 0,299" fill="#000" stroke="#000" stroke-width="58" stroke-linejoin="round"/>
+<mask id="melbus-blackm1" maskUnits="userSpaceOnUse" x="-80" y="-80" width="800" height="900"><rect x="-80" y="-80" width="800" height="900" fill="#fff"/>
+<path d="M0.0,335.0 L320.0,150.0 L640.0,335.0 L640.0,440.0 L320.0,255.0 L0.0,440.0 Z" fill="#000" stroke="#000" stroke-width="46" stroke-linejoin="round"/>
+<path d="M0.0,185.0 L320.0,0.0 L640.0,185.0 L640.0,290.0 L320.0,105.0 L0.0,290.0 Z" fill="#000" stroke="#000" stroke-width="46" stroke-linejoin="round"/>
 </mask>
-<mask id="melbus-blackm2" maskUnits="userSpaceOnUse" x="-60" y="-60" width="760" height="640"><rect x="-60" y="-60" width="760" height="640" fill="#fff"/>
+<mask id="melbus-blackm2" maskUnits="userSpaceOnUse" x="-80" y="-80" width="800" height="900"><rect x="-80" y="-80" width="800" height="900" fill="#fff"/>
+<path d="M0.0,185.0 L320.0,0.0 L640.0,185.0 L640.0,290.0 L320.0,105.0 L0.0,290.0 Z" fill="#000" stroke="#000" stroke-width="46" stroke-linejoin="round"/>
+</mask>
+<mask id="melbus-blackm3" maskUnits="userSpaceOnUse" x="-80" y="-80" width="800" height="900"><rect x="-80" y="-80" width="800" height="900" fill="#fff"/>
 </mask>
 </defs>
-<g mask="url(#melbus-blackm0)">
-<polygon points="0,208 320,387 640,208 640,328 320,507 0,328" fill="#070A0F" stroke="#070A0F" stroke-width="26" stroke-linejoin="round" clip-path="url(#melbus-blackL)"/>
-<polygon points="0,208 320,387 640,208 640,328 320,507 0,328" fill="#070A0F" stroke="#070A0F" stroke-width="26" stroke-linejoin="round" clip-path="url(#melbus-blackR)"/>
-</g>
-<g mask="url(#melbus-blackm1)">
-<polygon points="0,361 320,182 640,361 640,481 320,302 0,481" fill="#070A0F" stroke="#070A0F" stroke-width="26" stroke-linejoin="round" clip-path="url(#melbus-blackL)"/>
-<polygon points="0,361 320,182 640,361 640,481 320,302 0,481" fill="#070A0F" stroke="#070A0F" stroke-width="26" stroke-linejoin="round" clip-path="url(#melbus-blackR)"/>
-</g>
-<g mask="url(#melbus-blackm2)">
-<polygon points="0,179 320,0 640,179 640,299 320,120 0,299" fill="#070A0F" stroke="#070A0F" stroke-width="26" stroke-linejoin="round" clip-path="url(#melbus-blackL)"/>
-<polygon points="0,179 320,0 640,179 640,299 320,120 0,299" fill="#070A0F" stroke="#070A0F" stroke-width="26" stroke-linejoin="round" clip-path="url(#melbus-blackR)"/>
-</g>
+<g mask="url(#melbus-blackm0)"><path d="M0.0,335.0 L320.0,520.0 L640.0,335.0 L640.0,440.0 L320.0,625.0 L0.0,440.0 Z" fill="#070A0F" stroke="#070A0F" stroke-width="20" stroke-linejoin="round" clip-path="url(#melbus-blackL)"/><path d="M0.0,335.0 L320.0,520.0 L640.0,335.0 L640.0,440.0 L320.0,625.0 L0.0,440.0 Z" fill="#070A0F" stroke="#070A0F" stroke-width="20" stroke-linejoin="round" clip-path="url(#melbus-blackR)"/></g>
+<g mask="url(#melbus-blackm1)"><path d="M0.0,185.0 L320.0,370.0 L640.0,185.0 L640.0,290.0 L320.0,475.0 L0.0,290.0 Z" fill="#070A0F" stroke="#070A0F" stroke-width="20" stroke-linejoin="round" clip-path="url(#melbus-blackL)"/><path d="M0.0,185.0 L320.0,370.0 L640.0,185.0 L640.0,290.0 L320.0,475.0 L0.0,290.0 Z" fill="#070A0F" stroke="#070A0F" stroke-width="20" stroke-linejoin="round" clip-path="url(#melbus-blackR)"/></g>
+<g mask="url(#melbus-blackm2)"><path d="M0.0,335.0 L320.0,150.0 L640.0,335.0 L640.0,440.0 L320.0,255.0 L0.0,440.0 Z" fill="#070A0F" stroke="#070A0F" stroke-width="20" stroke-linejoin="round" clip-path="url(#melbus-blackL)"/><path d="M0.0,335.0 L320.0,150.0 L640.0,335.0 L640.0,440.0 L320.0,255.0 L0.0,440.0 Z" fill="#070A0F" stroke="#070A0F" stroke-width="20" stroke-linejoin="round" clip-path="url(#melbus-blackR)"/></g>
+<g mask="url(#melbus-blackm3)"><path d="M0.0,185.0 L320.0,0.0 L640.0,185.0 L640.0,290.0 L320.0,105.0 L0.0,290.0 Z" fill="#070A0F" stroke="#070A0F" stroke-width="20" stroke-linejoin="round" clip-path="url(#melbus-blackL)"/><path d="M0.0,185.0 L320.0,0.0 L640.0,185.0 L640.0,290.0 L320.0,105.0 L0.0,290.0 Z" fill="#070A0F" stroke="#070A0F" stroke-width="20" stroke-linejoin="round" clip-path="url(#melbus-blackR)"/></g>
 </svg></g>
-<g transform="translate(154.85981308411215,72) scale(0.02815099168266155,-0.02815099168266155)">
+<g transform="translate(132.28310502283105,72) scale(0.02815099168266155,-0.02815099168266155)">
 <path transform="translate(0,0)" d="M223 1563H540L1108 993L1676 1563H1993V0H1676V1124L1108 577L540 1124V0H223Z" fill="#070A0F"/>
 <path transform="translate(2297.92,0)" d="M222 1563H1553V1285H539V973H1437V712H539V277H1574V0H222Z" fill="#070A0F"/>
 <path transform="translate(4083.84,0)" d="M222 1563H539V278H1448V0H222Z" fill="#070A0F"/>

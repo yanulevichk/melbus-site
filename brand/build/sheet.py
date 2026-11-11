@@ -34,7 +34,7 @@ def box():
   <g transform="matrix(0.866,-0.5,0,1,300,260)">
     <rect width="200" height="200" fill="#E6EAEE" stroke="#C9D0D8" stroke-width="1"/>
     <g transform="translate(25,70)">{sticker('КУХНЯ', '#F2B705', '07')}</g>
-    <image href="{mark}" x="150" y="160" width="36" height="29" opacity=".9"/>
+    <image href="{mark}" x="152" y="150" width="34" height="34" opacity=".9"/>
   </g>
   <!-- верхняя грань -->
   <g transform="matrix(0.866,-0.5,0.866,0.5,127,160)">
@@ -106,7 +106,7 @@ ul.rules{{margin:0;padding-left:20px;display:grid;gap:8px}}
 </style>
 
 <header class="cover"><div class="wrap cover__in">
-  <span class="eb">Фирменный стиль · версия 1 · на утверждение</span>
+  <span class="eb">Фирменный стиль · версия 2 · на утверждение</span>
   <img class="lk" src="{uri('melbus-dark')}" alt="MELBUS">
   <p>Векторная версия логотипа по вашему эскизу, палитра с проверенной читаемостью, шрифты и первые фирменные предметы.</p>
 </div></header>
@@ -124,10 +124,19 @@ ul.rules{{margin:0;padding-left:20px;display:grid;gap:8px}}
   </section>
 
   <section class="sec">
+    <span class="eb">01b · Форма знака</span><h2>Два квадрата с отверстием по центру</h2>
+    <div class="grid">
+      <div class="card d"><img src="{uri('mark-dark')}" alt="Вариант D" width="150"><small>D — квадраты сцеплены, как в эскизе · выбран</small></div>
+      <div class="card d"><img src="{uri('alt-mark-C-dark')}" alt="Вариант C" width="150"><small>C — верхний квадрат целиком поверх нижнего</small></div>
+    </div>
+    <p>Каждый квадрат — рамка в изометрии: задняя стенка (шеврон вверх) и передняя (V вниз), между ними сквозное отверстие. Левые стороны бирюзовые, правые серебряные, передние стенки темнее — так знак остаётся объёмным даже плоским.</p>
+  </section>
+
+  <section class="sec">
     <span class="eb">02 · Знак отдельно</span><h2>Читается от вывески до иконки 16 px</h2>
     <div class="sizes">
-      {''.join(f'<span><img src="{uri("mark-dark")}" alt="" width="{s}" height="{round(s*0.8)}">{s}px</span>' for s in (160, 96, 48, 32, 16))}
-      <span><img src="{uri('mark-white')}" alt="" width="48" height="38">белый</span>
+      {''.join(f'<span><img src="{uri("mark-dark")}" alt="" width="{s}" height="{round(s*1.0)}">{s}px</span>' for s in (160, 96, 48, 32, 16))}
+      <span><img src="{uri('mark-white')}" alt="" width="48" height="48">белый</span>
     </div>
   </section>
 

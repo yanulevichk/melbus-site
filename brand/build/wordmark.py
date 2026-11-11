@@ -30,7 +30,8 @@ mark_src = {k: open(f'/home/user/moving-site/public/brand/mark-{k}.svg').read() 
 def inner(svg, idp):
     body = re.sub(r'^<svg[^>]*>|</svg>$', '', svg.strip(), flags=re.S)
     return re.sub(r'id="(\w+)"', lambda m: f'id="{idp}{m.group(1)}"', body).replace('url(#', f'url(#{idp}')
-MW, MH = 668, 535  # viewBox знака с полями
+vb = [float(v) for v in re.search(r'viewBox="([^"]+)"', mark_src['dark']).group(1).split()]
+VX, VY, MW, MH = vb  # viewBox знака с полями
 
 def lockup(variant, c1, c2, name):
     # знак высотой 100, надпись капителью 44, по центру знака
@@ -40,7 +41,7 @@ def lockup(variant, c1, c2, name):
     mw = MW * s_mark
     W = mw + gap + wdt * s_word
     svg = [f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W:.1f} 100">',
-           f'<g transform="scale({s_mark})"><svg viewBox="-14 -14 {MW} {MH}" width="{MW}" height="{MH}">{inner(mark_src[variant], name)}</svg></g>',
+           f'<g transform="scale({s_mark})"><svg viewBox="{VX} {VY} {MW} {MH}" width="{MW}" height="{MH}">{inner(mark_src[variant], name)}</svg></g>',
            wordmark_group(c1, c2, s_word, mw + gap, 50 + 22), '</svg>']
     open(f'/home/user/moving-site/public/brand/{name}.svg', 'w').write('\n'.join(svg))
 
