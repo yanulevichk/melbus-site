@@ -105,6 +105,8 @@ def cyl(name, r1, r2, h, m, x=0, y=0, z=0, parent=None, n=20, axis='y'):
     o.parent = parent
     if axis == 'y':   # вертикально (three y)
         o.location = P(x, y + h / 2, z)
+    elif axis == 'x':  # ось вдоль three x (кардан, выхлоп)
+        o.location = P(x, y, z); o.rotation_euler = (0, math.pi / 2, 0)
     else:            # ось вдоль three z (колёса)
         o.location = P(x, y, z); o.rotation_euler = (math.pi / 2, 0, 0)
     return o
@@ -244,12 +246,30 @@ box('van_bump_f', .2, .26, 1.9, G['dark'], 2.28, .32, 0, van, .04)
 box('van_bump_r', .16, .18, 1.9, G['dark'], -2.24, .2, 0, van, .03)
 box('van_stripe_l', 3.36, .1, .02, G['tape'], -.55, .55, .935, van, 0)
 box('van_stripe_r', 3.36, .1, .02, G['tape'], -.55, .55, -.935, van, 0)
-# днище (для пролёта камеры под бусом): рама, мосты, выхлоп
-box('van_chassis', 3.9, .08, 1.1, G['dark'], -.3, .28, 0, van, .01)
-box('van_tank', .7, .16, .5, G['mid'], .2, .2, -.35, van, .02)
-cyl('van_axle_r', .05, .05, 1.7, G['dark'], -1.45, .37, 0, van, 10, axis='z')
-cyl('van_axle_f', .05, .05, 1.7, G['dark'], 1.5, .37, 0, van, 10, axis='z')
-box('van_exhaust', 2.4, .06, .06, G['mid'], -.9, .24, .45, van, 0)
+# ДНИЩЕ — «спецэффект» пролёта камеры под бусом: рама, двигатель, КПП, кардан, мост, рессоры, выхлоп, бак, запаска
+UB = mat('under', (0.34, 0.35, 0.37), 0.5); UM = mat('under_mid', (0.55, 0.56, 0.58), 0.4); UL = mat('under_light', (0.78, 0.79, 0.80), 0.3)
+box('van_floorpan', 3.9, .02, 1.7, mat('floorpan', (0.14, 0.15, 0.16)), -.3, .34, 0, van, 0)
+for zz in (.42, -.42): box('van_rail', 4.3, .1, .08, UB, -.15, .24, zz, van, .01)                      # лонжероны
+for xx in (-2.05, -1.0, -.1, .7, 1.95): box('van_cross', .07, .07, .92, UB, xx, .25, 0, van, 0)        # поперечины
+box('van_engine', .72, .18, .55, UM, 1.55, .17, 0, van, .03)                                            # поддон двигателя
+box('van_engine_ribs', .6, .03, .45, UL, 1.55, .155, 0, van, 0)
+box('van_gearbox', .62, .16, .3, UM, .95, .17, 0, van, .04)                                            # коробка передач
+cyl('van_driveshaft', .045, .045, 1.95, UL, -.33, .25, 0, van, 12, axis='x')                            # карданный вал
+for xx in (.63, -.33, -1.28): cyl('van_ujoint', .075, .075, .06, UB, xx, .25, 0, van, 12, axis='x')    # крестовины и опора
+box('van_bearing', .1, .1, .22, UB, -.33, .26, 0, van, 0)
+cyl('van_diff', .15, .15, .2, UM, -1.45, .33, 0, van, 16, axis='x')                                    # «тыква» дифференциала
+cyl('van_axle_r', .065, .065, 1.6, UB, -1.45, .37, 0, van, 12, axis='z')                               # задний мост
+for zz in (.55, -.55):
+    box('van_leaf', 1.2, .05, .08, UL, -1.45, .26, zz, van, .01)                                       # рессоры
+    sh = cyl('van_shock', .025, .025, .32, UL, -1.15, .35, zz * 1.1, van, 8); sh.rotation_euler = (0, -.5, 0)  # амортизаторы
+cyl('van_axle_f', .04, .04, 1.5, UB, 1.5, .37, 0, van, 10, axis='z')
+cyl('van_rack', .03, .03, 1.2, UL, 1.32, .3, 0, van, 10, axis='z')                                      # рулевая рейка
+for zz in (.66, -.66):
+    for xx in (1.5, -1.45): cyl('van_disc', .2, .2, .03, UL, xx, .37, zz, van, 20, axis='z')           # тормозные диски
+cyl('van_exhaust', .03, .03, 3.4, UL, -.5, .2, .34, van, 10, axis='x')                                 # выхлоп
+box('van_muffler', .62, .14, .22, UM, -.6, .14, .34, van, .04)                                         # глушитель
+box('van_tank', .7, .16, .5, UM, .2, .18, -.38, van, .03)                                              # бак
+sp = cyl('van_spare', .3, .3, .18, UB, -1.98, .17, 0, van, 22)                                          # запаска под кормой
 # задние двери на петлях
 DOORS = []
 for s_ in (1, -1):
@@ -360,24 +380,28 @@ KEYS_1 += [
 ]
 # после склейки: колесо → под днищем вперёд (FPV) → вынырнули → бус проезжает под камерой → за бусом
 KEYS_2 = []
-for k in range(0, 8):        # 1) низко у заднего колеса, едем вместе с бусом
-    u = k / 7; t_ = CUT + u * 1.4; vx = van_x(t_)
+for k in range(0, 6):        # 1) низко у заднего колеса, едем вместе с бусом
+    u = k / 5; t_ = CUT + u * 1.0; vx = van_x(t_)
     KEYS_2.append((t_, (vx - 1.0 + .3 * u, 0.55, 7.0), (vx - 0.2, 0.55, 4.6), 24))
-for k in range(1, 13):       # 2) уходим за корму и пролетаем под днищем от задней части к передней
-    u = k / 12; t_ = CUT + 1.4 + u * 1.9; vx = van_x(t_)
-    rel = lerp(-0.7, -3.0, eio(min(1, u * 2.2))) if u < .45 else lerp(-3.0, 3.6, eio((u - .45) / .55))
-    z = lerp(7.0, 4.45, eio(min(1, u * 2.2)))
-    y = lerp(0.55, 0.19, eio(min(1, u * 2.2)))
-    look = (vx + rel + 3.0, y + .02, 4.45) if u >= .45 else (vx - 0.2, 0.3, 4.45)
+for k in range(1, 17):       # 2) уходим за корму и медленно пролетаем под днищем от задней части к передней
+    u = k / 16; t_ = CUT + 1.0 + u * 2.7; vx = van_x(t_)
+    rel = lerp(-0.7, -3.0, eio(min(1, u * 2.8))) if u < .35 else lerp(-3.0, 3.6, eio((u - .35) / .65))
+    z = lerp(7.0, 4.45, eio(min(1, u * 2.8)))
+    y = lerp(0.55, 0.12, eio(min(1, u * 2.8)))
+    if u >= .35:   # под днищем смотрим вперёд и вверх — видно кардан, мост, выхлоп
+        up = math.sin(math.pi * min(1, (u - .35) / .65))
+        look = (vx + rel + 2.2, y + lerp(.1, .95, up), 4.45)
+    else:
+        look = (vx - 0.2, 0.3, 4.45)
     KEYS_2.append((t_, (vx + rel, y, z), look, lerp(22, 18, min(1, u * 2))))
 for k in range(1, 11):       # 3) вынырнули перед бусом, поднимаемся и замедляемся — бус проезжает под камерой
-    u = k / 10; t_ = CUT + 3.3 + u * 1.6; vx = van_x(t_)
-    cam_ = (vx + lerp(3.6, -1.6, ein(u)), lerp(0.19, 4.8, eout(u)), 4.45)
-    fwd = (cam_[0] + 4.0, lerp(0.19, 4.8, eout(u)) - 1.0, 4.45)
+    u = k / 10; t_ = CUT + 3.7 + u * 1.5; vx = van_x(t_)
+    cam_ = (vx + lerp(3.6, -1.6, ein(u)), lerp(0.12, 4.8, eout(u)), 4.45)
+    fwd = (cam_[0] + 4.0, lerp(0.12, 4.8, eout(u)) - 1.0, 4.45)
     look = tuple(lerp(fwd[i], (vx + 2.5, 0.6, 4.45)[i], eio(u)) for i in range(3))
     KEYS_2.append((t_, cam_, look, lerp(18, 26, u)))
 for k in range(1, 7):        # 4) за бусом сверху-сзади до остановки
-    u = k / 6; t_ = CUT + 4.9 + u * 1.3; vx = van_x(t_)
+    u = k / 6; t_ = CUT + 5.2 + u * 1.3; vx = van_x(t_)
     KEYS_2.append((t_, (vx - lerp(1.6, 4.2, eio(u)), lerp(4.8, 2.8, u), lerp(4.45, 5.9, eio(u))), (vx + lerp(2.5, 0.5, u), lerp(0.6, 0.8, u), 4.45), 26))
 KEYS_2 += [
     (32.6, (BX - 4.4, 1.7, 6.4), (BX - 1.0, 0.8, 4.45), 26),
