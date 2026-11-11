@@ -1,0 +1,60 @@
+---
+import Logo from './Logo.astro';
+import { brand } from '../config/brand';
+import { ui } from '../i18n/ru';
+import { href, type Locale } from '../i18n/routes';
+import { services } from '../data/services';
+const { locale } = Astro.props as { locale: Locale };
+const year = new Date().getFullYear();
+---
+<footer class="ftr dark">
+  <div class="container">
+    <div class="ftr__top">
+      <div class="ftr__brand">
+        <Logo />
+        <p class="t-muted">{ui.footer.note}</p>
+        <a href={`tel:${brand.contact.phoneHref}`} class="ftr__phone">{brand.contact.phone}</a>
+        <a href={`mailto:${brand.contact.email}`} class="t-muted">{brand.contact.email}</a>
+      </div>
+      <nav class="ftr__col" aria-label={ui.nav.services}>
+        <span class="t-eyebrow">{ui.nav.services}</span>
+        {services.slice(0, 7).map((s) => <a href={href(locale, `service:${s.slug}`)}>{s.title}</a>)}
+      </nav>
+      <nav class="ftr__col" aria-label="Компания">
+        <span class="t-eyebrow">MELBUS</span>
+        <a href={href(locale, 'pricing')}>{ui.nav.pricing}</a>
+        <a href={href(locale, 'how')}>{ui.nav.how}</a>
+        <a href={href(locale, 'guarantee')}>{ui.nav.guarantee}</a>
+        <a href={href(locale, 'about')}>{ui.nav.about}</a>
+        <a href={href(locale, 'faq')}>Вопросы и ответы</a>
+        <a href={href(locale, 'contact')}>{ui.nav.contact}</a>
+      </nav>
+      <nav class="ftr__col" aria-label={ui.footer.docs}>
+        <span class="t-eyebrow">{ui.footer.docs}</span>
+        <a href={href(locale, 'terms')}>Регламент</a>
+        <a href={href(locale, 'privacy')}>Политика конфиденциальности</a>
+        <a href={href(locale, 'cookies')}>Cookies</a>
+        <a href={href(locale, 'complaints')}>Рекламации</a>
+      </nav>
+    </div>
+    <div class="ftr__word" aria-hidden="true">{brand.name}</div>
+    <div class="ftr__legal">
+      <span>© {year} {brand.legal.company}. {brand.legal.address}. NIP {brand.legal.nip}, KRS {brand.legal.krs}.</span>
+      <span>Часть видео на сайте — {ui.aiLabel.toLowerCase()}, созданная ИИ.</span>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .ftr { padding-block: 72px calc(24px + env(safe-area-inset-bottom, 0px)); }
+  .ftr__top { display: grid; gap: 40px; grid-template-columns: 1fr; }
+  @media (min-width: 640px) { .ftr__top { grid-template-columns: 1fr 1fr; } }
+  @media (min-width: 1024px) { .ftr__top { grid-template-columns: 1.4fr 1fr 1fr 1fr; } }
+  .ftr__brand { display: grid; gap: 12px; align-content: start; max-width: 34ch; --logo-cut: var(--dark); }
+  .ftr__phone { font-size: 1.5rem; font-weight: 620; letter-spacing: -0.02em; margin-top: 8px; }
+  .ftr__col { display: grid; gap: 10px; align-content: start; }
+  .ftr__col a { color: var(--dark-ink); opacity: .82; transition: opacity .2s; }
+  .ftr__col a:hover { opacity: 1; }
+  .ftr__word { font-size: clamp(4rem, 22vw, 20rem); font-weight: 760; letter-spacing: -0.06em; line-height: .8; margin-top: 64px; color: #1B1F25; user-select: none; }
+  .ftr__legal { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; margin-top: 24px; padding-top: 20px; border-top: 1px solid #23272D; font-size: .8rem; color: var(--dark-muted); }
+</style>

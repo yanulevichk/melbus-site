@@ -1,0 +1,313 @@
+---
+import SceneSlot from '../components/SceneSlot.astro';
+import VideoSlot from '../components/VideoSlot.astro';
+import SectionHead from '../components/SectionHead.astro';
+import Faq from '../components/Faq.astro';
+import CtaBand from '../components/CtaBand.astro';
+import { href, type Locale } from '../i18n/routes';
+import { ui } from '../i18n/ru';
+import { brand } from '../config/brand';
+import { services } from '../data/services';
+import { faqHome } from '../data/faq';
+const { locale } = Astro.props as { locale: Locale };
+
+const steps = [
+  ['V2', 'Видео', 'Снимаете квартиру на телефон — 2–3 минуты, по комнатам.'],
+  ['V3', 'Цена', 'В течение 2 часов днём присылаем фиксированную цену и список вещей.'],
+  ['V4', 'Бронь', 'Подтверждаете предоплатой BLIK или картой. Дата закреплена за вами.'],
+  ['V5', 'Упаковка', 'Бригада в форме, перчатках и бахилах упаковывает всё по комнатам.'],
+  ['V6', 'Дорога', 'Бус MELBUS едет только с вашими вещами, без перегрузок.'],
+  ['V7', 'Новый дом', 'Заносим, собираем мебель и расставляем всё по местам.'],
+];
+const details = [
+  ['D1', 'Чистота с порога', 'Бахилы поверх рабочей обуви и чистые перчатки — до того, как мы зайдём в квартиру.'],
+  ['D2', 'Защита дома', 'Дорожки на пол, накладки на дверные косяки и углы. Уходим — убираем за собой.'],
+  ['D3', 'Хрупкое отдельно', 'Посуда в бумаге, бокалы в пузырчатой плёнке, коробки с перегородками.'],
+  ['D4', 'Порядок в коробках', 'Цвет наклейки — комната, номер — коробка, QR — список вещей внутри.'],
+  ['D5', 'Одежда на вешалках', 'Гардеробные коробки со штангой: вещи приезжают не мятыми.'],
+];
+const packages = [
+  { name: 'Перевозка', from: '…', note: 'Вы пакуете — мы перевозим', items: ['Бус и бригада', 'Защита мебели плёнкой и одеялами', 'Разборка и сборка кровати', 'Фиксированная цена'] },
+  { name: 'Стандарт', from: '…', note: 'Самый частый выбор', items: ['Всё из «Перевозки»', 'Упаковка кухни и хрупкого', 'Набор белых коробок', 'Сборка всей мебели'], featured: true },
+  { name: 'Под ключ', from: '…', note: 'Вы приезжаете в готовый дом', items: ['Всё из «Стандарта»', 'Упаковка всей квартиры', 'Распаковка и расстановка', 'Вывоз упаковки'] },
+];
+---
+
+<!-- 1. ПЕРВЫЙ ЭКРАН -->
+<section class="hero">
+  <div class="container">
+    <div class="hero__text">
+      <span class="t-eyebrow" data-reveal>Переезды · Варшава, вся Польша и ЕС</span>
+      <h1 class="t-hero" data-split>Переезд<br />без доплат.</h1>
+      <div class="hero__row">
+        <p class="t-lead" data-reveal>Цена фиксируется по видео вашей квартиры и не меняется в день переезда. Упакуем, перевезём и расставим всё по местам.</p>
+        <div class="hero__btns" data-reveal>
+          <a href={href(locale, 'quote')} class="btn btn--primary" data-magnetic>{ui.cta.price} <span class="arrow">→</span></a>
+          <a href={href(locale, 'quote') + '#video'} class="btn btn--ghost">{ui.cta.video}</a>
+        </div>
+      </div>
+      <ul class="hero__trust" data-reveal>{ui.trust.map((t) => <li>{t}</li>)}</ul>
+    </div>
+  </div>
+  <div class="container hero__scene">
+    <SceneSlot id="home-hero" title="Квартира-диорама складывается в белую коробку MELBUS, уезжает в бусе и раскрывается в новой квартире" length={2.4}>
+      <p class="cap" data-at="0.05" data-until="0.3">Ваша квартира сегодня</p>
+      <p class="cap" data-at="0.38" data-until="0.62">Всё упаковано за один день</p>
+      <p class="cap" data-at="0.72">Новый адрес. Всё на местах.</p>
+    </SceneSlot>
+  </div>
+</section>
+
+<!-- 2. БЕГУЩАЯ СТРОКА -->
+<div class="marquee" data-marquee="50" aria-hidden="true">
+  <div class="marquee__track">{services.slice(0, 8).map((s) => <span>{s.title}<i>✦</i></span>)}</div>
+</div>
+
+<!-- 3. ОБЕЩАНИЕ -->
+<section class="section">
+  <div class="container">
+    <p class="promise" data-words>Цена, которую вы приняли, — это цена, которую вы заплатите. Никаких «а тут ещё этаж» и «шкаф оказался тяжелее». Всё посчитано по видео заранее, а если что-то меняется — только с вашего согласия и до начала работ.</p>
+  </div>
+</section>
+
+<!-- 4. КАЛЬКУЛЯТОР (тизер; слот для анимации цены) -->
+<section class="section section--tight">
+  <div class="container">
+    <div class="calc" data-reveal>
+      <div class="calc__l">
+        <span class="t-eyebrow">Калькулятор</span>
+        <h2 class="t-h2">Сколько стоит<br />ваш переезд?</h2>
+        <p class="t-muted">Ориентир за 30 секунд. Точную цену зафиксируем по видео.</p>
+      </div>
+      <div class="calc__r">
+        <div class="chips" role="group" aria-label="Что перевозим">
+          {['Студия', '2 комнаты', '3 комнаты', 'Дом', 'Офис'].map((c, i) => <button type="button" class="chip" aria-pressed={i === 1 ? 'true' : 'false'}>{c}</button>)}
+        </div>
+        <div class="calc__price"><span class="t-muted">от</span> <strong>— zł</strong><span class="calc__slot">слот: анимация цены (на утверждении)</span></div>
+        <a href={href(locale, 'calculator')} class="btn btn--primary">Продолжить расчёт <span class="arrow">→</span></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5. КАК ЭТО РАБОТАЕТ — горизонтальная лента -->
+<section class="section steps-sec">
+  <div class="container">
+    <SectionHead eyebrow={ui.nav.how} title="Шесть шагов<br>до нового адреса" lead="От видео на телефоне до последней собранной полки. На каждом шаге вы знаете, что будет дальше." />
+  </div>
+  <div class="hs" data-hscroll>
+    <div class="hs__track container" data-hscroll-track>
+      <svg class="hs__route" viewBox="0 0 2400 40" preserveAspectRatio="none" aria-hidden="true"><path data-route d="M0 20 C 400 0, 800 40, 1200 20 S 2000 0, 2400 20" /></svg>
+      {steps.map(([id, t, d], i) => (
+        <article class="step">
+          <VideoSlot id={id} title={`Шаг «${t}»`} ratio="4 / 5" />
+          <div class="step__t"><span class="step__n">{String(i + 1).padStart(2, '0')}</span><h3 class="t-h3">{t}</h3></div>
+          <p class="t-muted">{d}</p>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<!-- 6. ДЕТАЛИ, КОТОРЫЕ ВИДНО -->
+<section class="section">
+  <div class="container">
+    <SectionHead eyebrow="Стандарты MELBUS" title="Детали,<br>которые видно" lead="За нами 20 бусов и 5+ лет в логистике. Аккуратность для нас — это чек-лист бригады, а не слово в рекламе." />
+    <div class="swap" data-swap>
+      <div class="swap__list">
+        {details.map(([id, t, d], i) => (
+          <div class="swap__item" data-swap-item>
+            <span class="t-eyebrow">{String(i + 1).padStart(2, '0')}</span>
+            <h3 class="t-h3">{t}</h3>
+            <p class="t-muted">{d}</p>
+            <div class="swap__inline"><VideoSlot id={id} title={t} ratio="4 / 3" /></div>
+          </div>
+        ))}
+      </div>
+      <div class="swap__media" aria-hidden="true">
+        {details.map(([id, t]) => <div class="swap__m" data-swap-media><VideoSlot id={id} title={t} ratio="4 / 5" /></div>)}
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 7. ФИРМЕННАЯ КОРОБКА -->
+<section class="section section--tight">
+  <div class="container">
+    <SectionHead eyebrow="Коробки MELBUS" title="Белые коробки<br>с порядком внутри" lead="Привезём набор за несколько дней до переезда. Наклейки по комнатам и QR со списком вещей." />
+    <SceneSlot id="box" title="Белая коробка MELBUS: вид и способ показа утверждаем после логотипа" length={1.2} ratio="21 / 9" ratioMobile="1 / 1" />
+  </div>
+</section>
+
+<!-- 8. ПАКЕТЫ -->
+<section class="section">
+  <div class="container">
+    <SectionHead eyebrow={ui.nav.pricing} title="Три пакета —<br>одна честная цена" lead="Цены появятся после анализа рынка. Структура пакетов — на утверждении." />
+    <div class="pk">
+      {packages.map((p) => (
+        <article class={`pk__card${p.featured ? ' is-featured' : ''}`} data-reveal>
+          <div class="pk__top"><h3 class="t-h3">{p.name}</h3><span class="t-muted">{p.note}</span></div>
+          <div class="pk__price"><span class="t-muted">от</span> <strong>{p.from} zł</strong></div>
+          <ul>{p.items.map((it) => <li>{it}</li>)}</ul>
+          <a href={href(locale, 'quote')} class={`btn ${p.featured ? 'btn--primary' : 'btn--ghost'}`}>{ui.cta.quote}</a>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<!-- 9. ГАРАНТИИ (тёмный, Vanta на компьютере) -->
+<section class="guar dark" data-vanta>
+  <div class="container section guar__in">
+    <SectionHead eyebrow="Гарантии" title="Три обещания,<br>записанные в оферте" align="left" />
+    <div class="guar__grid">
+      {[['Фиксированная цена', 'Цена из принятой оферты окончательная. Риск «не уложились по времени» — наш.'], ['Пунктуальность', 'Окно прибытия 30 минут. Опоздали по своей вине — скидка за каждые 30 минут.'], ['Сохранность', 'Защищаем мебель и дом. Если что-то повредили — возмещаем по процедуре рекламации.']].map(([t, d]) => (
+        <div class="guar__item" data-reveal><h3 class="t-h3">{t}</h3><p class="t-muted">{d}</p></div>
+      ))}
+    </div>
+    <a href={href(locale, 'guarantee')} class="btn btn--ghost" data-reveal>Условия гарантии <span class="arrow">→</span></a>
+  </div>
+</section>
+
+<!-- 10. ФАКТЫ -->
+<section class="section">
+  <div class="container facts">
+    <div class="fact" data-reveal><strong><span data-count-to={brand.facts.years}>{brand.facts.years}</span>+</strong><span>лет в логистике</span></div>
+    <div class="fact" data-reveal><strong>≈<span data-count-to={brand.facts.deliveriesPerMonth}>{brand.facts.deliveriesPerMonth}</span></strong><span>доставок в месяц</span></div>
+    <div class="fact" data-reveal><strong>7/7</strong><span>работаем без выходных</span></div>
+    <div class="fact" data-reveal><strong>150 км</strong><span>вокруг Варшавы и вся Польша</span></div>
+  </div>
+</section>
+
+<!-- 11. ЗОНА РАБОТЫ -->
+<section class="section section--tight">
+  <div class="container area">
+    <div class="area__map" data-reveal aria-hidden="true">
+      <svg viewBox="0 0 400 400">
+        <circle cx="200" cy="200" r="190" class="ring" /><circle cx="200" cy="200" r="120" class="ring" /><circle cx="200" cy="200" r="54" class="ring ring--in" />
+        <circle cx="200" cy="200" r="7" class="dot" />
+      </svg>
+      <span class="area__lbl">Варшава</span>
+    </div>
+    <div class="area__text">
+      <SectionHead eyebrow="Где работаем" title="Варшава<br>и 150 км вокруг" align="left" lead="Мокотув, Воля, Урсынов, Прага, Белоленка и все районы. Пясечно, Прушков, Легионово, Марки и дальше. По Польше и в страны ЕС — по запросу." />
+    </div>
+  </div>
+</section>
+
+<!-- 12. ОТЗЫВЫ (честно) -->
+<section class="section section--tight">
+  <div class="container">
+    <div class="reviews" data-reveal>
+      <span class="t-eyebrow">Отзывы</span>
+      <h2 class="t-h2">Мы новое направление —<br />первые отзывы появятся здесь.</h2>
+      <p class="t-lead">Публикуем только настоящие отзывы из Google. Каждый клиент после переезда получает ссылку, чтобы оценить нас честно.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 13. FAQ -->
+<section class="section">
+  <div class="container">
+    <SectionHead eyebrow="Вопросы" title="Частые вопросы" align="left" />
+    <Faq items={faqHome} />
+  </div>
+</section>
+
+<CtaBand locale={locale} />
+
+<style>
+  .hero { padding-top: calc(var(--header-h) + env(safe-area-inset-top, 0px) + clamp(28px, 6vw, 88px)); }
+  .hero__text { display: grid; gap: clamp(20px, 2.5vw, 32px); }
+  .hero__row { display: grid; gap: 24px; }
+  .hero__btns { display: flex; flex-wrap: wrap; gap: 12px; }
+  @media (max-width: 479px) { .hero__btns .btn { flex: 1 1 100%; } }
+  @media (min-width: 960px) { .hero__row { grid-template-columns: 1fr auto; align-items: end; } }
+  .hero__trust { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; padding: 0; margin: 0; }
+  .hero__trust li { font-size: .875rem; font-weight: 520; padding: 7px 12px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); }
+  .hero__scene { margin-top: clamp(28px, 4vw, 56px); }
+  .cap { position: absolute; left: 20px; bottom: 56px; max-width: 18ch; font-size: clamp(1.4rem, 1rem + 2vw, 2.6rem); font-weight: 640; letter-spacing: -0.035em; line-height: 1.05; visibility: hidden; }
+
+  .marquee { overflow: hidden; border-block: 1px solid var(--line); padding-block: 22px; margin-top: clamp(48px, 6vw, 96px); }
+  .marquee__track { display: flex; width: max-content; will-change: transform; }
+  .marquee span { display: inline-flex; align-items: center; gap: 28px; padding-right: 28px; font-size: clamp(1.6rem, 1rem + 2.6vw, 3.4rem); font-weight: 600; letter-spacing: -0.04em; white-space: nowrap; }
+  .marquee i { font-style: normal; font-size: .5em; color: var(--accent); }
+
+  .promise { font-size: clamp(1.7rem, 1rem + 3.2vw, 4rem); font-weight: 600; letter-spacing: -0.04em; line-height: 1.08; max-width: 24ch; }
+
+  .calc { display: grid; gap: 32px; padding: clamp(24px, 4vw, 56px); border-radius: calc(var(--radius) + 8px); background: var(--surface); border: 1px solid var(--line); }
+  .calc__l { display: grid; gap: 14px; align-content: start; }
+  .calc__r { display: grid; gap: 24px; align-content: start; }
+  @media (min-width: 960px) { .calc { grid-template-columns: 1fr 1fr; } }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { padding: 12px 16px; border-radius: 999px; border: 1px solid var(--line); background: transparent; cursor: pointer; font-weight: 520; }
+  .chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .calc__price { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 12px; }
+  .calc__price strong { font-size: clamp(2.6rem, 2rem + 3vw, 4.5rem); font-weight: 680; letter-spacing: -0.05em; line-height: 1; }
+  .calc__slot { flex-basis: 100%; font-size: .75rem; color: var(--accent); }
+
+  .hs { overflow: hidden; }
+  .hs__track { position: relative; display: grid; gap: 32px; }
+  .hs__route { display: none; }
+  .step { display: grid; gap: 14px; }
+  .step__t { display: flex; align-items: baseline; gap: 12px; }
+  .step__n { font-size: .8rem; font-weight: 600; color: var(--accent); letter-spacing: .08em; }
+  @media (max-width: 1023px) {
+    .hs__track { grid-template-columns: 1fr; padding-left: calc(var(--gutter) + 22px); border-left: 0; }
+    .hs__track::before { content: ""; position: absolute; left: calc(var(--gutter) + 4px); top: 8px; bottom: 8px; width: 2px; background: linear-gradient(var(--accent), color-mix(in oklab, var(--accent) 10%, transparent)); border-radius: 2px; }
+    .step { grid-template-columns: 1fr; }
+  }
+  @media (min-width: 640px) and (max-width: 1023px) { .hs__track { grid-template-columns: 1fr 1fr; } }
+  @media (min-width: 1024px) {
+    .hs__track { display: flex; gap: 40px; width: max-content; max-width: none; padding-bottom: 72px; }
+    .step { width: min(400px, 30vw); }
+    .hs__route { display: block; position: absolute; left: 0; right: 0; bottom: 20px; width: 100%; height: 40px; }
+    .hs__route path { fill: none; stroke: var(--accent); stroke-width: 2.5; vector-effect: non-scaling-stroke; }
+  }
+
+  .swap { display: grid; gap: 48px; }
+  .swap__item { display: grid; gap: 12px; }
+  .swap__media { display: none; }
+  @media (min-width: 1024px) {
+    .swap { grid-template-columns: 1fr 1fr; gap: 80px; }
+    .swap__item { min-height: 60vh; align-content: center; }
+    .swap__inline { display: none; }
+    .swap__media { display: block; position: sticky; top: calc(var(--header-h) + 32px); height: calc(100vh - var(--header-h) - 64px); }
+    .swap__m { position: absolute; inset: 0; display: grid; place-items: center; }
+    .swap__m :global(.vslot) { height: 100%; width: auto; }
+  }
+
+  .pk { display: grid; gap: 16px; }
+  @media (min-width: 900px) { .pk { grid-template-columns: repeat(3, 1fr); } }
+  .pk__card { display: grid; gap: 22px; align-content: start; padding: 28px; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--line); }
+  .pk__card.is-featured { background: var(--ink); color: var(--bg); --muted: #A0A7B1; border-color: var(--ink); }
+  .pk__card.is-featured .btn--primary { background: var(--accent); }
+  .pk__top { display: grid; gap: 6px; }
+  .pk__price strong { font-size: 2.6rem; font-weight: 680; letter-spacing: -0.05em; }
+  .pk__card ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+  .pk__card li { padding-left: 26px; position: relative; }
+  .pk__card li::before { content: ""; position: absolute; left: 0; top: .55em; width: 14px; height: 8px; border-left: 2px solid var(--accent); border-bottom: 2px solid var(--accent); transform: rotate(-45deg); }
+  .pk__card .btn { margin-top: auto; }
+
+  .guar { position: relative; overflow: hidden; background: radial-gradient(120% 80% at 80% 0%, #17204a 0%, var(--dark) 60%); }
+  .guar__in { position: relative; z-index: 1; display: grid; gap: 40px; justify-items: start; }
+  .guar__grid { display: grid; gap: 32px; width: 100%; }
+  @media (min-width: 900px) { .guar__grid { grid-template-columns: repeat(3, 1fr); } }
+  .guar__item { display: grid; gap: 10px; padding-top: 20px; border-top: 1px solid #2A2F38; }
+
+  .facts { display: grid; grid-template-columns: 1fr 1fr; gap: 32px 16px; }
+  @media (min-width: 900px) { .facts { grid-template-columns: repeat(4, 1fr); } }
+  .fact { display: grid; gap: 8px; border-top: 1px solid var(--line); padding-top: 16px; }
+  .fact strong { font-size: clamp(2.2rem, 1.4rem + 3vw, 4.5rem); font-weight: 680; letter-spacing: -0.05em; line-height: 1; font-variant-numeric: tabular-nums; }
+  .fact span { color: var(--muted); }
+
+  .area { display: grid; gap: 40px; align-items: center; }
+  @media (min-width: 900px) { .area { grid-template-columns: 1fr 1.2fr; } }
+  .area__map { position: relative; max-width: 420px; width: 100%; margin-inline: auto; }
+  .ring { fill: none; stroke: var(--line); stroke-width: 1.5; stroke-dasharray: 4 6; }
+  .ring--in { stroke: var(--accent); stroke-dasharray: none; fill: color-mix(in oklab, var(--accent) 8%, transparent); }
+  .dot { fill: var(--accent); }
+  .area__lbl { position: absolute; left: 50%; top: 56%; transform: translateX(-50%); font-weight: 600; font-size: .9rem; }
+
+  .reviews { display: grid; gap: 18px; padding: clamp(28px, 5vw, 64px); border-radius: calc(var(--radius) + 8px); border: 1px dashed var(--line); }
+</style>

@@ -1,0 +1,50 @@
+---
+/**
+ * Универсальный шаблон для страниц: цены, калькулятор, гарантия, как работаем, о нас, контакты.
+ * Содержание каждого раздела задаётся данными в [...path].astro — каркас один.
+ */
+import PageHero from '../components/PageHero.astro';
+import SceneSlot from '../components/SceneSlot.astro';
+import SectionHead from '../components/SectionHead.astro';
+import Faq from '../components/Faq.astro';
+import CtaBand from '../components/CtaBand.astro';
+import type { Locale } from '../i18n/routes';
+
+export interface Block { type: 'list' | 'text' | 'faq' | 'cards'; eyebrow?: string; title: string; lead?: string; items?: [string, string][] }
+interface Props { locale: Locale; eyebrow?: string; title: string; lead?: string; scene?: { id: string; title: string; length?: number }; blocks?: Block[]; cta?: boolean }
+const { locale, eyebrow, title, lead, scene, blocks = [], cta = true } = Astro.props;
+---
+<PageHero eyebrow={eyebrow} title={title} lead={lead}>
+  {scene && <SceneSlot id={scene.id} title={scene.title} length={scene.length ?? 1.4} />}
+</PageHero>
+
+{blocks.map((b) => (
+  <section class="section section--tight">
+    <div class="container">
+      <SectionHead eyebrow={b.eyebrow} title={b.title} lead={b.lead} />
+      {b.type === 'faq' && b.items && <Faq items={b.items} />}
+      {b.type === 'list' && b.items && (
+        <ol class="blist">{b.items.map(([t, d], i) => <li data-reveal><span class="blist__n">{String(i + 1).padStart(2, '0')}</span><div><h3 class="t-h3">{t}</h3><p class="t-muted">{d}</p></div></li>)}</ol>
+      )}
+      {b.type === 'cards' && b.items && (
+        <div class="bcards">{b.items.map(([t, d]) => <div class="bcard" data-reveal><h3 class="t-h3">{t}</h3><p class="t-muted">{d}</p></div>)}</div>
+      )}
+      {b.type === 'text' && b.items && <div class="btext">{b.items.map(([t, d]) => <div data-reveal><h3 class="t-h3">{t}</h3><p class="t-muted">{d}</p></div>)}</div>}
+    </div>
+  </section>
+))}
+
+<slot />
+{cta && <CtaBand locale={locale} />}
+
+<style>
+  .blist { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+  .blist li { display: grid; grid-template-columns: 48px 1fr; gap: 16px; padding: 26px 0; border-bottom: 1px solid var(--line); }
+  .blist li div { display: grid; gap: 8px; max-width: 70ch; }
+  .blist__n { font-size: .8rem; font-weight: 600; color: var(--accent); letter-spacing: .08em; padding-top: .35em; }
+  .bcards { display: grid; gap: 12px; }
+  @media (min-width: 900px) { .bcards { grid-template-columns: repeat(3, 1fr); } }
+  .bcard { display: grid; gap: 10px; align-content: start; padding: 26px; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--line); }
+  .btext { display: grid; gap: 28px; max-width: 760px; }
+  .btext div { display: grid; gap: 8px; }
+</style>

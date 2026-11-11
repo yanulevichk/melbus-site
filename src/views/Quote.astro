@@ -1,0 +1,193 @@
+---
+/**
+ * Заявка: 6 шагов, по одному вопросу на экран. Сейчас это макет:
+ * отправка в CRM, загрузка видео и календарь свободных дат подключаются на этапе «Заявка и CRM».
+ */
+import { brand } from '../config/brand';
+const sizes = ['Студия', '2 комнаты', '3 комнаты', '4+ комнаты', 'Дом', 'Офис', 'Несколько вещей'];
+const items = ['Диван', 'Шкаф', 'Кровать', 'Стол', 'Холодильник', 'Стиральная машина', 'Телевизор', 'Коробки'];
+const extras = ['Упаковка всего', 'Упаковка хрупкого', 'Коробки заранее', 'Разборка и сборка мебели', 'Вывоз старой мебели', 'Уборка', 'Распаковка и расстановка'];
+const steps = ['Что везём', 'Адреса', 'Дата', 'Вещи', 'Услуги', 'Контакт'];
+---
+<section class="q">
+  <div class="container q__in">
+    <div class="q__head">
+      <span class="t-eyebrow">Заявка · фиксированная цена по видео</span>
+      <h1 class="t-h2">Расскажите о переезде</h1>
+      <ol class="q__steps" aria-label="Шаги заявки">{steps.map((s, i) => <li data-step-dot={i}><span>{i + 1}</span>{s}</li>)}</ol>
+      <div class="q__bar" aria-hidden="true"><i data-q-bar></i></div>
+    </div>
+
+    <form class="q__form" data-quote novalidate>
+      <fieldset data-q-step="0">
+        <legend class="t-h3">Что перевозим?</legend>
+        <div class="opts">{sizes.map((s, i) => <label class="opt"><input type="radio" name="size" value={s} id={`size-${i}`} checked={i === 1} /><span>{s}</span></label>)}</div>
+      </fieldset>
+
+      <fieldset data-q-step="1" hidden>
+        <legend class="t-h3">Откуда и куда?</legend>
+        {['from', 'to'].map((k) => (
+          <div class="addr">
+            <label class="fld"><span>{k === 'from' ? 'Откуда' : 'Куда'}</span><input id={`addr-${k}`} name={`addr_${k}`} autocomplete="street-address" placeholder="Улица, дом, город" /></label>
+            <div class="row3">
+              <label class="fld"><span>Этаж</span><input id={`floor-${k}`} name={`floor_${k}`} inputmode="numeric" placeholder="3" /></label>
+              <label class="fld"><span>Лифт</span><select id={`lift-${k}`} name={`lift_${k}`}><option>Нет</option><option>Пассажирский</option><option>Грузовой</option></select></label>
+              <label class="fld"><span>От парковки, м</span><input id={`dist-${k}`} name={`dist_${k}`} inputmode="numeric" placeholder="20" /></label>
+            </div>
+          </div>
+        ))}
+        <p class="hint">Подсказки адресов и расчёт расстояния подключим с Google Places.</p>
+      </fieldset>
+
+      <fieldset data-q-step="2" hidden>
+        <legend class="t-h3">Когда?</legend>
+        <div class="row2">
+          <label class="fld"><span>Дата</span><input type="date" id="date" name="date" /></label>
+          <label class="fld"><span>Начало</span><select id="time" name="time"><option>08:00</option><option>09:00</option><option>12:00</option><option>15:00</option><option>Вечер</option></select></label>
+        </div>
+        <label class="check"><input type="checkbox" id="flex" name="flex" /> Дата гибкая, ±2 дня</label>
+        <p class="hint">Свободные даты будут подсвечиваться из календаря CRM.</p>
+      </fieldset>
+
+      <fieldset data-q-step="3" hidden>
+        <legend class="t-h3">Основные вещи</legend>
+        <div class="cnt">{items.map((it, i) => (
+          <div class="cnt__row"><span>{it}</span><div class="cnt__ctl"><button type="button" data-dec aria-label={`Меньше: ${it}`}>−</button><input id={`item-${i}`} name={`item_${i}`} value="0" inputmode="numeric" aria-label={it} /><button type="button" data-inc aria-label={`Больше: ${it}`}>+</button></div></div>
+        ))}</div>
+        <label class="check"><input type="checkbox" id="skip-items" name="skip_items" /> Покажу всё на видео</label>
+      </fieldset>
+
+      <fieldset data-q-step="4" hidden>
+        <legend class="t-h3">Что ещё сделать?</legend>
+        <div class="opts">{extras.map((e, i) => <label class="opt"><input type="checkbox" name="extras" value={e} id={`ex-${i}`} /><span>{e}</span></label>)}</div>
+      </fieldset>
+
+      <fieldset data-q-step="5" hidden>
+        <legend class="t-h3">Как с вами связаться?</legend>
+        <div class="row2">
+          <label class="fld"><span>Имя</span><input id="name" name="name" autocomplete="name" /></label>
+          <label class="fld"><span>Телефон</span><input id="phone" name="phone" type="tel" autocomplete="tel" placeholder="+48" /></label>
+        </div>
+        <div class="opts opts--sm">{['WhatsApp', 'Telegram', 'Звонок', 'Email'].map((c, i) => <label class="opt"><input type="radio" name="channel" value={c} id={`ch-${i}`} checked={i === 0} /><span>{c}</span></label>)}</div>
+        <div id="video" class="video">
+          <strong>Покажите квартиру на видео</strong>
+          <p class="t-muted">По 30–60 секунд на комнату, откройте шкафы, покажите лестницу. Так цена будет точной и окончательной.</p>
+          <div class="video__opts">
+            <label class="btn btn--ghost btn--sm">Загрузить видео<input type="file" accept="video/*" multiple hidden id="video-file" /></label>
+            <a class="btn btn--ghost btn--sm" href={`https://wa.me/${brand.contact.whatsapp}`} target="_blank" rel="noopener">Отправить в WhatsApp</a>
+          </div>
+        </div>
+        <label class="check"><input type="checkbox" id="nip" name="nip" /> Нужна фактура на фирму (NIP)</label>
+      </fieldset>
+
+      <div class="q__done" data-q-done hidden>
+        <span class="t-eyebrow">Заявка № 0001 · макет</span>
+        <h2 class="t-h2">Приняли!</h2>
+        <p class="t-lead">В течение 2 часов днём пришлём фиксированную цену в WhatsApp. Сейчас это макет — заявки ещё не отправляются.</p>
+      </div>
+
+      <div class="q__nav">
+        <button type="button" class="btn btn--ghost" data-q-prev hidden>Назад</button>
+        <button type="button" class="btn btn--primary" data-q-next>Дальше <span class="arrow">→</span></button>
+      </div>
+    </form>
+
+    <aside class="q__sum" aria-label="Ваш переезд">
+      <span class="t-eyebrow">Ваш переезд</span>
+      <dl>
+        <dt>Объём</dt><dd data-sum="size">2 комнаты</dd>
+        <dt>Ориентир</dt><dd>от — zł</dd>
+      </dl>
+      <p class="t-muted">Точная цена — после видео. Она не изменится в день переезда.</p>
+    </aside>
+  </div>
+</section>
+
+<script>
+  function initQuote() {
+    const form = document.querySelector<HTMLFormElement>('[data-quote]');
+    if (!form || form.dataset.ready) return;
+    form.dataset.ready = '1';
+    const steps = [...form.querySelectorAll<HTMLElement>('[data-q-step]')];
+    const dots = [...document.querySelectorAll<HTMLElement>('[data-step-dot]')];
+    const bar = document.querySelector<HTMLElement>('[data-q-bar]')!;
+    const prev = form.querySelector<HTMLButtonElement>('[data-q-prev]')!;
+    const next = form.querySelector<HTMLButtonElement>('[data-q-next]')!;
+    const done = form.querySelector<HTMLElement>('[data-q-done]')!;
+    let i = 0;
+    const show = (n: number) => {
+      i = n;
+      steps.forEach((s, k) => (s.hidden = k !== n));
+      dots.forEach((d, k) => { d.classList.toggle('is-done', k < n); d.classList.toggle('is-on', k === n); });
+      bar.style.transform = `scaleX(${(n + 1) / steps.length})`;
+      prev.hidden = n === 0;
+      next.innerHTML = n === steps.length - 1 ? 'Отправить заявку' : 'Дальше <span class="arrow">→</span>';
+      steps[n].querySelector<HTMLElement>('input,select,button')?.focus({ preventScroll: true });
+    };
+    next.addEventListener('click', () => {
+      if (i < steps.length - 1) return show(i + 1);
+      steps.forEach((s) => (s.hidden = true)); prev.hidden = next.hidden = true; done.hidden = false; bar.style.transform = 'scaleX(1)';
+    });
+    prev.addEventListener('click', () => show(Math.max(0, i - 1)));
+    form.addEventListener('submit', (e) => e.preventDefault());
+    form.addEventListener('change', (e) => {
+      const t = e.target as HTMLInputElement;
+      if (t.name === 'size') document.querySelector('[data-sum="size"]')!.textContent = t.value;
+    });
+    form.querySelectorAll('.cnt__row').forEach((row) => {
+      const inp = row.querySelector('input')!;
+      row.querySelector('[data-inc]')!.addEventListener('click', () => (inp.value = String(+inp.value + 1)));
+      row.querySelector('[data-dec]')!.addEventListener('click', () => (inp.value = String(Math.max(0, +inp.value - 1))));
+    });
+    if (location.hash === '#video') show(steps.length - 1); else show(0);
+  }
+  document.addEventListener('astro:page-load', initQuote);
+</script>
+
+<style>
+  .q { padding-top: calc(var(--header-h) + env(safe-area-inset-top, 0px) + 32px); padding-bottom: 96px; }
+  .q__in { display: grid; gap: 32px; }
+  @media (min-width: 1024px) { .q__in { grid-template-columns: 1fr 340px; column-gap: 64px; } .q__head { grid-column: 1 / -1; } }
+  .q__head { display: grid; gap: 18px; }
+  .q__steps { display: flex; gap: 8px; list-style: none; padding: 0; margin: 0; overflow-x: auto; scrollbar-width: none; }
+  .q__steps li { display: flex; align-items: center; gap: 8px; font-size: .85rem; color: var(--muted); white-space: nowrap; padding: 6px 12px 6px 6px; border-radius: 999px; border: 1px solid var(--line); }
+  .q__steps li span { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: .75rem; background: var(--line); color: var(--ink); }
+  .q__steps li.is-on { color: var(--ink); border-color: var(--ink); }
+  .q__steps li.is-on span, .q__steps li.is-done span { background: var(--accent); color: var(--accent-ink); }
+  .q__bar { height: 3px; background: var(--line); border-radius: 3px; overflow: hidden; }
+  .q__bar i { display: block; height: 100%; background: var(--accent); transform-origin: 0 50%; transform: scaleX(.16); transition: transform .6s var(--ease); }
+  .q__form { display: grid; gap: 28px; min-width: 0; }
+  fieldset { border: 0; padding: 0; margin: 0; display: grid; gap: 18px; min-width: 0; }
+  legend { margin-bottom: 18px; padding: 0; }
+  .opts { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+  .opts--sm { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
+  .opt { position: relative; cursor: pointer; }
+  .opt input { position: absolute; opacity: 0; }
+  .opt span { display: flex; align-items: center; min-height: 64px; padding: 14px 16px; border-radius: 16px; border: 1px solid var(--line); background: var(--surface); font-weight: 560; transition: border-color .2s, background .2s, color .2s; }
+  .opt input:checked + span { border-color: var(--ink); background: var(--ink); color: var(--bg); }
+  .opt input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .fld { display: grid; gap: 6px; font-size: .85rem; color: var(--muted); min-width: 0; }
+  .fld input, .fld select { height: 54px; padding: 0 16px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: inherit; font-size: 1rem; width: 100%; min-width: 0; }
+  .fld input:focus, .fld select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .addr { display: grid; gap: 10px; padding-bottom: 14px; }
+  .row2, .row3 { display: grid; gap: 10px; }
+  @media (min-width: 560px) { .row2 { grid-template-columns: 1fr 1fr; } .row3 { grid-template-columns: repeat(3, 1fr); } }
+  .check { display: flex; gap: 10px; align-items: center; font-weight: 500; }
+  .check input { width: 20px; height: 20px; accent-color: var(--accent); }
+  .hint { font-size: .8rem; color: var(--accent); }
+  .cnt { display: grid; border-top: 1px solid var(--line); }
+  .cnt__row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); font-weight: 520; }
+  .cnt__ctl { display: flex; align-items: center; gap: 4px; }
+  .cnt__ctl button { width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); font-size: 1.2rem; cursor: pointer; }
+  .cnt__ctl input { width: 44px; text-align: center; border: 0; background: transparent; font: inherit; font-weight: 600; }
+  .video { display: grid; gap: 10px; padding: 20px; border-radius: var(--radius); border: 1px dashed var(--accent); background: color-mix(in oklab, var(--accent) 5%, var(--surface)); }
+  .video__opts { display: flex; flex-wrap: wrap; gap: 8px; }
+  .video__opts label { cursor: pointer; }
+  .q__nav { display: flex; gap: 10px; justify-content: space-between; }
+  .q__nav .btn--primary { margin-left: auto; }
+  .q__done { display: grid; gap: 16px; }
+  .q__sum { align-self: start; position: sticky; top: calc(var(--header-h) + 24px); display: grid; gap: 14px; padding: 24px; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--line); }
+  .q__sum dl { display: grid; grid-template-columns: auto 1fr; gap: 8px 16px; margin: 0; }
+  .q__sum dt { color: var(--muted); } .q__sum dd { margin: 0; font-weight: 600; text-align: right; }
+  @media (max-width: 1023px) { .q__sum { position: static; order: -1; } }
+</style>

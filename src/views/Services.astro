@@ -1,0 +1,39 @@
+---
+import PageHero from '../components/PageHero.astro';
+import CtaBand from '../components/CtaBand.astro';
+import { href, type Locale } from '../i18n/routes';
+import { services } from '../data/services';
+const { locale } = Astro.props as { locale: Locale };
+const groups = [['move', 'Переезды'], ['extra', 'Дополнительные услуги']] as const;
+---
+<PageHero eyebrow="Услуги" title="Всё для переезда<br>в одних руках" lead="От одной коробки до офиса на три этажа. Каждая услуга — с фиксированной ценой и бригадой MELBUS." />
+{groups.map(([g, label]) => (
+  <section class="section section--tight">
+    <div class="container">
+      <h2 class="t-eyebrow svc-g" data-reveal>{label}</h2>
+      <div class="svc">
+        {services.filter((s) => s.group === g).map((s, i) => (
+          <a href={href(locale, `service:${s.slug}`)} class="svc__card" data-reveal>
+            <span class="svc__n">{String(i + 1).padStart(2, '0')}</span>
+            <h3 class="t-h3">{s.title}</h3>
+            <p class="t-muted">{s.short}</p>
+            <span class="svc__go" aria-hidden="true">→</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+))}
+<CtaBand locale={locale} />
+
+<style>
+  .svc-g { margin-bottom: 20px; }
+  .svc { display: grid; gap: 12px; }
+  @media (min-width: 640px) { .svc { grid-template-columns: 1fr 1fr; } }
+  @media (min-width: 1024px) { .svc { grid-template-columns: repeat(3, 1fr); } }
+  .svc__card { position: relative; display: grid; gap: 8px; align-content: start; min-height: 190px; padding: 24px; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--line); transition: background .4s var(--ease), color .4s var(--ease), transform .4s var(--ease); }
+  .svc__card:hover { background: var(--ink); color: var(--bg); --muted: #A0A7B1; transform: translateY(-4px); }
+  .svc__n { font-size: .8rem; font-weight: 600; color: var(--accent); letter-spacing: .08em; }
+  .svc__go { position: absolute; right: 22px; bottom: 18px; font-size: 1.6rem; transition: transform .4s var(--ease); }
+  .svc__card:hover .svc__go { transform: translateX(6px); }
+</style>

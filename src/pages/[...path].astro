@@ -1,0 +1,107 @@
+---
+/**
+ * Один маршрутизатор на все страницы и языки.
+ * Адреса берутся из src/i18n/routes.ts, услуги — из src/data/services.ts.
+ */
+import Base from '../layouts/Base.astro';
+import Home from '../views/Home.astro';
+import Services from '../views/Services.astro';
+import Service from '../views/Service.astro';
+import Quote from '../views/Quote.astro';
+import Simple from '../views/Simple.astro';
+import { enabledLocales, href, type Locale, type PageKey } from '../i18n/routes';
+import { services, serviceBySlug } from '../data/services';
+import { faqHome } from '../data/faq';
+import { brand } from '../config/brand';
+
+export function getStaticPaths() {
+  const keys: PageKey[] = ['home', 'services', 'pricing', 'calculator', 'quote', 'guarantee', 'how', 'about', 'faq', 'contact', 'terms', 'privacy', 'cookies', 'complaints', ...services.map((s) => `service:${s.slug}` as PageKey)];
+  return enabledLocales.flatMap((locale) => keys.map((key) => ({
+    params: { path: href(locale, key).replace(/^\/|\/$/g, '') || undefined },
+    props: { locale, key },
+  })));
+}
+
+const { locale, key } = Astro.props as { locale: Locale; key: PageKey };
+
+const meta: Record<string, { title: string; description: string; nav?: string }> = {
+  home: { title: 'переезды в Варшаве с фиксированной ценой', description: 'Переезды квартир, домов и офисов по Варшаве, Польше и ЕС. Цена по видео без доплат, фактура VAT, BLIK и карта, 7 дней в неделю.' },
+  services: { title: 'Услуги', description: 'Переезды квартир, домов и офисов, перевозка мебели, упаковка, коробки, сборка мебели, вывоз и уборка.', nav: 'services' },
+  pricing: { title: 'Цены на переезд', description: 'Пакеты и ставки MELBUS: что входит в цену и как мы её фиксируем по видео.', nav: 'pricing' },
+  calculator: { title: 'Калькулятор переезда', description: 'Ориентировочная цена переезда за 30 секунд.', nav: 'pricing' },
+  quote: { title: 'Заявка на переезд', description: 'Расскажите о переезде и пришлите видео — получите фиксированную цену.' },
+  guarantee: { title: 'Гарантия фиксированной цены', description: 'Цена из принятой оферты окончательная. Условия гарантии MELBUS.', nav: 'guarantee' },
+  how: { title: 'Как мы работаем', description: 'Шаги переезда и стандарты бригады MELBUS: перчатки, бахилы, защита дома, порядок в коробках.', nav: 'how' },
+  about: { title: 'О нас', description: 'MELBUS — 5+ лет в логистике и собственный парк бусов.', nav: 'about' },
+  faq: { title: 'Вопросы и ответы', description: 'Ответы на частые вопросы о переезде с MELBUS.' },
+  contact: { title: 'Контакты', description: 'Телефон, WhatsApp, Telegram и email MELBUS.', nav: 'contact' },
+  terms: { title: 'Регламент', description: 'Регламент оказания услуг MELBUS.' },
+  privacy: { title: 'Политика конфиденциальности', description: 'Как MELBUS обрабатывает персональные данные.' },
+  cookies: { title: 'Cookies', description: 'Политика cookies MELBUS.' },
+  complaints: { title: 'Рекламации', description: 'Как подать рекламацию в MELBUS.' },
+};
+
+const svc = key.startsWith('service:') ? serviceBySlug(key.slice(8))! : null;
+const m = svc ? { title: svc.title, description: svc.lead, nav: 'services' } : meta[key];
+const legal = ['terms', 'privacy', 'cookies', 'complaints'].includes(key);
+const faqSchema = key === 'faq' || key === 'home' ? [{ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faqHome.map(([q, a]) => ({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: a } })) }] : [];
+---
+<Base locale={locale} pageKey={key} title={m.title} description={m.description} nav={m.nav} schema={faqSchema}>
+  {key === 'home' && <Home locale={locale} />}
+  {key === 'services' && <Services locale={locale} />}
+  {svc && <Service locale={locale} service={svc} />}
+  {key === 'quote' && <Quote />}
+
+  {key === 'pricing' && (
+    <Simple locale={locale} eyebrow="Цены" title="Честная цена<br>до переезда" lead="Все цены брутто. Ставки и пакеты публикуем после анализа рынка — структура ниже на утверждении."
+      scene={{ id: 'pricing', title: 'Слот: анимация цены (на утверждении)', length: 1 }}
+      blocks={[
+        { type: 'cards', eyebrow: 'Пакеты', title: 'Три пакета', items: [['Перевозка', 'Вы пакуете — мы перевозим, защищаем и собираем кровать.'], ['Стандарт', 'Плюс упаковка кухни и хрупкого, набор белых коробок, сборка мебели.'], ['Под ключ', 'Плюс упаковка всей квартиры, распаковка и расстановка.']] },
+        { type: 'list', eyebrow: 'Всегда включено', title: 'Без доплат<br>за мелочи', items: [['Подача буса и топливо по Варшаве', 'Не считаем отдельно дорогу до вас.'], ['Защита мебели и дома', 'Плёнка, одеяла, ремни, дорожки на пол, накладки на косяки.'], ['Бахилы и перчатки', 'Стандарт бригады, а не услуга за деньги.'], ['Фактура VAT', 'Для частных клиентов и фирм.']] },
+      ]} />
+  )}
+
+  {key === 'calculator' && (
+    <Simple locale={locale} eyebrow="Калькулятор" title="Сколько стоит<br>ваш переезд" lead="Ориентир за 30 секунд. Логику и цены подключим после утверждения ставок."
+      scene={{ id: 'calculator', title: 'Слот: калькулятор в 3 шага + анимация цены', length: 1 }} />
+  )}
+
+  {key === 'guarantee' && (
+    <Simple locale={locale} eyebrow="Гарантия" title="Цена, которую<br>вы приняли, —<br>окончательная" lead="Главное обещание MELBUS. Ниже — честные условия, при которых оно работает."
+      scene={{ id: 'guarantee', title: 'Слот: вау-сцена гарантии (штамп отклонён, ищем новую идею)', length: 1.2 }}
+      blocks={[
+        { type: 'list', eyebrow: 'Как это работает', title: 'Риск —<br>на нашей стороне', items: [['Цена фиксируется по видео', 'Мы видим вещи, этажи и подъезд заранее, поэтому считаем точно.'], ['Дольше по времени — не ваша проблема', 'Пробки, тяжёлый шкаф, узкая лестница с видео — уже в цене.'], ['Изменения — только с вашего согласия', 'Если вещей заметно больше или изменился адрес, бригадир оформляет изменение в приложении. Вы принимаете его до начала работ.'], ['Мелочи бесплатно', 'До 5 коробок или один небольшой предмет сверх списка — без доплаты.']] },
+        { type: 'cards', eyebrow: 'Дополнительно', title: 'Ещё две гарантии', items: [['Пунктуальность', 'Окно прибытия 30 минут. Опоздали по своей вине — скидка за каждые 30 минут.'], ['Сохранность', 'Защищаем дом и мебель. Повреждения — по процедуре рекламации.'], ['Фактура', 'Всегда выставляем фактуру VAT.']] },
+      ]} />
+  )}
+
+  {key === 'how' && (
+    <Simple locale={locale} eyebrow="Как мы работаем" title="Переезд,<br>как по чек-листу" lead="Шесть шагов от видео до последней полки и стандарты, которые бригада соблюдает в каждом доме."
+      scene={{ id: 'how', title: 'Слот: чертёж — квартира превращается в план, из плана собирается цена', length: 1.6 }}
+      blocks={[
+        { type: 'list', eyebrow: 'Шаги', title: 'От видео<br>до нового адреса', items: [['Видео', 'Снимаете квартиру на телефон.'], ['Цена', 'В течение 2 часов днём — фиксированная цена.'], ['Бронь', 'Предоплата BLIK или картой.'], ['Упаковка', 'Бригада пакует по комнатам.'], ['Дорога', 'Бус только с вашими вещами.'], ['Новый дом', 'Заносим, собираем, расставляем.']] },
+        { type: 'cards', eyebrow: 'Стандарты бригады', title: 'Что вы увидите<br>в своём доме', items: [['Бахилы и перчатки', 'Надеваем до входа в квартиру.'], ['Защита пола и косяков', 'Дорожки и накладки до начала работ.'], ['Белые коробки MELBUS', 'Наклейки по комнатам и QR со списком.']] },
+      ]} />
+  )}
+
+  {key === 'about' && (
+    <Simple locale={locale} eyebrow="О нас" title="Логистика —<br>наша профессия" lead={`MELBUS — ${brand.facts.years}+ лет в доставке и собственный парк бусов. Теперь мы перевозим не только посылки, но и целые дома.`}
+      scene={{ id: 'about', title: 'Слот: поток посылок складывается в число 30 000 и превращается в один бус с бригадой', length: 1.4 }}
+      blocks={[
+        { type: 'text', eyebrow: 'Почему мы', title: 'Дисциплина курьерской службы<br>в каждом переезде', items: [['Точно ко времени', 'Каждый день мы доставляем около 30 000 посылок в месяц. Опаздывать — не в нашей культуре.'], ['Свой парк', 'Бусы наши, а не арендованные «по звонку».'], ['Честно о новом', 'Переезды — наше новое направление. Поэтому мы так стараемся на каждом заказе.']] },
+      ]} />
+  )}
+
+  {key === 'faq' && (
+    <Simple locale={locale} eyebrow="Вопросы" title="Вопросы<br>и ответы" blocks={[{ type: 'faq', title: 'Частые вопросы', items: faqHome }]} />
+  )}
+
+  {key === 'contact' && (
+    <Simple locale={locale} eyebrow="Контакты" title="Напишите —<br>ответим быстро" lead={`Работаем ${brand.hours}. ${brand.area}.`}
+      blocks={[{ type: 'cards', title: 'Как связаться', items: [['Телефон', brand.contact.phone], ['WhatsApp / Telegram', `+${brand.contact.whatsapp} · @${brand.contact.telegram}`], ['Email', brand.contact.email]] }]} />
+  )}
+
+  {legal && (
+    <Simple locale={locale} eyebrow="Документы" title={m.title} lead="Черновик документа готовим вместе с юристом. Здесь появится полный текст." cta={false} />
+  )}
+</Base>

@@ -1,0 +1,26 @@
+---
+import { href, type Locale } from '../i18n/routes';
+import { ui } from '../i18n/ru';
+import { brand } from '../config/brand';
+interface Props { locale: Locale; title?: string; lead?: string }
+const { locale, title = 'Ваш новый адрес<br>ждёт.', lead = 'Пришлите видео квартиры — в течение 2 часов днём получите цену, которая не изменится.' } = Astro.props;
+---
+<section class="cta dark section">
+  <div class="container cta__in">
+    <h2 class="t-hero" data-split set:html={title} />
+    <div class="cta__side">
+      <p class="t-lead" data-reveal>{lead}</p>
+      <div class="cta__btns" data-reveal>
+        <a href={href(locale, 'quote')} class="btn btn--primary" data-magnetic>{ui.cta.quote} <span class="arrow">→</span></a>
+        <a href={`https://wa.me/${brand.contact.whatsapp}`} class="btn btn--ghost" target="_blank" rel="noopener">{ui.cta.whatsapp}</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .cta__in { display: grid; gap: 40px; }
+  .cta__side { display: grid; gap: 28px; align-content: end; }
+  .cta__btns { display: flex; flex-wrap: wrap; gap: 12px; }
+  @media (min-width: 960px) { .cta__in { grid-template-columns: 1.4fr 1fr; align-items: end; } }
+</style>

@@ -1,0 +1,476 @@
+<title>Лаборатория анимаций</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Onest:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: длинная лента «стендов» — каждый стенд = одна анимация на утверждение; сцены закрепляются и проигрываются скроллом */
+:root{
+  --bg:#E8EBEE; --surface:#F6F7F8; --ink:#101317; --muted:#59626D; --line:#CBD0D6;
+  --kraft:#B8895A; --kraft-2:#A57A4C; --kraft-3:#8F6840; --kraft-ink:#3B2A18; --tape:#E6D6AE;
+  --stamp:#C4311B; --bp:#0D3762; --bp-line:#86B8EA; --bp-dim:#2B5A8A;
+  --flap:#16191D; --flap-2:#22262B; --flap-fg:#F3F2EC;
+  --paper:#FBFBF8; --paper-ink:#1A1D21;
+  --f-display:"Unbounded", "Arial Black", system-ui, sans-serif;
+  --f-body:"Onest", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0E1013; --surface:#16191D; --ink:#ECEFF2; --muted:#9AA3AE; --line:#2A3038;
+  --stamp:#E24A33; --bp:#0A2846; --bp-dim:#1F4A75; --flap:#08090B; --flap-2:#14171A;
+  --paper:#ECEBE6; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#0E1013; --surface:#16191D; --ink:#ECEFF2; --muted:#9AA3AE; --line:#2A3038;
+  --stamp:#E24A33; --bp:#0A2846; --bp-dim:#1F4A75; --flap:#08090B; --flap-2:#14171A;
+  --paper:#ECEBE6; color-scheme:dark }
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:400 16px/1.55 var(--f-body);margin:0;overflow-x:hidden}
+.wrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));max-width:1120px;margin:0 auto}
+h1,h2{font-family:var(--f-display);font-weight:700;letter-spacing:-.02em;text-wrap:balance;margin:0}
+h1{font-size:clamp(30px,6vw,60px);line-height:1.04}
+h2{font-size:clamp(22px,3.6vw,36px);line-height:1.1}
+p{margin:0;max-width:62ch}
+.eyebrow{font:500 12px/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.muted{color:var(--muted)}
+
+/* intro */
+.intro{padding-block:56px 40px;display:grid;gap:20px}
+.howto{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));margin-top:8px}
+.howto div{border-top:1px solid var(--line);padding-top:12px;font-size:15px}
+.howto b{display:block;font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;color:var(--muted);font-weight:500;margin-bottom:4px}
+
+/* stand */
+.stand{border-top:1px solid var(--line);padding-block:48px 24px}
+.stand-head{display:grid;gap:12px;grid-template-columns:minmax(0,1fr);margin-bottom:24px}
+@media(min-width:860px){.stand-head{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);align-items:end;column-gap:48px}}
+.meta{display:grid;gap:8px;font-size:15px}
+.meta dt{font:500 11px/1 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:6px}
+.meta dd{margin:0}
+.tag{display:inline-block;font:500 11px/1 var(--f-mono);letter-spacing:.08em;padding:6px 8px;border:1px solid var(--line);border-radius:4px;color:var(--muted)}
+.hint{font:500 12px/1.4 var(--f-mono);color:var(--muted);margin-top:14px;text-align:center}
+
+/* ---------- 1. Табло ---------- */
+.board{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:clamp(18px,4vw,40px);display:grid;gap:24px;justify-items:center}
+.picker{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.picker button{font:500 14px/1 var(--f-body);padding:12px 16px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer;transition:background .2s,color .2s,border-color .2s}
+.picker button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.picker button:focus-visible,.sound:focus-visible{outline:2px solid var(--stamp);outline-offset:2px}
+.flaps{display:flex;align-items:flex-end;gap:clamp(3px,.8vw,6px);--fs:clamp(34px,9vw,92px)}
+.flap{position:relative;width:calc(var(--fs)*.78);height:calc(var(--fs)*1.28);font:700 var(--fs)/1 var(--f-mono);perspective:calc(var(--fs)*6);color:var(--flap-fg)}
+.flap .h{position:absolute;left:0;right:0;height:50%;overflow:hidden;background:linear-gradient(var(--flap-2),var(--flap));backface-visibility:hidden}
+.flap .h>span{display:block;height:200%;line-height:calc(var(--fs)*1.28);text-align:center}
+.flap .t{top:0;border-radius:7px 7px 0 0}
+.flap .b{bottom:0;border-radius:0 0 7px 7px;background:linear-gradient(var(--flap),var(--flap-2))}
+.flap .b>span{transform:translateY(-50%)}
+.flap .lt{transform-origin:50% 100%;z-index:2}
+.flap .lb{transform-origin:50% 0;transform:rotateX(90deg);z-index:2}
+.flap::after{content:"";position:absolute;left:0;right:0;top:50%;height:2px;margin-top:-1px;background:var(--bg);opacity:.9;z-index:3}
+.flap.sep{width:calc(var(--fs)*.3)}
+.flap.sep .h{background:transparent}
+.flap.sep::after{display:none}
+.unit{font:700 calc(var(--fs)*.45)/1 var(--f-display);color:var(--ink);margin-left:8px;padding-bottom:calc(var(--fs)*.12)}
+.board-note{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;font:500 13px/1.4 var(--f-mono);color:var(--muted);text-align:center}
+.sound{font:500 12px/1 var(--f-mono);background:none;border:1px dashed var(--line);color:var(--muted);padding:8px 10px;border-radius:6px;cursor:pointer}
+
+/* ---------- 2. Штамп ---------- */
+.pin{position:relative}
+.stage{height:min(88vh,760px);min-height:520px;border-radius:14px;background:var(--surface);border:1px solid var(--line);position:relative;overflow:hidden;display:grid;place-items:start center}
+.printer{position:relative;margin-top:28px;width:min(440px,86%);height:46px;border-radius:12px;background:var(--flap);box-shadow:0 10px 30px rgba(0,0,0,.18);z-index:3}
+.printer::after{content:"";position:absolute;left:8%;right:8%;bottom:10px;height:6px;border-radius:3px;background:#000}
+.printer i{position:absolute;right:16px;top:12px;width:8px;height:8px;border-radius:50%;background:#5BD27A;box-shadow:0 0 8px #5BD27A}
+.feed{position:absolute;top:64px;left:50%;transform:translateX(-50%);width:min(400px,80%);bottom:0;overflow:hidden;z-index:2}
+.offer{background:var(--paper);color:var(--paper-ink);border-radius:2px 2px 6px 6px;padding:24px 22px 28px;box-shadow:0 18px 40px rgba(0,0,0,.14);font-size:14px;position:relative;will-change:transform}
+.offer .row{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px dashed #cfd2d6}
+.offer .row span:first-child{color:#5a6069}
+.offer h3{font:700 15px/1.2 var(--f-display);margin:4px 0 10px}
+.offer .no{font:500 11px/1 var(--f-mono);letter-spacing:.1em;color:#6a7078}
+.offer .total{display:flex;justify-content:space-between;align-items:baseline;margin-top:14px;font:700 22px/1 var(--f-display)}
+.stamp{position:absolute;left:50%;top:58%;width:min(300px,62%);transform:translate(-50%,-50%) rotate(-12deg);color:var(--stamp);border:4px solid currentColor;border-radius:14px;padding:8px;z-index:5;filter:url(#rough);opacity:0;pointer-events:none;mix-blend-mode:multiply}
+:root[data-theme="dark"] .stamp{mix-blend-mode:normal}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .stamp{mix-blend-mode:normal}}
+.stamp>div{border:2px solid currentColor;border-radius:8px;padding:12px 10px;text-align:center}
+.stamp b{display:block;font:800 clamp(26px,6vw,40px)/1 var(--f-display);letter-spacing:.02em}
+.stamp small{display:block;font:700 11px/1.3 var(--f-mono);letter-spacing:.18em;margin-top:8px}
+.dust{position:absolute;left:50%;top:58%;width:10px;height:10px;z-index:4;pointer-events:none}
+.dust span{position:absolute;width:6px;height:6px;border-radius:50%;background:var(--stamp);opacity:0}
+
+/* ---------- 3. Чертёж ---------- */
+.bp-stage{background:var(--bp);color:var(--bp-line);border-color:transparent;place-items:center;
+  background-image:linear-gradient(var(--bp-dim) 1px,transparent 1px),linear-gradient(90deg,var(--bp-dim) 1px,transparent 1px);background-size:24px 24px;background-position:-1px -1px}
+.bp-stage svg{width:min(860px,94%);height:auto;overflow:visible}
+.bp-stage .wall{fill:none;stroke:#DDEBFA;stroke-width:5;stroke-linecap:square}
+.bp-stage .thin{fill:none;stroke:var(--bp-line);stroke-width:1.5}
+.bp-stage .item{fill:rgba(134,184,234,.12);stroke:#BFDCF7;stroke-width:1.6}
+.bp-stage text{font:500 11px var(--f-mono);fill:#DDEBFA}
+.bp-stage .lbl{opacity:0}
+.readout{position:absolute;left:0;right:0;bottom:0;padding:14px max(16px,3vw);display:flex;flex-wrap:wrap;gap:8px 28px;justify-content:center;font:500 13px/1.3 var(--f-mono);color:#DDEBFA;background:linear-gradient(transparent,rgba(0,0,0,.35))}
+.readout b{font:700 20px/1 var(--f-display);color:#fff;font-variant-numeric:tabular-nums}
+.readout div{display:grid;gap:4px;text-align:center}
+.readout .price b{color:#FFD15C}
+.bp-title{position:absolute;top:16px;left:18px;font:500 11px/1.4 var(--f-mono);letter-spacing:.1em;color:#BFDCF7;text-transform:uppercase}
+
+/* ---------- 4. Коробка ---------- */
+.box-stage{place-items:center;perspective:1300px;--s:clamp(64px,16vw,150px)}
+.rig{position:relative;width:var(--s);height:var(--s);transform-style:preserve-3d;transform:rotateX(58deg) rotateZ(-36deg)}
+.face{position:absolute;width:var(--s);height:var(--s);transform-style:preserve-3d;backface-visibility:visible;
+  background:var(--kraft);
+  background-image:repeating-linear-gradient(90deg,rgba(0,0,0,.035) 0 2px,transparent 2px 7px);
+  outline:1px solid rgba(59,42,24,.25)}
+.base{left:0;top:0;background-color:var(--kraft-3)}
+.w-front{left:0;top:100%;transform-origin:50% 0}
+.w-back{left:0;bottom:100%;transform-origin:50% 100%;background-color:var(--kraft-2)}
+.w-left{right:100%;top:0;transform-origin:100% 50%;background-color:var(--kraft-2)}
+.w-right{left:100%;top:0;transform-origin:0 50%}
+.flapx{position:absolute;transform-style:preserve-3d;background:inherit;background-color:var(--kraft);outline:1px solid rgba(59,42,24,.25)}
+.f-front,.f-back{--tp:0%;background-image:linear-gradient(var(--tape),var(--tape)),repeating-linear-gradient(90deg,rgba(0,0,0,.035) 0 2px,transparent 2px 7px);background-repeat:no-repeat,repeat;background-size:28% var(--tp),auto}
+.f-front{left:0;top:100%;width:100%;height:50%;transform-origin:50% 0;background-position:50% 0,0 0}
+.f-back{left:0;bottom:100%;width:100%;height:50%;transform-origin:50% 100%;background-position:50% 100%,0 0}
+.f-left{right:calc(100% - 2px);top:0;width:46%;height:100%;transform-origin:100% 50%;background-color:var(--kraft-2)}
+.f-right{left:calc(100% - 2px);top:0;width:46%;height:100%;transform-origin:0 50%;background-color:var(--kraft-2)}
+.sticker{position:absolute;left:10%;right:10%;top:16%;bottom:auto;background:#fff;color:#111;border-radius:3px;padding:5% 6%;display:flex;gap:6%;align-items:center;transform:scale(0);transform-origin:20% 30%}
+.sticker .dot{width:14%;aspect-ratio:1;border-radius:50%;background:#E8A400;flex:none}
+.sticker .tx{font:700 calc(var(--s)*.085)/1.1 var(--f-mono);letter-spacing:.04em}
+.sticker .tx small{display:block;font-weight:500;font-size:.75em;color:#666}
+.sticker .qr{margin-left:auto;width:24%;aspect-ratio:1;display:grid;grid-template-columns:repeat(7,1fr);flex:none}
+.sticker .qr i{background:#111}.sticker .qr i.o{background:transparent}
+.print{position:absolute;inset:0;transform:translateZ(-1px) rotateY(180deg);display:grid;place-items:center;font:800 calc(var(--s)*.11)/1.05 var(--f-display);color:var(--kraft-ink);opacity:.75;text-align:center;letter-spacing:.02em}
+.print small{display:block;font:500 calc(var(--s)*.06)/1.3 var(--f-mono);letter-spacing:.1em}
+.box-caption{position:absolute;left:0;right:0;bottom:18px;text-align:center;font:500 12px/1.4 var(--f-mono);color:var(--muted)}
+
+/* scene 0 */
+.scene0{background:var(--surface);border:1px dashed var(--line);border-radius:14px;padding:24px;display:grid;gap:16px}
+.frames{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.frames div{aspect-ratio:16/10;border-radius:8px;background:repeating-linear-gradient(135deg,transparent 0 10px,rgba(0,0,0,.04) 10px 20px),var(--bg);border:1px solid var(--line);display:grid;place-items:center;text-align:center;padding:10px;font:500 12px/1.4 var(--f-mono);color:var(--muted)}
+
+.outro{padding-block:56px 80px;display:grid;gap:16px}
+.answer{font:500 14px/1.6 var(--f-mono);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 18px;max-width:640px}
+
+@media (prefers-reduced-motion: reduce){ .stage{height:auto;min-height:0;padding-block:24px} }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <filter id="rough"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="7" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="3.5"/></filter>
+</svg>
+
+<main>
+  <section class="wrap intro">
+    <span class="eyebrow">Сервис переездов · прототипы анимаций · v1</span>
+    <h1>Лаборатория анимаций</h1>
+    <p class="muted">Четыре приёма, которые делаются кодом, без ИИ-картинок. Цвета и шрифты временные, их заменим после выбора бренда. Цены и данные в примерах условные.</p>
+    <div class="howto">
+      <div><b>КАК СМОТРЕТЬ</b>Просто листайте. Сцены 2–4 закрепляются на экране и проигрываются скроллом, листайте назад — проиграются обратно.</div>
+      <div><b>КАК ОТВЕЧАТЬ</b>В чате, коротко по номеру: «1 — да», «2 — штамп синий», «3 — нет».</div>
+      <div><b>ЧТО ДАЛЬШЕ</b>Главная сцена-диорама (№0) появится, когда будут картинки из ChatGPT.</div>
+    </div>
+  </section>
+
+  <!-- 1 -->
+  <section class="wrap stand" id="tablo">
+    <div class="stand-head">
+      <div style="display:grid;gap:10px"><span class="eyebrow">Анимация 1 · Табло</span><h2>Цена перелистывается, как на табло в аэропорту</h2></div>
+      <dl class="meta">
+        <dt>Где</dt><dd>Калькулятор на главной и странице цен, итог в форме заявки.</dd>
+        <dt>Зачем</dt><dd>Цена — главное в нашем предложении. Табло делает её событием, а ощущение «механики» говорит о точности.</dd>
+      </dl>
+    </div>
+    <div class="board">
+      <div class="picker" role="group" aria-label="Тип переезда">
+        <button type="button" id="p-k" data-v="1290" aria-pressed="false">Студия</button>
+        <button type="button" id="p-2" data-v="2140" aria-pressed="true">2 комнаты</button>
+        <button type="button" id="p-3" data-v="2960" aria-pressed="false">3 комнаты</button>
+        <button type="button" id="p-d" data-v="4850" aria-pressed="false">Дом</button>
+      </div>
+      <div class="flaps" id="flaps" aria-live="polite" aria-label="Цена"></div>
+      <div class="board-note"><span>пример цены · не утверждено</span><button type="button" class="sound" id="sound" aria-pressed="false">звук щелчков: выкл</button></div>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="wrap stand" id="stamp">
+    <div class="stand-head">
+      <div style="display:grid;gap:10px"><span class="eyebrow">Анимация 2 · Штамп</span><h2>Оферта печатается, сверху с ударом падает штамп</h2></div>
+      <dl class="meta">
+        <dt>Где</dt><dd>Страница «Гарантия цены» и блок гарантий на главной.</dd>
+        <dt>Зачем</dt><dd>Наш аналог удара кувалдой из референса. Обещание «без доплат» становится физическим, его «пришлёпнули» печатью.</dd>
+      </dl>
+    </div>
+    <div class="pin" id="stamp-pin">
+      <div class="stage" id="stamp-stage">
+        <div class="printer" aria-hidden="true"><i></i></div>
+        <div class="feed">
+          <div class="offer" id="offer">
+            <div class="no">ОФЕРТА № 0412 · ПРИМЕР</div>
+            <h3>Переезд 2-комнатной квартиры</h3>
+            <div class="row"><span>Маршрут</span><span>Мокотув → Воля</span></div>
+            <div class="row"><span>Дата</span><span>14 марта, 9:00</span></div>
+            <div class="row"><span>Бригада</span><span>3 человека, бус 20 м³</span></div>
+            <div class="row"><span>Упаковка</span><span>кухня, хрупкое</span></div>
+            <div class="row"><span>Мебель</span><span>разборка и сборка шкафа</span></div>
+            <div class="total"><span>Итого</span><span>2 140 zł</span></div>
+          </div>
+        </div>
+        <div class="dust" id="dust" aria-hidden="true"></div>
+        <div class="stamp" id="stampEl" aria-label="Штамп: стала цена"><div><b>STAŁA CENA</b><small>GWARANCJA · BEZ DOPŁAT</small></div></div>
+      </div>
+      <p class="hint">листайте ↓</p>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="wrap stand" id="blueprint">
+    <div class="stand-head">
+      <div style="display:grid;gap:10px"><span class="eyebrow">Анимация 3 · Чертёж</span><h2>Квартира превращается в план, и из плана собирается цена</h2></div>
+      <dl class="meta">
+        <dt>Где</dt><dd>Страница «Заявка и видеоосмотр», шаг «Как мы считаем».</dd>
+        <dt>Зачем</dt><dd>Показывает, что цена не «на глаз»: каждая вещь посчитана в кубометрах, отсюда часы, люди и бус.</dd>
+      </dl>
+    </div>
+    <div class="pin">
+      <div class="stage bp-stage" id="bp-stage">
+        <div class="bp-title">План · ул. Пример 12/34 · 48 м²</div>
+        <svg viewBox="0 0 640 380" role="img" aria-label="План двухкомнатной квартиры с мебелью и объёмами">
+          <!-- walls -->
+          <path class="wall draw" d="M20 20 H620 V340 H20 Z"/>
+          <path class="wall draw" d="M330 20 V150 M330 210 V340 M20 220 H140 M200 220 H330 M470 340 V250 H620"/>
+          <!-- doors & windows -->
+          <path class="thin draw" d="M330 150 A60 60 0 0 1 390 210 M140 220 A60 60 0 0 1 200 160 M470 250 A40 40 0 0 0 510 290"/>
+          <path class="thin draw" d="M90 20 H200 M420 20 H560 M620 80 V180"/>
+          <!-- furniture -->
+          <g class="items">
+            <rect class="item draw" x="40" y="40" width="190" height="70" rx="6"/>
+            <rect class="item draw" x="250" y="40" width="60" height="140" rx="3"/>
+            <rect class="item draw" x="60" y="140" width="110" height="60" rx="4"/>
+            <rect class="item draw" x="370" y="40" width="160" height="120" rx="6"/>
+            <rect class="item draw" x="545" y="40" width="55" height="110" rx="3"/>
+            <rect class="item draw" x="40" y="250" width="70" height="70" rx="4"/>
+            <rect class="item draw" x="125" y="250" width="70" height="70" rx="4"/>
+            <rect class="item draw" x="215" y="250" width="100" height="70" rx="4"/>
+            <rect class="item draw" x="370" y="190" width="80" height="45" rx="3"/>
+            <rect class="item draw" x="500" y="265" width="100" height="55" rx="4"/>
+          </g>
+          <g class="labels">
+            <text class="lbl" x="135" y="80" text-anchor="middle">ДИВАН · 2,1 м³</text>
+            <text class="lbl" x="280" y="115" text-anchor="middle" transform="rotate(-90 280 115)">ШКАФ · 2,6 м³</text>
+            <text class="lbl" x="115" y="174" text-anchor="middle">СТОЛ · 0,6 м³</text>
+            <text class="lbl" x="450" y="104" text-anchor="middle">КРОВАТЬ · 2,4 м³</text>
+            <text class="lbl" x="572" y="99" text-anchor="middle" transform="rotate(-90 572 99)">КОМОД · 1,1</text>
+            <text class="lbl" x="75" y="289" text-anchor="middle">ХОЛОД. 0,9</text>
+            <text class="lbl" x="160" y="289" text-anchor="middle">СТИР. 0,5</text>
+            <text class="lbl" x="265" y="289" text-anchor="middle">КУХНЯ · 25 кор.</text>
+            <text class="lbl" x="410" y="217" text-anchor="middle">ТВ · 0,4</text>
+            <text class="lbl" x="550" y="297" text-anchor="middle">КОРОБКИ · 15</text>
+          </g>
+        </svg>
+        <div class="readout" aria-live="polite">
+          <div><span>объём</span><b id="r-vol">0,0 м³</b></div>
+          <div><span>время</span><b id="r-h">0 ч</b></div>
+          <div><span>бригада</span><b id="r-crew">—</b></div>
+          <div class="price"><span>цена · пример</span><b id="r-price">— zł</b></div>
+        </div>
+      </div>
+      <p class="hint">листайте ↓</p>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="wrap stand" id="box">
+    <div class="stand-head">
+      <div style="display:grid;gap:10px"><span class="eyebrow">Анимация 4 · Коробка</span><h2>Плоская заготовка сама складывается в фирменную коробку</h2></div>
+      <dl class="meta">
+        <dt>Где</dt><dd>Страница «Коробки и материалы», блок «Фирменные коробки» на главной, экран «Заявка отправлена».</dd>
+        <dt>Зачем</dt><dd>Коробка — наш главный фирменный предмет. Наклейка с комнатой и QR показывает порядок, который клиент получит.</dd>
+      </dl>
+    </div>
+    <div class="pin">
+      <div class="stage box-stage" id="box-stage">
+        <div class="rig" id="rig" aria-hidden="true">
+          <div class="face base"></div>
+          <div class="face w-front" id="wf">
+            <div class="sticker" id="sticker"><span class="dot"></span><span class="tx">КУХНЯ<small>№ 07 · хрупкое</small></span><span class="qr" id="qr"></span></div>
+            <div class="flapx f-front" id="ff"></div>
+          </div>
+          <div class="face w-back" id="wb"><div class="flapx f-back" id="fb"></div></div>
+          <div class="face w-left" id="wl"><div class="print">ЛОГОТИП<small>место для бренда</small></div><div class="flapx f-left" id="fl"></div></div>
+          <div class="face w-right" id="wr"><div class="flapx f-right" id="fr"></div></div>
+        </div>
+        <div class="box-caption">Коробка M · 40×40×40 см · пример</div>
+      </div>
+      <p class="hint">листайте ↓</p>
+    </div>
+  </section>
+
+  <!-- 0 -->
+  <section class="wrap stand" id="scene0">
+    <div class="stand-head">
+      <div style="display:grid;gap:10px"><span class="eyebrow">Анимация 0 · Главная сцена</span><h2>Квартира-диорама складывается в коробку и переезжает</h2></div>
+      <dl class="meta">
+        <dt>Статус</dt><dd>Ждём пробные картинки из ChatGPT. Механика та же, что в сценах выше: кадры проигрываются скроллом.</dd>
+      </dl>
+    </div>
+    <div class="scene0">
+      <div class="frames">
+        <div>Кадр A<br>квартира-диорама<br>в обычном виде</div>
+        <div>Кадр B<br>мебель в плёнке,<br>коробки подписаны</div>
+        <div>Кадр C<br>всё внутри одной<br>закрытой коробки</div>
+        <div>Кадр D<br>новая квартира,<br>всё на местах</div>
+      </div>
+      <p class="muted">Между кадрами видео-модель (Higgsfield/Kling/Veo) делает плавный переход по первому и последнему кадру.</p>
+    </div>
+  </section>
+
+  <section class="wrap outro">
+    <h2>Ваш вердикт</h2>
+    <p class="muted">Ответьте в чате по номерам. Можно с поправками: скорость, цвет, звук, что убрать.</p>
+    <div class="answer">1 — …<br>2 — …<br>3 — …<br>4 — …</div>
+  </section>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+<script>
+(() => {
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const hasGsap = typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined';
+
+  /* ---------- Lenis ---------- */
+  if (hasGsap && !reduce && typeof Lenis !== 'undefined') {
+    const lenis = new Lenis({ lerp: 0.1 });
+    lenis.on('scroll', ScrollTrigger.update);
+    gsap.ticker.add(t => lenis.raf(t * 1000));
+    gsap.ticker.lagSmoothing(0);
+  }
+
+  /* ---------- 1. Split-flap ---------- */
+  const SEQ = ' 0123456789';
+  const N = 5; // "4 850" → 5 знаков
+  const flapsEl = document.getElementById('flaps');
+  const cells = [];
+  for (let i = 0; i < N; i++) {
+    const c = document.createElement('div');
+    c.className = 'flap' + (i === 1 ? ' sep' : '');
+    c.innerHTML = '<span class="h t"><span></span></span><span class="h b"><span></span></span><span class="h t lt"><span></span></span><span class="h b lb"><span></span></span>';
+    flapsEl.appendChild(c);
+    const q = s => c.querySelector(s + '>span');
+    cells.push({ el: c, t: q('.t:not(.lt)'), b: q('.b:not(.lb)'), lt: q('.lt'), lb: q('.lb'), ltw: c.querySelector('.lt'), lbw: c.querySelector('.lb'), ch: ' ', busy: null });
+  }
+  const unit = document.createElement('span'); unit.className = 'unit'; unit.textContent = 'zł'; flapsEl.appendChild(unit);
+
+  const fmt = v => { const s = String(v); return s.length > 3 ? s.slice(0, -3) + ' ' + s.slice(-3) : s; };
+  let audioCtx = null, soundOn = false;
+  const click = () => {
+    if (!soundOn) return;
+    try {
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      const b = audioCtx.createBuffer(1, 600, audioCtx.sampleRate), d = b.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / d.length, 6);
+      const s = audioCtx.createBufferSource(), g = audioCtx.createGain(); g.gain.value = 0.25;
+      s.buffer = b; s.connect(g).connect(audioCtx.destination); s.start();
+    } catch (e) {}
+  };
+  const setStatic = (cell, ch) => { cell.t.textContent = cell.b.textContent = cell.lt.textContent = cell.lb.textContent = ch; cell.ch = ch; };
+  const step = (cell, to, dur) => new Promise(res => {
+    const from = cell.ch;
+    cell.t.textContent = to; cell.b.textContent = from; cell.lt.textContent = from; cell.lb.textContent = to;
+    const a = cell.ltw.animate([{ transform: 'rotateX(0deg)' }, { transform: 'rotateX(-90deg)' }], { duration: dur, easing: 'ease-in', fill: 'forwards' });
+    a.onfinish = () => {
+      const b = cell.lbw.animate([{ transform: 'rotateX(90deg)' }, { transform: 'rotateX(0deg)' }], { duration: dur, easing: 'ease-out', fill: 'forwards' });
+      b.onfinish = () => { cell.b.textContent = to; cell.lt.textContent = to; cell.lb.textContent = to; cell.ch = to; cell.ltw.getAnimations().forEach(x => x.cancel()); cell.lbw.getAnimations().forEach(x => x.cancel()); click(); res(); };
+    };
+  });
+  async function flipTo(cell, target, delay) {
+    const token = {}; cell.busy = token;
+    await new Promise(r => setTimeout(r, delay));
+    if (reduce) { setStatic(cell, target); return; }
+    let guard = 0;
+    while (cell.ch !== target && cell.busy === token && guard++ < 12) {
+      const i = SEQ.indexOf(cell.ch), next = SEQ[(i + 1) % SEQ.length];
+      await step(cell, next, 55);
+    }
+  }
+  function show(v) {
+    const s = fmt(v).padStart(N, ' ');
+    cells.forEach((c, i) => { if (i === 1) { setStatic(c, ' '); return; } flipTo(c, s[i] === ' ' && i !== 0 ? '0' : s[i], i * 70); });
+  }
+  // separator cell is the thousands gap; render "2 140" as [2][ ][1][4][0]
+  cells.forEach(c => setStatic(c, ' '));
+  const btns = document.querySelectorAll('.picker button');
+  btns.forEach(b => b.addEventListener('click', () => {
+    btns.forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    show(+b.dataset.v);
+  }));
+  const snd = document.getElementById('sound');
+  snd.addEventListener('click', () => { soundOn = !soundOn; snd.setAttribute('aria-pressed', String(soundOn)); snd.textContent = 'звук щелчков: ' + (soundOn ? 'вкл' : 'выкл'); });
+  // start when visible
+  const startBoard = () => show(2140);
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver(es => { if (es[0].isIntersecting) { startBoard(); io.disconnect(); } }, { threshold: .4 });
+    io.observe(flapsEl);
+  } else startBoard();
+
+  /* ---------- QR pattern ---------- */
+  const qr = document.getElementById('qr');
+  const pat = '1110111100010110101011010101100011011101110100111';
+  for (const p of pat) { const i = document.createElement('i'); if (p === '0') i.className = 'o'; qr.appendChild(i); }
+
+  if (!hasGsap) return;
+  gsap.registerPlugin(ScrollTrigger);
+
+  const pinned = (trigger, tl, len) => ScrollTrigger.create({ trigger, start: 'center center', end: '+=' + len, pin: true, scrub: 0.6, animation: tl, anticipatePin: 1 });
+
+  /* ---------- 2. Stamp ---------- */
+  const offer = document.getElementById('offer');
+  const stampEl = document.getElementById('stampEl');
+  const dust = document.getElementById('dust');
+  for (let i = 0; i < 14; i++) dust.appendChild(document.createElement('span'));
+  const stampTl = gsap.timeline({ paused: true })
+    .fromTo(offer, { yPercent: -102 }, { yPercent: 0, ease: 'none', duration: 5 })
+    .fromTo(offer.querySelectorAll('.row,.total'), { opacity: 0 }, { opacity: 1, stagger: .4, duration: .4 }, 1.2)
+    .fromTo(stampEl, { opacity: 0, scale: 2.8, rotate: -26 }, { opacity: 1, scale: 1, rotate: -12, ease: 'power4.in', duration: 1.2 }, 6)
+    .to('#stamp-stage', { keyframes: [{ x: -6, y: 4 }, { x: 5, y: -3 }, { x: -3, y: 2 }, { x: 0, y: 0 }], duration: .5, ease: 'none' }, 7.2)
+    .fromTo(dust.children, { opacity: .8, x: 0, y: 0, scale: 1 }, { opacity: 0, scale: .2, duration: .8, x: (i) => Math.cos(i / 14 * 6.28) * 170, y: (i) => Math.sin(i / 14 * 6.28) * 110, ease: 'power2.out' }, 7.2)
+    .to({}, { duration: 1 });
+
+  /* ---------- 3. Blueprint ---------- */
+  const draws = document.querySelectorAll('#bp-stage .draw');
+  draws.forEach(p => { const L = p.getTotalLength(); p.style.strokeDasharray = L; p.style.strokeDashoffset = L; });
+  const vol = { v: 0 };
+  const rVol = document.getElementById('r-vol'), rH = document.getElementById('r-h'), rCrew = document.getElementById('r-crew'), rPrice = document.getElementById('r-price');
+  const nf = new Intl.NumberFormat('ru-RU', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  const upd = () => {
+    const v = vol.v; rVol.textContent = nf.format(v) + ' м³';
+    rH.textContent = v < 1 ? '0 ч' : '≈ ' + Math.max(1, Math.round(v / 3.6)) + ' ч';
+    rCrew.textContent = v < 1 ? '—' : (v > 12 ? '3 чел.' : '2 чел.');
+    rPrice.textContent = v < 1 ? '— zł' : (Math.round(v * 116.3 / 10) * 10).toLocaleString('ru-RU') + ' zł';
+  };
+  const bpTl = gsap.timeline({ paused: true })
+    .to('#bp-stage .wall', { strokeDashoffset: 0, ease: 'none', duration: 3, stagger: .5 })
+    .to('#bp-stage .thin', { strokeDashoffset: 0, ease: 'none', duration: 1.5 }, 2)
+    .to('#bp-stage .item', { strokeDashoffset: 0, ease: 'none', duration: 1, stagger: .35 }, 3.5)
+    .to('#bp-stage .lbl', { opacity: 1, duration: .3, stagger: .35 }, 4.2)
+    .to(vol, { v: 18.4, ease: 'none', duration: 4.2, onUpdate: upd }, 4)
+    .to({}, { duration: 1 });
+
+  /* ---------- 4. Box ---------- */
+  const boxTl = gsap.timeline({ paused: true })
+    .to('#wf', { rotateX: 90, duration: 1.2, ease: 'power2.inOut' }, 0)
+    .to('#wb', { rotateX: -90, duration: 1.2, ease: 'power2.inOut' }, .25)
+    .to('#wl', { rotateY: 90, duration: 1.2, ease: 'power2.inOut' }, .5)
+    .to('#wr', { rotateY: -90, duration: 1.2, ease: 'power2.inOut' }, .75)
+    .to('#fl', { rotateY: 90, duration: .8, ease: 'power2.inOut' }, 2.2)
+    .to('#fr', { rotateY: -90, duration: .8, ease: 'power2.inOut' }, 2.4)
+    .to('#ff', { rotateX: 90, duration: .8, ease: 'power2.inOut' }, 3.1)
+    .to('#fb', { rotateX: -90, duration: .8, ease: 'power2.inOut' }, 3.3)
+    .to('#fb', { '--tp': '100%', duration: .5, ease: 'none' }, 4.2)
+    .to('#ff', { '--tp': '100%', duration: .5, ease: 'none' }, 4.7)
+    .to('#sticker', { scale: 1, duration: .5, ease: 'back.out(2)' }, 5.2)
+    .to('#rig', { rotateX: 64, rotateZ: 24, duration: 2, ease: 'power1.inOut' }, 4.4)
+    .to({}, { duration: .6 });
+
+  gsap.set('#sticker', { z: -1, rotationX: 180, scale: 0 });
+  const tls = [['#stamp-stage', stampTl, 1600], ['#bp-stage', bpTl, 1600], ['#box-stage', boxTl, 1500]];
+  if (reduce) { tls.forEach(([, tl]) => tl.progress(1)); upd(); return; }
+  tls.forEach(([sel, tl, len]) => pinned(sel, tl, len));
+})();
+</script>

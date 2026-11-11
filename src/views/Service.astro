@@ -1,0 +1,44 @@
+---
+import PageHero from '../components/PageHero.astro';
+import SceneSlot from '../components/SceneSlot.astro';
+import SectionHead from '../components/SectionHead.astro';
+import CtaBand from '../components/CtaBand.astro';
+import { href, type Locale } from '../i18n/routes';
+import { ui } from '../i18n/ru';
+import { services, type Service } from '../data/services';
+const { locale, service: s } = Astro.props as { locale: Locale; service: Service };
+const others = services.filter((x) => x.slug !== s.slug && x.group === s.group).slice(0, 3);
+---
+<PageHero eyebrow="Услуга" title={s.title} lead={s.lead}>
+  <Fragment slot="actions">
+    <a href={href(locale, 'quote')} class="btn btn--primary" data-magnetic>{ui.cta.price} <span class="arrow">→</span></a>
+    <a href={href(locale, 'pricing')} class="btn btn--ghost">{ui.nav.pricing}</a>
+  </Fragment>
+  <SceneSlot id={`svc-${s.slug}`} title={s.scene} length={1.4} />
+</PageHero>
+
+<section class="section section--tight">
+  <div class="container">
+    <SectionHead eyebrow="Что входит" title="Включено<br>в фиксированную цену" />
+    <ul class="inc">{s.includes.map((it, i) => <li data-reveal><span>{String(i + 1).padStart(2, '0')}</span>{it}</li>)}</ul>
+  </div>
+</section>
+
+<section class="section section--tight">
+  <div class="container">
+    <h2 class="t-eyebrow" data-reveal>Ещё услуги</h2>
+    <div class="more">{others.map((o) => <a href={href(locale, `service:${o.slug}`)} data-reveal><strong>{o.title}</strong><span class="t-muted">{o.short}</span></a>)}</div>
+  </div>
+</section>
+<CtaBand locale={locale} />
+
+<style>
+  .inc { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; border-top: 1px solid var(--line); }
+  @media (min-width: 900px) { .inc { grid-template-columns: 1fr 1fr; column-gap: 48px; } }
+  .inc li { display: flex; gap: 18px; align-items: baseline; padding: 22px 0; border-bottom: 1px solid var(--line); font-size: clamp(1.1rem, 1rem + .6vw, 1.5rem); font-weight: 560; letter-spacing: -0.02em; }
+  .inc li span { font-size: .8rem; color: var(--accent); font-weight: 600; letter-spacing: .08em; }
+  .more { display: grid; gap: 12px; margin-top: 18px; }
+  @media (min-width: 900px) { .more { grid-template-columns: repeat(3, 1fr); } }
+  .more a { display: grid; gap: 6px; padding: 22px; border-radius: var(--radius); border: 1px solid var(--line); background: var(--surface); transition: transform .4s var(--ease); }
+  .more a:hover { transform: translateY(-3px); }
+</style>

@@ -1,0 +1,25 @@
+---
+/** Шапка внутренней страницы: крупный заголовок + лид + (опционально) слот сцены под ним */
+interface Props { eyebrow?: string; title: string; lead?: string }
+const { eyebrow, title, lead } = Astro.props;
+---
+<section class="phero">
+  <div class="container">
+    <div class="phero__text">
+      {eyebrow && <span class="t-eyebrow" data-reveal>{eyebrow}</span>}
+      <h1 class="t-hero" data-split set:html={title} />
+      {lead && <p class="t-lead" data-reveal>{lead}</p>}
+      <div class="phero__actions" data-reveal><slot name="actions" /></div>
+    </div>
+    <div class="phero__media"><slot /></div>
+  </div>
+</section>
+
+<style>
+  .phero { padding-top: calc(var(--header-h) + env(safe-area-inset-top, 0px) + clamp(40px, 7vw, 96px)); padding-bottom: clamp(48px, 6vw, 96px); }
+  .phero__text { display: grid; gap: 22px; max-width: 980px; }
+  .phero__actions { display: flex; flex-wrap: wrap; gap: 12px; }
+  .phero__actions:empty { display: none; }
+  .phero__media { margin-top: clamp(36px, 5vw, 64px); }
+  .phero__media:empty { display: none; }
+</style>

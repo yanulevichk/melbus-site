@@ -1,0 +1,27 @@
+---
+import { brand } from '../config/brand';
+import { ui } from '../i18n/ru';
+import { href, type Locale } from '../i18n/routes';
+const { locale } = Astro.props as { locale: Locale };
+---
+<nav class="mbar" aria-label="Быстрые действия" transition:persist="mbar">
+  <a href={`tel:${brand.contact.phoneHref}`} class="mbar__btn">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z" fill="currentColor"/></svg>
+    {ui.cta.call}
+  </a>
+  <a href={`https://wa.me/${brand.contact.whatsapp}`} class="mbar__btn" rel="noopener" target="_blank">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.2 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.6-4-4.7-4.1-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.4.6-.4.4c-.1.1-.3.3-.1.6.1.3.7 1.2 1.6 1.9 1.1 1 2 1.3 2.3 1.4.3.1.5.1.6-.1l.9-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.1.1.7-.1 1.3z" fill="currentColor"/></svg>
+    {ui.cta.whatsapp}
+  </a>
+  <a href={href(locale, 'quote')} class="mbar__btn mbar__btn--main">{ui.cta.price}</a>
+</nav>
+
+<style>
+  .mbar { position: fixed; z-index: 40; left: 0; right: 0; bottom: 0; display: grid; grid-template-columns: 1fr 1fr 1.6fr; gap: 6px;
+    padding: 8px var(--gutter-r) calc(8px + env(safe-area-inset-bottom, 0px)) var(--gutter);
+    background: color-mix(in oklab, var(--bg) 88%, transparent); backdrop-filter: blur(16px) saturate(1.4); -webkit-backdrop-filter: blur(16px) saturate(1.4); border-top: 1px solid var(--line); }
+  .mbar__btn { height: 48px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-radius: 14px; font-weight: 580; font-size: .9rem; background: var(--surface); border: 1px solid var(--line); }
+  .mbar__btn svg { width: 18px; height: 18px; }
+  .mbar__btn--main { background: var(--accent); color: var(--accent-ink); border-color: transparent; }
+  @media (min-width: 768px) { .mbar { display: none; } }
+</style>

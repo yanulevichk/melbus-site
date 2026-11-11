@@ -1,0 +1,67 @@
+---
+/**
+ * СЛОТ ДЛЯ СЦЕНЫ «ПОД СКРОЛЛ».
+ * Когда есть кадры: положить их в /public/scenes/<id>/desktop/0001.webp … и /mobile/…,
+ * указать frames={{ count: 150 }} — сцена заиграет сама.
+ * Пока кадров нет — показываем заглушку, которая так же закрепляется и «проигрывается» скроллом,
+ * чтобы можно было оценить длину и ритм сцены.
+ */
+import { ui } from '../i18n/ru';
+interface Props {
+  id: string;
+  title: string;                       // что за сцена (для заглушки и alt)
+  frames?: { count: number; mobileCount?: number; ext?: string };
+  length?: number;                     // длина проигрывания в экранах (1.5 = 150% высоты экрана)
+  ratio?: string;                      // пропорции на компьютере
+  ratioMobile?: string;                // пропорции на телефоне
+  ai?: boolean;                        // подпись «Визуализация»
+  pin?: boolean;
+}
+const { id, title, frames, length = 1.6, ratio = '16 / 9', ratioMobile = '4 / 5', ai = true, pin = true } = Astro.props;
+const base = `/scenes/${id}`;
+const ext = frames?.ext ?? 'webp';
+---
+<div class="scene" data-scene={id} data-pin={pin ? '1' : '0'} data-length={length}
+  data-count={frames?.count ?? 0} data-count-mobile={frames?.mobileCount ?? frames?.count ?? 0}
+  data-base={base} data-ext={ext}
+  style={`--r:${ratio};--rm:${ratioMobile}`}>
+  <div class="scene__frame">
+    {frames ? (
+      <>
+        <img class="scene__poster" src={`${base}/mobile/0001.${ext}`} srcset={`${base}/mobile/0001.${ext} 720w, ${base}/desktop/0001.${ext} 1600w`} sizes="100vw" alt={title} fetchpriority="high" />
+        <canvas class="scene__canvas" aria-hidden="true"></canvas>
+      </>
+    ) : (
+      <div class="scene__ph" aria-label={`${ui.sceneSoon}: ${title}`}>
+        <div class="scene__grid" aria-hidden="true"></div>
+        <div class="scene__label">
+          <span class="t-eyebrow">{ui.sceneSoon}</span>
+          <strong>{title}</strong>
+        </div>
+        <div class="scene__meter" aria-hidden="true"><i data-scene-progress></i></div>
+        <span class="scene__count" data-scene-frame aria-hidden="true">кадр 1 / 150</span>
+      </div>
+    )}
+    <div class="scene__overlay"><slot /></div>
+    {ai && <span class="scene__ai">{ui.aiLabel}</span>}
+  </div>
+</div>
+
+<style>
+  .scene { position: relative; }
+  .scene__frame { position: relative; aspect-ratio: var(--rm); width: 100%; max-height: calc(100svh - var(--header-h) - var(--bar-h) - 24px); border-radius: var(--radius); overflow: hidden; background: var(--surface); isolation: isolate; }
+  @media (min-width: 768px) { .scene__frame { aspect-ratio: var(--r); max-height: calc(100svh - var(--header-h) - 32px); } }
+  .scene__poster, .scene__canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .scene__canvas { opacity: 0; transition: opacity .3s; }
+  .scene.is-live .scene__canvas { opacity: 1; }
+  .scene__ph { position: absolute; inset: 0; background: linear-gradient(160deg, color-mix(in oklab, var(--accent) 10%, var(--surface)), var(--surface) 60%); }
+  .scene__grid { position: absolute; inset: -20%; background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px); background-size: 48px 48px; opacity: .6; transform: rotateX(55deg) rotateZ(-30deg) translateY(var(--shift, 0px)); transform-origin: 50% 50%; }
+  .scene__label { position: absolute; left: 20px; right: 20px; top: 20px; display: grid; gap: 6px; max-width: 34ch; }
+  .scene__label strong { font-size: clamp(1.05rem, .9rem + .8vw, 1.5rem); font-weight: 600; letter-spacing: -0.02em; line-height: 1.2; }
+  .scene__meter { position: absolute; left: 20px; right: 20px; bottom: 20px; height: 4px; border-radius: 4px; background: var(--line); overflow: hidden; }
+  .scene__meter i { display: block; height: 100%; width: 100%; background: var(--accent); transform-origin: 0 50%; transform: scaleX(0); }
+  .scene__count { position: absolute; right: 20px; bottom: 34px; font-size: .75rem; font-variant-numeric: tabular-nums; color: var(--muted); }
+  .scene__overlay { position: absolute; inset: 0; pointer-events: none; }
+  .scene__overlay :global(> *) { pointer-events: auto; }
+  .scene__ai { position: absolute; right: 12px; top: 12px; font-size: .7rem; letter-spacing: .06em; padding: 4px 8px; border-radius: 999px; background: color-mix(in oklab, var(--ink) 55%, transparent); color: #fff; backdrop-filter: blur(6px); }
+</style>

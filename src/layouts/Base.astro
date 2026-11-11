@@ -1,0 +1,68 @@
+---
+import '../styles/global.css';
+import { ClientRouter } from 'astro:transitions';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import MobileBar from '../components/MobileBar.astro';
+import { brand } from '../config/brand';
+import { locales, enabledLocales, href, type Locale, type PageKey } from '../i18n/routes';
+
+interface Props {
+  locale: Locale;
+  pageKey: PageKey;
+  title: string;
+  description: string;
+  nav?: string;
+  noindex?: boolean;
+  schema?: Record<string, unknown>[];
+}
+const { locale, pageKey, title, description, nav, noindex = false, schema = [] } = Astro.props;
+const canonical = new URL(href(locale, pageKey), brand.site).href;
+const fullTitle = pageKey === 'home' ? `${brand.name} — ${title}` : `${title} · ${brand.name}`;
+
+const org = {
+  '@context': 'https://schema.org',
+  '@type': 'MovingCompany',
+  name: brand.name,
+  url: brand.site,
+  telephone: brand.contact.phone,
+  email: brand.contact.email,
+  areaServed: [{ '@type': 'City', name: 'Warszawa' }, { '@type': 'Country', name: 'Polska' }],
+  openingHours: 'Mo-Su 00:00-23:59',
+  paymentAccepted: 'BLIK, karta, przelew',
+};
+---
+<!doctype html>
+<html lang={locales[locale].htmlLang}>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>{fullTitle}</title>
+  <meta name="description" content={description} />
+  <link rel="canonical" href={canonical} />
+  {enabledLocales.map((l) => <link rel="alternate" hreflang={locales[l].htmlLang} href={new URL(href(l, pageKey), brand.site).href} />)}
+  {noindex && <meta name="robots" content="noindex" />}
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content={fullTitle} />
+  <meta property="og:description" content={description} />
+  <meta property="og:url" content={canonical} />
+  <meta name="theme-color" content="#F3F4F6" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <script type="application/ld+json" set:html={JSON.stringify([org, ...schema])} />
+  <script is:inline>document.documentElement.classList.add('js');</script>
+  <ClientRouter />
+</head>
+<body data-page={pageKey}>
+  <a href="#main" class="skip">К содержанию</a>
+  <Header locale={locale} current={nav} />
+  <main id="main"><slot /></main>
+  <Footer locale={locale} />
+  <MobileBar locale={locale} />
+  <script>import '../scripts/motion.ts';</script>
+</body>
+</html>
+
+<style>
+  .skip { position: absolute; left: 12px; top: -60px; z-index: 100; padding: 10px 14px; background: var(--ink); color: var(--bg); border-radius: 8px; }
+  .skip:focus { top: 12px; }
+</style>
