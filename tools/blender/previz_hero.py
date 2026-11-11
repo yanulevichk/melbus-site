@@ -201,10 +201,12 @@ PLAN = [
     ('rug', 0.3, -0.7, 0, 0.0, -0.65, 0), ('lamp', -1.1, -2.3, 0, -1.55, -2.3, 0), ('plant', 3.3, 1.95, 0, 3.3, 1.1, 0),
 ]
 ITEMS = []
+FIT = {'bed': .16, 'sofa': .14, 'fridge': .42, 'dining': .25, 'bookcase': .22, 'tv': .19, 'armchair': .33, 'rug': .11, 'lamp': .45, 'plant': .42}
+SLOTS = [(x, z) for z in (-.3, .3) for x in (-.68, -.34, 0, .34, .68)]
 for n, ax, az, ar, bx_, bz, br in PLAN:
     o = empty('it_' + n)
     FUR[n](o)
-    ITEMS.append(dict(o=o, a=(ax, az, ar), b=(bx_, bz, br), h={'bed': 1.2, 'fridge': 2.0, 'bookcase': 2.0, 'lamp': 1.9, 'plant': 1.5}.get(n, 0.8)))
+    ITEMS.append(dict(o=o, n=n, fit=FIT[n], slot=SLOTS[len(ITEMS)], a=(ax, az, ar), b=(bx_, bz, br), h={'bed': 1.2, 'fridge': 2.0, 'bookcase': 2.0, 'lamp': 1.9, 'plant': 1.5}.get(n, 0.8)))
 
 # ---------------- складная коробка MELBUS ----------------
 BW, BD, BH, BT = 1.9, 1.4, 1.3, 0.04
@@ -224,6 +226,10 @@ for i, (sx, sz, yaw, ln) in enumerate([(0, BD / 2, 0, BW), (0, -BD / 2, math.pi,
 tapeL = box('tapeL', 1, 1, 1, G['tape'], 0, 0, 0, boxRoot, 0)
 tapeT = box('tapeT', 1, 1, 1, G['tape'], 0, 0, 0, boxRoot, 0)
 tapeR = box('tapeR', 1, 1, 1, G['tape'], 0, 0, 0, boxRoot, 0)
+# рулон скотча: едет вверх по левому торцу, через крышку и вниз по правому — лента тянется за ним
+tapeRoll = empty('tape_roll', (0, 0, 0), boxRoot)
+cyl('roll_outer', .12, .12, .3, G['tape'], 0, 0, 0, tapeRoll, 24, axis='z')
+cyl('roll_core', .06, .06, .32, G['light'], 0, 0, 0, tapeRoll, 16, axis='z')
 for t_ in (tapeL, tapeT, tapeR): t_.location = (0, 0, 0)
 # раскладка коробки: в квартире А и Б (координаты three)
 BOXA, BOXB = (0.6, RY, 1.4), (BX - 1.0, RY, 1.95)
@@ -288,8 +294,8 @@ for wx_ in (-1.45, 1.5):
 # ---------------- тайминг (секунды) ----------------
 T_BOX_POP, T_WALLS, T_OPEN = (8.0, 8.4), (8.6, 10.4), (10.2, 10.9)
 IN0, IN_STEP, IN_DUR = 11.6, 0.62, 1.2
-T_CLOSE_S, T_CLOSE_F = (18.5, 19.2), (18.8, 19.5)
-T_TAPE = (19.5, 19.7, 20.5, 20.7)
+T_CLOSE_S, T_CLOSE_F = (18.5, 19.1), (18.8, 19.4)
+T_TAPE = (19.5, 19.8, 20.6, 20.9)
 T_STICK = (20.7, 21.1)
 T_VAN_IN = (17.0, 21.0)
 T_DOORS_A = (21.4, 22.0, 25.0, 25.6)       # открыть / закрыть
@@ -351,74 +357,66 @@ def box_state(t):
 
 # ---------------- камера: опорные точки + процедурные участки, гладкая интерполяция ----------------
 BOXC = (BOXA[0], BOXA[1] + .55, BOXA[2])
-KEYS_1 = [  # до склейки (двери закрываются перед камерой)
+# ---------- камера: одна непрерывная траектория ----------
+KEYS = [
     (0.0, (16.0, 17.0, 20.0), (1.0, 0.0, 1.0), 30),
     (2.5, (10.0, 8.0, 11.0), (0.5, 0.6, 0.5), 28),
     (4.2, (4.2, 2.4, 5.2), (0.5, 0.8, 0.2), 24),
-    (5.2, (2.4, 1.25, 2.6), (-0.8, 0.9, -1.2), 20),
-    (6.6, (0.4, 1.1, 0.9), (-2.4, 0.9, -1.4), 20),
-    (7.6, (-1.2, 1.5, 0.4), (-2.2, 0.8, -1.6), 22),
-    (8.6, (0.2, 4.5, 2.8), (0.6, 0.35, 1.4), 26),
-    (9.6, (0.9, 7.2, 1.9), (0.6, 0.35, 1.4), 32),
-    (10.8, (0.1, 7.0, 0.9), (0.6, 0.35, 1.4), 32),
+    (5.2, (2.6, 1.3, 2.4), (-1.0, 0.9, -1.0), 21),          # влетели в квартиру
+    (6.4, (0.9, 1.35, 1.6), (-1.6, 1.0, -1.6), 21),         # скользим по диагонали, не упираясь в мебель
+    (7.4, (-0.6, 1.7, 1.9), (-2.4, 0.9, -0.9), 22),
+    (8.3, (-0.8, 4.0, 1.4), (0.4, 0.4, 1.3), 26),           # кран вверх
 ]
-# упаковка — камера СВЕРХУ над открытой коробкой, медленно вращается и снижается
-MOUTH_A = (BOXA[0], RY + BH * .6, BOXA[2])
-for k in range(1, 17):
-    u = k / 16; t_ = 10.8 + u * 7.7
-    a = 3.92 - 2.0 * eio(u); r = lerp(0.7, 2.2, eout(min(1, u * 1.6)))
-    KEYS_1.append((t_, (BOXA[0] + r * math.cos(a), lerp(7.0, 5.0, eio(u)), BOXA[2] + r * math.sin(a)), MOUTH_A, lerp(32, 30, u)))
-KEYS_1 += [
-    (19.4, (-0.5, 3.3, 2.75), (BOXA[0] - .95, 1.65, 1.4), 36),         # к началу скотча
-    (20.6, (1.75, 3.3, 2.75), (BOXA[0] + .95, 1.65, 1.4), 36),         # едем вдоль скотча
-    (21.4, (0.6, 4.2, 3.0), (-0.2, 0.9, 2.2), 30),                      # подъём, коробка с наклейкой видна сверху-спереди
-    (22.0, (-1.0, 6.4, 6.4), (-0.6, 0.6, 3.2), 28),                     # высокий общий план: коробка, бус, открытые двери, пандус
-    (22.8, (-3.8, 3.6, 7.4), (-1.8, 0.5, 4.3), 27),                     # опускаемся за задние двери
+# сверху: одна плавная спираль — сборка коробки и упаковка, равномерное вращение
+MOUTH_A = (BOXA[0], RY + BH * .4, BOXA[2])
+for k in range(0, 25):
+    u = k / 24; t_ = 9.0 + u * 9.6
+    ang = 3.4 - 2.09 * u
+    r = lerp(0.9, 2.2, eio(u)); y = lerp(7.2, 5.0, eio(u))
+    KEYS.append((t_, (BOXA[0] + r * math.cos(ang), y, BOXA[2] + r * math.sin(ang)), MOUTH_A, lerp(32, 30, u)))
+KEYS += [
+    (19.4, (-1.6, 3.6, 4.2), (0.6, 1.5, 1.4), 32),          # скотч: спокойный ракурс три четверти сверху
+    (20.9, (-0.9, 3.2, 3.7), (0.8, 1.55, 1.4), 34),
+    (22.0, (-1.0, 6.4, 6.4), (-0.6, 0.6, 3.2), 28),          # общий план: коробка, бус, двери, пандус
+    (22.8, (-3.8, 3.6, 7.4), (-1.8, 0.5, 4.3), 27),
     (23.4, (-4.6, 1.5, 6.4), (-1.6, 0.6, 4.45), 26),
     (24.4, (-3.6, 1.3, 5.3), (-0.5, 0.9, 4.45), 24),
-    (25.3, (-1.7, 1.25, 4.6), (1.0, 1.1, 4.45), 22),
-    (25.75, (-1.65, 1.25, 4.58), (1.0, 1.1, 4.45), 22),
+    (25.2, (-1.7, 1.25, 4.6), (1.0, 1.1, 4.45), 22),         # двери закрываются перед камерой
+    (25.7, (-1.75, 1.2, 4.55), (1.0, 1.0, 4.45), 22),
 ]
-# после склейки: колесо → под днищем вперёд (FPV) → вынырнули → бус проезжает под камерой → за бусом
-KEYS_2 = []
-for k in range(0, 6):        # 1) низко у заднего колеса, едем вместе с бусом
-    u = k / 5; t_ = CUT + u * 1.0; vx = van_x(t_)
-    KEYS_2.append((t_, (vx - 1.0 + .3 * u, 0.55, 7.0), (vx - 0.2, 0.55, 4.6), 24))
-for k in range(1, 17):       # 2) уходим за корму и медленно пролетаем под днищем от задней части к передней
-    u = k / 16; t_ = CUT + 1.0 + u * 2.7; vx = van_x(t_)
-    rel = lerp(-0.7, -3.0, eio(min(1, u / .2))) if u < .35 else lerp(-3.0, 3.6, eio((u - .35) / .65))
-    z = lerp(7.0, 4.45, eio(seg(u, .18, .35)))           # внутрь — только когда уже за кормой (не задеваем колесо)
-    y = lerp(0.55, 0.12, eio(seg(u, .1, .35)))
-    if u >= .35:   # под днищем смотрим вперёд и вверх — видно кардан, мост, выхлоп
-        up = math.sin(math.pi * min(1, (u - .35) / .33)) if u < .68 else 0.0
-        look = (vx + rel + 2.2, y + lerp(.1, .75, up), 4.45)
-    else:
-        look = (vx - 0.2, 0.3, 4.45)
-    KEYS_2.append((t_, (vx + rel, y, z), look, lerp(22, 18, min(1, u * 2))))
-for k in range(1, 11):       # 3) вынырнули перед бусом, поднимаемся и замедляемся — бус проезжает под камерой
-    u = k / 10; t_ = CUT + 3.7 + u * 1.5; vx = van_x(t_)
+# без склейки: отъезжаем назад и вниз за корму, бус трогается, догоняем и ныряем под днище
+for k in range(1, 9):
+    u = k / 8; t_ = 25.7 + u * 1.9; vx = van_x(t_)
+    rel = lerp(-1.75 - VAN_A, -4.2, eio(min(1, u * 1.6))) if u < .6 else lerp(-4.2, -3.0, eio((u - .6) / .4))
+    KEYS.append((t_, (vx + rel, lerp(1.2, 0.14, eio(u)), lerp(4.55, 4.45, u)), (vx, lerp(1.0, 0.45, eio(u)), 4.45), lerp(22, 20, u)))
+for k in range(1, 13):       # под днищем от кормы к кабине: смотрим вперёд и вверх — кардан, мост, выхлоп
+    u = k / 12; t_ = 27.6 + u * 1.7; vx = van_x(t_)
+    rel = lerp(-3.0, 3.6, eio(u)); y = 0.12
+    up = math.sin(math.pi * min(1, u / .75)) if u < .75 else 0.0
+    KEYS.append((t_, (vx + rel, y, 4.45), (vx + rel + 2.2, y + lerp(.1, .75, up), 4.45), lerp(20, 18, u)))
+for k in range(1, 11):       # вынырнули перед бусом, поднимаемся — бус проезжает под камерой
+    u = k / 10; t_ = 29.3 + u * 1.5; vx = van_x(t_)
     cam_ = (vx + lerp(3.6, -2.6, ein(u)), lerp(0.12, 6.0, eout(u)), 4.45)
-    fwd = (cam_[0] + 4.0, lerp(0.12, 6.0, eout(u)) - 1.0, 4.45)
+    fwd = (cam_[0] + 4.0, cam_[1] - 1.0, 4.45)
     look = tuple(lerp(fwd[i], (vx + 2.5, 0.6, 4.45)[i], eio(u)) for i in range(3))
-    KEYS_2.append((t_, cam_, look, lerp(18, 26, u)))
-for k in range(1, 7):        # 4) за бусом сверху-сзади до остановки
-    u = k / 6; t_ = CUT + 5.2 + u * 1.3; vx = van_x(t_)
-    KEYS_2.append((t_, (vx - lerp(2.6, 4.4, eio(u)), lerp(6.0, 3.0, eio(u)), lerp(4.45, 5.9, eio(u))), (vx + lerp(2.5, 0.5, u), lerp(0.6, 0.8, u), 4.45), 26))
-KEYS_2 += [
-    (32.6, (BX - 4.4, 1.7, 6.4), (BX - 1.0, 0.8, 4.45), 26),
-    (34.0, (BX - 3.8, 1.5, 6.0), (BX - 1.4, 0.6, 4.45), 26),
-    (35.4, (BX - 2.2, 4.6, 6.4), (BOXB[0], 0.6, BOXB[2]), 28),
+    KEYS.append((t_, cam_, look, lerp(18, 26, u)))
+for k in range(1, 7):        # за бусом до остановки
+    u = k / 6; t_ = 30.8 + u * 1.4; vx = van_x(t_)
+    KEYS.append((t_, (vx - lerp(2.6, 4.4, eio(u)), lerp(6.0, 3.0, eio(u)), lerp(4.45, 5.9, eio(u))), (vx + lerp(2.5, 0.5, u), lerp(0.6, 0.8, u), 4.45), 26))
+KEYS += [
+    (32.8, (BX - 4.4, 1.7, 6.4), (BX - 1.0, 0.8, 4.45), 26),
+    (34.0, (BX - 3.8, 1.6, 6.0), (BX - 1.4, 0.6, 4.45), 26),
+    (35.0, (BX - 3.0, 3.6, 4.8), (BOXB[0], 0.8, BOXB[2] + .4), 28),   # плавно вверх за прыжком коробки
 ]
-# распаковка — снова СВЕРХУ: коробка раскрывается, вещи разлетаются, камера вращается и поднимается
-MOUTH_B = (BOXB[0], RY + BH * .6, BOXB[2])
-for k in range(1, 15):
-    u = k / 14; t_ = 35.4 + u * 4.6
-    a = 1.4 + 2.2 * eio(u); r = lerp(0.8, 4.2, eio(u))
-    look = tuple(lerp(MOUTH_B[i], (BX - 0.3, 0.6, 0.0)[i], eio(u)) for i in range(3))
-    KEYS_2.append((t_, (BOXB[0] + r * math.cos(a), lerp(5.6, 8.0, eio(u)), BOXB[2] + r * math.sin(a)), look, lerp(28, 30, u)))
-KEYS_2 += [
-    (42.0, (BX + 9.0, 8.8, 11.0), (BX, 0.6, 0.0), 32),
-]
+# распаковка: спираль от коробки, расходится и сама приводит в финальный общий план
+MOUTH_B = (BOXB[0], RY + BH * .4, BOXB[2])
+FIN_REL = (BX + 9.0 - BOXB[0], 11.0 - BOXB[2]); FIN_A = math.atan2(FIN_REL[1], FIN_REL[0]); FIN_R = math.hypot(*FIN_REL)
+for k in range(0, 23):
+    u = k / 22; t_ = 36.0 + u * 6.0
+    ang = FIN_A + 2.0 * (1 - u)
+    r = lerp(0.9, FIN_R, ein(u) * .85 + u * .15); y = lerp(5.6, 8.8, eio(u))
+    look = tuple(lerp(MOUTH_B[i], (BX, 0.6, 0.0)[i], eio(u)) for i in range(3))
+    KEYS.append((t_, (BOXB[0] + r * math.cos(ang), y, BOXB[2] + r * math.sin(ang)), look, lerp(28, 32, u)))
 
 def hermite(keys, t):
     """гладкая кривая через опорные точки (Catmull-Rom по времени), на концах — плавный старт/стоп"""
@@ -448,7 +446,7 @@ def hermite(keys, t):
     return out
 
 def cam_state(t):
-    return hermite(KEYS_1 if t < CUT else KEYS_2, t)
+    return hermite(KEYS, t)
 
 cam_data = bpy.data.cameras.new('cam'); cam_data.sensor_width = 36; cam_data.clip_start = .02; cam_data.clip_end = 300
 cam = bpy.data.objects.new('cam', cam_data); col.objects.link(cam); sc.camera = cam
@@ -489,7 +487,7 @@ def apply(t, f):
     off = seg(t, T_OPEN_B[0], T_OPEN_B[1])
     a, b_, c_ = (eout(seg(t, T_TAPE[0], T_TAPE[1])) * (1 - off), eio(seg(t, T_TAPE[1], T_TAPE[2])) * (1 - off), eout(seg(t, T_TAPE[2], T_TAPE[3])) * (1 - off))
     top = BH + BT * 2.2
-    tapeL.scale = three_scale((TH, max(.001, DROP * a), TW_)); tapeL.location = P(-BW / 2 - TH / 2, top - DROP * a / 2, 0)
+    tapeL.scale = three_scale((TH, max(.001, DROP * a), TW_)); tapeL.location = P(-BW / 2 - TH / 2, top - DROP + DROP * a / 2, 0)   # растёт снизу вверх за рулоном
     tapeT.scale = three_scale((max(.001, (BW + .02) * b_), TH, TW_)); tapeT.location = P(-BW / 2 + (BW + .02) * b_ / 2, top, 0)
     tapeR.scale = three_scale((TH, max(.001, DROP * c_), TW_)); tapeR.location = P(BW / 2 + TH / 2, top - DROP * c_ / 2, 0)
     for t_ in (tapeL, tapeT, tapeR): t_.keyframe_insert('scale', frame=f); t_.keyframe_insert('location', frame=f)
@@ -499,25 +497,48 @@ def apply(t, f):
     sq = min(1, gulp) * .07
     boxRoot.location = P(*pos); boxRoot.rotation_euler = (0, 0, rot); boxRoot.scale = three_scale((s * (1 + sq * .6), s * (1 - sq), s * (1 + sq * .6)))
     for path in ('location', 'rotation_euler', 'scale'): boxRoot.keyframe_insert(path, frame=f)
-    # вещи: в коробку и из коробки
-    mouthA = (BOXA[0], RY + BH * .55, BOXA[2]); mouthB = (BOXB[0], RY + BH * .55, BOXB[2])
+    # вещи: ложатся внутрь коробки (в свою ячейку) и при распаковке поднимаются со дна
+    hideA = seg(t, T_CLOSE_F[1] + .05, T_CLOSE_F[1] + .1)          # закрыли — внутри не видно
+    showB = t >= T_OPEN_B[2]                                           # в Б коробка открылась — вещи снова на дне
     for i, it in enumerate(ITEMS):
-        ax, az, ar = it['a']; bx_, bz, br = it['b']
+        ax, az, ar = it['a']; bx_, bz, br = it['b']; fit = it['fit']; sx, sz = it['slot']
+        slotA = (BOXA[0] + sx, RY + BT, BOXA[2] + sz); aboveA = (slotA[0], RY + BH + .55, slotA[2])
+        slotB = (BOXB[0] + sx, RY + BT, BOXB[2] + sz); aboveB = (slotB[0], RY + BH + .55, slotB[2])
         k = seg(t, IN0 + i * IN_STEP, IN0 + i * IN_STEP + IN_DUR)
         o_ = seg(t, OUT0 + i * OUT_STEP, OUT0 + i * OUT_STEP + OUT_DUR)
-        if o_ > 0:
-            e = eout(o_); p_ = bez(mouthB, (BX + bx_, RY, bz), 2.2 + it['h'] * .4, e)
-            sc_ = max(.0001, eback(o_)); st_ = math.sin(math.pi * o_) * .22; r_ = br - (1 - e) * math.pi * 1.2
+        if o_ > 0:                                   # распаковка: со дна вверх, потом по дуге на место, растёт
+            if o_ < .3:
+                e = eout(o_ / .3); p_ = lerp3(slotB, aboveB, e); sc_ = lerp(fit, fit * 1.15, e); r_ = 0.0
+            else:
+                e = eout((o_ - .3) / .7); p_ = bez(aboveB, (BX + bx_, RY, bz), 1.6 + it['h'] * .3, e)
+                sc_ = lerp(fit * 1.15, 1.0, eback(e) if e < 1 else 1.0); r_ = br * e
+        elif showB and t >= OUT0 - 1.0:              # ждут на дне открытой коробки
+            p_, sc_, r_ = slotB, fit, 0.0
         elif k <= 0:
-            p_, sc_, st_, r_ = (ax, RY, az), 1.0, 0.0, ar
-        elif k < 1:
-            e = eio(k); p_ = bez((ax, RY, az), mouthA, 2.4 + it['h'] * .4, e)
-            sc_ = max(.0001, 1 - ein(k)); st_ = math.sin(math.pi * k) * .28; r_ = ar + e * math.pi * 1.2
-        else:
-            p_, sc_, st_, r_ = (ax, RY, az), .0001, 0.0, ar
+            p_, sc_, r_ = (ax, RY, az), 1.0, ar
+        elif k < 1:                                  # упаковка: по дуге к коробке, уменьшаясь, потом вниз — на дно
+            if k < .68:
+                e = eio(k / .68); p_ = bez((ax, RY, az), aboveA, 1.6 + it['h'] * .35, e)
+                sc_ = lerp(1.0, fit * 1.15, e); r_ = ar * (1 - e)
+            else:
+                e = eout((k - .68) / .32); p_ = lerp3(aboveA, slotA, e); sc_ = lerp(fit * 1.15, fit, e); r_ = 0.0
+        else:                                        # лежит на дне, пока клапаны не закрылись
+            p_, sc_, r_ = slotA, max(.0001, fit * (1 - hideA)), 0.0
+        if t >= T_HOP_A[0] and k >= 1 and o_ <= 0 and not (showB and t >= OUT0 - 1.0):
+            sc_ = .0001                               # коробка уехала — вещи внутри (не показываем)
         o = it['o']; o.location = P(*p_); o.rotation_euler = (0, 0, r_)
-        o.scale = three_scale((sc_ * (1 - st_ * .5), sc_ * (1 + st_), sc_ * (1 - st_ * .5)))
+        o.scale = (max(sc_, .0001),) * 3
         for path in ('location', 'rotation_euler', 'scale'): o.keyframe_insert(path, frame=f)
+    # рулон скотча
+    rl = seg(t, T_TAPE[0], T_TAPE[1]); rt = seg(t, T_TAPE[1], T_TAPE[2]); rr = seg(t, T_TAPE[2], T_TAPE[3])
+    gone = seg(t, T_TAPE[3], T_TAPE[3] + .3); appear = seg(t, T_TAPE[0] - .25, T_TAPE[0])
+    R_ = .12; top_ = BH + BT * 2.2 + R_
+    if t < T_TAPE[1]:   pos_r = (-BW / 2 - R_, top_ - R_ - DROP * (1 - eout(rl)), 0); dist = DROP * eout(rl)
+    elif t < T_TAPE[2]: pos_r = (-BW / 2 + (BW) * eio(rt), top_, 0); dist = DROP + BW * eio(rt)
+    else:               pos_r = (BW / 2 + R_, top_ - R_ - DROP * eout(rr) + .6 * eio(gone), 0); dist = DROP + BW + DROP * eout(rr)
+    tapeRoll.location = P(*pos_r); tapeRoll.rotation_euler = (0, -dist / R_, 0)
+    tapeRoll.scale = (max(.0001, eout(appear) * (1 - eio(gone))),) * 3
+    for path in ('location', 'rotation_euler', 'scale'): tapeRoll.keyframe_insert(path, frame=f)
 
 for f in range(0, N + 1):
     apply(f / FPS, f)
