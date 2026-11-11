@@ -16,17 +16,38 @@ interface Props {
   ratioMobile?: string;                // пропорции на телефоне
   ai?: boolean;                        // подпись «Визуализация»
   pin?: boolean;
+  three?: 'hero' | 'box';              // живая 3D-сцена вместо кадров (без ИИ, логотип точный)
+  mobile?: 'pin' | 'scrub' | 'auto';   // телефон: закрепить / крутить скроллом без закрепления / играть сама
+  tone?: 'dark' | 'light';             // фон кадра
+  data?: Record<string, string>;       // параметры сцены (например, подпись на наклейке)
+  poster?: string;                     // постер 3D-сцены: <poster>-d.webp (компьютер) и <poster>-m.webp (телефон)
+  eager?: boolean;                     // постер на первом экране — грузить сразу
 }
-const { id, title, frames, length = 1.6, ratio = '16 / 9', ratioMobile = '4 / 5', ai = true, pin = true } = Astro.props;
+const { id, title, frames, length = 1.6, ratio = '16 / 9', ratioMobile = '4 / 5', ai = true, pin = true, three, mobile = 'pin', tone, data = {}, poster, eager = false } = Astro.props;
+const dataAttrs = Object.fromEntries(Object.entries(data).map(([k, v]) => [`data-${k}`, v]));
 const base = `/scenes/${id}`;
 const ext = frames?.ext ?? 'webp';
 ---
 <div class="scene" data-scene={id} data-pin={pin ? '1' : '0'} data-length={length}
   data-count={frames?.count ?? 0} data-count-mobile={frames?.mobileCount ?? frames?.count ?? 0}
-  data-base={base} data-ext={ext}
+  data-base={base} data-ext={ext} data-mobile={mobile}
   style={`--r:${ratio};--rm:${ratioMobile}`}>
-  <div class="scene__frame">
-    {frames ? (
+  <div class={`scene__frame${tone ? ` scene__frame--${tone}` : ''}`}>
+    {three ? (
+      <div class="s3d" data-three={three} {...dataAttrs}>
+        {poster ? (
+          <picture class="s3d__poster">
+            <source media="(max-width: 767px)" srcset={`${poster}-m.webp`} width="780" height="975" />
+            <img src={`${poster}-d.webp`} alt={title} width="1600" height="900" loading={eager ? 'eager' : 'lazy'} decoding="async" fetchpriority={eager ? 'high' : 'auto'} />
+          </picture>
+        ) : (
+          <>
+            <p class="sr-only">{title}</p>
+            <div class="s3d__wait" aria-hidden="true"><img src="/brand/mark-dark.svg" alt="" width="64" height="62" /></div>
+          </>
+        )}
+      </div>
+    ) : frames ? (
       <>
         <img class="scene__poster" src={`${base}/mobile/0001.${ext}`} srcset={`${base}/mobile/0001.${ext} 720w, ${base}/desktop/0001.${ext} 1600w`} sizes="100vw" alt={title} fetchpriority="high" />
         <canvas class="scene__canvas" aria-hidden="true"></canvas>
@@ -61,6 +82,19 @@ const ext = frames?.ext ?? 'webp';
   .scene__meter { position: absolute; left: 20px; right: 20px; bottom: 20px; height: 4px; border-radius: 4px; background: var(--line); overflow: hidden; }
   .scene__meter i { display: block; height: 100%; width: 100%; background: var(--accent); transform-origin: 0 50%; transform: scaleX(0); }
   .scene__count { position: absolute; right: 20px; bottom: 34px; font-size: .75rem; font-variant-numeric: tabular-nums; color: var(--muted); }
+  .scene__frame--dark { background: radial-gradient(90% 75% at 55% 35%, #17323A 0%, #111B23 52%, #0C1117 100%); }
+  .scene__frame--light { background: linear-gradient(180deg, #FFFFFF 0%, #EEF1F4 100%); }
+  .s3d { position: absolute; inset: 0; }
+  .s3d :global(.s3d__canvas) { position: absolute; inset: 0; width: 100% !important; height: 100% !important; opacity: 0; transition: opacity .8s var(--ease); }
+  .s3d:global(.is-ready) :global(.s3d__canvas) { opacity: 1; }
+  .s3d__poster, .s3d__poster img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .s3d__poster { transition: opacity .8s var(--ease) .1s; }
+  .s3d:global(.is-ready) .s3d__poster { opacity: 0; }
+  .s3d__wait { position: absolute; inset: 0; display: grid; place-items: center; transition: opacity .6s; }
+  .s3d__wait img { width: 56px; height: auto; opacity: .5; animation: s3dpulse 1.6s ease-in-out infinite; }
+  .scene__frame--light .s3d__wait img { filter: invert(1) grayscale(1); opacity: .25; }
+  .s3d:global(.is-ready) .s3d__wait { opacity: 0; pointer-events: none; }
+  @keyframes s3dpulse { 50% { transform: scale(.9); opacity: .25; } }
   .scene__overlay { position: absolute; inset: 0; pointer-events: none; }
   .scene__overlay :global(> *) { pointer-events: auto; }
   .scene__ai { position: absolute; right: 12px; top: 12px; font-size: .7rem; letter-spacing: .06em; padding: 4px 8px; border-radius: 999px; background: color-mix(in oklab, var(--ink) 55%, transparent); color: #fff; backdrop-filter: blur(6px); }

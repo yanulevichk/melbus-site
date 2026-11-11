@@ -35,6 +35,40 @@ if (!reduce()) {
   gsap.ticker.lagSmoothing(0);
 }
 
+/* ---------- логотип «заклеивается» скотчем (первый заход, без прелоадера) ---------- */
+let introDelay = 0;
+function tapeLogo() {
+  const root = document.documentElement;
+  const tape = document.querySelector<HTMLElement>('[data-logo-tape]');
+  if (!tape || !root.classList.contains('tape') || reduce()) return;
+  try { sessionStorage.setItem('mb-tape', '1'); } catch {}
+  gsap.timeline({ delay: 0.25, onComplete: () => root.classList.remove('tape') })
+    .fromTo(tape, { scaleX: 0, transformOrigin: '0% 50%', opacity: 1 }, { scaleX: 1, duration: 0.55, ease: 'expo.out' })
+    .to(tape, { scaleX: 0, transformOrigin: '100% 50%', duration: 0.5, ease: 'expo.in' }, '+=0.35');
+}
+
+/* ---------- шторка между страницами ---------- */
+function curtain() {
+  const el = document.querySelector<HTMLElement>('[data-curtain]');
+  return {
+    in: () => new Promise<void>((res) => {
+      if (!el || reduce()) return res();
+      gsap.killTweensOf(el);
+      gsap.set(el, { visibility: 'visible' });
+      gsap.fromTo(el, { clipPath: 'inset(100% 0 0 0)' }, { clipPath: 'inset(0% 0 0 0)', duration: 0.5, ease: 'expo.inOut', onComplete: () => res() });
+      gsap.fromTo(el.querySelector('img'), { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.4, delay: 0.2 });
+    }),
+    out: () => {
+      if (!el || getComputedStyle(el).visibility !== 'visible') return;
+      gsap.to(el, { clipPath: 'inset(0 0 100% 0)', duration: 0.65, ease: 'expo.inOut', delay: 0.05, onComplete: () => { gsap.set(el, { visibility: 'hidden' }); } });
+    },
+  };
+}
+document.addEventListener('astro:before-preparation', (e: any) => {
+  const load = e.loader;
+  e.loader = async () => { await Promise.all([curtain().in(), load()]); };
+});
+
 /* ---------- шапка и меню (живут между страницами) ---------- */
 function setupHeader() {
   const hdr = document.querySelector<HTMLElement>('[data-header]');
@@ -105,6 +139,85 @@ function sceneFrames(el: HTMLElement, tl: gsap.core.Timeline) {
   window.addEventListener('resize', draw);
 }
 
+/* ---------- 3D-сцены: грузим three.js только когда сцена рядом с экраном ---------- */
+function scene3d(el: HTMLElement, tl: gsap.core.Timeline, local: (() => void)[]) {
+  const host = el.querySelector<HTMLElement>('[data-three]');
+  if (!host) return;
+  const st = { p: 0 };
+  let api: { setProgress(p: number): void; destroy(): void } | null = null;
+  let alive = true;
+  tl.to(st, { p: 1, ease: 'none', duration: 1, onUpdate: () => api?.setProgress(st.p) }, 0);
+  const load = () => import('./scenes3d')
+    .then((m) => m.mountScene(host, host.dataset.three!))
+    .then((a) => {
+      if (!alive) { a.destroy(); return; }
+      api = a; a.setProgress(st.p);
+      if (location.search.includes('debug')) ((window as any).__s3d ||= {})[host.dataset.three!] = a; // для проверки кадров
+    })
+    .catch(() => host.classList.add('is-fallback'));
+  const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { io.disconnect(); load(); } }, { rootMargin: '600px 0px' });
+  // скорость: на телефоне three.js ждёт первого касания/прокрутки, на компьютере — свободной минуты браузера.
+  // До этого на месте сцены стоит постер (картинка первого кадра).
+  const evs = ['scroll', 'touchstart', 'pointerdown', 'keydown', 'wheel'] as const;
+  const go = () => { evs.forEach((n) => window.removeEventListener(n, go)); io.observe(host); };
+  if (window.matchMedia('(max-width: 1023px)').matches && !location.search.includes('debug')) evs.forEach((n) => window.addEventListener(n, go, { passive: true, once: true }));
+  else ('requestIdleCallback' in window ? (window as any).requestIdleCallback(go, { timeout: 1500 }) : setTimeout(go, 600));
+  local.push(() => { alive = false; evs.forEach((n) => window.removeEventListener(n, go)); io.disconnect(); api?.destroy(); api = null; });
+}
+
+/* ---------- шаги: маршрут и бус ---------- */
+function stepsRoute(desktop: boolean, reduceNow: boolean, local: (() => void)[]) {
+  const wrap = document.querySelector<HTMLElement>('[data-hscroll]');
+  if (!wrap || reduceNow) return;
+  if (desktop) return; // на компьютере бус двигается в самой ленте (см. ниже)
+  const fill = wrap.querySelector<HTMLElement>('[data-fill]');
+  const bus = wrap.querySelector<HTMLElement>('[data-fill-bus]');
+  if (!fill) return;
+  const t = gsap.timeline();
+  t.fromTo(fill, { scaleY: 0 }, { scaleY: 1, ease: 'none' }, 0);
+  if (bus) t.fromTo(bus, { top: '0%' }, { top: '100%', ease: 'none' }, 0);
+  const trig = ScrollTrigger.create({ trigger: wrap.querySelector('[data-hscroll-track]'), start: 'top 70%', end: 'bottom 60%', scrub: 0.4, animation: t });
+  local.push(() => { trig.kill(); t.kill(); });
+}
+
+/* ---------- табло цены: барабаны с цифрами ---------- */
+function priceBoard(board: HTMLElement) {
+  const reels = Array.from(board.querySelectorAll<HTMLElement>('[data-reel]'));
+  const out = board.querySelector<HTMLElement>('[data-board-value]');
+  const status = board.querySelector<HTMLElement>('[data-board-status]');
+  const chips = Array.from(document.querySelectorAll<HTMLButtonElement>(`[data-board-for="${board.id}"] [data-value]`));
+  const fmt = new Intl.NumberFormat('ru');
+  const cur = reels.map(() => 0);
+  const CELLS = 33; // 3 круга по 11 клеток (0–9 и пустая)
+  const yp = (idx: number) => (-idx * 100) / CELLS;
+  const show = (value: number, spin = 1) => {
+    const digits = String(value).padStart(reels.length, ' ').split('');
+    reels.forEach((r, i) => {
+      const strip = r.firstElementChild as HTMLElement;
+      const d = digits[i] === ' ' ? 10 : Number(digits[i]); // 10 = пустая клетка
+      const from = cur[i] % 11;
+      const to = d + 11 * Math.max(1, spin);
+      cur[i] = d;
+      r.classList.toggle('is-blank', d === 10);
+      if (reduce()) { gsap.set(strip, { yPercent: yp(d) }); return; }
+      gsap.fromTo(strip, { yPercent: yp(from) }, { yPercent: yp(to), duration: 0.9 + i * 0.22, ease: 'expo.out', overwrite: true,
+        onComplete: () => gsap.set(strip, { yPercent: yp(d) }) });
+      r.classList.remove('is-hit'); void r.offsetWidth; r.classList.add('is-hit');
+    });
+    if (out) out.textContent = fmt.format(value);
+  };
+  const pick = (b: HTMLButtonElement, spin = 1) => {
+    chips.forEach((c) => c.setAttribute('aria-pressed', String(c === b)));
+    if (status) status.textContent = b.dataset.status || b.textContent || '';
+    show(Number(b.dataset.value), spin);
+  };
+  chips.forEach((b) => b.addEventListener('click', () => pick(b)));
+  const first = chips.find((c) => c.getAttribute('aria-pressed') === 'true') || chips[0];
+  if (!first) return;
+  reels.forEach((r) => gsap.set(r.firstElementChild, { yPercent: 0 }));
+  ScrollTrigger.create({ trigger: board, start: 'top 85%', once: true, onEnter: () => pick(first, 2) });
+}
+
 /* ---------- инициализация страницы ---------- */
 let ctx: gsap.Context | null = null;
 let mm: gsap.MatchMedia | null = null;
@@ -114,13 +227,14 @@ function initPage() {
   setupHeader();
   const rm = reduce();
 
+  const delay = introDelay; introDelay = 0;
   ctx = gsap.context(() => {
     /* заголовки строками */
     document.querySelectorAll<HTMLElement>('[data-split]').forEach((el) => {
       if (rm) return;
       const split = SplitText.create(el, { type: 'lines', mask: 'lines', linesClass: 'split-line', autoSplit: true,
         onSplit: (self) => gsap.from(self.lines, {
-          yPercent: 110, duration: 1.1, ease: 'expo.out', stagger: 0.08,
+          yPercent: 110, duration: 1.1, ease: 'expo.out', stagger: 0.08, delay,
           scrollTrigger: { trigger: el, start: 'top 88%', once: true },
         }),
       });
@@ -130,7 +244,7 @@ function initPage() {
     /* появление */
     gsap.utils.toArray<HTMLElement>('[data-reveal]').forEach((el) => {
       if (rm) { gsap.set(el, { opacity: 1, y: 0 }); return; }
-      gsap.to(el, { opacity: 1, y: 0, duration: 1, ease: 'expo.out', scrollTrigger: { trigger: el, start: 'top 92%', once: true } });
+      gsap.to(el, { opacity: 1, y: 0, duration: 1, ease: 'expo.out', delay: delay ? delay + 0.25 : 0, scrollTrigger: { trigger: el, start: 'top 92%', once: true } });
     });
 
     /* бегущая строка */
@@ -161,6 +275,27 @@ function initPage() {
         scrollTrigger: { trigger: el, start: 'top 80%', end: 'bottom 45%', scrub: true } });
     });
 
+    /* класс is-in, когда блок появился (CSS-анимации: галочки, линии, радар) */
+    document.querySelectorAll<HTMLElement>('[data-inview]').forEach((el) => {
+      if (rm) { el.classList.add('is-in'); return; }
+      ScrollTrigger.create({ trigger: el, start: el.dataset.inview || 'top 80%', once: true, onEnter: () => el.classList.add('is-in') });
+    });
+
+    /* линии рисуются по ходу прокрутки */
+    document.querySelectorAll<SVGPathElement>('[data-draw] path, path[data-draw]').forEach((path) => {
+      const L = path.getTotalLength();
+      if (rm) return;
+      gsap.fromTo(path, { strokeDasharray: L, strokeDashoffset: L }, { strokeDashoffset: 0, ease: 'none',
+        scrollTrigger: { trigger: path.closest('[data-draw]') || path, start: 'top 85%', end: 'center 45%', scrub: 0.6 } });
+    });
+
+    /* табло цены */
+    document.querySelectorAll<HTMLElement>('[data-board]').forEach(priceBoard);
+
+    /* полоска прогресса страницы в шапке */
+    const prog = document.querySelector<HTMLElement>('[data-progress]');
+    if (prog) ScrollTrigger.create({ start: 0, end: 'max', onUpdate: (s) => gsap.set(prog, { scaleX: s.progress }) });
+
     /* числа */
     document.querySelectorAll<HTMLElement>('[data-count-to]').forEach((el) => {
       const to = Number(el.dataset.countTo);
@@ -178,10 +313,12 @@ function initPage() {
     const { desktop, rm: reduceNow } = c.conditions as { desktop: boolean; rm: boolean };
 
     /* сцены */
+    const local: (() => void)[] = [];
     document.querySelectorAll<HTMLElement>('[data-scene]').forEach((el) => {
-      const pin = el.dataset.pin === '1' && !reduceNow;
+      const mobileMode = el.dataset.mobile || 'pin';
+      const pin = el.dataset.pin === '1' && !reduceNow && (desktop || mobileMode === 'pin');
       const len = Number(el.dataset.length) || 1.6;
-      const tl = gsap.timeline({ paused: !pin });
+      const tl = gsap.timeline({ paused: true });
       const bar = el.querySelector<HTMLElement>('[data-scene-progress]');
       const label = el.querySelector<HTMLElement>('[data-scene-frame]');
       const grid = el.querySelector<HTMLElement>('.scene__grid');
@@ -189,14 +326,26 @@ function initPage() {
       if (grid) tl.fromTo(grid, { '--shift': '0px' }, { '--shift': '-240px', ease: 'none', duration: 1 }, 0);
       if (label) tl.eventCallback('onUpdate', () => (label.textContent = `кадр ${Math.round(tl.progress() * 149) + 1} / 150`));
       sceneFrames(el, tl);
+      scene3d(el, tl, local);
       el.querySelectorAll<HTMLElement>('[data-at]').forEach((cap) => {
         const at = Number(cap.dataset.at);
-        tl.fromTo(cap, { autoAlpha: 0, y: 24 }, { autoAlpha: 1, y: 0, duration: 0.08 }, at);
-        if (cap.dataset.until) tl.to(cap, { autoAlpha: 0, y: -24, duration: 0.08 }, Number(cap.dataset.until));
+        tl.fromTo(cap, { autoAlpha: 0, y: 24 }, { autoAlpha: 1, y: 0, duration: 0.06 }, at);
+        if (cap.dataset.until) tl.to(cap, { autoAlpha: 0, y: -24, duration: 0.06 }, Number(cap.dataset.until));
       });
+      tl.set({}, {}, 1); // длина таймлайна ровно 1
+      if (location.search.includes('debug')) ((window as any).__tl ||= {})[el.dataset.scene!] = tl;
+      if (reduceNow) { tl.progress(1); return; }
       if (pin) {
-        ScrollTrigger.create({ trigger: el, start: 'center center', end: `+=${len * 100}%`, pin: true, scrub: 0.5, animation: tl, anticipatePin: 1 });
-      } else tl.progress(reduceNow ? 1 : 0);
+        ScrollTrigger.create({ trigger: el, start: 'center center', end: `+=${len * 100}%`, pin: true, scrub: 0.6, animation: tl, anticipatePin: 1 });
+      } else if (mobileMode === 'auto' && !location.search.includes('debug')) {
+        // телефон: сцена играет сама, по кругу, только пока видна
+        tl.timeScale(1 / 22).repeat(-1).repeatDelay(0.1);
+        const io = new IntersectionObserver(([e]) => (e.isIntersecting ? tl.play() : tl.pause()), { threshold: 0.15 });
+        io.observe(el); local.push(() => io.disconnect());
+      } else {
+        ScrollTrigger.create({ trigger: el, start: 'top 85%', end: 'bottom 20%', scrub: 0.5, animation: tl });
+      }
+      local.push(() => tl.kill());
     });
 
     /* горизонтальная лента шагов */
@@ -207,7 +356,21 @@ function initPage() {
       const dist = () => track.scrollWidth - wrap.clientWidth;
       const tl = gsap.timeline();
       tl.to(track, { x: () => -dist(), ease: 'none' }, 0);
-      if (line) { const L = line.getTotalLength(); gsap.set(line, { strokeDasharray: L, strokeDashoffset: L }); tl.to(line, { strokeDashoffset: 0, ease: 'none' }, 0); }
+      if (line) {
+        const L = line.getTotalLength();
+        gsap.set(line, { strokeDasharray: L, strokeDashoffset: L });
+        tl.to(line, { strokeDashoffset: 0, ease: 'none' }, 0);
+        const bus = wrap.querySelector<HTMLElement>('[data-route-bus]');
+        const svg = line.ownerSVGElement!;
+        if (bus) tl.eventCallback('onUpdate', () => {
+          const k = tl.progress();
+          const pt = line.getPointAtLength(L * k), pt2 = line.getPointAtLength(Math.min(L, L * k + 4));
+          const r = svg.getBoundingClientRect(), vb = svg.viewBox.baseVal;
+          const sx = r.width / vb.width, sy = r.height / vb.height;
+          const ang = Math.atan2((pt2.y - pt.y) * sy, (pt2.x - pt.x) * sx) * 180 / Math.PI;
+          gsap.set(bus, { x: pt.x * sx, y: pt.y * sy, rotation: ang, opacity: k > 0.002 && k < 0.998 ? 1 : 0 });
+        });
+      }
       ScrollTrigger.create({ trigger: wrap, start: 'top top+=' + (parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-h')) || 76), end: () => '+=' + dist(), pin: true, scrub: 0.6, animation: tl, invalidateOnRefresh: true });
     });
 
@@ -223,6 +386,20 @@ function initPage() {
         gsap.to(media[i], { clipPath: 'inset(0% 0 0 0)', ease: 'none', scrollTrigger: { trigger: it, start: 'top 75%', end: 'top 35%', scrub: true } });
       });
     });
+
+    /* карточки слегка наклоняются за курсором */
+    if (finePointer() && !reduceNow) {
+      document.querySelectorAll<HTMLElement>('[data-tilt]').forEach((c) => {
+        const move = (e: PointerEvent) => {
+          const r = c.getBoundingClientRect();
+          const x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5;
+          c.style.setProperty('--ry', `${(x * 7).toFixed(2)}deg`); c.style.setProperty('--rx', `${(-y * 6).toFixed(2)}deg`);
+        };
+        const leave = () => { c.style.setProperty('--ry', '0deg'); c.style.setProperty('--rx', '0deg'); };
+        c.addEventListener('pointermove', move); c.addEventListener('pointerleave', leave);
+        local.push(() => { c.removeEventListener('pointermove', move); c.removeEventListener('pointerleave', leave); });
+      });
+    }
 
     /* магнитные кнопки */
     if (finePointer() && !reduceNow) {
@@ -240,9 +417,14 @@ function initPage() {
     if (desktop && !reduceNow) {
       document.querySelectorAll<HTMLElement>('[data-vanta]').forEach((el) => {
         const stop = mountVanta(el, 'fog', { highlightColor: 0x14dcd5, midtoneColor: 0x0b3a3d, lowlightColor: 0x10161d, baseColor: 0x10161d, blurFactor: 0.7, speed: 0.8, zoom: 0.8 });
-        if (stop) cleanups.push(stop);
+        if (stop) local.push(stop);
       });
     }
+
+    /* шаги: бус едет по маршруту (компьютер) / линия заполняется (телефон) */
+    stepsRoute(desktop, reduceNow, local);
+
+    return () => local.splice(0).forEach((f) => f());
   });
 
   /* видео: грузим и играем только на экране */
@@ -265,6 +447,10 @@ function destroyPage() {
   ScrollTrigger.getAll().forEach((t) => t.kill());
 }
 
-document.addEventListener('astro:page-load', initPage);
+let first = true;
+document.addEventListener('astro:page-load', () => {
+  if (first) { first = false; tapeLogo(); } else curtain().out();
+  initPage();
+});
 document.addEventListener('astro:before-swap', destroyPage);
 document.addEventListener('astro:after-swap', () => { lenis?.scrollTo(0, { immediate: true }); lenis?.resize(); });

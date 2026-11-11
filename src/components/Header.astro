@@ -17,7 +17,7 @@ const nav = [
 ---
 <header class="hdr dark-hdr" data-header transition:persist="header">
   <div class="container hdr__in">
-    <a href={href(locale, 'home')} class="hdr__logo" aria-label={`${brand.name} — главная`}><Logo variant="dark" /></a>
+    <a href={href(locale, 'home')} class="hdr__logo" aria-label={`${brand.name} — главная`}><Logo variant="dark" /><i class="hdr__tape" data-logo-tape aria-hidden="true"></i></a>
     <nav class="hdr__nav" aria-label="Основное меню">
       {nav.map(([k, label]) => (
         <a href={href(locale, k)} class="hdr__link" aria-current={current === k ? 'page' : undefined}>{label}</a>
@@ -34,6 +34,7 @@ const nav = [
     </div>
   </div>
 
+  <i class="hdr__progress" data-progress aria-hidden="true"></i>
   <div class="menu" id="menu" data-menu hidden>
     <div class="container menu__in">
       <nav class="menu__nav" aria-label="Меню">
@@ -90,4 +91,8 @@ const nav = [
     .hdr__nav, .hdr__langs { display: flex; }
     .hdr__burger { display: none; }
   }
+  .hdr__logo { position: relative; }
+  .hdr__tape { position: absolute; left: -6%; right: -6%; top: 50%; height: 14px; margin-top: -7px; background: color-mix(in oklab, var(--accent) 82%, transparent); border-radius: 2px; transform: rotate(-3deg) scaleX(0); opacity: 0; pointer-events: none; mix-blend-mode: screen;
+    -webkit-mask: linear-gradient(90deg, transparent 0 3px, #000 3px calc(100% - 3px), transparent calc(100% - 3px)); }
+  .hdr__progress { position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--accent); transform: scaleX(0); transform-origin: 0 50%; pointer-events: none; z-index: 2; }
 </style>

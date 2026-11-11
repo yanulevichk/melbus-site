@@ -112,8 +112,10 @@ html.js [data-reveal] { opacity: 0; transform: translateY(28px); }
   html.js [data-reveal] { opacity: 1; transform: none; }
 }
 
-/* переход между страницами */
-::view-transition-old(root) { animation: 280ms var(--ease) both vt-out; }
-::view-transition-new(root) { animation: 420ms var(--ease) both vt-in; }
-@keyframes vt-out { to { opacity: 0; transform: translateY(-12px); } }
-@keyframes vt-in { from { opacity: 0; transform: translateY(18px); } }
+/* переход между страницами: шторка (motion.ts), стандартную анимацию браузера отключаем */
+::view-transition-old(root), ::view-transition-new(root) { animation: none; }
+.curtain { position: fixed; inset: 0; z-index: 45; display: grid; place-items: center; background: var(--dark); visibility: hidden; clip-path: inset(100% 0 0 0); }
+.curtain img { width: 64px; height: auto; }
+
+/* только для экранных читалок и поисковиков */
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }

@@ -6,6 +6,9 @@ interface Props { locale: Locale; title?: string; lead?: string }
 const { locale, title = 'Ваш новый адрес<br>ждёт.', lead = 'Пришлите видео квартиры — в течение 2 часов днём получите цену, которая не изменится.' } = Astro.props;
 ---
 <section class="cta dark section">
+  <svg class="cta__route" data-draw viewBox="0 0 1440 600" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <path d="M-40 120 C 260 40, 420 300, 700 260 S 1080 120, 1180 360 S 1300 560, 1500 520" />
+  </svg>
   <div class="container cta__in">
     <h2 class="t-hero" data-split set:html={title} />
     <div class="cta__side">
@@ -19,6 +22,10 @@ const { locale, title = 'Ваш новый адрес<br>ждёт.', lead = 'П�
 </section>
 
 <style>
+  .cta { position: relative; overflow: hidden; }
+  .cta__in { position: relative; z-index: 1; }
+  .cta__route { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+  .cta__route path { fill: none; stroke: var(--accent); stroke-width: 2; opacity: .55; vector-effect: non-scaling-stroke; }
   .cta__in { display: grid; gap: 40px; }
   .cta__side { display: grid; gap: 28px; align-content: end; }
   .cta__btns { display: flex; flex-wrap: wrap; gap: 12px; }
