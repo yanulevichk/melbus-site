@@ -254,7 +254,7 @@ box('van_stripe_l', 3.36, .1, .02, G['tape'], -.55, .55, .935, van, 0)
 box('van_stripe_r', 3.36, .1, .02, G['tape'], -.55, .55, -.935, van, 0)
 # ДНИЩЕ — «спецэффект» пролёта камеры под бусом: рама, двигатель, КПП, кардан, мост, рессоры, выхлоп, бак, запаска
 UB = mat('under', (0.34, 0.35, 0.37), 0.5); UM = mat('under_mid', (0.55, 0.56, 0.58), 0.4); UL = mat('under_light', (0.78, 0.79, 0.80), 0.3)
-box('van_floorpan', 3.9, .02, 1.7, mat('floorpan', (0.14, 0.15, 0.16)), -.3, .34, 0, van, 0)
+box('van_floorpan', 3.9, .02, 1.7, mat('floorpan', (0.27, 0.28, 0.30)), -.3, .34, 0, van, 0)
 for zz in (.42, -.42): box('van_rail', 4.3, .1, .08, UB, -.15, .24, zz, van, .01)                      # лонжероны
 for xx in (-2.05, -1.0, -.1, .7, 1.95): box('van_cross', .07, .07, .92, UB, xx, .25, 0, van, 0)        # поперечины
 box('van_engine', .72, .18, .55, UM, 1.55, .17, 0, van, .03)                                            # поддон двигателя
@@ -387,22 +387,22 @@ KEYS += [
 # без склейки: отъезжаем назад и вниз за корму, бус трогается, догоняем и ныряем под днище
 for k in range(1, 9):
     u = k / 8; t_ = 25.7 + u * 1.9; vx = van_x(t_)
-    rel = lerp(-1.75 - VAN_A, -4.2, eio(min(1, u * 1.6))) if u < .6 else lerp(-4.2, -3.0, eio((u - .6) / .4))
+    rel = lerp(-1.75 - VAN_A, -6.6, eout(min(1, u / .45))) if u < .45 else lerp(-6.6, -3.0, eio((u - .45) / .55))
     KEYS.append((t_, (vx + rel, lerp(1.2, 0.14, eio(u)), lerp(4.55, 4.45, u)), (vx, lerp(1.0, 0.45, eio(u)), 4.45), lerp(22, 20, u)))
 for k in range(1, 13):       # под днищем от кормы к кабине: смотрим вперёд и вверх — кардан, мост, выхлоп
     u = k / 12; t_ = 27.6 + u * 1.7; vx = van_x(t_)
-    rel = lerp(-3.0, 3.6, eio(u)); y = 0.12
+    rel = lerp(-3.0, 4.6, eio(u)); y = 0.12
     up = math.sin(math.pi * min(1, u / .75)) if u < .75 else 0.0
-    KEYS.append((t_, (vx + rel, y, 4.45), (vx + rel + 2.2, y + lerp(.1, .75, up), 4.45), lerp(20, 18, u)))
+    KEYS.append((t_, (vx + rel, y, 4.45), (vx + rel + 2.2, y + lerp(.1, .5, up), 4.45), lerp(20, 18, u)))
 for k in range(1, 11):       # вынырнули перед бусом, поднимаемся — бус проезжает под камерой
     u = k / 10; t_ = 29.3 + u * 1.5; vx = van_x(t_)
-    cam_ = (vx + lerp(3.6, -2.6, ein(u)), lerp(0.12, 6.0, eout(u)), 4.45)
+    cam_ = (vx + lerp(4.6, -3.0, ein(u)), lerp(0.12, 7.2, eout(u)), 4.45)
     fwd = (cam_[0] + 4.0, cam_[1] - 1.0, 4.45)
     look = tuple(lerp(fwd[i], (vx + 2.5, 0.6, 4.45)[i], eio(u)) for i in range(3))
     KEYS.append((t_, cam_, look, lerp(18, 26, u)))
 for k in range(1, 7):        # за бусом до остановки
     u = k / 6; t_ = 30.8 + u * 1.4; vx = van_x(t_)
-    KEYS.append((t_, (vx - lerp(2.6, 4.4, eio(u)), lerp(6.0, 3.0, eio(u)), lerp(4.45, 5.9, eio(u))), (vx + lerp(2.5, 0.5, u), lerp(0.6, 0.8, u), 4.45), 26))
+    KEYS.append((t_, (vx - lerp(3.0, 4.4, eio(u)), lerp(7.2, 3.0, eio(u)), lerp(4.45, 5.9, eio(u))), (vx + lerp(2.5, 0.5, u), lerp(0.6, 0.8, u), 4.45), 26))
 KEYS += [
     (32.8, (BX - 4.4, 1.7, 6.4), (BX - 1.0, 0.8, 4.45), 26),
     (34.0, (BX - 3.8, 1.6, 6.0), (BX - 1.4, 0.6, 4.45), 26),
