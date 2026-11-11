@@ -367,7 +367,7 @@ def bez(a, b, lift, k):
 def lerp3(a, b, k): return tuple(a[i] + (b[i] - a[i]) * k for i in range(3))
 def arc(a, b, lift, k):
     """дуга, которая взлетает и садится почти вертикально (не задевает соседнюю мебель)"""
-    v = bez(a, b, lift, k); hk = k * k * (3 - 2 * k)
+    v = bez(a, b, lift, k); kk = clamp01((k - .08) / .92); hk = kk * kk * (3 - 2 * kk)   # сначала вверх, потом в сторону
     return (a[0] + (b[0] - a[0]) * hk, v[1], a[2] + (b[2] - a[2]) * hk)
 
 def box_state(t):
@@ -414,14 +414,16 @@ KEYS = [
     (5.2, (2.6, 1.3, 2.4), (-1.0, 0.9, -1.0), 21),          # влетели в квартиру
     (6.4, (0.9, 1.35, 1.6), (-1.6, 1.0, -1.6), 21),         # скользим по диагонали, не упираясь в мебель
     (7.4, (-0.6, 1.7, 1.9), (-2.4, 0.9, -0.9), 22),
-    (8.3, (-0.8, 4.0, 1.4), (0.4, 0.4, 1.3), 26),           # кран вверх
+    (8.0, (-1.0, 2.9, 2.6), (-0.4, 0.5, 0.0), 23),          # плавный кран вверх: взгляд скользит от кровати к заготовке
+    (8.6, (-0.5, 4.3, 1.3), (0.5, 0.4, 0.8), 26),
 ]
 # сверху: одна плавная спираль — сборка коробки и упаковка, равномерное вращение
 MOUTH_A = (BOXA[0], RY + BH * .4, BOXA[2])
 for k in range(0, 25):
     u = k / 24; t_ = 9.0 + u * 9.6
     ang = 3.4 - 2.09 * u
-    r = lerp(0.9, 2.2, eio(u)); y = lerp(7.2, 5.0, eio(u))
+    r = lerp(0.9, 2.2, eio(u))
+    y = lerp(5.6, 7.0, eout(u / .25)) if u < .25 else lerp(7.0, 5.0, eio((u - .25) / .75))   # кран продолжает подъём, потом плавно вниз
     KEYS.append((t_, (BOXA[0] + r * math.cos(ang), y, BOXA[2] + r * math.sin(ang)), MOUTH_A, lerp(32, 30, u)))
 KEYS += [
     (19.4, (-1.6, 3.6, BOXA[2] + 2.8), (BOXA[0], 1.5, BOXA[2]), 32),          # скотч: спокойный ракурс три четверти сверху
@@ -538,9 +540,9 @@ def apply(t, f):
     off = seg(t, T_OPEN_B[0], T_OPEN_B[1])
     a, b_, c_ = (eout(seg(t, T_TAPE[0], T_TAPE[1])) * (1 - off), eio(seg(t, T_TAPE[1], T_TAPE[2])) * (1 - off), eout(seg(t, T_TAPE[2], T_TAPE[3])) * (1 - off))
     top = BH + BT * 2.2
-    tapeL.scale = three_scale((TH, max(.001, DROP * a), TW_)); tapeL.location = P(-BW / 2 - TH / 2, top - DROP + DROP * a / 2, 0)   # растёт снизу вверх за рулоном
-    tapeT.scale = three_scale((max(.001, (BW + .02) * b_), TH, TW_)); tapeT.location = P(-BW / 2 + (BW + .02) * b_ / 2, top, 0)
-    tapeR.scale = three_scale((TH, max(.001, DROP * c_), TW_)); tapeR.location = P(BW / 2 + TH / 2, top - DROP * c_ / 2, 0)
+    tapeL.scale = three_scale((TH, DROP * a, TW_)) if a > .002 else (1e-4,) * 3; tapeL.location = P(-BW / 2 - TH / 2, top - DROP + DROP * a / 2, 0)   # растёт снизу вверх за рулоном
+    tapeT.scale = three_scale(((BW + .02) * b_, TH, TW_)) if b_ > .002 else (1e-4,) * 3; tapeT.location = P(-BW / 2 + (BW + .02) * b_ / 2, top, 0)
+    tapeR.scale = three_scale((TH, DROP * c_, TW_)) if c_ > .002 else (1e-4,) * 3; tapeR.location = P(BW / 2 + TH / 2, top - DROP * c_ / 2, 0)
     for t_ in (tapeL, tapeT, tapeR): t_.keyframe_insert('scale', frame=f); t_.keyframe_insert('location', frame=f)
     pos, rot, s = box_state(t)
     gulp = sum(math.sin(math.pi * seg(t, IN0 + i * IN_STEP + IN_DUR - .1, IN0 + i * IN_STEP + IN_DUR + .35)) for i in range(len(ITEMS)))
@@ -570,7 +572,7 @@ def apply(t, f):
             p_, sc_, r_ = (ax, RY, az), 1.0, ar
         elif k < 1:                                  # упаковка: по дуге к коробке, уменьшаясь, потом вниз — на дно
             if k < .68:
-                e = eio(k / .68); p_ = arc((ax, RY, az), aboveA, 2.0 + it['h'] * .35, e)
+                e = eio(k / .68); p_ = arc((ax, RY, az), aboveA, 1.4 + it['h'] * .25, e)   # ниже — дальше от объектива
                 sc_ = lerp(1.0, fit * 1.15, e); r_ = ar * (1 - eio(min(1, e / .5)))
             else:
                 e = eout((k - .68) / .32); p_ = lerp3(aboveA, slotA, e); sc_ = lerp(fit * 1.15, fit, e); r_ = 0.0
