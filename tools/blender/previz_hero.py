@@ -32,9 +32,9 @@ def lerp(a, b, k): return a + (b - a) * k
 def eio(k): return 4 * k * k * k if k < .5 else 1 - pow(-2 * k + 2, 3) / 2
 def eout(k): return 1 - pow(1 - k, 3)
 def ein(k): return k * k * k
-def eback(k):
+def eback(k, c1=1.70158):
     if k <= 0: return 0.0
-    c1 = 1.70158; c3 = c1 + 1
+    c3 = c1 + 1
     return 1 + c3 * pow(k - 1, 3) + c1 * pow(k - 1, 2)
 
 bpy.ops.wm.read_factory_settings(use_empty=True)
@@ -124,7 +124,7 @@ def f_sofa(p):
     box('sofa_al', .24, .6, .95, G['dark'], -1.08, .06, 0, p, .05); box('sofa_ar', .24, .6, .95, G['dark'], 1.08, .06, 0, p, .05)
     box('sofa_c1', .92, .16, .66, G['mid'], -.47, .48, .08, p, .05); box('sofa_c2', .92, .16, .66, G['mid'], .47, .48, .08, p, .05)
 def f_rug(p):
-    box('rug', 2.9, .025, 1.9, G['mid'], 0, 0, 0, p, 0)
+    box('rug', 2.0, .012, 1.5, G['mid'], 0, 0, 0, p, 0)
 def f_armchair(p):
     box('arm_b', .95, .4, .9, G['mid'], 0, .06, 0, p, .06); box('arm_k', .95, .62, .22, G['mid'], 0, .06, -.34, p, .05)
     box('arm_l', .18, .5, .9, G['mid'], -.39, .06, 0, p, .04); box('arm_r', .18, .5, .9, G['mid'], .39, .06, 0, p, .04)
@@ -138,7 +138,7 @@ def f_bookcase(p):
 def f_plant(p):
     cyl('pot', .24, .19, .46, G['white'], 0, 0, 0, p); ico('leaf1', .42, G['tree'], 0, .95, 0, p); ico('leaf2', .3, G['tree'], .18, 1.25, .08, p)
 def f_lamp(p):
-    cyl('lamp_b', .2, .22, .05, G['dark'], 0, 0, 0, p); box('lamp_p', .04, 1.55, .04, G['dark'], 0, .05, 0, p, 0); cyl('lamp_s', .2, .32, .36, G['white'], 0, 1.45, 0, p)
+    cyl('lamp_b', .2, .22, .05, G['dark'], 0, 0, 0, p); box('lamp_p', .04, 1.55, .04, G['dark'], 0, .05, 0, p, 0); cyl('lamp_s', .17, .27, .36, G['white'], 0, 1.45, 0, p)
 def f_tv(p):
     box('tv_st', 1.7, .42, .44, G['white'], 0, .08, 0, p, .03); box('tv_ft', 1.7, .08, .44, G['dark'], 0, 0, 0, p, .01)
     box('tv_sc', 1.36, .78, .05, G['dark'], 0, .62, -.08, p, .01)
@@ -212,7 +212,7 @@ def tree(x, z, s=0.85):
     t = empty('tree', P(x, 0, z))
     cyl('trunk', .06 * s, .08 * s, .7 * s, G['dark'], 0, 0, 0, t, 8); ico('crown', .55 * s, G['tree'], 0, 1.1 * s, 0, t)
 x = 4.8
-while x < 23: tree(x, 3.0); x += 2.9
+while x < 20.5: tree(x, 3.0); x += 2.9          # не ставим деревья на пути коробки у дома Б
 for tx, tz, ts in [(BX - 4.5, -4.0, 1.4), (BX - 1.5, -5.0, 1.6), (BX + 2.5, -4.6, 1.3), (BX + 5.0, -3.6, 1.5), (BX + 7.5, 1.0, 1.2), (BX - 7.0, 0.5, 1.3), (16.0, -3.5, 1.2), (24.0, -3.8, 1.4), (29.5, -3.2, 1.3)]:
     tree(tx, tz, ts)
 x = -16.0
@@ -222,12 +222,13 @@ while x < 46:
 
 # ---------------- мебель по местам: A и Б ----------------
 PLAN = [
-    ('bed', -2.2, -1.5, 0, 2.35, -1.5, 0), ('sofa', 0.3, -2.1, 0, 0.0, -2.1, 0), ('fridge', 3.25, -2.25, 0, -3.25, -2.25, 0),
-    ('dining', 2.55, -0.85, 0, -2.2, -0.55, math.pi / 2), ('bookcase', -3.32, 1.75, math.pi / 2, -3.32, -1.0, math.pi / 2),
-    ('tv', -3.33, -0.05, math.pi / 2, 0.0, 0.95, math.pi), ('armchair', -2.0, 1.5, 0.9, 1.45, 0.55, -0.75),
-    ('rug', 0.3, -0.7, 0, 0.0, -0.65, 0), ('lamp', -1.1, -2.3, 0, -1.55, -2.3, 0), ('plant', 3.3, 1.95, 0, 3.3, 1.1, 0),
+    ('bed', -2.2, -1.5, 0, 2.35, -1.5, 0), ('sofa', 0.6, -2.1, 0, 0.0, -2.1, 0), ('fridge', 3.25, -2.25, 0, -3.25, -2.25, 0),
+    ('dining', 2.55, -0.85, 0, -2.0, -0.55, math.pi / 2), ('bookcase', -3.32, 1.75, math.pi / 2, -3.32, -1.0, math.pi / 2),
+    ('tv', -3.33, -0.05, math.pi / 2, 0.0, 0.45, math.pi), ('armchair', -2.3, 2.05, 0.6, 1.62, 0.6, -0.75),
+    ('rug', 2.65, -0.85, 0, 0.0, -0.65, 0), ('lamp', -0.95, -2.3, 0, -1.72, -2.3, 0), ('plant', 3.3, 1.95, 0, 3.3, 1.1, 0),
 ]
 ITEMS = []
+OUT_ORDER = ['rug', 'bed', 'sofa', 'fridge', 'dining', 'bookcase', 'tv', 'armchair', 'lamp', 'plant']  # ковёр — первым, на него ставят мебель
 FIT = {'bed': .16, 'sofa': .14, 'fridge': .42, 'dining': .25, 'bookcase': .22, 'tv': .19, 'armchair': .33, 'rug': .11, 'lamp': .45, 'plant': .42}
 SLOTS = [(x, z) for z in (-.3, .3) for x in (-.68, -.34, 0, .34, .68)]
 for n, ax, az, ar, bx_, bz, br in PLAN:
@@ -259,7 +260,7 @@ cyl('roll_outer', .12, .12, .3, G['tape'], 0, 0, 0, tapeRoll, 24, axis='z')
 cyl('roll_core', .06, .06, .32, G['light'], 0, 0, 0, tapeRoll, 16, axis='z')
 for t_ in (tapeL, tapeT, tapeR): t_.location = (0, 0, 0)
 # раскладка коробки: в квартире А и Б (координаты three)
-BOXA, BOXB = (0.6, RY, 0.9), (BX - 1.0, RY, 1.95)
+BOXA, BOXB = (0.6, RY, 0.7), (BX - 1.0, RY, 1.95)   # вокруг заготовки в А мебели нет
 VAN_A, VAN_B = 2.2, BX + 2.2          # где стоит бус (центр) при погрузке и выгрузке: задняя дверь ≈ x−2.22
 
 # ---------------- бус: пустой кузов, задние двери, пандус, днище ----------------
@@ -283,7 +284,7 @@ for zz in (.68, -.68): box('van_lamp', .04, .14, .3, G['light'], 2.31, .9, zz, v
 box('van_bump_f', .2, .26, 1.9, G['dark'], 2.28, .32, 0, van, .04)
 box('van_logo_plate_l', 2.0, .55, .01, G['light'], -.6, 1.35, .935, van, 0)   # место под логотип MELBUS
 box('van_logo_plate_r', 2.0, .55, .01, G['light'], -.6, 1.35, -.935, van, 0)
-box('van_bump_r', .16, .18, 1.9, G['dark'], -2.24, .2, 0, van, .03)
+box('van_bump_r', .16, .16, 1.9, G['dark'], -2.24, .18, 0, van, .03)
 box('van_stripe_l', 4.4, .1, .02, G['tape'], .0, .55, .935, van, 0)
 box('van_stripe_r', 4.4, .1, .02, G['tape'], .0, .55, -.935, van, 0)
 # ДНИЩЕ — «спецэффект» пролёта камеры под бусом: рама, двигатель, КПП, кардан, мост, рессоры, выхлоп, бак, запаска
@@ -291,25 +292,25 @@ UB = mat('under', (0.34, 0.35, 0.37), 0.5); UM = mat('under_mid', (0.55, 0.56, 0
 box('van_floorpan', 3.9, .02, 1.7, mat('floorpan', (0.40, 0.41, 0.43)), -.3, .34, 0, van, 0)
 for zz in (.42, -.42): box('van_rail', 4.3, .1, .08, UB, -.15, .24, zz, van, .01)                      # лонжероны
 for xx in (-2.05, -1.0, -.1, .7, 1.95): box('van_cross', .07, .07, .92, UB, xx, .25, 0, van, 0)        # поперечины
-box('van_engine', .72, .18, .55, UM, 1.55, .17, 0, van, .03)                                            # поддон двигателя
-box('van_engine_ribs', .6, .03, .45, UL, 1.55, .155, 0, van, 0)
-box('van_gearbox', .62, .16, .3, UM, .95, .17, 0, van, .04)                                            # коробка передач
+box('van_engine', .72, .14, .55, UM, 1.55, .23, 0, van, .03)                                            # поддон двигателя
+box('van_engine_ribs', .6, .03, .45, UL, 1.55, .215, 0, van, 0)
+box('van_gearbox', .62, .14, .3, UM, .95, .21, 0, van, .04)                                            # коробка передач
 cyl('van_driveshaft', .045, .045, 1.95, UL, -.33, .25, 0, van, 12, axis='x')                            # карданный вал
 for xx in (.63, -.33, -1.28): cyl('van_ujoint', .075, .075, .06, UB, xx, .25, 0, van, 12, axis='x')    # крестовины и опора
 box('van_bearing', .1, .1, .22, UB, -.33, .26, 0, van, 0)
-cyl('van_diff', .15, .15, .2, UM, -1.45, .33, 0, van, 16, axis='x')                                    # «тыква» дифференциала
-cyl('van_axle_r', .065, .065, 1.6, UB, -1.45, .37, 0, van, 12, axis='z')                               # задний мост
+cyl('van_diff', .12, .12, .2, UM, -1.45, .305, 0, van, 16, axis='x')                                    # «тыква» дифференциала
+cyl('van_axle_r', .055, .055, 1.6, UB, -1.45, .34, 0, van, 12, axis='z')                               # задний мост
 for zz in (.55, -.55):
     box('van_leaf', 1.2, .05, .08, UL, -1.45, .26, zz, van, .01)                                       # рессоры
-    sh = cyl('van_shock', .025, .025, .32, UL, -1.15, .35, zz * 1.1, van, 8); sh.rotation_euler = (0, -.5, 0)  # амортизаторы
+    sh = cyl('van_shock', .025, .025, .18, UL, -1.15, .2, zz * 1.1, van, 8); sh.rotation_euler = (0, -.5, 0)  # амортизаторы
 cyl('van_axle_f', .04, .04, 1.5, UB, 1.5, .37, 0, van, 10, axis='z')
 cyl('van_rack', .03, .03, 1.2, UL, 1.32, .3, 0, van, 10, axis='z')                                      # рулевая рейка
 for zz in (.66, -.66):
-    for xx in (1.5, -1.45): cyl('van_disc', .2, .2, .03, UL, xx, .37, zz, van, 20, axis='z')           # тормозные диски
+    for xx in (1.5, -1.45): cyl('van_disc', .2, .2, .03, UL, xx, .37, zz * 1.13, van, 20, axis='z')    # тормозные диски (внутри колёс)
 cyl('van_exhaust', .03, .03, 3.4, UL, -.5, .2, .34, van, 10, axis='x')                                 # выхлоп
-box('van_muffler', .62, .14, .22, UM, -.6, .14, .34, van, .04)                                         # глушитель
-box('van_tank', .7, .16, .5, UM, .2, .18, -.38, van, .03)                                              # бак
-sp = cyl('van_spare', .3, .3, .18, UB, -1.98, .17, 0, van, 22)                                          # запаска под кормой
+box('van_muffler', .62, .12, .22, UM, -.6, .2, .34, van, .04)                                         # глушитель
+box('van_tank', .7, .14, .5, UM, .2, .21, -.38, van, .03)                                              # бак
+sp = cyl('van_spare', .3, .3, .12, UB, -1.98, .19, 0, van, 22)                                          # запаска под кормой
 # задние двери на петлях
 DOORS = []
 for s_ in (1, -1):
@@ -322,22 +323,22 @@ rampG = empty('van_ramp', P(CX0, .42, 0), van)
 ramp = box('van_ramp_plank', 1.6, .04, 1.2, G['mid'], -.8, -.02, 0, rampG, 0)
 WHEELS = []
 for wx_ in (-1.45, 1.5):
-    for wz in (.82, -.82):
+    for wz in (.86, -.86):
         w = cyl('wheel', .37, .37, .28, G['dark'], wx_, .37, wz, van, 24, axis='z'); WHEELS.append(w)
 
 # ---------------- тайминг (секунды) ----------------
-T_BOX_POP, T_WALLS, T_OPEN = (8.3, 8.9), (8.9, 10.4), (10.2, 10.9)   # заготовка лежит с начала: клапаны раскрываются, потом стенки встают
+T_WALLS, T_FLAPS, T_OPEN = (8.3, 9.7), (9.3, 10.2), (10.2, 10.9)   # заготовка лежит с начала: стенки встают, клапаны (сложены внутрь) раскрываются вверх
 IN0, IN_STEP, IN_DUR = 11.6, 0.62, 1.2
 T_CLOSE_S, T_CLOSE_F = (18.5, 19.1), (18.8, 19.4)
 T_TAPE = (19.5, 19.8, 20.6, 20.9)
 T_STICK = (20.7, 21.1)
 T_VAN_IN = (17.0, 21.0)
 T_DOORS_A = (21.4, 22.0, 25.0, 25.6)       # открыть / закрыть
-T_HOP_A, T_RAMP_A = (22.2, 23.3), (23.4, 24.7)
+T_HOP_A, T_RAMP_A = (22.2, 23.4), (23.45, 24.7)
 CUT = 25.8
 T_DRIVE = (26.2, 31.8)
 T_DOORS_B = (32.2, 32.9, 35.3, 35.9)
-T_RAMP_B, T_HOP_B = (33.0, 34.0), (34.1, 35.2)
+T_RAMP_B, T_HOP_B = (33.0, 34.0), (34.05, 35.3)
 T_OPEN_B = (35.9, 36.1, 36.1, 36.7)        # скотч снят, клапаны раскрылись
 OUT0, OUT_STEP, OUT_DUR = 36.8, 0.32, 1.1
 T_FLAT, T_GONE = (40.6, 41.3), (41.3, 41.7)
@@ -364,28 +365,42 @@ def bez(a, b, lift, k):
     u = 1 - k
     return tuple(u * u * a[i] + 2 * u * k * q[i] + k * k * b[i] for i in range(3))
 def lerp3(a, b, k): return tuple(a[i] + (b[i] - a[i]) * k for i in range(3))
+def arc(a, b, lift, k):
+    """дуга, которая взлетает и садится почти вертикально (не задевает соседнюю мебель)"""
+    v = bez(a, b, lift, k); hk = k * k * (3 - 2 * k)
+    return (a[0] + (b[0] - a[0]) * hk, v[1], a[2] + (b[2] - a[2]) * hk)
 
 def box_state(t):
     """позиция коробки (three), поворот, масштаб"""
     vA, vB = van_x(t), van_x(t)
     cargoA = (VAN_A - 1.05, .43, 4.45); cargoB = (VAN_B - 1.05, .43, 4.45)
-    streetA = (VAN_A - 2.22 - 2.4, 0.0, 4.45); streetB = (VAN_B - 2.22 - 2.4, 0.0, 4.45)
-    rampTopA = (VAN_A - 2.22 - .2, .42, 4.45); rampTopB = (VAN_B - 2.22 - .2, .42, 4.45)
+    streetA = (VAN_A - 4.8, 0.0, 4.45); streetB = (VAN_B - 4.8, 0.0, 4.45)
+    edgeA = (VAN_A - 4.8, RY, 2.3); edgeB = (VAN_B - 4.8, RY, 2.3)        # край квартиры напротив кормы — в стороне от дверей
+    rampTopA = (VAN_A - 2.22 - .2, .43, 4.45); rampTopB = (VAN_B - 2.22 - .2, .43, 4.45)
+    clearA = (VAN_A - 3.35, .45, 4.45); clearB = (VAN_B - 3.35, .45, 4.45)    # целиком за бампером, на уровне пола кузова
     s = 1.0 - ein(seg(t, *T_GONE))
     rot = 0.0
     if t < T_HOP_A[0]: pos = BOXA
     elif t < T_HOP_A[1]:
-        k = eio(seg(t, *T_HOP_A)); pos = bez(BOXA, streetA, 1.5, k); rot = math.sin(math.pi * k) * .35
+        k = seg(t, *T_HOP_A)
+        if k < .66: e = eio(k / .66); pos = bez(BOXA, edgeA, 1.0, e); rot = math.sin(math.pi * e) * .25
+        else: e = eio((k - .66) / .34); pos = bez(edgeA, streetA, .25, e)
     elif t < T_RAMP_A[1]:
         k = eio(seg(t, *T_RAMP_A))
-        pos = lerp3(streetA, rampTopA, min(1, k / .55)) if k < .55 else lerp3(rampTopA, cargoA, (k - .55) / .45)
+        if k < .35: pos = bez(streetA, clearA, .2, k / .35)                 # поднялись к пандусу, не задевая бампер
+        elif k < .55: pos = lerp3(clearA, rampTopA, (k - .35) / .2)
+        else: pos = lerp3(rampTopA, cargoA, (k - .55) / .45)
     elif t < CUT: pos = cargoA
     elif t < T_RAMP_B[0]: pos = (van_x(t) - 1.05, .43, 4.45)         # едет в кузове
     elif t < T_RAMP_B[1]:
         k = eio(seg(t, *T_RAMP_B))
-        pos = lerp3(cargoB, rampTopB, min(1, k / .45)) if k < .45 else lerp3(rampTopB, streetB, (k - .45) / .55)
+        if k < .45: pos = lerp3(cargoB, rampTopB, k / .45)
+        elif k < .65: pos = lerp3(rampTopB, clearB, (k - .45) / .2)        # выехали целиком за бампер
+        else: pos = bez(clearB, streetB, .2, (k - .65) / .35)
     elif t < T_HOP_B[1]:
-        k = eio(seg(t, *T_HOP_B)); pos = bez(streetB, BOXB, 1.5, k); rot = -math.sin(math.pi * k) * .35
+        k = seg(t, *T_HOP_B)
+        if k < .3: e = eio(k / .3); pos = bez(streetB, edgeB, .25, e)
+        else: e = eio((k - .3) / .7); pos = bez(edgeB, BOXB, 1.0, e); rot = -math.sin(math.pi * e) * .25
     else: pos = BOXB
     return pos, rot, max(s, .0001)
 
@@ -422,15 +437,15 @@ KEYS += [
 for k in range(1, 9):
     u = k / 8; t_ = 25.7 + u * 1.9; vx = van_x(t_)
     rel = lerp(-1.75 - VAN_A, -6.6, eout(min(1, u / .45))) if u < .45 else lerp(-6.6, -3.0, eio((u - .45) / .55))
-    KEYS.append((t_, (vx + rel, lerp(1.2, 0.14, eio(u)), lerp(4.55, 4.45, u)), (vx, lerp(1.0, 0.45, eio(u)), 4.45), lerp(22, 20, u)))
+    KEYS.append((t_, (vx + rel, lerp(1.2, 0.10, eio(u)), lerp(4.55, 4.45, u)), (vx, lerp(1.0, 0.45, eio(u)), 4.45), lerp(22, 20, u)))
 for k in range(1, 13):       # под днищем от кормы к кабине: смотрим вперёд и вверх — кардан, мост, выхлоп
     u = k / 12; t_ = 27.6 + u * 1.7; vx = van_x(t_)
-    rel = lerp(-3.0, 4.6, eio(u)); y = 0.12
+    rel = lerp(-3.0, 4.6, eio(u)); y = 0.09   # ~10 см до деталей днища, ~9 см до асфальта
     up = math.sin(math.pi * min(1, u / .6)) if u < .6 else 0.0
     KEYS.append((t_, (vx + rel, y, 4.45), (vx + rel + 2.2, y + lerp(.1, .5, up), 4.45), lerp(20, 18, u)))
 for k in range(1, 11):       # вынырнули перед бусом, поднимаемся — бус проезжает под камерой
     u = k / 10; t_ = 29.3 + u * 1.5; vx = van_x(t_)
-    cam_ = (vx + lerp(4.6, -3.0, ein(u)), lerp(0.12, 7.2, eout(u)), 4.45)
+    cam_ = (vx + lerp(4.6, -3.0, ein(u)), lerp(0.09, 7.2, eout(u)), 4.45)
     fwd = (cam_[0] + 4.0, cam_[1] - 1.0, 4.45)
     look = tuple(lerp(fwd[i], (vx + 2.5, 0.6, 4.45)[i], eio(u)) for i in range(3))
     KEYS.append((t_, cam_, look, lerp(18, 26, u)))
@@ -508,13 +523,14 @@ def apply(t, f):
     rampG.scale = (max(rk, .0001), 1, 1); rampG.rotation_euler = (0, -.27 * rk, 0)
     rampG.keyframe_insert('scale', frame=f); rampG.keyframe_insert('rotation_euler', frame=f)
     # коробка: сборка, клапаны, скотч
-    walls = eio(seg(t, *T_WALLS)) * (1 - eio(seg(t, *T_FLAT)))
+    walls = eio(seg(t, *T_WALLS)) + eio(seg(t, *T_FLAT))   # в конце стенки складываются внутрь (walls → 2)
     opn = -0.28 * eout(seg(t, *T_OPEN))
     cS, cF = eio(seg(t, *T_CLOSE_S)), eio(seg(t, *T_CLOSE_F))
     rOpen = eio(seg(t, T_OPEN_B[2], T_OPEN_B[3])); flat = eio(seg(t, *T_FLAT))
-    pack = 2.0 * (1 - eio(seg(t, *T_BOX_POP)))      # до 8,3 с клапаны сложены на стенки — компактная заготовка
-    flS = lerp(lerp(opn, 1, cS), -0.28, rOpen) * (1 - flat) + pack
-    flF = lerp(lerp(opn, 1, cF), -0.28, rOpen) * (1 - flat) + pack
+    pack = 2.0 * (1 - eio(seg(t, *T_FLAPS)))        # клапаны сложены на внутреннюю сторону стенок, раскрываются, когда стенки уже стоят
+    fin = eio(seg(t, T_FLAT[0] - .3, T_FLAT[0] + .2))   # в конце клапаны сначала складываются внутрь, потом стенки
+    flS = lerp(lerp(lerp(opn, 1, cS), -0.28, rOpen) + pack, 2.0, fin)
+    flF = lerp(lerp(lerp(opn, 1, cF), -0.28, rOpen) + pack, 2.0, fin)
     for i, (hinge, flap) in enumerate(SIDES):
         hinge.rotation_euler = ((math.pi / 2) * (1 - walls), 0, 0)
         flap.rotation_euler = (-(math.pi / 2) * (flF if i < 2 else flS * .985), 0, 0)
@@ -537,24 +553,25 @@ def apply(t, f):
     showB = t >= T_OPEN_B[2]                                           # в Б коробка открылась — вещи снова на дне
     for i, it in enumerate(ITEMS):
         ax, az, ar = it['a']; bx_, bz, br = it['b']; fit = it['fit']; sx, sz = it['slot']
-        slotA = (BOXA[0] + sx, RY + BT, BOXA[2] + sz); aboveA = (slotA[0], RY + BH + .55, slotA[2])
-        slotB = (BOXB[0] + sx, RY + BT, BOXB[2] + sz); aboveB = (slotB[0], RY + BH + .55, slotB[2])
+        slotA = (BOXA[0] + sx, RY + BT, BOXA[2] + sz); aboveA = (slotA[0], RY + BH + 1.0, slotA[2])   # выше открытых клапанов
+        slotB = (BOXB[0] + sx, RY + BT, BOXB[2] + sz); aboveB = (slotB[0], RY + BH + 1.3, slotB[2])   # выше открытых клапанов
         k = seg(t, IN0 + i * IN_STEP, IN0 + i * IN_STEP + IN_DUR)
-        o_ = seg(t, OUT0 + i * OUT_STEP, OUT0 + i * OUT_STEP + OUT_DUR)
+        oi = OUT_ORDER.index(it['n'])
+        o_ = seg(t, OUT0 + oi * OUT_STEP, OUT0 + oi * OUT_STEP + OUT_DUR)
         if o_ > 0:                                   # распаковка: со дна вверх, потом по дуге на место, растёт
             if o_ < .3:
                 e = eout(o_ / .3); p_ = lerp3(slotB, aboveB, e); sc_ = lerp(fit, fit * 1.15, e); r_ = 0.0
             else:
-                e = eout((o_ - .3) / .7); p_ = bez(aboveB, (BX + bx_, RY, bz), 1.6 + it['h'] * .3, e)
-                sc_ = lerp(fit * 1.15, 1.0, eback(e) if e < 1 else 1.0); r_ = br * e
+                e = eout((o_ - .3) / .7); p_ = arc(aboveB, (BX + bx_, RY, bz), 2.0 + it['h'] * .3, e)
+                sc_ = lerp(fit * 1.15, 1.0, eback(e, .9) if e < 1 else 1.0); r_ = br * eio(min(1, e / .5))   # разворот — пока высоко
         elif showB and t >= OUT0 - 1.0:              # ждут на дне открытой коробки
             p_, sc_, r_ = slotB, fit, 0.0
         elif k <= 0:
             p_, sc_, r_ = (ax, RY, az), 1.0, ar
         elif k < 1:                                  # упаковка: по дуге к коробке, уменьшаясь, потом вниз — на дно
             if k < .68:
-                e = eio(k / .68); p_ = bez((ax, RY, az), aboveA, 1.6 + it['h'] * .35, e)
-                sc_ = lerp(1.0, fit * 1.15, e); r_ = ar * (1 - e)
+                e = eio(k / .68); p_ = arc((ax, RY, az), aboveA, 2.0 + it['h'] * .35, e)
+                sc_ = lerp(1.0, fit * 1.15, e); r_ = ar * (1 - eio(min(1, e / .5)))
             else:
                 e = eout((k - .68) / .32); p_ = lerp3(aboveA, slotA, e); sc_ = lerp(fit * 1.15, fit, e); r_ = 0.0
         else:                                        # лежит на дне, пока клапаны не закрылись
