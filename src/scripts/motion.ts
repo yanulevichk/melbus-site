@@ -142,7 +142,9 @@ function sceneFrames(el: HTMLElement, tl: gsap.core.Timeline) {
 /* ---------- 3D-сцены: грузим three.js только когда сцена рядом с экраном ---------- */
 function scene3d(el: HTMLElement, tl: gsap.core.Timeline, local: (() => void)[]) {
   const host = el.querySelector<HTMLElement>('[data-three]');
-  if (!host) return;
+  if (host) mount3d(host, tl, local);
+}
+function mount3d(host: HTMLElement, tl: gsap.core.Timeline, local: (() => void)[]) {
   const st = { p: 0 };
   let api: { setProgress(p: number): void; destroy(): void } | null = null;
   let alive = true;
@@ -289,6 +291,36 @@ function initPage() {
         scrollTrigger: { trigger: path.closest('[data-draw]') || path, start: 'top 85%', end: 'center 45%', scrub: 0.6 } });
     });
 
+    /* «лента скотча»: линия протягивается и открывает кадр сверху вниз */
+    document.querySelectorAll<HTMLElement>('[data-tape]').forEach((el) => {
+      const media = el.querySelector<HTMLElement>('.tape__media');
+      if (!media) return;
+      if (rm) { gsap.set(media, { clipPath: 'none' }); return; }
+      let line = el.querySelector<HTMLElement>('.tape__line');
+      if (!line) { line = document.createElement('i'); line.className = 'tape__line'; line.setAttribute('aria-hidden', 'true'); el.appendChild(line); }
+      const t = gsap.timeline({ paused: true });
+      t.fromTo(line, { scaleX: 0, top: '0%', opacity: 1 }, { scaleX: 1, duration: 0.75, ease: 'power3.inOut' })
+        .fromTo(media, { clipPath: 'inset(0% 0% 100% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.25, ease: 'expo.inOut' }, '-=0.05')
+        .to(line, { top: '100%', duration: 1.25, ease: 'expo.inOut' }, '<')
+        .to(line, { opacity: 0, duration: 0.5 }, '-=0.25');
+      ScrollTrigger.create({ trigger: el, start: 'top 80%', once: true, onEnter: () => t.play() });
+    });
+
+    /* открытие первого экрана (люкс): линия-скотч → заголовок строками → остальное */
+    document.querySelectorAll<HTMLElement>('[data-intro-hero]').forEach((hero) => {
+      const title = hero.querySelector<HTMLElement>('[data-intro-title]');
+      const line = hero.querySelector<HTMLElement>('[data-intro-line]');
+      const rest = hero.querySelectorAll<HTMLElement>('[data-intro-fade]');
+      if (rm || !title) { gsap.set([title, line, ...rest], { clearProps: 'all', visibility: 'visible', opacity: 1, scaleX: 1 }); return; }
+      const split = SplitText.create(title, { type: 'lines', mask: 'lines', linesClass: 'split-line' });
+      cleanups.push(() => split.revert());
+      gsap.set(title, { visibility: 'visible' });
+      const t = gsap.timeline({ delay: 0.15 + delay });
+      t.from(split.lines, { yPercent: 105, duration: 1.35, ease: 'expo.out', stagger: 0.1 }, 0)
+        .fromTo(line, { scaleX: 0 }, { scaleX: 1, duration: 1.1, ease: 'expo.inOut' }, 0.35)
+        .fromTo(rest, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 1.1, ease: 'expo.out', stagger: 0.09 }, 0.7);
+    });
+
     /* табло цены */
     document.querySelectorAll<HTMLElement>('[data-board]').forEach(priceBoard);
 
@@ -420,6 +452,18 @@ function initPage() {
         if (stop) local.push(stop);
       });
     }
+
+    /* 3D вне сцен-слотов (люкс-hero): прогресс = прокрутка своей секции */
+    document.querySelectorAll<HTMLElement>('[data-three-free]').forEach((host) => {
+      const sec = host.closest<HTMLElement>('section') || host;
+      const tl = gsap.timeline({ paused: true });
+      tl.set({}, {}, 1);
+      mount3d(host, tl, local);
+      if (location.search.includes('debug')) ((window as any).__tl ||= {})[host.dataset.three!] = tl;
+      if (reduceNow) return;
+      const trig = ScrollTrigger.create({ trigger: sec, start: 'top top', end: 'bottom top', scrub: 0.6, animation: tl });
+      local.push(() => { trig.kill(); tl.kill(); });
+    });
 
     /* шаги: бус едет по маршруту (компьютер) / линия заполняется (телефон) */
     stepsRoute(desktop, reduceNow, local);

@@ -785,11 +785,126 @@ async function boxScene(host: HTMLElement): Promise<SceneApi> {
   return { setProgress(v) { p = clamp01(v); frame(); }, destroy: st.destroy };
 }
 
+/* ======================================================================
+   СЦЕНА «BOXHERO»: предметная съёмка одной коробки MELBUS на графите (люкс-версия)
+   При загрузке протягивается скотч; скролл поворачивает коробку; мышь — лёгкий параллакс.
+   ====================================================================== */
+async function boxHeroScene(host: HTMLElement): Promise<SceneApi> {
+  const st = makeStage(host, { persp: true });
+  const { scene, renderer } = st;
+  const cam = st.camera as THREE.PerspectiveCamera;
+  renderer.toneMappingExposure = 1.0;
+  const logo = logoTexture(st.invalidate);
+  if (document.fonts?.ready) await document.fonts.ready;
+
+  // свет как в студии: ключевой сверху-слева, холодный контровой сзади, слабая заливка
+  st.sun.position.set(-4, 10, 5); st.sun.intensity = 1.75;
+  const sc = st.sun.shadow.camera; sc.left = -5; sc.right = 5; sc.top = 5; sc.bottom = -5; sc.updateProjectionMatrix();
+  st.sun.shadow.radius = 6;
+  const rim = new THREE.DirectionalLight(col(0xbff7f4), 0.9); rim.position.set(6, 4, -7); scene.add(rim);
+  const fill = new THREE.DirectionalLight(0xffffff, 0.12); fill.position.set(7, 1.5, 6); scene.add(fill);
+
+  // фактура картона: мелкий шум в рельефе
+  const noise = canvasTex(256, 256, (c) => {
+    const img = c.createImageData(256, 256);
+    for (let i = 0; i < img.data.length; i += 4) { const v = 118 + Math.random() * 20; img.data[i] = img.data[i + 1] = img.data[i + 2] = v; img.data[i + 3] = 255; }
+    c.putImageData(img, 0, 0);
+    c.globalAlpha = 0.12; c.fillStyle = '#000';
+    for (let y = 0; y < 256; y += 6) c.fillRect(0, y, 256, 1); // волокна гофры
+  });
+  noise.encoding = THREE.LinearEncoding; noise.wrapS = noise.wrapT = THREE.RepeatWrapping; noise.repeat.set(3, 3);
+
+  const W = 2.5, D = 1.75, H = 1.8;
+  const root = new THREE.Group(); scene.add(root);
+  const card = new THREE.MeshStandardMaterial({ color: col(0xf6f7f8), roughness: 0.82, bumpMap: noise, bumpScale: 0.0028, envMapIntensity: 0.55 });
+  const body = new THREE.Mesh(new RoundedBoxGeometry(W, H, D, 5, 0.035), card);
+  body.position.y = H / 2; body.castShadow = body.receiveShadow = true; root.add(body);
+  // шов между клапанами и кромки клапанов
+  const seamM = mat(0xc3cad1, { rough: 0.9 });
+  part(root, W - 0.06, 0.004, 0.012, seamM, 0, H + 0.0005, 0, 0).castShadow = false;
+  part(root, 0.012, 0.004, D - 0.06, mat(0xd5dbe0, { rough: 0.9 }), 0, H + 0.0005, 0, 0).castShadow = false;
+  // скотч: верх и спуски по торцам
+  const tapeM = new THREE.MeshStandardMaterial({ color: col(0x0fc4bd), roughness: 0.4, metalness: 0, emissive: col(0x0a8c87), emissiveIntensity: 0.35, envMapIntensity: 0.35 });
+  tapeM.toneMapped = false;
+  const unit = new THREE.BoxGeometry(1, 1, 1);
+  const tTop = new THREE.Mesh(unit, tapeM), tL = new THREE.Mesh(unit, tapeM), tR = new THREE.Mesh(unit, tapeM);
+  tTop.castShadow = true;
+  root.add(tTop, tL, tR);
+  // невидимый пол, на котором видна только тень
+  const floor = new THREE.Mesh(new THREE.CircleGeometry(6, 48), new THREE.ShadowMaterial({ opacity: 0.5 }));
+  floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor);
+  const TW = 0.46, TH = 0.006, DROP = 0.6;
+  // логотип на фасаде и наклейка комнаты на торце
+  const dec = new THREE.Mesh(new THREE.PlaneGeometry(W * 0.6, (W * 0.6) / LOGO_RATIO), new THREE.MeshStandardMaterial({ map: logo, transparent: true, roughness: 0.7, envMapIntensity: 0.4 }));
+  dec.position.set(0, H * 0.52, D / 2 + 0.002); root.add(dec);
+  const stW = D * 0.66;
+  const sticker = new THREE.Mesh(new THREE.PlaneGeometry(stW, stW * 400 / 640), new THREE.MeshStandardMaterial({ map: stickerTexture(host.dataset.room || 'КУХНЯ', host.dataset.num || '07'), transparent: true, roughness: 0.55, envMapIntensity: 0.5 }));
+  sticker.rotation.y = Math.PI / 2; sticker.position.set(W / 2 + 0.002, H * 0.4, 0.05); root.add(sticker);
+
+  // мягкая контактная тень (поверх «пола», которого не видно)
+  const shadowTex = canvasTex(256, 256, (c) => {
+    const g = c.createRadialGradient(128, 128, 10, 128, 128, 128);
+    g.addColorStop(0, 'rgba(0,0,0,0.75)'); g.addColorStop(0.55, 'rgba(0,0,0,0.28)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+    c.fillStyle = g; c.fillRect(0, 0, 256, 256);
+  });
+  const contact = new THREE.Mesh(new THREE.PlaneGeometry(W * 2.1, D * 2.3), new THREE.MeshBasicMaterial({ map: shadowTex, transparent: true, depthWrite: false }));
+  contact.rotation.x = -Math.PI / 2; contact.position.y = 0.002; scene.add(contact);
+
+  // состояние
+  let p = 0, tape = 0;
+  const look = { x: 0, y: 0 }, aim = { x: 0, y: 0 };
+  const tgt = new THREE.Vector3();
+  const frame = () => {
+    const a = st.aspect;
+    const tl = eout(seg(tape, 0, 0.28)), tt = eio(seg(tape, 0.22, 0.8)), tr = eout(seg(tape, 0.74, 1));
+    const top = H + TH / 2 + 0.002;
+    tL.visible = tl > 0; tL.scale.set(TH, Math.max(0.001, DROP * tl), TW); tL.position.set(-W / 2 - TH / 2, top - (DROP * tl) / 2, 0);
+    tTop.visible = tt > 0; tTop.scale.set(Math.max(0.001, (W + 0.012) * tt), TH, TW); tTop.position.set(-W / 2 + ((W + 0.012) * tt) / 2, top, 0);
+    tR.visible = tr > 0; tR.scale.set(TH, Math.max(0.001, DROP * tr), TW); tR.position.set(W / 2 + TH / 2, top - (DROP * tr) / 2, 0);
+    // скролл: коробка поворачивается и чуть поднимается
+    root.rotation.y = lerp(-0.22, -1.05, eio(p)) + look.x * 0.12;
+    root.rotation.x = look.y * 0.05;
+    root.position.y = p * 0.35;
+    contact.material.opacity = 1 - p * 0.5;
+    const elev = lerp(0.26, 0.18, p);
+    const dist = a < 1 ? 11.4 : 10.4;
+    tgt.set(0, H * 0.5 + p * 0.25, 0);
+    cam.aspect = a; cam.fov = a < 1 ? 26 : 22;
+    cam.position.set(Math.sin(0.55) * Math.cos(elev) * dist, Math.sin(elev) * dist + H * 0.35, Math.cos(0.55) * Math.cos(elev) * dist).add(tgt);
+    cam.lookAt(tgt);
+    cam.updateProjectionMatrix();
+    st.invalidate();
+  };
+
+  // анимации по времени: скотч при появлении и мягкий параллакс за мышью
+  let raf = 0, t0 = 0, alive = true;
+  const tick = (t: number) => {
+    raf = 0; if (!alive) return;
+    if (!t0) t0 = t;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    tape = reduce ? 1 : Math.min(1, (t - t0 - 250) / 1300);
+    look.x += (aim.x - look.x) * 0.06; look.y += (aim.y - look.y) * 0.06;
+    frame();
+    if (tape < 1 || Math.abs(aim.x - look.x) > 0.001 || Math.abs(aim.y - look.y) > 0.001) raf = requestAnimationFrame(tick);
+  };
+  const kick = () => { if (!raf) raf = requestAnimationFrame(tick); };
+  const fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  const onMove = (e: PointerEvent) => { aim.x = (e.clientX / window.innerWidth - 0.5) * 2; aim.y = (e.clientY / window.innerHeight - 0.5) * 2; kick(); };
+  if (fine) window.addEventListener('pointermove', onMove, { passive: true });
+  st.onResize(frame);
+  st.ready();
+  kick();
+  return {
+    setProgress(v) { p = clamp01(v); frame(); },
+    destroy() { alive = false; cancelAnimationFrame(raf); window.removeEventListener('pointermove', onMove); st.destroy(); },
+  };
+}
+
 export function supportsWebGL() {
   try { const c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')); } catch { return false; }
 }
 
 export async function mountScene(host: HTMLElement, kind: string): Promise<SceneApi> {
   if (!supportsWebGL()) throw new Error('no webgl');
-  return kind === 'box' ? boxScene(host) : heroScene(host);
+  return kind === 'box' ? boxScene(host) : kind === 'boxhero' ? boxHeroScene(host) : heroScene(host);
 }

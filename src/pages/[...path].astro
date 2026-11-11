@@ -5,6 +5,7 @@
  */
 import Base from '../layouts/Base.astro';
 import Home from '../views/Home.astro';
+import HomeLux from '../views/HomeLux.astro';
 import Services from '../views/Services.astro';
 import Service from '../views/Service.astro';
 import Quote from '../views/Quote.astro';
@@ -15,7 +16,7 @@ import { faqHome } from '../data/faq';
 import { brand } from '../config/brand';
 
 export function getStaticPaths() {
-  const keys: PageKey[] = ['home', 'services', 'pricing', 'calculator', 'quote', 'guarantee', 'how', 'about', 'faq', 'contact', 'terms', 'privacy', 'cookies', 'complaints', ...services.map((s) => `service:${s.slug}` as PageKey)];
+  const keys: PageKey[] = ['home', 'services', 'pricing', 'calculator', 'quote', 'guarantee', 'how', 'about', 'faq', 'contact', 'terms', 'privacy', 'cookies', 'complaints', 'lux', ...services.map((s) => `service:${s.slug}` as PageKey)];
   return enabledLocales.flatMap((locale) => keys.map((key) => ({
     params: { path: href(locale, key).replace(/^\/|\/$/g, '') || undefined },
     props: { locale, key },
@@ -39,15 +40,17 @@ const meta: Record<string, { title: string; description: string; nav?: string }>
   privacy: { title: 'Политика конфиденциальности', description: 'Как MELBUS обрабатывает персональные данные.' },
   cookies: { title: 'Cookies', description: 'Политика cookies MELBUS.' },
   complaints: { title: 'Рекламации', description: 'Как подать рекламацию в MELBUS.' },
+  lux: { title: 'переезды в Варшаве с фиксированной ценой', description: 'Переезды квартир, домов и офисов по Варшаве, Польше и ЕС. Цена по видео без доплат, фактура VAT, BLIK и карта, 7 дней в неделю.' },
 };
 
 const svc = key.startsWith('service:') ? serviceBySlug(key.slice(8))! : null;
 const m = svc ? { title: svc.title, description: svc.lead, nav: 'services' } : meta[key];
 const legal = ['terms', 'privacy', 'cookies', 'complaints'].includes(key);
-const faqSchema = key === 'faq' || key === 'home' ? [{ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faqHome.map(([q, a]) => ({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: a } })) }] : [];
+const faqSchema = key === 'faq' || key === 'home' || key === 'lux' ? [{ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faqHome.map(([q, a]) => ({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: a } })) }] : [];
 ---
-<Base locale={locale} pageKey={key} title={m.title} description={m.description} nav={m.nav} schema={faqSchema}>
+<Base locale={locale} pageKey={key} title={m.title} description={m.description} nav={m.nav} schema={faqSchema} noindex={key === 'lux'} theme={key === 'lux' ? 'lux' : undefined}>
   {key === 'home' && <Home locale={locale} />}
+  {key === 'lux' && <HomeLux locale={locale} />}
   {key === 'services' && <Services locale={locale} />}
   {svc && <Service locale={locale} service={svc} />}
   {key === 'quote' && <Quote />}

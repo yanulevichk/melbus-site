@@ -5,6 +5,6 @@ import sitemap from '@astrojs/sitemap';
 export default defineConfig({
   site: 'https://melbus.pl', // TODO: финальный домен
   trailingSlash: 'always',
-  integrations: [sitemap({ filter: (p) => !p.endsWith('/404/') })],
+  integrations: [sitemap({ filter: (p) => !p.endsWith('/404/') && !p.endsWith('/lux/') })],
   vite: { plugins: [tailwindcss()] },
 });

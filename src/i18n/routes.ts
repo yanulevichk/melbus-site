@@ -16,7 +16,7 @@ export const enabledLocales = (Object.keys(locales) as Locale[]).filter((l) => l
 
 export type PageKey =
   | 'home' | 'services' | 'pricing' | 'calculator' | 'quote' | 'guarantee' | 'how'
-  | 'about' | 'faq' | 'contact' | 'terms' | 'privacy' | 'cookies' | 'complaints'
+  | 'about' | 'faq' | 'contact' | 'terms' | 'privacy' | 'cookies' | 'complaints' | 'lux'
   | `service:${string}`;
 
 /** слаги страниц; '' = главная языка */
@@ -35,6 +35,7 @@ export const slugs: Record<string, Partial<Record<Locale, string>>> = {
   privacy:    { ru: 'konfidencialnost', pl: 'polityka-prywatnosci', uk: 'konfidentsiynist', en: 'privacy' },
   cookies:    { ru: 'cookies', pl: 'cookies', uk: 'cookies', en: 'cookies' },
   complaints: { ru: 'reklamacii', pl: 'reklamacje', uk: 'reklamatsii', en: 'complaints' },
+  lux:        { ru: 'lux', pl: 'lux', uk: 'lux', en: 'lux' }, // черновик люкс-версии главной для сравнения (noindex)
 };
 
 export function href(locale: Locale, key: PageKey): string {
