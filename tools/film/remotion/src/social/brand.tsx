@@ -1,6 +1,7 @@
 // Фирменные элементы для соцсетей: шрифты сайта, цвета, логотип, лента скотча, пометка «Визуализация».
 import React from 'react';
 import {continueRender, delayRender, Easing, Img, interpolate, staticFile} from 'remotion';
+import {COMMON, type Lang} from './texts';
 
 export const C = {
   graphite: '#10161D',
@@ -32,7 +33,7 @@ export const loadBrandFonts = () => {
   const st = document.createElement('style');
   st.textContent = css;
   document.head.appendChild(st);
-  const probe = 'Переезд MELBUS Wizualizacja ąęł 0123';
+  const probe = 'Переезд Переїзд їєґ MELBUS Wizualizacja ąęłż 0123';
   Promise.all([200, 300, 400].map((w) => document.fonts.load(`${w} 40px Unbounded`, probe)).concat(
     [400, 500].map((w) => document.fonts.load(`${w} 40px Onest`, probe)),
   )).then(() => continueRender(handle)).catch(() => continueRender(handle));
@@ -42,8 +43,9 @@ export const Logo: React.FC<{width: number; style?: React.CSSProperties}> = ({wi
   <Img src={staticFile('brand/melbus-white.svg')} style={{width, height: width / 4.606, ...style}} />
 );
 
-export const AiLabel: React.FC<{style?: React.CSSProperties}> = ({style}) => (
-  <div style={{fontFamily: TEXT, fontSize: 22, color: 'rgba(255,255,255,.6)', letterSpacing: 0.3, ...style}}>Визуализация</div>
+export type {Lang} from './texts';
+export const AiLabel: React.FC<{style?: React.CSSProperties; lang?: Lang}> = ({style, lang = 'ru'}) => (
+  <div style={{fontFamily: TEXT, fontSize: 22, color: 'rgba(255,255,255,.6)', letterSpacing: 0.3, ...style}}>{COMMON.ai[lang]}</div>
 );
 
 // бирюзовая «лента скотча»: протягивается слева направо
