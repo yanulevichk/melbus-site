@@ -1,0 +1,24 @@
+/** Подписанные ссылки на видео: открыть может только тот, у кого есть ссылка из Telegram. */
+import type { Env } from './env';
+
+const b64url = (buf: ArrayBuffer) => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+const secret = (env: Env) => env.LINK_SECRET || `link:${env.TELEGRAM_BOT_TOKEN || ''}`;
+
+async function hmac(env: Env, data: string) {
+  const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(secret(env)), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  return b64url(await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(data)));
+}
+
+/** ссылка живёт 60 дней */
+export async function videoLink(env: Env, origin: string, key: string, days = 60) {
+  const e = Math.floor(Date.now() / 1000) + days * 86400;
+  return `${origin}/api/video/${key}?e=${e}&s=${await hmac(env, `${key}.${e}`)}`;
+}
+
+export async function checkLink(env: Env, key: string, e: string | null, s: string | null) {
+  if (!e || !s || Number(e) < Date.now() / 1000) return false;
+  const good = await hmac(env, `${key}.${e}`);
+  if (good.length !== s.length) return false;
+  let diff = 0; for (let i = 0; i < good.length; i++) diff |= good.charCodeAt(i) ^ s.charCodeAt(i);
+  return diff === 0;
+}
