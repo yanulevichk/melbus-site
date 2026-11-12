@@ -77,16 +77,6 @@ export const home = {
       [l('Ванная', 'Łazienka', 'Ванна', 'Bathroom'), '#C9D1D9', '05'],
     ] as [L, string, string][],
   },
-  packages: {
-    h2: l('Три пакета', 'Trzy pakiety', 'Три пакети', 'Three packages'),
-    lead: l('Цены опубликуем после анализа рынка. Состав пакетов пока на утверждении.', 'Ceny opublikujemy po analizie rynku. Skład pakietów jest jeszcze zatwierdzany.', 'Ціни опублікуємо після аналізу ринку. Склад пакетів ще затверджується.', 'We’ll publish prices after a market review. Package contents are still being finalised.'),
-    priceFrom: l('от … zł', 'od … zł', 'від … zł', 'from … zł'),
-    items: [
-      { name: l('Перевозка', 'Transport', 'Перевезення', 'Transport'), note: l('Вы пакуете, мы перевозим', 'Ty pakujesz, my przewozimy', 'Ви пакуєте, ми перевозимо', 'You pack, we move'), items: [l('Бус и бригада', 'Bus i ekipa', 'Бус і бригада', 'Van and crew'), l('Защита мебели плёнкой и одеялами', 'Ochrona mebli folią i kocami', 'Захист меблів плівкою й ковдрами', 'Furniture protected with film and blankets'), l('Разборка и сборка кровати', 'Demontaż i montaż łóżka', 'Розбирання та збирання ліжка', 'Bed disassembly and assembly'), l('Фиксированная цена', 'Stała cena', 'Фіксована ціна', 'Fixed price')] },
-      { name: l('Стандарт', 'Standard', 'Стандарт', 'Standard'), note: l('Чаще всего выбирают', 'Wybierany najczęściej', 'Обирають найчастіше', 'Most popular'), featured: true, items: [l('Всё из «Перевозки»', 'Wszystko z pakietu „Transport”', 'Усе з «Перевезення»', 'Everything in “Transport”'), l('Упаковка кухни и хрупкого', 'Pakowanie kuchni i rzeczy delikatnych', 'Пакування кухні та крихкого', 'Packing the kitchen and fragile items'), l('Набор белых коробок', 'Zestaw białych kartonów', 'Набір білих коробок', 'A set of white boxes'), l('Сборка всей мебели', 'Montaż wszystkich mebli', 'Збирання всіх меблів', 'Assembly of all furniture')] },
-      { name: l('Под ключ', 'Pod klucz', 'Під ключ', 'Full service'), note: l('Вы приезжаете в готовый дом', 'Przyjeżdżasz do gotowego domu', 'Ви приїжджаєте в готовий дім', 'You arrive at a ready home'), items: [l('Всё из «Стандарта»', 'Wszystko z pakietu „Standard”', 'Усе зі «Стандарту»', 'Everything in “Standard”'), l('Упаковка всей квартиры', 'Pakowanie całego mieszkania', 'Пакування всієї квартири', 'Packing the whole flat'), l('Распаковка и расстановка', 'Rozpakowanie i ustawienie', 'Розпакування та розстановка', 'Unpacking and arranging'), l('Вывоз упаковки', 'Wywóz opakowań', 'Вивезення пакування', 'Packaging taken away')] },
-    ] as { name: L; note: L; items: L[]; featured?: boolean }[],
-  },
   guarantee: {
     h2: l('Цена из оферты —<br />окончательная.', 'Cena z oferty —<br />ostateczna.', 'Ціна з оферти —<br />остаточна.', 'The price in the offer<br />is final.'),
     cols: [

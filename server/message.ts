@@ -7,7 +7,7 @@ import { esc } from './telegram';
 
 export interface Addr { addr?: string; floor?: string; lift?: number; dist?: string }
 export interface QuotePayload {
-  lang?: string; size?: number; est?: number;
+  lang?: string; size?: number; pkg?: number; est?: number;
   from?: Addr; to?: Addr;
   date?: string; time?: string; flex?: boolean;
   items?: number[]; skipItems?: boolean; extras?: number[];
@@ -53,6 +53,8 @@ export function quoteMessage(id: string, p: QuotePayload, links: string[]) {
     if (str(a.dist, 10)) parts.push(`от парковки ${esc(str(a.dist, 10))} м`);
     return parts.join(', ');
   };
+  const pk = int(p.pkg, 0, Q.pkgs.length - 1);
+  add('Пакет', pk >= 0 ? `<b>${esc(Q.pkgs[pk][ru])}</b>` : '—');
   add('Откуда', addr(p.from));
   add('Куда', addr(p.to));
   const date = str(p.date, 10).match(/^(\d{4})-(\d{2})-(\d{2})$/);

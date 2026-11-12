@@ -57,7 +57,9 @@ const { locale: L } = Astro.props as { locale: Locale };
       </fieldset>
 
       <fieldset data-q-step="4" hidden>
-        <legend class="t-h3">{Q.q4[L]}</legend>
+        <legend class="t-h3">{Q.qPkg[L]}</legend>
+        <div class="opts opts--sm">{Q.pkgs.map((x, i) => <label class="opt"><input type="radio" name="pkg" value={i} id={`pkg-${i}`} checked={i === 3} /><span>{x[L]}</span></label>)}</div>
+        <p class="t-h3 q__sub">{Q.q4[L]}</p>
         <div class="opts">{Q.extras.map((e, i) => <label class="opt"><input type="checkbox" name="extras" value={i} id={`ex-${i}`} /><span>{e[L]}</span></label>)}</div>
       </fieldset>
 
@@ -211,7 +213,7 @@ const { locale: L } = Astro.props as { locale: Locale };
         date: val('date'), time: val('time'), flex: chk('flex'),
         items: [...form.querySelectorAll<HTMLInputElement>('.cnt__row input')].map((x) => Number(x.value) || 0), skipItems: chk('skip_items'),
         extras: [...form.querySelectorAll<HTMLInputElement>('input[name="extras"]:checked')].map((x) => Number(x.value)),
-        name: val('name'), phone, channel: num('channel'), nip: chk('nip'), comment: val('comment'),
+        pkg: num('pkg'), name: val('name'), phone, channel: num('channel'), nip: chk('nip'), comment: val('comment'),
         videos, skipped, hp: val('website'), t: T0,
       };
       try {
@@ -257,10 +259,11 @@ const { locale: L } = Astro.props as { locale: Locale };
     const qs = new URLSearchParams(location.search);
     const size = form.querySelector<HTMLInputElement>(`#size-${qs.get('size')}`);
     if (size) { size.checked = true; document.querySelector('[data-sum="size"]')!.textContent = size.nextElementSibling?.textContent || ''; }
+    const pk = form.querySelector<HTMLInputElement>(`#pkg-${qs.get('pkg')}`); if (pk) pk.checked = true;
     (qs.get('ex') || '').split(',').forEach((n) => { const c = form.querySelector<HTMLInputElement>(`#ex-${n}`); if (c) c.checked = true; });
     const est = Number(qs.get('est'));
     const estEl = document.querySelector<HTMLElement>('[data-sum="est"]');
-    if (est > 0 && estEl) estEl.textContent = `${estEl.dataset.from} ${fmt.format(est)} zł`;
+    if (est > 0 && estEl) estEl.textContent = `${estEl.dataset.from} ${new Intl.NumberFormat(document.documentElement.lang === 'en' ? 'en' : 'ru').format(est)} zł`;
     if (location.hash === '#video') show(steps.length - 1); else show(0);
   }
   document.addEventListener('astro:page-load', initQuote);
@@ -308,6 +311,7 @@ const { locale: L } = Astro.props as { locale: Locale };
   .video__list li::before { content: "▶ "; color: var(--accent-text); }
   .fld textarea { padding: 14px 16px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: inherit; font-size: 1rem; width: 100%; resize: vertical; }
   .fld textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .q__sub { margin-top: 18px; }
   .q__consent { font-size: .82rem; color: var(--muted); }
   .q__consent a, .q__warn a, .q__err a { color: var(--accent-text); text-decoration: underline; text-underline-offset: 3px; }
   .q__hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }

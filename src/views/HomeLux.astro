@@ -8,13 +8,17 @@ import { href, type Locale } from '../i18n/routes';
 import { ui } from '../i18n/ui';
 import { brand } from '../config/brand';
 import { faqFor } from '../data/faq';
-import { boardOptions, DEMO } from '../data/pricing';
+import { boardOptions, DEMO, PACKAGES, GRID, moneyLocale } from '../data/pricing';
+import { pkgText } from '../content/prices';
+import NoHours from '../components/NoHours.astro';
 import { home as H } from '../content/home';
 import { areaText } from '../content/areas';
 const { locale } = Astro.props as { locale: Locale };
 const L = locale;
 const quote = href(locale, 'quote');
 const ai = ui.aiLabel[L];
+const fmt = new Intl.NumberFormat(moneyLocale(L));
+const EX = 1; // пример пакетов на главной — 2 комнаты
 // мини-QR для наклеек (декоративный узор)
 const qr = (seed: number) => {
   let r = seed; const rnd = () => ((r = (r * 9301 + 49297) % 233280) / 233280);
@@ -129,6 +133,9 @@ const qr = (seed: number) => {
   </div>
 </section>
 
+<!-- 3б. МЫ НЕ ПРОДАЁМ ЧАСЫ -->
+<NoHours locale={locale} />
+
 <!-- 4. ШАГИ (это последовательность — номера по делу) -->
 <section class="lx-sec lx-steps">
   <div class="container lx-head">
@@ -206,24 +213,27 @@ const qr = (seed: number) => {
   </div>
 </section>
 
-<!-- 7. ПАКЕТЫ -->
+<!-- 7. ПАКЕТЫ: «Под ключ» лишь немного дороже «Стандарта» (цены — src/data/pricing.ts) -->
 <section class="lx-sec lx-pk">
   <div class="container">
     <div class="lx-head">
-      <h2 class="lx-h2">{H.packages.h2[L]}</h2>
-      <p class="lx-lead">{H.packages.lead[L]}</p>
+      <h2 class="lx-h2">{pkgText.h2[L]}</h2>
+      <p class="lx-lead">{pkgText.lead[L]}</p>
     </div>
     <div class="lx-pk__cols">
-      {H.packages.items.map((p) => (
-        <article class={`lx-pk__col${p.featured ? ' is-f' : ''}`}>
+      {PACKAGES.map((p, i) => (
+        <article class={`lx-pk__col${i === 2 ? ' is-f' : ''}`}>
+          {i === 2 && <span class="lx-pk__badge">{pkgText.best[L]}</span>}
           <p class="lx-pk__note">{p.note[L]}</p>
           <h3 class="lx-pk__name">{p.name[L]}</h3>
-          <p class="lx-pk__price">{H.packages.priceFrom[L]}</p>
+          <p class="lx-pk__price">{fmt.format(GRID[EX][i])} zł</p>
+          {i > 0 && <p class="lx-pk__diff">{pkgText.more[L].replace('{d}', fmt.format(GRID[EX][i] - GRID[EX][i - 1])).replace('{n}', PACKAGES[i - 1].name[L])}</p>}
           <ul>{p.items.map((it) => <li>{it[L]}</li>)}</ul>
-          <a class="lux-link" href={quote}>{ui.cta.quote[L]}</a>
+          <a class="lux-link" href={`${quote}?size=${EX}&pkg=${p.quote}`}>{ui.cta.quote[L]}</a>
         </article>
       ))}
     </div>
+    <p class="lx-pk__calc"><a class="lux-link" href={`${href(locale, 'calculator')}?size=${EX}&pkg=2`}>{pkgText.calc[L]}</a>{DEMO && <span class="lx-note"> · {H.price.demo[L]}</span>}</p>
   </div>
 </section>
 
@@ -509,7 +519,10 @@ const qr = (seed: number) => {
   .lx-pk__col.is-f::before { content: ""; position: absolute; left: 0; right: 0; top: -1px; height: 2px; background: var(--tape); }
   .lx-pk__note { color: var(--muted); font-size: .95rem; }
   .lx-pk__name { font-family: var(--font-display); font-weight: 200; font-size: var(--fs-l); letter-spacing: -0.045em; }
-  .lx-pk__price { font-family: var(--font-display); font-weight: 200; font-size: 1.6rem; letter-spacing: -0.03em; }
+  .lx-pk__price { font-family: var(--font-display); font-weight: 200; font-size: clamp(2rem, 1.4rem + 1.6vw, 2.8rem); letter-spacing: -0.04em; line-height: 1; font-variant-numeric: tabular-nums; }
+  .lx-pk__diff { margin-top: -8px; color: var(--deep); font-weight: 600; font-size: .92rem; }
+  .lx-pk__badge { justify-self: start; padding: 3px 10px; font-size: .75rem; font-weight: 600; background: var(--tape); color: var(--graphite); border-radius: 2px; }
+  .lx-pk__calc { margin-top: clamp(28px, 4vw, 48px); display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; }
   .lx-pk__col ul { list-style: none; padding: 0; margin: 8px 0 12px; display: grid; gap: 10px; color: var(--muted); }
   @media (min-width: 900px) {
     .lx-pk__cols { grid-template-columns: repeat(3, 1fr); }

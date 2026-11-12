@@ -10,6 +10,7 @@ import Services from '../views/Services.astro';
 import Service from '../views/Service.astro';
 import Quote from '../views/Quote.astro';
 import Calculator from '../views/Calculator.astro';
+import Pricing from '../views/Pricing.astro';
 import Area from '../views/Area.astro';
 import Areas from '../views/Areas.astro';
 import Simple, { type Block, type MediaProps } from '../views/Simple.astro';
@@ -70,7 +71,8 @@ const simple = pg && { eyebrow: pg.eyebrow[L], title: pg.title[L], lead: pg.lead
   {area && <Area locale={locale} area={area} />}
   {key === 'areas' && <Areas locale={locale} />}
 
-  {['pricing', 'guarantee', 'how', 'about'].includes(key) && simple && <Simple locale={locale} {...simple} />}
+  {['guarantee', 'how', 'about'].includes(key) && simple && <Simple locale={locale} {...simple} />}
+  {key === 'pricing' && <Pricing locale={locale} />}
   {key === 'calculator' && simple && <Calculator locale={locale} eyebrow={simple.eyebrow} title={simple.title} lead={simple.lead} />}
 
   {key === 'faq' && simple && (

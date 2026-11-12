@@ -1,23 +1,29 @@
 ---
 /**
- * КАЛЬКУЛЯТОР ПЕРЕЕЗДА. Слева вопросы, справа (на телефоне — ниже) графитовая панель с табло-барабанами.
- * Тексты — src/content/calculator.ts, формула и ставки — src/data/pricing.ts (estimate, та же у менеджера).
- * Кнопка «Получить точную цену» переносит выбор в заявку: ?size=…&ex=…&est=…
+ * КАЛЬКУЛЯТОР ПЕРЕЕЗДА — цена за весь переезд, НЕ за часы.
+ * Вопросы: что везём → сколько вещей → куда → этажи → пакет (три карточки с живой ценой) → доп. услуги.
+ * Справа (на телефоне — ниже) графитовая панель с табло-барабанами и разбивкой.
+ * Тексты — src/content/calculator.ts, цены и формула — src/data/pricing.ts (estimate, та же у менеджера).
+ * Кнопка «Получить точную цену» переносит выбор в заявку: ?size=…&pkg=…&ex=…&est=…
  */
 import PageHero from '../components/PageHero.astro';
 import { href, type Locale } from '../i18n/routes';
-import { boardOptions, SIZES, ZONES, PACKING, EXTRAS, DEMO } from '../data/pricing';
+import { SIZES, AMOUNTS, ZONES, PACKAGES, EXTRAS, DEMO, estimate, comparePackages, extraIncluded, moneyLocale } from '../data/pricing';
 import { calcText as T } from '../content/calculator';
 interface Props { locale: Locale; eyebrow?: string; title: string; lead?: string }
 const { locale: L, eyebrow, title, lead } = Astro.props;
 const quote = href(L, 'quote');
+const fmt = new Intl.NumberFormat(moneyLocale(L));
+const SIZE0 = 1, AMT0 = 1, PKG0 = 1;
+const start = { size: SIZE0, amount: AMT0, zone: 0, floorsNoLift: 0, extras: [] as number[] };
+const prices0 = comparePackages(start);
+const total0 = estimate({ ...start, pkg: PKG0 }).total;
 // подписи для браузера (сама формула импортируется в скрипт из pricing.ts)
 const model = {
-  status: SIZES.map((s) => s.status[L]), zones: ZONES.map((z) => z.label[L]),
-  sizeQ: SIZES.map((s) => s.quote), packQ: PACKING.map((p) => p.quote), extraQ: EXTRAS.map((e) => e.quote),
-  ground: T.ground[L], crew: T.crew[L], h: T.hours[L],
+  status: SIZES.map((s) => s.status[L]), amounts: AMOUNTS.map((a) => a.label[L]), zones: ZONES.map((z) => z.label[L]),
+  pkgNames: PACKAGES.map((p) => p.name[L]), sizeQ: SIZES.map((s) => s.quote), pkgQ: PACKAGES.map((p) => p.quote), extraQ: EXTRAS.map((e) => e.quote),
+  ground: T.ground[L], nudgeMore: T.nudgeMore[L], nudgeSame: T.nudgeSame[L], nudgeNote: T.nudgeNote.map((n) => n[L]), inPkg: T.inPkg[L],
 };
-const SIZE0 = 1;
 const floors: ['from' | 'to', number, boolean][] = [['from', 3, true], ['to', 2, true]];
 ---
 <PageHero eyebrow={eyebrow} title={title} lead={lead} />
@@ -30,10 +36,20 @@ const floors: ['from' | 'to', number, boolean][] = [['from', 3, true], ['to', 2,
       <fieldset class="cx__q">
         <legend class="cx__h">{T.qSize[L]}</legend>
         <div class="cx-seg">
-          {boardOptions.map((o, i) => (
+          {SIZES.map((o, i) => (
             <label><input type="radio" name="size" value={i} checked={i === SIZE0} /><span>{o.label[L]}</span></label>
           ))}
         </div>
+      </fieldset>
+
+      <fieldset class="cx__q">
+        <legend class="cx__h">{T.qAmount[L]}</legend>
+        <div class="cx-cards cx-cards--3">
+          {AMOUNTS.map((a, i) => (
+            <label class="cx-card"><input type="radio" name="amount" value={i} checked={i === AMT0} /><span class="cx-card__in"><span class="cx-card__t">{a.label[L]}</span><span class="cx-card__h">{a.hint[L]}</span></span></label>
+          ))}
+        </div>
+        <p class="cx__hint">{T.amountHint[L]}</p>
       </fieldset>
 
       <fieldset class="cx__q">
@@ -66,10 +82,19 @@ const floors: ['from' | 'to', number, boolean][] = [['from', 3, true], ['to', 2,
       </fieldset>
 
       <fieldset class="cx__q">
-        <legend class="cx__h">{T.qPack[L]}</legend>
-        <div class="cx-seg">
-          {PACKING.map((p, i) => (
-            <label><input type="radio" name="pack" value={i} checked={i === 0} /><span>{p.label[L]}</span></label>
+        <legend class="cx__h">{T.qPkg[L]}</legend>
+        <div class="cx-cards">
+          {PACKAGES.map((p, i) => (
+            <label class={`cx-card cx-pkg${i === 2 ? ' is-best' : ''}`}>
+              <input type="radio" name="pkg" value={i} checked={i === PKG0} />
+              <span class="cx-card__in" data-badge={T.best[L]}>
+                <span class="cx-pkg__top">
+                  <span><span class="cx-pkg__name">{p.name[L]}</span><span class="cx-pkg__note">{p.note[L]}</span></span>
+                  <span class="cx-pkg__right"><span class="cx-pkg__price"><span data-pkg-price={i}>{fmt.format(prices0[i].pkg)}</span> zł</span><span class="cx-pkg__diff" data-pkg-diff={i}>{i > 0 ? `+${fmt.format(prices0[i].pkg - prices0[i - 1].pkg)} zł` : ''}</span></span>
+                </span>
+                <ul>{p.items.map((it) => <li>{it[L]}</li>)}</ul>
+              </span>
+            </label>
           ))}
         </div>
       </fieldset>
@@ -78,14 +103,18 @@ const floors: ['from' | 'to', number, boolean][] = [['from', 3, true], ['to', 2,
         <legend class="cx__h">{T.qExtras[L]}</legend>
         <div class="cx-checks">
           {EXTRAS.map((e, i) => (
-            <label class="cx-check"><input type="checkbox" name="extra" value={i} /><i aria-hidden="true"></i><span>{e.label[L]}</span></label>
+            <label class={`cx-check${extraIncluded(PKG0, i) ? ' is-inc' : ''}`} data-extra={i}>
+              <input type="checkbox" name="extra" value={i} disabled={extraIncluded(PKG0, i)} /><i aria-hidden="true"></i>
+              <span>{e.label[L]}<small data-inc hidden={!extraIncluded(PKG0, i)}>{T.inPkg[L]}</small></span>
+              <span class="cx-check__p" data-extra-price>{extraIncluded(PKG0, i) ? '' : `+${fmt.format(e.price[SIZE0])} zł`}</span>
+            </label>
           ))}
         </div>
       </fieldset>
 
       <div class="cx-mini" aria-hidden="true">
         <span>{T.estimate[L]}</span>
-        <strong>{T.from[L]} <b data-calc-mini>{boardOptions[SIZE0].value}</b> zł</strong>
+        <strong>{T.from[L]} <b data-calc-mini>{fmt.format(total0)}</b> zł</strong>
       </div>
     </form>
 
@@ -93,7 +122,7 @@ const floors: ['from' | 'to', number, boolean][] = [['from', 3, true], ['to', 2,
       <div class="cx__panel">
         <p class="cx__eyebrow">{T.estimate[L]}</p>
         <div class="cx-board" id="board-calc" data-board>
-          <p class="cx-board__status" data-board-status>{boardOptions[SIZE0].status[L]} · {ZONES[0].label[L]}</p>
+          <p class="cx-board__status" data-board-status>{SIZES[SIZE0].status[L]} · {ZONES[0].label[L]}</p>
           <div class="cx-board__row" aria-hidden="true">
             <span class="cx-board__from">{T.from[L]}</span>
             {[0, 1, 2, 3, 4].map((i) => (
@@ -101,15 +130,17 @@ const floors: ['from' | 'to', number, boolean][] = [['from', 3, true], ['to', 2,
             ))}
             <span class="cx-board__cur">zł</span>
           </div>
-          <p class="sr-only" aria-live="polite">{T.sr[L]} <span data-board-value>{boardOptions[SIZE0].value}</span> zł</p>
+          <p class="sr-only" aria-live="polite">{T.sr[L]} <span data-board-value>{total0}</span> zł</p>
         </div>
 
         <dl class="cx-break">
-          {(['base', 'dist', 'floors', 'pack', 'extras'] as const).map((r) => (
-            <div data-row={r} hidden={r !== 'base'}><dt>{T.rows[r][L]}{r === 'base' && <small data-crew></small>}</dt><dd data-row-v>—</dd></div>
+          {(['pkg', 'dist', 'floors', 'extras'] as const).map((r) => (
+            <div data-row={r} hidden={r !== 'pkg'}><dt>{T.rows[r][L]}{r === 'pkg' && <span data-pkg-name> «{PACKAGES[PKG0].name[L]}»</span>}</dt><dd data-row-v>—</dd></div>
           ))}
         </dl>
+        <p class="cx-nudge" data-nudge hidden><span data-nudge-t></span><button type="button" data-nudge-go>{T.nudgeGo[L]}</button></p>
 
+        <p class="cx-nohours">{T.noHours[L]}</p>
         {DEMO && <p class="cx-note">{T.note[L]}</p>}
         <div class="cx__cta">
           <a class="btn btn--primary" href={quote} data-calc-cta>{T.cta[L]}</a>
@@ -121,8 +152,8 @@ const floors: ['from' | 'to', number, boolean][] = [['from', 3, true], ['to', 2,
 </section>
 
 <script>
-  import { estimate } from '../data/pricing';
-  type Model = { status: string[]; zones: string[]; sizeQ: number[]; packQ: number[]; extraQ: number[]; ground: string; crew: string; h: string };
+  import { estimate, comparePackages, extraIncluded, EXTRAS, moneyLocale } from '../data/pricing';
+  type Model = { status: string[]; amounts: string[]; zones: string[]; pkgNames: string[]; sizeQ: number[]; pkgQ: number[]; extraQ: number[]; ground: string; nudgeMore: string; nudgeSame: string; nudgeNote: string[]; inPkg: string };
   function initCalc() {
     const form = document.querySelector<HTMLFormElement>('[data-calc]');
     if (!form || form.dataset.ready) return;
@@ -131,38 +162,64 @@ const floors: ['from' | 'to', number, boolean][] = [['from', 3, true], ['to', 2,
     const board = document.getElementById('board-calc')!;
     const cta = document.querySelector<HTMLAnchorElement>('[data-calc-cta]')!;
     const mini = form.querySelector<HTMLElement>('[data-calc-mini]')!;
-    const crewEl = document.querySelector<HTMLElement>('[data-crew]');
+    const nudge = document.querySelector<HTMLElement>('[data-nudge]')!;
     const base = cta.getAttribute('href')!;
-    const fmt = new Intl.NumberFormat(document.documentElement.lang || 'pl');
+    const fmt = new Intl.NumberFormat(moneyLocale(document.documentElement.lang));
     const radio = (n: string) => Number(form.querySelector<HTMLInputElement>(`input[name="${n}"]:checked`)?.value ?? 0);
+    const setRadio = (n: string, v: number) => { const r = form.querySelector<HTMLInputElement>(`input[name="${n}"][value="${v}"]`); if (r) r.checked = true; };
     const row = (k: string, v: number) => {
       const el = document.querySelector<HTMLElement>(`[data-row="${k}"]`)!;
-      el.hidden = k !== 'base' && v === 0;
-      el.querySelector('[data-row-v]')!.textContent = `${k !== 'base' ? '+ ' : ''}${fmt.format(v)} zł`;
+      el.hidden = k !== 'pkg' && v === 0;
+      el.querySelector('[data-row-v]')!.textContent = `${k !== 'pkg' ? '+ ' : ''}${fmt.format(v)} zł`;
     };
+    let nextPkg = -1;
 
     const calc = () => {
-      const size = radio('size'), zone = radio('dist'), pack = radio('pack');
+      const size = radio('size'), amount = radio('amount'), zone = radio('dist'), pkg = radio('pkg');
       let fl = 0;
       form.querySelectorAll<HTMLElement>('[data-floor]').forEach((w) => {
         const f = Number(w.querySelector<HTMLInputElement>('input[type="hidden"]')!.value);
         if (!w.querySelector<HTMLInputElement>('input[type="checkbox"]')!.checked) fl += f;
       });
+      // доп. услуги: то, что входит в пакет, — отмечено «в пакете» и не считается
+      form.querySelectorAll<HTMLElement>('[data-extra]').forEach((lab) => {
+        const i = Number(lab.dataset.extra), inc = extraIncluded(pkg, i);
+        const cb = lab.querySelector<HTMLInputElement>('input')!;
+        cb.disabled = inc; if (inc) cb.checked = false;
+        lab.classList.toggle('is-inc', inc);
+        lab.querySelector<HTMLElement>('[data-inc]')!.hidden = !inc;
+        lab.querySelector<HTMLElement>('[data-extra-price]')!.textContent = inc ? '' : `+${fmt.format(EXTRAS[i].price[size])} zł`;
+      });
       const extras = [...form.querySelectorAll<HTMLInputElement>('input[name="extra"]:checked')].map((c) => Number(c.value));
-      const r = estimate({ size, zone, floorsNoLift: fl, pack, extras });
-      (['base', 'dist', 'floors', 'pack', 'extras'] as const).forEach((k) => row(k, r[k]));
-      if (crewEl) crewEl.textContent = ` · ${M.crew.replace('{n}', String(r.crew))} · ~${fmt.format(r.hours)} ${M.h}`;
+      const input = { size, amount, zone, floorsNoLift: fl, extras };
+      const all = comparePackages(input);
+      // карточки пакетов: живая цена и «+X zł» к предыдущему
+      all.forEach((r, i) => {
+        form.querySelector(`[data-pkg-price="${i}"]`)!.textContent = fmt.format(r.pkg);
+        if (i > 0) form.querySelector(`[data-pkg-diff="${i}"]`)!.textContent = `+${fmt.format(r.pkg - all[i - 1].pkg)} zł`;
+      });
+      const r = estimate({ ...input, pkg });
+      (['pkg', 'dist', 'floors', 'extras'] as const).forEach((k) => row(k, r[k]));
+      document.querySelector('[data-pkg-name]')!.textContent = ` «${M.pkgNames[pkg]}»`;
+      // подсказка: следующий пакет — всего +X zł (или не дороже, если допы уже набраны)
+      nextPkg = pkg < all.length - 1 ? pkg + 1 : -1;
+      if (nextPkg > 0) {
+        const diff = all[nextPkg].total - r.total;
+        const tpl = diff <= 0 ? M.nudgeSame : M.nudgeMore;
+        nudge.querySelector('[data-nudge-t]')!.textContent = tpl.replace('{name}', M.pkgNames[nextPkg]).replace('{diff}', fmt.format(diff)).replace('{note}', M.nudgeNote[nextPkg]);
+      }
+      nudge.hidden = nextPkg < 0;
       mini.textContent = fmt.format(r.total);
-      const st = `${M.status[size]} · ${M.zones[zone]}`;
+      const st = `${M.status[size]} · ${M.amounts[amount]} · ${M.zones[zone]}`;
       board.dataset.value = String(r.total);
       board.querySelector('[data-board-status]')!.textContent = st;
       board.dispatchEvent(new CustomEvent('board:set', { detail: { value: r.total, status: st } }));
-      const q = new URLSearchParams({ size: String(M.sizeQ[size]), est: String(r.total) });
-      const exq = [...(M.packQ[pack] >= 0 ? [M.packQ[pack]] : []), ...extras.map((i) => M.extraQ[i])];
-      if (exq.length) q.set('ex', exq.join(','));
+      const q = new URLSearchParams({ size: String(M.sizeQ[size]), pkg: String(M.pkgQ[pkg]), est: String(r.total) });
+      if (extras.length) q.set('ex', extras.map((i) => M.extraQ[i]).join(','));
       cta.href = `${base}?${q}`;
     };
 
+    nudge.querySelector('[data-nudge-go]')!.addEventListener('click', () => { if (nextPkg >= 0) { setRadio('pkg', nextPkg); calc(); } });
     // этажи: − / +, 0 = партер
     form.querySelectorAll<HTMLElement>('[data-floor]').forEach((w) => {
       const inp = w.querySelector<HTMLInputElement>('input[type="hidden"]')!;
@@ -171,12 +228,9 @@ const floors: ['from' | 'to', number, boolean][] = [['from', 3, true], ['to', 2,
       w.querySelector('[data-dec]')!.addEventListener('click', () => set(Math.max(0, Number(inp.value) - 1)));
       w.querySelector('[data-inc]')!.addEventListener('click', () => set(Math.min(30, Number(inp.value) + 1)));
     });
-    // ссылка со страницы района: ?dist=1 (до 50 км), ?size=2
+    // ссылка со страницы района или цен: ?dist=1, ?size=2, ?pkg=2
     const qs = new URLSearchParams(location.search);
-    (['size', 'dist'] as const).forEach((n) => {
-      const r = form.querySelector<HTMLInputElement>(`input[name="${n}"][value="${qs.get(n)}"]`);
-      if (r) r.checked = true;
-    });
+    (['size', 'dist', 'pkg'] as const).forEach((n) => { if (qs.has(n)) setRadio(n, Number(qs.get(n))); });
     form.addEventListener('change', calc);
     form.addEventListener('submit', (e) => e.preventDefault());
     calc();
@@ -270,4 +324,35 @@ const floors: ['from' | 'to', number, boolean][] = [['from', 3, true], ['to', 2,
   .cx-note { color: var(--dark-muted); font-size: .85rem; line-height: 1.55; }
   .cx__cta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 28px; }
   .cx__cta .lux-link { color: #fff; }
+
+  /* сколько вещей и пакеты — карточки */
+  .cx-cards { display: grid; gap: 10px; }
+  @media (min-width: 640px) { .cx-cards--3 { grid-template-columns: repeat(3, 1fr); } }
+  .cx-card { position: relative; cursor: pointer; display: block; }
+  .cx-card input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .cx-card__in { display: grid; gap: 6px; align-content: start; height: 100%; padding: 16px 18px; border: 1px solid var(--hair); border-radius: 3px; background: #fff; transition: border-color .25s, box-shadow .25s; }
+  .cx-card:hover .cx-card__in { border-color: var(--steel); }
+  .cx-card input:checked + .cx-card__in { border-color: var(--graphite); box-shadow: inset 0 0 0 1px var(--graphite); }
+  .cx-card input:focus-visible + .cx-card__in { outline: 2px solid var(--deep); outline-offset: 3px; }
+  .cx-card__t { font-weight: 500; }
+  .cx-card__h { color: var(--muted); font-size: .88rem; }
+  .cx-pkg .cx-card__in { gap: 10px; padding: 20px; }
+  .cx-pkg__top { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+  .cx-pkg__top > span:first-child { display: grid; gap: 4px; }
+  .cx-pkg__right { display: grid; justify-items: end; gap: 2px; text-align: right; }
+  .cx-pkg__name { font-family: var(--font-display); font-weight: 300; font-size: 1.25rem; letter-spacing: -0.03em; }
+  .cx-pkg__diff { font-size: .8rem; color: var(--deep); font-weight: 600; white-space: nowrap; }
+  .cx-pkg__price { white-space: nowrap; font-family: var(--font-display); font-weight: 200; font-size: 1.9rem; letter-spacing: -0.04em; line-height: 1; font-variant-numeric: tabular-nums; }
+  .cx-pkg__note { color: var(--muted); font-size: .9rem; }
+  .cx-pkg ul { list-style: none; margin: 4px 0 0; padding: 0; display: grid; gap: 6px 20px; font-size: .88rem; }
+  @media (min-width: 640px) { .cx-pkg ul { grid-template-columns: 1fr 1fr; } }
+  .cx-pkg li { position: relative; padding-left: 18px; }
+  .cx-pkg li::before { content: ""; position: absolute; left: 0; top: .55em; width: 8px; height: 2px; background: var(--tape); }
+  .cx-pkg.is-best .cx-card__in::before { content: attr(data-badge); position: absolute; top: -10px; left: 16px; padding: 2px 8px; font-size: .72rem; font-weight: 600; background: var(--tape); color: var(--graphite); border-radius: 2px; }
+  .cx-check.is-inc { opacity: .55; cursor: default; }
+  .cx-check small { color: var(--deep); font-weight: 600; margin-left: 6px; }
+  .cx-check__p { margin-left: auto; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .cx-nudge { padding: 12px 14px; border-left: 2px solid var(--tape); background: rgba(20,220,213,.08); font-size: .92rem; line-height: 1.5; }
+  .cx-nudge button { margin-top: 6px; display: block; padding: 0; border: 0; background: none; color: var(--tape); font: inherit; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+  .cx-nohours { color: #fff; font-size: .92rem; }
 </style>

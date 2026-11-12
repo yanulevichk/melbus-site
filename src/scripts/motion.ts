@@ -312,7 +312,7 @@ function priceBoard(board: HTMLElement) {
   const out = board.querySelector<HTMLElement>('[data-board-value]');
   const status = board.querySelector<HTMLElement>('[data-board-status]');
   const chips = Array.from(document.querySelectorAll<HTMLButtonElement>(`[data-board-for="${board.id}"] [data-value]`));
-  const fmt = new Intl.NumberFormat(document.documentElement.lang || 'pl');
+  const fmt = new Intl.NumberFormat(document.documentElement.lang === 'en' ? 'en' : 'ru');
   const cur = reels.map(() => 0);
   const CELLS = 33; // 3 круга по 11 клеток (0–9 и пустая)
   const yp = (idx: number) => (-idx * 100) / CELLS;
