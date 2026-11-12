@@ -108,6 +108,12 @@ function setupHeader() {
   document.addEventListener('astro:before-swap', close);
 }
 
+/* свободная минута браузера (или таймер, где requestIdleCallback нет) */
+function whenIdle(fn: () => void, ms: number) {
+  if ('requestIdleCallback' in window) window.requestIdleCallback(() => fn(), { timeout: ms * 5 });
+  else setTimeout(fn, ms);
+}
+
 /* ---------- сцены: кадры на canvas ---------- */
 function sceneFrames(el: HTMLElement, tl: gsap.core.Timeline) {
   const mobile = window.innerWidth < 768;
@@ -134,9 +140,115 @@ function sceneFrames(el: HTMLElement, tl: gsap.core.Timeline) {
   const load = (i: number) => { const im = new Image(); im.decoding = 'async'; im.src = src(i); im.onload = () => { if (i === Math.round(state.f)) draw(); }; imgs[i] = im; };
   load(0);
   const rest = () => { for (let i = 1; i < count; i++) load(i); el.classList.add('is-live'); };
-  ('requestIdleCallback' in window ? (window as any).requestIdleCallback : setTimeout)(rest, 200);
+  whenIdle(rest, 200);
   tl.to(state, { f: count - 1, ease: 'none', duration: 1, onUpdate: draw }, 0);
   window.addEventListener('resize', draw);
+}
+
+/* ---------- фильм первого экрана (люкс) ----------
+ * Компьютер: секция закрепляется, прокрутка ведёт фильм вперёд/назад (кадры WebP на canvas).
+ * Телефон: тот же фильм — видео без звука по кругу, только пока на экране.
+ * Подписи [data-film-cap data-from data-to] — в секундах фильма, общие для обоих режимов. */
+function filmHero(sec: HTMLElement, desktop: boolean, reduceNow: boolean, local: (() => void)[]) {
+  const stage = sec.querySelector<HTMLElement>('[data-film-stage]') || sec;
+  const canvas = sec.querySelector<HTMLCanvasElement>('[data-film-canvas]');
+  const video = sec.querySelector<HTMLVideoElement>('[data-film-video]');
+  const intro = sec.querySelector<HTMLElement>('[data-film-intro]');
+  const caps = [...sec.querySelectorAll<HTMLElement>('[data-film-cap]')];
+  const bar = sec.querySelector<HTMLElement>('[data-film-progress]');
+  const dur = Number(sec.dataset.dur) || 23;
+  const setTime = (t: number) => {
+    caps.forEach((c) => c.classList.toggle('is-on', t >= Number(c.dataset.from) && t < Number(c.dataset.to)));
+    if (bar) bar.style.transform = `scaleX(${Math.min(1, Math.max(0, t / dur)).toFixed(4)})`;
+  };
+  setTime(0);
+  if (reduceNow) return;
+
+  if (desktop && canvas) {
+    const count = Number(sec.dataset.count) || 0;
+    const base = sec.dataset.base || '';
+    const imgs: HTMLImageElement[] = [];
+    const ok = new Uint8Array(count);
+    const ctx = canvas.getContext('2d');
+    let cur = 0;
+    const draw = () => {
+      if (!ctx) return;
+      let i = cur;
+      if (!ok[i]) for (let d = 1; d < count; d++) { if (i - d >= 0 && ok[i - d]) { i -= d; break; } if (i + d < count && ok[i + d]) { i += d; break; } }
+      const img = imgs[i];
+      if (!img || !ok[i]) return;
+      const r = canvas.getBoundingClientRect();
+      const dpr = Math.min(window.devicePixelRatio, 2);
+      const W = Math.round(r.width * dpr), H = Math.round(r.height * dpr);
+      if (canvas.width !== W || canvas.height !== H) { canvas.width = W; canvas.height = H; }
+      const s = Math.max(W / img.naturalWidth, H / img.naturalHeight);
+      const dw = img.naturalWidth * s, dh = img.naturalHeight * s;
+      ctx.drawImage(img, (W - dw) / 2, (H - dh) / 2, dw, dh);
+      sec.classList.add('is-live');
+    };
+    const load = (i: number) => {
+      if (imgs[i]) return;
+      const im = new Image();
+      im.decoding = 'async';
+      im.onload = () => { ok[i] = 1; if (Math.abs(i - cur) < 8) draw(); };
+      im.src = `${base}/${String(i + 1).padStart(4, '0')}.webp`;
+      imgs[i] = im;
+    };
+    // сначала «скелет» — каждый 8-й кадр, потом заполняем промежутки: прокрутка работает сразу
+    const order: number[] = [];
+    const seen = new Uint8Array(count);
+    for (let step = 8; step >= 1; step >>= 1) for (let i = 0; i < count; i += step) if (!seen[i]) { seen[i] = 1; order.push(i); }
+    load(0);
+    let k = 0, alive = true;
+    const pump = () => { if (!alive) return; const end = Math.min(order.length, k + 16); for (; k < end; k++) load(order[k]); if (k < order.length) setTimeout(pump, 80); };
+    whenIdle(pump, 300);
+    const st = ScrollTrigger.create({
+      trigger: sec, start: 'top top', end: () => '+=' + (Number(sec.dataset.length) || 4) * window.innerHeight,
+      pin: stage, scrub: 0.5, anticipatePin: 1, invalidateOnRefresh: true,
+      refreshPriority: 10, // закрепление фильма считается первым — блоки ниже не «наезжают»
+      onUpdate: (self) => {
+        const p = self.progress;
+        cur = Math.min(count - 1, Math.round(p * (count - 1)));
+        draw(); setTime(p * dur);
+        if (intro) { const q = Math.min(1, p / 0.04); gsap.set(intro, { autoAlpha: 1 - q, y: -48 * q }); }
+      },
+    });
+    window.addEventListener('resize', draw);
+    local.push(() => { alive = false; st.kill(); window.removeEventListener('resize', draw); });
+  } else if (video) {
+    let raf = 0;
+    const tick = () => { setTime(video.currentTime); raf = requestAnimationFrame(tick); };
+    const onPlay = () => { sec.classList.add('is-playing'); cancelAnimationFrame(raf); raf = requestAnimationFrame(tick); };
+    const onPause = () => cancelAnimationFrame(raf);
+    video.addEventListener('playing', onPlay);
+    video.addEventListener('pause', onPause);
+    const io = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) {
+        if (!video.getAttribute('src') && video.dataset.src) video.src = video.dataset.src;
+        video.play().catch(() => {});
+      } else video.pause();
+    }, { threshold: 0.2 });
+    io.observe(video);
+    local.push(() => { io.disconnect(); cancelAnimationFrame(raf); video.pause(); video.removeEventListener('playing', onPlay); video.removeEventListener('pause', onPause); });
+  }
+}
+
+/* окно «Смотреть ролик»: видео грузится только по нажатию */
+function filmModal() {
+  const dlg = document.querySelector<HTMLDialogElement>('[data-film-modal]');
+  if (!dlg) return;
+  const v = dlg.querySelector('video');
+  const open = () => {
+    if (v && !v.getAttribute('src') && v.dataset.src) v.src = v.dataset.src;
+    dlg.showModal(); lenis?.stop();
+    v?.play().catch(() => {});
+  };
+  const close = () => { v?.pause(); if (dlg.open) dlg.close(); lenis?.start(); };
+  document.querySelectorAll<HTMLElement>('[data-film-open]').forEach((b) => b.addEventListener('click', open));
+  dlg.querySelectorAll<HTMLElement>('[data-film-close]').forEach((b) => b.addEventListener('click', close));
+  dlg.addEventListener('click', (e) => { if (e.target === dlg) close(); });
+  dlg.addEventListener('close', () => { v?.pause(); lenis?.start(); });
+  cleanups.push(close);
 }
 
 /* ---------- 3D-сцены: грузим three.js только когда сцена рядом с экраном ---------- */
@@ -344,8 +456,12 @@ function initPage() {
   mm.add({ desktop: '(min-width: 1024px)', mobile: '(max-width: 1023px)', rm: '(prefers-reduced-motion: reduce)' }, (c) => {
     const { desktop, rm: reduceNow } = c.conditions as { desktop: boolean; rm: boolean };
 
-    /* сцены */
     const local: (() => void)[] = [];
+
+    /* фильм первого экрана — первым: его закрепление сдвигает всё, что ниже */
+    document.querySelectorAll<HTMLElement>('[data-film]').forEach((sec) => filmHero(sec, desktop, reduceNow, local));
+
+    /* сцены */
     document.querySelectorAll<HTMLElement>('[data-scene]').forEach((el) => {
       const mobileMode = el.dataset.mobile || 'pin';
       const pin = el.dataset.pin === '1' && !reduceNow && (desktop || mobileMode === 'pin');
@@ -470,6 +586,8 @@ function initPage() {
 
     return () => local.splice(0).forEach((f) => f());
   });
+
+  filmModal();
 
   /* видео: грузим и играем только на экране */
   const io = new IntersectionObserver((entries) => entries.forEach((e) => {

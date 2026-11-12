@@ -12,6 +12,16 @@ import { boardOptions, DEMO } from '../data/pricing-demo';
 const { locale } = Astro.props as { locale: Locale };
 const quote = href(locale, 'quote');
 
+// подписи фильма: [с, до, заголовок, пояснение] — секунды монтажа (23 с), моменты замедлений
+const caps: [number, number, string, string][] = [
+  [4.8, 6.5, 'Цена по видео', 'Снимаете квартиру на телефон — мы называем окончательную цену.'],
+  [6.6, 8.4, 'Упакуем всё', 'От кровати и холодильника до последней вилки.'],
+  [9.9, 11.7, 'Белые коробки MELBUS', 'Бирюзовый скотч и наклейка комнаты на каждой.'],
+  [12.7, 14.2, 'Только ваши вещи', 'Бус едет без перегрузок и попутных грузов.'],
+  [14.5, 16.9, 'Варшава, Польша, Европа', 'Варшава и 150 км вокруг — семь дней в неделю.'],
+  [18.8, 20.6, 'Распакуем и расставим', 'Соберём мебель и поставим всё по местам.'],
+];
+const stepImg: Record<string, string> = { V2: 'step-1-video', V3: 'step-2-price', V4: 'step-3-book', V5: 'step-4-pack', V6: 'step-5-road', V7: 'step-6-home' };
 const steps = [
   ['V2', 'Видео', 'Снимаете квартиру на телефон: две-три минуты, комната за комнатой.'],
   ['V3', 'Цена', 'В течение двух часов днём присылаем окончательную цену и список вещей.'],
@@ -51,31 +61,56 @@ const qr = (seed: number) => {
 };
 ---
 
-<!-- 1. ПЕРВЫЙ ЭКРАН: один предмет — коробка MELBUS -->
-<section class="lx-hero dark grain" data-intro-hero>
-  <div class="lx-hero__glow" aria-hidden="true"></div>
-  <div class="container lx-hero__grid">
-    <div class="lx-hero__text">
-      <p class="lx-hero__kicker" data-intro-fade>Переезды по Варшаве, Польше и Европе</p>
-      <h1 class="lx-hero__title" data-intro-title>Переезд<br />без доплат</h1>
-      <i class="lx-hero__line" data-intro-line aria-hidden="true"></i>
-      <p class="lx-hero__lead" data-intro-fade>Вы снимаете квартиру на видео — мы называем окончательную цену. Упакуем, перевезём и расставим всё по местам.</p>
-      <div class="lx-hero__cta" data-intro-fade>
+<!-- 1. ПЕРВЫЙ ЭКРАН: фильм «вся квартира в одной коробке».
+     Компьютер — прокрутка ведёт фильм (кадры на canvas), телефон — видео по кругу без звука. -->
+<section class="lx-film dark" data-film data-intro-hero data-dur="22.5" data-length="4.2" data-count="270" data-base="/scenes/film/d">
+  <div class="lx-film__stage" data-film-stage>
+    <picture class="lx-film__poster">
+      <source media="(max-width: 1023px)" srcset="/scenes/film/poster-m.webp" width="540" height="960" />
+      <img src="/scenes/film/poster-d.webp" alt="Вид сверху на жилой комплекс в Варшаве в золотой час — начало фильма о переезде MELBUS" width="1600" height="900" fetchpriority="high" decoding="async" />
+    </picture>
+    <canvas class="lx-film__canvas" data-film-canvas aria-hidden="true"></canvas>
+    <video class="lx-film__video" data-film-video data-src="/video/film-m.mp4" muted playsinline loop preload="none" poster="/scenes/film/poster-m.webp" aria-hidden="true"></video>
+    <div class="lx-film__shade" aria-hidden="true"></div>
+
+    <div class="container lx-film__intro" data-film-intro>
+      <p class="lx-film__kicker" data-intro-fade>Переезды по Варшаве, Польше и Европе</p>
+      <h1 class="lx-film__title" data-intro-title>Переезд<br />без доплат</h1>
+      <i class="lx-film__line" data-intro-line aria-hidden="true"></i>
+      <p class="lx-film__lead" data-intro-fade>Вы снимаете квартиру на видео — мы называем окончательную цену. Упакуем, перевезём и расставим всё по местам.</p>
+      <div class="lx-film__cta" data-intro-fade>
+        <a href={quote} class="btn btn--primary">Рассчитать цену</a>
+        <a href={quote + '#video'} class="lux-link">Отправить видео</a>
+      </div>
+      <p class="lx-film__hint" data-intro-fade aria-hidden="true"><i></i>Прокрутите — фильм пойдёт</p>
+    </div>
+
+    <div class="container lx-film__caps" aria-hidden="true">
+      {caps.map(([from, to, t, d]) => (
+        <p class="lx-film__cap" data-film-cap data-from={from} data-to={to}><strong>{t}</strong><span>{d}</span></p>
+      ))}
+    </div>
+
+    <div class="container lx-film__end" data-film-cap data-from="21.6" data-to="99">
+      <p class="lx-film__endt">Ваш новый адрес ждёт</p>
+      <div class="lx-film__cta">
         <a href={quote} class="btn btn--primary">Рассчитать цену</a>
         <a href={quote + '#video'} class="lux-link">Отправить видео</a>
       </div>
     </div>
-    <div class="lx-hero__stage">
-      <div class="lx-hero__box" data-three="boxhero" data-three-free data-room="КУХНЯ" data-num="07">
-        <picture class="lx-hero__poster">
-          <source media="(max-width: 767px)" srcset="/scenes/boxhero/poster-m.webp" />
-          <img src="/scenes/boxhero/poster-d.webp" alt="Белая коробка MELBUS с бирюзовым скотчем и наклейкой комнаты" width="1100" height="1100" fetchpriority="high" decoding="async" />
-        </picture>
-      </div>
+
+    <div class="lx-film__foot">
+      <button type="button" class="lx-film__watch" data-film-open><i aria-hidden="true"></i>Смотреть ролик · 0:23</button>
+      <span class="lx-film__ai">Визуализация</span>
     </div>
+    <div class="lx-film__bar" aria-hidden="true"><i data-film-progress></i></div>
   </div>
+</section>
+
+<!-- 1б. КОРОТКО О ГЛАВНОМ -->
+<section class="lx-band dark">
   <div class="container">
-    <ul class="lx-hero__facts" data-intro-fade>
+    <ul class="lx-band__facts">
       <li><strong>Цена по видео</strong><span>окончательная, без доплат на месте</span></li>
       <li><strong>Фактура VAT</strong><span>BLIK, карта или перевод</span></li>
       <li><strong>7 дней в неделю</strong><span>Варшава и 150 км вокруг</span></li>
@@ -131,7 +166,10 @@ const qr = (seed: number) => {
       <i class="lx-hs__fill" data-fill aria-hidden="true"></i>
       {steps.map(([id, t, d], i) => (
         <article class="lx-step">
-          <div class="lx-step__media grain" data-slot={id}><span class="lx-step__n">{i + 1}</span></div>
+          <div class="lx-step__media" data-slot={id}>
+            <img src={`/img/film/${stepImg[id]}.webp`} alt="" width="720" height="900" loading="lazy" decoding="async" />
+            <span class="lx-step__n">{i + 1}</span>
+          </div>
           <h3 class="lx-step__t">{t}</h3>
           <p class="lx-step__d">{d}</p>
         </article>
@@ -144,7 +182,10 @@ const qr = (seed: number) => {
 <section class="lx-sec lx-std">
   <div class="container lx-std__grid">
     <div class="lx-std__media" data-tape>
-      <div class="tape__media lx-ph grain" data-slot="D1"><span>Здесь будет видео: бахилы и перчатки бригады</span></div>
+      <div class="tape__media lx-std__img" data-slot="D1">
+        <img src="/img/film/std-tape.webp" alt="Белая коробка MELBUS заклеивается бирюзовым скотчем" width="720" height="900" loading="lazy" decoding="async" />
+        <span class="lx-ai">Визуализация</span>
+      </div>
     </div>
     <div class="lx-std__text">
       <h2 class="lx-h2">Аккуратность, которую видно</h2>
@@ -278,6 +319,12 @@ const qr = (seed: number) => {
   </div>
 </section>
 
+<!-- окно «Смотреть ролик» (видео грузится только по нажатию) -->
+<dialog class="lx-modal" data-film-modal aria-label="Ролик MELBUS: вся квартира в одной коробке">
+  <button type="button" class="lx-modal__x" data-film-close aria-label="Закрыть">×</button>
+  <video data-src="/video/film-1280.mp4" controls playsinline preload="none" poster="/scenes/film/poster-d.webp" width="1280" height="720"></video>
+</dialog>
+
 <style>
   /* ---------- общий ритм ---------- */
   .lx-sec { padding-block: clamp(96px, 13vw, 210px); }
@@ -289,38 +336,92 @@ const qr = (seed: number) => {
   @media (min-width: 960px) { .lx-head { grid-template-columns: 7fr 5fr; align-items: end; } }
   .lx-note { font-size: .875rem; color: var(--muted); }
 
-  /* ---------- первый экран ---------- */
-  .lx-hero { position: relative; min-height: 100svh; padding-top: calc(var(--header-h) + env(safe-area-inset-top, 0px) + clamp(32px, 6vh, 72px)); padding-bottom: clamp(28px, 5vh, 56px); overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; }
-  .lx-hero__glow { position: absolute; inset: 0; background: radial-gradient(48% 60% at 72% 52%, rgba(143,154,167,.18), transparent 70%), radial-gradient(70% 90% at 80% 120%, rgba(7,126,121,.16), transparent 70%); pointer-events: none; }
-  .lx-hero__grid { position: relative; z-index: 1; display: grid; gap: 24px; }
-  .lx-hero__text { position: relative; z-index: 2; display: grid; align-content: start; }
-  .lx-hero__kicker { color: var(--dark-muted); font-size: 1rem; margin-bottom: clamp(20px, 3vw, 36px); }
-  .lx-hero__title { font-family: var(--font-display); font-size: clamp(3rem, .9rem + 6.1vw, 8.2rem); font-weight: 200; letter-spacing: -0.055em; line-height: .9; color: var(--dark-ink); }
-  html.js .lx-hero__title { visibility: hidden; }
-  .lx-hero__line { display: block; width: min(420px, 60%); height: 2px; margin: clamp(28px, 3.4vw, 44px) 0 clamp(24px, 3vw, 36px); background: var(--tape); transform-origin: 0 50%; }
-  html.js .lx-hero__line { transform: scaleX(0); }
-  .lx-hero__lead { font-size: clamp(1.05rem, 1rem + .35vw, 1.3rem); line-height: 1.6; color: var(--dark-muted); max-width: 38ch; }
-  .lx-hero__cta { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 28px; margin-top: clamp(28px, 3.4vw, 44px); }
+  /* ---------- первый экран: фильм ---------- */
+  .lx-film { position: relative; background: var(--graphite); color: #fff; }
+  .lx-film__stage { position: relative; height: 100svh; min-height: 580px; overflow: hidden; isolation: isolate; }
+  .lx-film__poster, .lx-film__poster img, .lx-film__canvas, .lx-film__video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .lx-film__canvas { opacity: 0; transition: opacity .5s var(--ease-lux); }
+  .lx-film:global(.is-live) .lx-film__canvas { opacity: 1; }
+  .lx-film__video { display: none; opacity: 0; transition: opacity .8s var(--ease-lux); }
+  .lx-film__shade { position: absolute; inset: 0; z-index: 1; pointer-events: none;
+    background: linear-gradient(180deg, rgba(16,22,29,.62) 0%, rgba(16,22,29,0) 20%, rgba(16,22,29,0) 46%, rgba(16,22,29,.82) 100%),
+                linear-gradient(90deg, rgba(16,22,29,.5) 0%, rgba(16,22,29,0) 58%); }
+
+  .lx-film__intro { position: absolute; left: 0; right: 0; bottom: clamp(88px, 13vh, 150px); z-index: 2; display: grid; justify-items: start; }
+  .lx-film__kicker { color: rgba(255,255,255,.72); font-size: 1rem; margin-bottom: clamp(16px, 2.4vw, 28px); }
+  .lx-film__title { font-family: var(--font-display); font-size: clamp(3rem, .9rem + 6.1vw, 8.2rem); font-weight: 200; letter-spacing: -0.055em; line-height: .9; color: #fff; }
+  html.js .lx-film__title { visibility: hidden; }
+  .lx-film__line { display: block; width: min(420px, 60%); height: 2px; margin: clamp(24px, 3vw, 40px) 0 clamp(20px, 2.6vw, 32px); background: var(--tape); transform-origin: 0 50%; }
+  html.js .lx-film__line { transform: scaleX(0); }
+  .lx-film__lead { font-size: clamp(1.05rem, 1rem + .35vw, 1.3rem); line-height: 1.6; color: rgba(255,255,255,.84); max-width: 38ch; }
+  .lx-film__cta { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 28px; margin-top: clamp(24px, 3vw, 40px); }
+  .lx-film__cta .lux-link { color: #fff; }
   html.js [data-intro-fade] { opacity: 0; }
-  .lx-hero__stage { position: relative; aspect-ratio: 1; margin-inline: calc(var(--gutter) * -1); }
-  .lx-hero__box { position: absolute; inset: 0; }
-  .lx-hero__poster, .lx-hero__poster img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
-  .lx-hero__poster { transition: opacity .9s var(--ease) .1s; }
-  .lx-hero__box:global(.is-ready) .lx-hero__poster { opacity: 0; }
-  .lx-hero__box :global(.s3d__canvas) { position: absolute; inset: 0; width: 100% !important; height: 100% !important; opacity: 0; transition: opacity .9s var(--ease); }
-  .lx-hero__box:global(.is-ready) :global(.s3d__canvas) { opacity: 1; }
-  .lx-hero__facts { position: relative; z-index: 2; list-style: none; margin: 0; padding: 0; display: grid; border-top: 1px solid #26303B; }
-  .lx-hero__facts li { display: grid; gap: 2px; padding: 18px 0; border-bottom: 1px solid #26303B; }
-  .lx-hero__facts strong { font-weight: 500; color: var(--dark-ink); }
-  .lx-hero__facts span { color: var(--dark-muted); font-size: .95rem; }
-  @media (min-width: 900px) {
-    .lx-hero__grid { grid-template-columns: repeat(12, 1fr); align-items: center; flex: 1; }
-    .lx-hero__text { grid-column: 1 / 8; grid-row: 1; }
-    .lx-hero__stage { grid-column: 6 / 13; grid-row: 1; aspect-ratio: auto; height: min(78vh, 780px); margin: 0 calc(var(--gutter-r) * -1) 0 0; }
-    .lx-hero__facts { grid-template-columns: repeat(3, 1fr); border-bottom: 0; margin-top: clamp(24px, 4vh, 48px); }
-    .lx-hero__facts li { border-bottom: 0; padding: 22px 24px 0 0; }
-    .lx-hero__facts li + li { padding-left: 24px; border-left: 1px solid #26303B; }
+  .lx-film__hint { display: none; }
+
+  /* подписи по ходу фильма */
+  .lx-film__caps { position: absolute; left: 0; right: 0; bottom: clamp(88px, 13vh, 150px); z-index: 2; display: grid; pointer-events: none; }
+  .lx-film__cap { grid-area: 1 / 1; display: grid; gap: 14px; justify-items: start; opacity: 0; transform: translateY(22px); transition: opacity .55s var(--ease-lux), transform .8s var(--ease-lux); }
+  .lx-film__cap::before { content: ""; width: 64px; height: 2px; background: var(--tape); transform: scaleX(0); transform-origin: 0 50%; transition: transform .8s var(--ease-lux) .05s; }
+  .lx-film__cap.is-on { opacity: 1; transform: none; }
+  .lx-film__cap.is-on::before { transform: scaleX(1); }
+  .lx-film__cap strong { font-family: var(--font-display); font-weight: 200; font-size: clamp(2rem, 1rem + 3.2vw, 4.6rem); letter-spacing: -0.05em; line-height: .95; max-width: 14ch; }
+  .lx-film__cap span { font-size: clamp(1rem, .95rem + .3vw, 1.2rem); line-height: 1.55; color: rgba(255,255,255,.84); max-width: 34ch; }
+
+  /* финал фильма: призыв */
+  .lx-film__end { position: absolute; left: 0; right: 0; bottom: clamp(88px, 13vh, 150px); z-index: 2; display: grid; justify-items: start; opacity: 0; visibility: hidden; transform: translateY(22px); transition: opacity .6s var(--ease-lux), transform .8s var(--ease-lux), visibility 0s .6s; }
+  .lx-film__end:global(.is-on) { opacity: 1; visibility: visible; transform: none; transition-delay: 0s; }
+  .lx-film__endt { font-family: var(--font-display); font-weight: 200; font-size: clamp(2.6rem, 1rem + 5vw, 6.4rem); letter-spacing: -0.055em; line-height: .92; max-width: 11ch; }
+
+  .lx-film__foot { position: absolute; left: 0; right: 0; bottom: 0; z-index: 3; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 var(--gutter) calc(14px + var(--bar-h, 0px)); }
+  .lx-film__watch { display: inline-flex; align-items: center; gap: 12px; min-height: 48px; padding: 0; border: 0; background: none; color: #fff; font: inherit; font-weight: 500; cursor: pointer; }
+  .lx-film__watch i { position: relative; width: 36px; height: 36px; border: 1px solid rgba(255,255,255,.5); border-radius: 50%; transition: border-color .3s, background .3s; }
+  .lx-film__watch i::after { content: ""; position: absolute; left: 14px; top: 11px; border-left: 10px solid #fff; border-top: 7px solid transparent; border-bottom: 7px solid transparent; }
+  .lx-film__watch:hover i { border-color: var(--tape); background: rgba(20,220,213,.12); }
+  .lx-film__ai { font-size: .75rem; letter-spacing: .02em; color: rgba(255,255,255,.62); }
+  .lx-film__bar { position: absolute; left: 0; right: 0; bottom: 0; height: 2px; z-index: 3; background: rgba(255,255,255,.12); }
+  .lx-film__bar i { display: block; height: 100%; background: var(--tape); transform-origin: 0 50%; transform: scaleX(0); }
+
+  @media (min-width: 1024px) {
+    .lx-film__hint { display: inline-flex; align-items: center; gap: 12px; margin-top: clamp(28px, 4vh, 48px); font-size: .9rem; color: rgba(255,255,255,.66); }
+    .lx-film__hint i { position: relative; width: 1px; height: 36px; background: rgba(255,255,255,.25); overflow: hidden; }
+    .lx-film__hint i::after { content: ""; position: absolute; left: 0; top: -40%; width: 1px; height: 40%; background: var(--tape); animation: lxhint 2.2s var(--ease-lux) infinite; }
+    .lx-film__foot { padding-bottom: 18px; }
   }
+  @keyframes lxhint { to { top: 100%; } }
+  @media (max-width: 1023px) {
+    .lx-film__canvas { display: none; }
+    .lx-film__video { display: block; }
+    .lx-film:global(.is-playing) .lx-film__video { opacity: 1; }
+    .lx-film__intro { bottom: calc(var(--bar-h, 0px) + 72px); }
+    .lx-film__lead { font-size: 1rem; }
+    .lx-film__caps { top: calc(var(--header-h) + env(safe-area-inset-top, 0px) + 20px); bottom: auto; }
+    .lx-film__cap { gap: 8px; }
+    .lx-film__cap::before { width: 40px; }
+    .lx-film__cap strong { font-size: 1.55rem; }
+    .lx-film__cap span { display: none; }
+    .lx-film__end { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) { .lx-film__video { display: none !important; } .lx-film__hint i::after { animation: none; } }
+
+  /* короткая полоса фактов под фильмом */
+  .lx-band { background: var(--graphite); color: #fff; }
+  .lx-band__facts { list-style: none; margin: 0; padding: 0; display: grid; }
+  .lx-band__facts li { display: grid; gap: 2px; padding: 22px 0; border-bottom: 1px solid #26303B; }
+  .lx-band__facts strong { font-weight: 500; color: var(--dark-ink); }
+  .lx-band__facts span { color: var(--dark-muted); font-size: .95rem; }
+  @media (min-width: 900px) {
+    .lx-band__facts { grid-template-columns: repeat(3, 1fr); }
+    .lx-band__facts li { border-bottom: 0; padding: 32px 24px 32px 0; }
+    .lx-band__facts li + li { padding-left: 24px; border-left: 1px solid #26303B; }
+  }
+
+  /* окно с роликом */
+  .lx-modal { width: min(1280px, 94vw); max-width: none; padding: 0; border: 0; background: #000; color: #fff; overflow: visible; }
+  .lx-modal::backdrop { background: rgba(10,14,19,.86); backdrop-filter: blur(6px); }
+  .lx-modal video { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; background: #000; }
+  .lx-modal__x { position: absolute; right: 0; top: -52px; width: 44px; height: 44px; border: 1px solid rgba(255,255,255,.4); border-radius: 50%; background: none; color: #fff; font-size: 1.6rem; line-height: 1; cursor: pointer; }
+  .lx-modal__x:hover { border-color: var(--tape); }
 
   /* ---------- обещание ---------- */
   .lx-statement .container { display: grid; gap: clamp(32px, 4vw, 56px); justify-items: start; }
@@ -355,7 +456,10 @@ const qr = (seed: number) => {
   .lx-step { display: grid; gap: 16px; align-content: start; }
   .lx-step__media { position: relative; aspect-ratio: 4 / 5; background: linear-gradient(160deg, #1A232D 0%, #10161D 70%); color: var(--dark-ink); overflow: hidden; }
   .lx-step:nth-child(even) .lx-step__media { background: linear-gradient(160deg, #E4E8EC 0%, #CBD2D9 100%); color: var(--ink); }
-  .lx-step__n { position: absolute; left: 6%; bottom: -0.08em; font-family: var(--font-display); font-weight: 200; font-size: clamp(9rem, 22vw, 17rem); line-height: .8; letter-spacing: -0.06em; opacity: .9; }
+  .lx-step__media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 1.2s var(--ease-lux); }
+  .lx-step__media::after { content: ""; position: absolute; inset: 45% 0 0; background: linear-gradient(transparent, rgba(16,22,29,.55)); pointer-events: none; }
+  .lx-step:hover .lx-step__media img { transform: scale(1.04); }
+  .lx-step__n { position: absolute; z-index: 1; color: #fff; left: 6%; bottom: -0.08em; font-family: var(--font-display); font-weight: 200; font-size: clamp(9rem, 22vw, 17rem); line-height: .8; letter-spacing: -0.06em; opacity: .9; }
   .lx-step__t { font-family: var(--font-display); font-weight: 300; font-size: var(--fs-m); letter-spacing: -0.03em; }
   .lx-step__d { color: var(--muted); max-width: 34ch; }
   @media (max-width: 1023px) {
@@ -376,6 +480,9 @@ const qr = (seed: number) => {
   /* ---------- стандарты ---------- */
   .lx-std__grid { display: grid; gap: 56px; }
   @media (min-width: 1024px) { .lx-std__grid { grid-template-columns: 5fr 6fr; gap: 8%; align-items: start; } .lx-std__media { position: sticky; top: calc(var(--header-h) + 32px); } }
+  .lx-std__img { position: relative; aspect-ratio: 4 / 5; overflow: hidden; background: var(--graphite); }
+  .lx-std__img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .lx-ai { position: absolute; right: 12px; top: 12px; z-index: 2; font-size: .72rem; padding: 4px 8px; border-radius: 2px; background: rgba(16,22,29,.55); color: #fff; backdrop-filter: blur(6px); }
   .lx-ph { aspect-ratio: 4 / 5; display: grid; align-content: end; padding: 24px; background: linear-gradient(170deg, #1C2630 0%, #10161D 80%); color: var(--dark-muted); font-size: .9rem; }
   .lx-std__text { display: grid; gap: 28px; align-content: start; }
   .lx-list { margin: clamp(16px, 3vw, 40px) 0 0; border-top: 1px solid var(--hair); }
