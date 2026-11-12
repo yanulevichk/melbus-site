@@ -120,9 +120,20 @@ const qr = (seed: number) => {
 
 <!-- 2. ОБЕЩАНИЕ -->
 <section class="lx-sec lx-statement">
-  <div class="container">
-    <p class="lx-statement__text">Цена, которую вы приняли, — это цена, которую вы заплатите. Никаких «а тут ещё этаж» и «шкаф оказался тяжелее». Если что-то меняется — только с вашего согласия и до начала работ.</p>
-    <a class="lux-link" href={href(locale, 'guarantee')}>Как работает гарантия цены</a>
+  <div class="container lx-statement__grid">
+    <div class="lx-statement__body">
+      <p class="lx-statement__text">Цена, которую вы приняли, — это цена, которую вы заплатите. Никаких «а тут ещё этаж» и «шкаф оказался тяжелее». Если что-то меняется — только с вашего согласия и до начала работ.</p>
+      <a class="lux-link" href={href(locale, 'guarantee')}>Как работает гарантия цены</a>
+    </div>
+    <figure class="lx-statement__media" data-tape>
+      <div class="tape__media lx-vid" data-video="1">
+        <video muted loop playsinline preload="none" poster="/img/site/phone.webp" width="900" height="900" aria-label="Рука с телефоном снимает квартиру на видео">
+          <source data-src="/video/phone.mp4" type="video/mp4" />
+        </video>
+        <span class="lx-ai">Визуализация</span>
+      </div>
+      <figcaption>Две-три минуты видео на телефон — и мы называем окончательную цену.</figcaption>
+    </figure>
   </div>
 </section>
 
@@ -182,8 +193,10 @@ const qr = (seed: number) => {
 <section class="lx-sec lx-std">
   <div class="container lx-std__grid">
     <div class="lx-std__media" data-tape>
-      <div class="tape__media lx-std__img" data-slot="D1">
-        <img src="/img/film/std-tape.webp" alt="Белая коробка MELBUS заклеивается бирюзовым скотчем" width="720" height="900" loading="lazy" decoding="async" />
+      <div class="tape__media lx-std__img lx-vid" data-slot="D1" data-video="1">
+        <video muted loop playsinline preload="none" poster="/img/site/gloves.webp" width="720" height="900" aria-label="Руки в фирменных перчатках MELBUS упаковывают бокал в бумагу и кладут в коробку">
+          <source data-src="/video/gloves.mp4" type="video/mp4" />
+        </video>
         <span class="lx-ai">Визуализация</span>
       </div>
     </div>
@@ -307,6 +320,14 @@ const qr = (seed: number) => {
 
 <!-- 13. ФИНАЛ -->
 <section class="lx-sec lx-cta dark grain">
+  <figure class="lx-cta__film" data-tape>
+    <div class="tape__media lx-vid" data-video="1">
+      <video muted loop playsinline preload="none" poster="/img/site/van-side.webp" width="1280" height="720" aria-label="Белый бус MELBUS едет по улице Варшавы в золотой час">
+        <source data-src="/video/van.mp4" type="video/mp4" />
+      </video>
+      <span class="lx-ai">Визуализация</span>
+    </div>
+  </figure>
   <div class="container">
     <h2 class="lx-mega">Ваш новый адрес ждёт</h2>
     <div class="lx-cta__row">
@@ -424,7 +445,19 @@ const qr = (seed: number) => {
   .lx-modal__x:hover { border-color: var(--tape); }
 
   /* ---------- обещание ---------- */
-  .lx-statement .container { display: grid; gap: clamp(32px, 4vw, 56px); justify-items: start; }
+  .lx-statement__grid { display: grid; gap: clamp(48px, 6vw, 96px); align-items: center; }
+  .lx-statement__body { display: grid; gap: clamp(32px, 4vw, 56px); justify-items: start; }
+  @media (min-width: 1024px) { .lx-statement__grid { grid-template-columns: 7fr 5fr; } }
+  .lx-statement__media { margin: 0; display: grid; gap: 14px; }
+  .lx-statement__media figcaption { color: var(--muted); font-size: .95rem; max-width: 36ch; }
+  .lx-vid { position: relative; overflow: hidden; background: var(--graphite); }
+  .lx-vid video { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .lx-statement .lx-vid { aspect-ratio: 1; }
+  .lx-cta { position: relative; overflow: hidden; padding-top: 0; }
+  .lx-cta__film { margin: 0 0 clamp(56px, 7vw, 112px); }
+  .lx-cta__film .lx-vid { aspect-ratio: 4 / 3; }
+  @media (min-width: 768px) { .lx-cta__film .lx-vid { aspect-ratio: 21 / 9; } }
+  .lx-cta__film .lx-vid::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg, rgba(16,22,29,0) 55%, var(--graphite) 100%); }
   .lx-statement__text { font-family: var(--font-display); font-weight: 200; font-size: var(--fs-l); letter-spacing: -0.04em; line-height: 1.12; max-width: 28ch; text-wrap: pretty; }
 
   /* ---------- цена ---------- */
@@ -481,7 +514,7 @@ const qr = (seed: number) => {
   .lx-std__grid { display: grid; gap: 56px; }
   @media (min-width: 1024px) { .lx-std__grid { grid-template-columns: 5fr 6fr; gap: 8%; align-items: start; } .lx-std__media { position: sticky; top: calc(var(--header-h) + 32px); } }
   .lx-std__img { position: relative; aspect-ratio: 4 / 5; overflow: hidden; background: var(--graphite); }
-  .lx-std__img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .lx-std__img img, .lx-std__img video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
   .lx-ai { position: absolute; right: 12px; top: 12px; z-index: 2; font-size: .72rem; padding: 4px 8px; border-radius: 2px; background: rgba(16,22,29,.55); color: #fff; backdrop-filter: blur(6px); }
   .lx-ph { aspect-ratio: 4 / 5; display: grid; align-content: end; padding: 24px; background: linear-gradient(170deg, #1C2630 0%, #10161D 80%); color: var(--dark-muted); font-size: .9rem; }
   .lx-std__text { display: grid; gap: 28px; align-content: start; }
