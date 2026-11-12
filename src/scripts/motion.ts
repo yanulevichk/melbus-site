@@ -312,7 +312,7 @@ function priceBoard(board: HTMLElement) {
   const out = board.querySelector<HTMLElement>('[data-board-value]');
   const status = board.querySelector<HTMLElement>('[data-board-status]');
   const chips = Array.from(document.querySelectorAll<HTMLButtonElement>(`[data-board-for="${board.id}"] [data-value]`));
-  const fmt = new Intl.NumberFormat('ru');
+  const fmt = new Intl.NumberFormat(document.documentElement.lang || 'pl');
   const cur = reels.map(() => 0);
   const CELLS = 33; // 3 круга по 11 клеток (0–9 и пустая)
   const yp = (idx: number) => (-idx * 100) / CELLS;
@@ -338,10 +338,20 @@ function priceBoard(board: HTMLElement) {
     show(Number(b.dataset.value), spin);
   };
   chips.forEach((b) => b.addEventListener('click', () => pick(b)));
+  // внешнее управление (калькулятор): board.dispatchEvent(new CustomEvent('board:set', { detail: { value, status } }))
+  let seen = false, pending: number | null = null;
+  board.addEventListener('board:set', (e) => {
+    const d = (e as CustomEvent<{ value: number; status?: string }>).detail;
+    if (status && d.status) status.textContent = d.status;
+    if (seen) show(d.value); else { pending = d.value; if (out) out.textContent = fmt.format(d.value); }
+  });
   const first = chips.find((c) => c.getAttribute('aria-pressed') === 'true') || chips[0];
-  if (!first) return;
   reels.forEach((r) => gsap.set(r.firstElementChild, { yPercent: 0 }));
-  ScrollTrigger.create({ trigger: board, start: 'top 85%', once: true, onEnter: () => pick(first, 2) });
+  ScrollTrigger.create({ trigger: board, start: 'top 85%', once: true, onEnter: () => {
+    seen = true;
+    const v = pending ?? (board.dataset.value ? Number(board.dataset.value) : null); // калькулятор мог посчитать раньше, чем табло ожило
+    if (v != null) show(v, 2); else if (first) pick(first, 2);
+  } });
 }
 
 /* ---------- инициализация страницы ---------- */

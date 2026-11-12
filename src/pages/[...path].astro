@@ -9,6 +9,7 @@ import HomeLux from '../views/HomeLux.astro';
 import Services from '../views/Services.astro';
 import Service from '../views/Service.astro';
 import Quote from '../views/Quote.astro';
+import Calculator from '../views/Calculator.astro';
 import Simple, { type Block, type MediaProps } from '../views/Simple.astro';
 import { enabledLocales, href, type Locale, type PageKey } from '../i18n/routes';
 import { services, serviceById } from '../data/services';
@@ -47,7 +48,8 @@ const simple = pg && { eyebrow: pg.eyebrow[L], title: pg.title[L], lead: pg.lead
   {svc && <Service locale={locale} service={svc} />}
   {key === 'quote' && <Quote locale={locale} />}
 
-  {['pricing', 'calculator', 'guarantee', 'how', 'about'].includes(key) && simple && <Simple locale={locale} {...simple} />}
+  {['pricing', 'guarantee', 'how', 'about'].includes(key) && simple && <Simple locale={locale} {...simple} />}
+  {key === 'calculator' && simple && <Calculator locale={locale} eyebrow={simple.eyebrow} title={simple.title} lead={simple.lead} />}
 
   {key === 'faq' && simple && (
     <Simple locale={locale} {...simple} blocks={[{ type: 'faq', title: misc.faqTitle[L], items: faq }]} />

@@ -53,5 +53,6 @@ export const quoteText = {
   vol: l('Объём', 'Zakres', 'Обсяг', 'Size'),
   est: l('Ориентир', 'Orientacyjnie', 'Орієнтир', 'Estimate'),
   estVal: l('от — zł', 'od — zł', 'від — zł', 'from — zł'),
+  estFrom: l('от', 'od', 'від', 'from'),
   sumNote: l('Точная цена — после видео. Она не изменится в день переезда.', 'Dokładna cena — po wideo. Nie zmieni się w dniu przeprowadzki.', 'Точна ціна — після відео. Вона не зміниться в день переїзду.', 'The exact price comes after the video. It won’t change on moving day.'),
 };

@@ -97,7 +97,7 @@ const { locale: L } = Astro.props as { locale: Locale };
       <span class="t-eyebrow">{Q.sum[L]}</span>
       <dl>
         <dt>{Q.vol[L]}</dt><dd data-sum="size">{Q.sizes[1][L]}</dd>
-        <dt>{Q.est[L]}</dt><dd>{Q.estVal[L]}</dd>
+        <dt>{Q.est[L]}</dt><dd data-sum="est" data-from={Q.estFrom[L]}>{Q.estVal[L]}</dd>
       </dl>
       <p class="t-muted">{Q.sumNote[L]}</p>
     </aside>
@@ -140,6 +140,14 @@ const { locale: L } = Astro.props as { locale: Locale };
       row.querySelector('[data-inc]')!.addEventListener('click', () => (inp.value = String(+inp.value + 1)));
       row.querySelector('[data-dec]')!.addEventListener('click', () => (inp.value = String(Math.max(0, +inp.value - 1))));
     });
+    // выбор из калькулятора: ?size=1&ex=0,3&est=2340
+    const qs = new URLSearchParams(location.search);
+    const size = form.querySelector<HTMLInputElement>(`#size-${qs.get('size')}`);
+    if (size) { size.checked = true; document.querySelector('[data-sum="size"]')!.textContent = size.value; }
+    (qs.get('ex') || '').split(',').forEach((n) => { const c = form.querySelector<HTMLInputElement>(`#ex-${n}`); if (c) c.checked = true; });
+    const est = Number(qs.get('est'));
+    const estEl = document.querySelector<HTMLElement>('[data-sum="est"]');
+    if (est > 0 && estEl) estEl.textContent = `${estEl.dataset.from} ${new Intl.NumberFormat(document.documentElement.lang || 'pl').format(est)} zł`;
     if (location.hash === '#video') show(steps.length - 1); else show(0);
   }
   document.addEventListener('astro:page-load', initQuote);

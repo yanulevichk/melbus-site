@@ -1,0 +1,268 @@
+---
+/**
+ * КАЛЬКУЛЯТОР ПЕРЕЕЗДА. Слева вопросы, справа (на телефоне — ниже) графитовая панель с табло-барабанами.
+ * Тексты — src/content/calculator.ts, суммы — src/data/pricing-demo.ts (calcDemo, ДЕМО).
+ * Кнопка «Получить точную цену» переносит выбор в заявку: ?size=…&ex=…&est=…
+ */
+import PageHero from '../components/PageHero.astro';
+import { href, type Locale } from '../i18n/routes';
+import { boardOptions, calcDemo as C, DEMO } from '../data/pricing-demo';
+import { calcText as T } from '../content/calculator';
+interface Props { locale: Locale; eyebrow?: string; title: string; lead?: string }
+const { locale: L, eyebrow, title, lead } = Astro.props;
+const quote = href(L, 'quote');
+const model = {
+  sizes: boardOptions.map((o, i) => ({ value: o.value, status: o.status[L], k: C.sizeK[i], q: C.sizeQuote[i] })),
+  dist: C.distance.map((d) => ({ add: d.add, label: d.label[L] })),
+  floor: C.floorNoLift,
+  pack: C.packing.map((p) => ({ pct: p.pct, q: p.quote })),
+  extras: C.extras.map((e) => ({ add: e.add, q: e.quote })),
+  ground: T.ground[L],
+};
+const SIZE0 = 1;
+const floors: ['from' | 'to', number, boolean][] = [['from', 3, true], ['to', 2, true]];
+---
+<PageHero eyebrow={eyebrow} title={title} lead={lead} />
+
+<section class="cx">
+  <div class="container cx__grid">
+    <form class="cx__form" data-calc novalidate>
+      <script is:inline type="application/json" data-calc-model set:html={JSON.stringify(model)} />
+
+      <fieldset class="cx__q">
+        <legend class="cx__h">{T.qSize[L]}</legend>
+        <div class="cx-seg">
+          {boardOptions.map((o, i) => (
+            <label><input type="radio" name="size" value={i} checked={i === SIZE0} /><span>{o.label[L]}</span></label>
+          ))}
+        </div>
+      </fieldset>
+
+      <fieldset class="cx__q">
+        <legend class="cx__h">{T.qDist[L]}</legend>
+        <div class="cx-seg">
+          {C.distance.map((d, i) => (
+            <label><input type="radio" name="dist" value={i} checked={i === 0} /><span>{d.label[L]}</span></label>
+          ))}
+        </div>
+        <p class="cx__hint">{T.euNote[L]} <a href={quote}>{T.euLink[L]}</a></p>
+      </fieldset>
+
+      <fieldset class="cx__q">
+        <legend class="cx__h">{T.qFloors[L]}</legend>
+        <div class="cx-floors">
+          {floors.map(([k, f, lift]) => (
+            <div class="cx-floor" data-floor={k}>
+              <span class="cx-floor__addr">{k === 'from' ? T.addrFrom[L] : T.addrTo[L]}</span>
+              <div class="cx-step">
+                <button type="button" data-dec aria-label={`${T.less[L]} — ${k === 'from' ? T.addrFrom[L] : T.addrTo[L]}`}>−</button>
+                <output aria-live="polite" data-floor-out><span class="cx-step__k">{T.floor[L]}</span> <b>{f}</b></output>
+                <input type="hidden" name={`floor_${k}`} value={f} />
+                <button type="button" data-inc aria-label={`${T.more[L]} — ${k === 'from' ? T.addrFrom[L] : T.addrTo[L]}`}>+</button>
+              </div>
+              <label class="cx-switch"><input type="checkbox" name={`lift_${k}`} checked={lift} /><i aria-hidden="true"></i><span>{T.lift[L]}</span></label>
+            </div>
+          ))}
+        </div>
+        <p class="cx__hint">{T.floorsHint[L]}</p>
+      </fieldset>
+
+      <fieldset class="cx__q">
+        <legend class="cx__h">{T.qPack[L]}</legend>
+        <div class="cx-seg">
+          {C.packing.map((p, i) => (
+            <label><input type="radio" name="pack" value={i} checked={i === 0} /><span>{p.label[L]}</span></label>
+          ))}
+        </div>
+      </fieldset>
+
+      <fieldset class="cx__q">
+        <legend class="cx__h">{T.qExtras[L]}</legend>
+        <div class="cx-checks">
+          {C.extras.map((e, i) => (
+            <label class="cx-check"><input type="checkbox" name="extra" value={i} /><i aria-hidden="true"></i><span>{e.label[L]}</span></label>
+          ))}
+        </div>
+      </fieldset>
+
+      <div class="cx-mini" aria-hidden="true">
+        <span>{T.estimate[L]}</span>
+        <strong>{T.from[L]} <b data-calc-mini>{boardOptions[SIZE0].value}</b> zł</strong>
+      </div>
+    </form>
+
+    <aside class="cx__res dark grain" aria-label={T.estimate[L]}>
+      <div class="cx__panel">
+        <p class="cx__eyebrow">{T.estimate[L]}</p>
+        <div class="cx-board" id="board-calc" data-board>
+          <p class="cx-board__status" data-board-status>{boardOptions[SIZE0].status[L]} · {C.distance[0].label[L]}</p>
+          <div class="cx-board__row" aria-hidden="true">
+            <span class="cx-board__from">{T.from[L]}</span>
+            {[0, 1, 2, 3, 4].map((i) => (
+              <span class={`cx-reel${i === 1 ? ' cx-reel--k' : ''}`} data-reel><span class="cx-reel__strip">{Array.from({ length: 33 }, (_, k) => <i>{k % 11 === 10 ? '' : k % 11}</i>)}</span></span>
+            ))}
+            <span class="cx-board__cur">zł</span>
+          </div>
+          <p class="sr-only" aria-live="polite">{T.sr[L]} <span data-board-value>{boardOptions[SIZE0].value}</span> zł</p>
+        </div>
+
+        <dl class="cx-break">
+          {(['base', 'dist', 'floors', 'pack', 'extras'] as const).map((r) => (
+            <div data-row={r} hidden={r !== 'base'}><dt>{T.rows[r][L]}</dt><dd data-row-v>—</dd></div>
+          ))}
+        </dl>
+
+        {DEMO && <p class="cx-note">{T.note[L]}</p>}
+        <div class="cx__cta">
+          <a class="btn btn--primary" href={quote} data-calc-cta>{T.cta[L]}</a>
+          <a class="lux-link" href={quote + '#video'}>{T.video[L]}</a>
+        </div>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<script>
+  type Model = { sizes: { value: number; status: string; k: number; q: number }[]; dist: { add: number; label: string }[]; floor: number; pack: { pct: number; q: number }[]; extras: { add: number; q: number }[]; ground: string };
+  function initCalc() {
+    const form = document.querySelector<HTMLFormElement>('[data-calc]');
+    if (!form || form.dataset.ready) return;
+    form.dataset.ready = '1';
+    const M: Model = JSON.parse(form.querySelector('[data-calc-model]')!.textContent || '{}');
+    const board = document.getElementById('board-calc')!;
+    const cta = document.querySelector<HTMLAnchorElement>('[data-calc-cta]')!;
+    const mini = form.querySelector<HTMLElement>('[data-calc-mini]')!;
+    const base = cta.getAttribute('href')!;
+    const fmt = new Intl.NumberFormat(document.documentElement.lang || 'pl');
+    const r10 = (n: number) => Math.round(n / 10) * 10;
+    const radio = (n: string) => Number(form.querySelector<HTMLInputElement>(`input[name="${n}"]:checked`)?.value ?? 0);
+    const row = (k: string, v: number, plus = true) => {
+      const el = document.querySelector<HTMLElement>(`[data-row="${k}"]`)!;
+      el.hidden = k !== 'base' && v === 0;
+      el.querySelector('[data-row-v]')!.textContent = `${plus && k !== 'base' ? '+ ' : ''}${fmt.format(v)} zł`;
+    };
+
+    const calc = () => {
+      const s = M.sizes[radio('size')], d = M.dist[radio('dist')], p = M.pack[radio('pack')];
+      let fl = 0;
+      form.querySelectorAll<HTMLElement>('[data-floor]').forEach((w) => {
+        const f = Number(w.querySelector<HTMLInputElement>('input[type="hidden"]')!.value);
+        const lift = w.querySelector<HTMLInputElement>('input[type="checkbox"]')!.checked;
+        if (!lift) fl += f;
+      });
+      const ex = [...form.querySelectorAll<HTMLInputElement>('input[name="extra"]:checked')].map((c) => M.extras[Number(c.value)]);
+      const v = { base: s.value, dist: r10(d.add * s.k), floors: r10(fl * M.floor * s.k), pack: r10(s.value * p.pct), extras: r10(ex.reduce((a, e) => a + e.add * s.k, 0)) };
+      const total = r10(v.base + v.dist + v.floors + v.pack + v.extras);
+      (Object.keys(v) as (keyof typeof v)[]).forEach((k) => row(k, v[k]));
+      mini.textContent = fmt.format(total);
+      const st = `${s.status} · ${d.label}`;
+      board.dataset.value = String(total);
+      board.querySelector('[data-board-status]')!.textContent = st;
+      board.dispatchEvent(new CustomEvent('board:set', { detail: { value: total, status: st } }));
+      const q = new URLSearchParams({ size: String(s.q), est: String(total) });
+      const exq = [...(p.q >= 0 ? [p.q] : []), ...ex.map((e) => e.q)];
+      if (exq.length) q.set('ex', exq.join(','));
+      cta.href = `${base}?${q}`;
+    };
+
+    // этажи: − / +, 0 = партер
+    form.querySelectorAll<HTMLElement>('[data-floor]').forEach((w) => {
+      const inp = w.querySelector<HTMLInputElement>('input[type="hidden"]')!;
+      const out = w.querySelector<HTMLElement>('[data-floor-out] b')!;
+      const set = (n: number) => { inp.value = String(n); out.textContent = n === 0 ? M.ground : String(n); calc(); };
+      w.querySelector('[data-dec]')!.addEventListener('click', () => set(Math.max(0, Number(inp.value) - 1)));
+      w.querySelector('[data-inc]')!.addEventListener('click', () => set(Math.min(30, Number(inp.value) + 1)));
+    });
+    form.addEventListener('change', calc);
+    form.addEventListener('submit', (e) => e.preventDefault());
+    calc();
+  }
+  document.addEventListener('astro:page-load', initCalc);
+</script>
+
+<style>
+  .cx { padding-block: clamp(56px, 8vw, 128px); background: #FFFFFF; }
+  .cx__grid { display: grid; gap: 56px; }
+  @media (min-width: 1024px) { .cx__grid { grid-template-columns: minmax(0, 7fr) minmax(380px, 5fr); gap: 7%; align-items: start; } }
+
+  /* ---------- вопросы ---------- */
+  .cx__form { display: grid; gap: clamp(40px, 5vw, 64px); min-width: 0; }
+  .cx__q { border: 0; margin: 0; padding: 0; display: grid; gap: 20px; min-width: 0; }
+  .cx__h { padding: 0; font-family: var(--font-display); font-weight: 200; font-size: var(--fs-m); letter-spacing: -0.03em; margin-bottom: 4px; }
+  .cx__hint { color: var(--muted); font-size: .92rem; max-width: 52ch; }
+  .cx__hint a { color: var(--deep); text-decoration: underline; text-underline-offset: 3px; }
+
+  /* выбор одного варианта: подчёркивание, как на главной */
+  .cx-seg { display: flex; flex-wrap: wrap; gap: 4px 28px; border-bottom: 1px solid var(--hair); }
+  .cx-seg label { position: relative; cursor: pointer; }
+  .cx-seg input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .cx-seg span { display: block; padding: 14px 0 16px; font-size: 1.05rem; color: var(--muted); transition: color .3s; }
+  .cx-seg span::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--graphite); transform: scaleX(0); transform-origin: 0 50%; transition: transform .5s var(--ease-lux); }
+  .cx-seg label:hover span, .cx-seg input:checked + span { color: var(--ink); }
+  .cx-seg input:checked + span::after { transform: scaleX(1); }
+  .cx-seg input:focus-visible + span { outline: 2px solid var(--deep); outline-offset: 4px; }
+
+  /* этажи */
+  .cx-floors { display: grid; border-top: 1px solid var(--hair); }
+  /* телефон: адрес и «есть лифт» в одной строке, этаж под ними; компьютер — всё в одну строку */
+  .cx-floor { display: grid; grid-template-columns: 1fr auto; grid-template-areas: "addr lift" "step step"; align-items: center; gap: 10px 16px; padding: 18px 0; border-bottom: 1px solid var(--hair); }
+  .cx-floor__addr { grid-area: addr; font-weight: 500; }
+  .cx-step { grid-area: step; }
+  .cx-floor .cx-switch { grid-area: lift; }
+  .cx-switch span { white-space: nowrap; }
+  @media (min-width: 640px) { .cx-floor { grid-template-columns: 9.5em auto 1fr; grid-template-areas: "addr step lift"; } .cx-floor .cx-switch { justify-self: end; } }
+  .cx-step { display: inline-flex; align-items: center; gap: 6px; }
+  .cx-step button { width: 44px; height: 44px; border: 1px solid var(--hair); border-radius: 3px; background: none; font-size: 1.25rem; line-height: 1; cursor: pointer; color: var(--ink); transition: border-color .25s; }
+  .cx-step button:hover { border-color: var(--graphite); }
+  .cx-step output { min-width: 7.2em; text-align: center; }
+  .cx-step__k { color: var(--muted); font-size: .9rem; }
+  .cx-step output b { font-family: var(--font-display); font-weight: 300; font-size: 1.35rem; letter-spacing: -0.03em; }
+
+  /* переключатель «есть лифт» и галочки */
+  .cx-switch, .cx-check { display: inline-flex; align-items: center; gap: 12px; cursor: pointer; min-height: 44px; }
+  .cx-switch input, .cx-check input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .cx-switch i { position: relative; width: 44px; height: 24px; border-radius: 12px; background: var(--hair); transition: background .3s; flex: none; }
+  .cx-switch i::after { content: ""; position: absolute; left: 3px; top: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(16,22,29,.25); transition: transform .35s var(--ease-lux); }
+  .cx-switch input:checked + i { background: var(--graphite); }
+  .cx-switch input:checked + i::after { transform: translateX(20px); }
+  .cx-switch input:focus-visible + i, .cx-check input:focus-visible + i { outline: 2px solid var(--deep); outline-offset: 3px; }
+  .cx-checks { display: grid; border-top: 1px solid var(--hair); }
+  .cx-check { padding: 12px 0; border-bottom: 1px solid var(--hair); }
+  .cx-check i { position: relative; width: 22px; height: 22px; border: 1px solid var(--steel); border-radius: 3px; flex: none; transition: background .25s, border-color .25s; }
+  .cx-check i::after { content: ""; position: absolute; left: 7px; top: 3px; width: 6px; height: 11px; border: solid var(--graphite); border-width: 0 2px 2px 0; transform: rotate(45deg) scale(0); transition: transform .3s var(--ease-lux); }
+  .cx-check input:checked + i { background: var(--tape); border-color: var(--tape); }
+  .cx-check input:checked + i::after { transform: rotate(45deg) scale(1); }
+
+  /* на телефоне: итог прилипает над нижней панелью, пока заполняете вопросы */
+  .cx-mini { position: sticky; bottom: calc(var(--bar-h) + env(safe-area-inset-bottom, 0px) + 10px); z-index: 5; display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding: 14px 18px; background: var(--graphite); color: #fff; border-radius: 3px; box-shadow: 0 10px 30px rgba(16,22,29,.25); }
+  .cx-mini span { color: var(--dark-muted); font-size: .9rem; }
+  .cx-mini strong { font-family: var(--font-display); font-weight: 300; font-size: 1.35rem; letter-spacing: -0.03em; }
+  .cx-mini strong b { font-weight: 300; }
+  @media (min-width: 1024px) { .cx-mini { display: none; } }
+
+  /* ---------- панель итога ---------- */
+  .cx__res { background: radial-gradient(90% 70% at 85% 0%, #14262C 0%, var(--graphite) 65%); color: #fff; border-radius: 3px; overflow: hidden; }
+  @media (min-width: 1024px) { .cx__res { position: sticky; top: calc(var(--header-h) + 24px); } }
+  .cx__panel { position: relative; z-index: 4; display: grid; gap: 24px; padding: clamp(24px, 3.4vw, 44px); }
+  .cx__eyebrow { color: var(--dark-muted); font-size: .95rem; }
+  .cx-board { --cell: clamp(60px, 15vw, 92px); display: grid; gap: 6px; }
+  .cx-board__status { color: var(--dark-muted); font-size: .95rem; }
+  .cx-board__row { display: flex; align-items: flex-end; }
+  .cx-board__from { font-size: 1rem; color: var(--dark-muted); margin-right: .6em; padding-bottom: calc(var(--cell) * .16); }
+  .cx-board__cur { font-family: var(--font-display); font-weight: 200; font-size: calc(var(--cell) * .38); margin-left: .3em; padding-bottom: calc(var(--cell) * .14); }
+  .cx-reel { position: relative; width: calc(var(--cell) * .66); height: var(--cell); overflow: hidden; transition: width .5s var(--ease-lux), margin .5s var(--ease-lux);
+    -webkit-mask: linear-gradient(transparent, #000 18%, #000 82%, transparent); mask: linear-gradient(transparent, #000 18%, #000 82%, transparent); }
+  .cx-reel--k { margin-right: calc(var(--cell) * .2); }
+  .cx-reel:global(.is-blank) { width: 0; margin-right: 0; }
+  .cx-reel__strip { display: block; will-change: transform; }
+  .cx-reel__strip i { display: grid; place-items: center; height: var(--cell); font-style: normal; font-family: var(--font-display); font-weight: 200; font-size: calc(var(--cell) * .92); letter-spacing: -0.06em; line-height: 1; font-variant-numeric: tabular-nums; }
+
+  .cx-break { margin: 0; border-top: 1px solid #26303B; }
+  .cx-break > div { display: flex; justify-content: space-between; gap: 16px; padding: 12px 0; border-bottom: 1px solid #26303B; font-size: .95rem; }
+  .cx-break > div[hidden] { display: none; }
+  .cx-break dt { color: var(--dark-muted); }
+  .cx-break dd { margin: 0; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .cx-note { color: var(--dark-muted); font-size: .85rem; line-height: 1.55; }
+  .cx__cta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 28px; }
+  .cx__cta .lux-link { color: #fff; }
+</style>

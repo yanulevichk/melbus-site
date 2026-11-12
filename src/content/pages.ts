@@ -106,10 +106,7 @@ export const pages: Record<string, LPage> = {
   calculator: {
     eyebrow: l('Калькулятор', 'Kalkulator', 'Калькулятор', 'Calculator'),
     title: l('Сколько стоит<br>ваш переезд', 'Ile kosztuje<br>Twoja przeprowadzka', 'Скільки коштує<br>ваш переїзд', 'How much<br>will your move cost'),
-    lead: l('Ориентир за 30 секунд. Логику и цены подключим после утверждения ставок.', 'Orientacyjna cena w 30 sekund. Logikę i ceny dodamy po zatwierdzeniu stawek.', 'Орієнтир за 30 секунд. Логіку й ціни підключимо після затвердження ставок.', 'A ballpark in 30 seconds. The logic and prices will go live once rates are approved.'),
-    media: { video: '/video/pack.mp4', poster: '/img/site/pack.webp',
-      alt: l('Мебель по очереди укладывается в белую коробку MELBUS', 'Meble po kolei trafiają do białego kartonu MELBUS', 'Меблі по черзі вкладаються в білу коробку MELBUS', 'Furniture goes into a white MELBUS box piece by piece'),
-      caption: l('Сначала ориентир за полминуты, затем точная цена по видео.', 'Najpierw orientacyjna cena w pół minuty, potem dokładna z wideo.', 'Спершу орієнтир за пів хвилини, потім точна ціна за відео.', 'First a ballpark in half a minute, then an exact price from a video.') },
+    lead: l('Выберите, что и куда везём, — табло покажет ориентир. Точную цену назовём по видео.', 'Wybierz, co i dokąd wieziemy — tablica pokaże orientacyjną cenę. Dokładną podamy na podstawie wideo.', 'Оберіть, що й куди веземо, — табло покаже орієнтир. Точну ціну назвемо за відео.', 'Choose what we’re moving and where — the board shows a ballpark. We’ll give you the exact price from a video.'),
   },
 
   guarantee: {
