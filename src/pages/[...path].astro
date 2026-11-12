@@ -13,6 +13,8 @@ import Calculator from '../views/Calculator.astro';
 import Pricing from '../views/Pricing.astro';
 import Area from '../views/Area.astro';
 import Areas from '../views/Areas.astro';
+import Offer from '../views/Offer.astro';
+import { offerText } from '../content/offer';
 import Simple, { type Block, type MediaProps } from '../views/Simple.astro';
 import { enabledLocales, href, type Locale, type PageKey } from '../i18n/routes';
 import { services, serviceById } from '../data/services';
@@ -24,7 +26,7 @@ import { ui } from '../i18n/ui';
 import { brand } from '../config/brand';
 
 export function getStaticPaths() {
-  const keys: PageKey[] = ['home', 'services', 'pricing', 'calculator', 'quote', 'guarantee', 'how', 'about', 'faq', 'contact', 'terms', 'privacy', 'cookies', 'complaints', 'lux', 'areas', ...services.map((s) => `service:${s.id}` as PageKey), ...areas.map((a) => `area:${a.id}` as PageKey)];
+  const keys: PageKey[] = ['home', 'services', 'pricing', 'calculator', 'quote', 'guarantee', 'how', 'about', 'faq', 'contact', 'terms', 'privacy', 'cookies', 'complaints', 'lux', 'areas', 'offer', ...services.map((s) => `service:${s.id}` as PageKey), ...areas.map((a) => `area:${a.id}` as PageKey)];
   return enabledLocales.flatMap((locale) => keys.map((key) => ({
     params: { path: href(locale, key).replace(/^\/|\/$/g, '') || undefined },
     props: { locale, key },
@@ -40,6 +42,7 @@ const mm = meta[key];
 const m = svc ? { title: svc.title[L], description: svc.lead[L], nav: 'services' }
   : area ? { title: areaText.title[L](area.name[L]), description: areaText.description[L](area.loc[L]), nav: undefined }
   : key === 'areas' ? { title: areaText.hub.metaTitle[L], description: areaText.hub.metaDesc[L], nav: undefined }
+  : key === 'offer' ? { title: offerText.metaTitle[L], description: offerText.metaDesc[L], nav: undefined }
   : { title: mm.title[L], description: mm.description[L], nav: mm.nav };
 const legal = ['terms', 'privacy', 'cookies', 'complaints'].includes(key);
 const faq = faqFor(L);
@@ -62,7 +65,7 @@ const blk = (b: LBlock): Block => ({ type: b.type, eyebrow: b.eyebrow?.[L], titl
 const med = (x?: LMedia): MediaProps | undefined => x && { video: x.video, poster: x.poster, alt: x.alt[L], caption: x.caption?.[L], square: x.square };
 const simple = pg && { eyebrow: pg.eyebrow[L], title: pg.title[L], lead: pg.lead?.[L], media: med(pg.media), blocks: (pg.blocks ?? []).map(blk) };
 ---
-<Base locale={locale} pageKey={key} title={m.title} description={m.description} nav={m.nav} schema={[...faqSchema, ...areaSchema]} noindex={key === 'lux'} theme="lux">
+<Base locale={locale} pageKey={key} title={m.title} description={m.description} nav={m.nav} schema={[...faqSchema, ...areaSchema]} noindex={key === 'lux' || key === 'offer'} theme="lux">
   {/* 12.11.2026: люкс-версия стала главной; /lux/ — та же страница (noindex) */}
   {(key === 'home' || key === 'lux') && <HomeLux locale={locale} />}
   {key === 'services' && <Services locale={locale} />}
@@ -70,6 +73,7 @@ const simple = pg && { eyebrow: pg.eyebrow[L], title: pg.title[L], lead: pg.lead
   {key === 'quote' && <Quote locale={locale} />}
   {area && <Area locale={locale} area={area} />}
   {key === 'areas' && <Areas locale={locale} />}
+  {key === 'offer' && <Offer locale={locale} />}
 
   {['guarantee', 'how', 'about'].includes(key) && simple && <Simple locale={locale} {...simple} />}
   {key === 'pricing' && <Pricing locale={locale} />}

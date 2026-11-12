@@ -11,7 +11,9 @@ export interface Env {
   TELEGRAM_API?: string;
   /** секрет для ссылок на видео; если не задан — берётся от токена бота */
   LINK_SECRET?: string;
-  /** хранилище видео (R2), привязка в wrangler.toml */
+  /** пароль команды для создания оферт (инструмент /team/oferta/) */
+  TEAM_KEY?: string;
+  /** хранилище видео и оферт (R2), привязка в wrangler.toml */
   VIDEOS?: R2Bucket;
 }
 

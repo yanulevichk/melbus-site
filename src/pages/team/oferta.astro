@@ -1,0 +1,213 @@
+---
+/**
+ * ИНСТРУМЕНТ МЕНЕДЖЕРА (внутренний, noindex, закрыт в robots.txt): оферта по видео.
+ * Цена — та же формула, что на сайте (src/data/pricing.ts). Создание оферты требует пароль команды (секрет TEAM_KEY).
+ * Ссылка «Создать оферту» из сообщения о заявке в Telegram открывает эту страницу уже заполненной (?id=&lang=&name=…).
+ * Интерфейс по-русски (для команды); всё, что видит клиент, — на его языке (src/content/offer.ts).
+ */
+import '../../styles/global.css';
+import '../../styles/lux.css';
+import { SIZES, AMOUNTS, PACKAGES, ZONES, EXTRAS, DATE_ADJ, DEPOSIT, OFFER_DAYS } from '../../data/pricing';
+const opt = (arr: { label?: any; name?: any; status?: any }[], key: 'label' | 'name' | 'status', sel = 0) => arr.map((x, i) => ({ v: i, t: (x as any)[key].ru, sel: i === sel }));
+---
+<!doctype html>
+<html lang="ru" class="lux">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Оферта по видео · MELBUS (команда)</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+</head>
+<body class="tm">
+  <header class="tm__top"><img src="/brand/melbus-dark.svg" alt="MELBUS" height="28" onerror="this.replaceWith(document.createTextNode('MELBUS'))" /><span>Оферта по видео — для команды</span></header>
+  <main class="tm__grid">
+    <form class="tm__form" data-tm novalidate>
+      <fieldset>
+        <legend>Доступ</legend>
+        <label class="f"><span>Пароль команды</span><input type="password" name="key" autocomplete="current-password" required /></label>
+      </fieldset>
+      <fieldset>
+        <legend>Клиент</legend>
+        <div class="r3">
+          <label class="f"><span>№ заявки (из Telegram)</span><input name="id" placeholder="M-261112-K4F2" /></label>
+          <label class="f"><span>Язык клиента</span><select name="lang"><option value="pl">Польский</option><option value="ru">Русский</option><option value="uk">Украинский</option><option value="en">Английский</option></select></label>
+          <label class="f"><span>Имя</span><input name="name" /></label>
+        </div>
+        <label class="f"><span>Телефон (для WhatsApp, клиент не видит)</span><input name="phone" type="tel" placeholder="+48" /></label>
+      </fieldset>
+      <fieldset>
+        <legend>Переезд (по видео)</legend>
+        <div class="r3">
+          <label class="f"><span>Что везём</span><select name="size">{opt(SIZES, 'status', 1).map((o) => <option value={o.v} selected={o.sel}>{o.t}</option>)}</select></label>
+          <label class="f"><span>Сколько вещей</span><select name="amount">{opt(AMOUNTS, 'label', 1).map((o) => <option value={o.v} selected={o.sel}>{o.t}</option>)}</select></label>
+          <label class="f"><span>Пакет</span><select name="pkg">{opt(PACKAGES, 'name', 1).map((o) => <option value={o.v} selected={o.sel}>{o.t}</option>)}</select></label>
+        </div>
+        <label class="f"><span>Куда</span><select name="zone">{opt(ZONES, 'label', 0).map((o) => <option value={o.v} selected={o.sel}>{o.t}</option>)}</select></label>
+        {(['from', 'to'] as const).map((k) => (
+          <div class="r3 r3--addr">
+            <label class="f"><span>{k === 'from' ? 'Откуда' : 'Куда'} — адрес</span><input name={k} /></label>
+            <label class="f"><span>Этаж (0 = партер)</span><input name={k === 'from' ? 'ff' : 'ft'} type="number" min="0" max="30" value="0" /></label>
+            <label class="chk"><input type="checkbox" name={k === 'from' ? 'lf' : 'lt'} checked /> Есть лифт</label>
+          </div>
+        ))}
+        <div class="r3">
+          <label class="f"><span>Дата</span><input name="date" type="date" /></label>
+          <label class="f"><span>Окно прибытия</span><input name="window" placeholder="08:00–08:30" /></label>
+          <label class="f"><span>Дата: скидка / надбавка</span><select name="adj">{opt(DATE_ADJ, 'label', 0).map((o) => <option value={o.v} selected={o.sel}>{o.t}</option>)}</select></label>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>Доп. услуги</legend>
+        <div class="ex">{EXTRAS.map((e, i) => <label class="chk" data-ex={i}><input type="checkbox" name="ex" value={i} /> {e.label.ru} <small></small></label>)}</div>
+      </fieldset>
+      <fieldset>
+        <legend>Для клиента</legend>
+        <label class="f"><span>Список вещей (клиент увидит)</span><textarea name="items" rows="4" placeholder="Диван угловой, шкаф 2 м, кровать 160, холодильник, ~25 коробок"></textarea></label>
+        <label class="f"><span>Комментарий для клиента</span><textarea name="note" rows="2"></textarea></label>
+      </fieldset>
+      <fieldset>
+        <legend>Корректировка (если нужна)</legend>
+        <div class="r3">
+          <label class="f"><span>± zł</span><input name="manual" type="number" step="10" value="0" /></label>
+          <label class="f f--2"><span>Причина (только для команды)</span><input name="reason" placeholder="пианино, узкая лестница, длинный пронос…" /></label>
+        </div>
+      </fieldset>
+    </form>
+
+    <aside class="tm__side">
+      <div class="tm__card">
+        <p class="tm__k">Цена для клиента</p>
+        <p class="tm__total"><span data-tm-total>—</span> zł</p>
+        <dl class="tm__rows" data-tm-rows></dl>
+        <p class="tm__k">Задаток {Math.round(DEPOSIT.pct * 100)} % (мин. {DEPOSIT.min} zł): <b data-tm-dep>—</b> · оферта действует {OFFER_DAYS} дней</p>
+        <button type="button" class="btn btn--primary" data-tm-create>Создать оферту и получить ссылку</button>
+        <p class="tm__err" data-tm-err hidden></p>
+      </div>
+      <div class="tm__card" data-tm-res hidden>
+        <p class="tm__k">Готово: <b data-tm-id></b></p>
+        <label class="f"><span>Ссылка для клиента</span><input data-tm-url readonly /></label>
+        <label class="f"><span>Сообщение клиенту (на его языке)</span><textarea data-tm-msg rows="5"></textarea></label>
+        <div class="tm__btns">
+          <button type="button" class="btn btn--ghost btn--sm" data-tm-copy>Скопировать сообщение</button>
+          <a class="btn btn--primary btn--sm" data-tm-wa target="_blank" rel="noopener">Отправить в WhatsApp</a>
+          <a class="btn btn--ghost btn--sm" data-tm-open target="_blank" rel="noopener">Открыть оферту</a>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <script>
+    import { estimate, extraIncluded, PACKAGES, DATE_ADJ, DEPOSIT } from '../../data/pricing';
+    import { offerText } from '../../content/offer';
+    const form = document.querySelector<HTMLFormElement>('[data-tm]')!;
+    const $ = <T extends HTMLElement>(s: string) => document.querySelector<T>(s)!;
+    const nf = new Intl.NumberFormat('ru');
+    const v = (n: string) => (form.elements.namedItem(n) as HTMLInputElement | null)?.value ?? '';
+    const num = (n: string) => Number(v(n)) || 0;
+    const chk = (n: string) => !!(form.elements.namedItem(n) as HTMLInputElement | null)?.checked;
+    const r10 = (n: number) => Math.round(n / 10) * 10;
+    const KEY = 'melbus-team-key';
+    try { (form.elements.namedItem('key') as HTMLInputElement).value = localStorage.getItem(KEY) || ''; } catch {}
+
+    // предзаполнение из ссылки в Telegram: ?id=&lang=&name=&phone=&size=&pkg=&from=&to=&ff=&ft=&lf=&lt=&date=&ex=
+    const qs = new URLSearchParams(location.search);
+    for (const [k, val] of qs) {
+      const el = form.elements.namedItem(k) as HTMLInputElement | null;
+      if (!el || k === 'ex' || k === 'key') continue;
+      if (el.type === 'checkbox') el.checked = val === '1'; else el.value = val;
+    }
+    (qs.get('ex') || '').split(',').forEach((i) => { const c = form.querySelector<HTMLInputElement>(`input[name="ex"][value="${i}"]`); if (c) c.checked = true; });
+
+    function input() {
+      const pkg = num('pkg');
+      return {
+        quoteId: v('id').trim().toUpperCase(), lang: v('lang'), name: v('name'), phone: v('phone'),
+        size: num('size'), amount: num('amount'), pkg, zone: num('zone'),
+        floorsFrom: num('ff'), liftFrom: chk('lf'), floorsTo: num('ft'), liftTo: chk('lt'),
+        extras: [...form.querySelectorAll<HTMLInputElement>('input[name="ex"]:checked')].map((c) => Number(c.value)).filter((e) => !extraIncluded(pkg, e)),
+        from: v('from'), to: v('to'), date: v('date'), window: v('window'), items: v('items'), note: v('note'),
+        dateAdj: num('adj'), manual: r10(num('manual')), manualReason: v('reason'),
+      };
+    }
+    function calc() {
+      const x = input();
+      form.querySelectorAll<HTMLElement>('[data-ex]').forEach((lab) => {
+        const inc = extraIncluded(x.pkg, Number(lab.dataset.ex));
+        const cb = lab.querySelector('input')!; cb.disabled = inc;
+        lab.querySelector('small')!.textContent = inc ? '(в пакете)' : '';
+      });
+      const e = estimate({ size: x.size, amount: x.amount, zone: x.zone, pkg: x.pkg, extras: x.extras, floorsNoLift: (x.liftFrom ? 0 : x.floorsFrom) + (x.liftTo ? 0 : x.floorsTo) });
+      const adj = r10(e.total * DATE_ADJ[x.dateAdj].k);
+      const total = Math.max(0, r10(e.total + adj + x.manual));
+      const dep = Math.min(total, Math.max(DEPOSIT.min, r10(total * DEPOSIT.pct)));
+      $('[data-tm-total]').textContent = nf.format(total);
+      $('[data-tm-dep]').textContent = `${nf.format(dep)} zł`;
+      const rows: [string, number][] = [[`Пакет «${PACKAGES[x.pkg].name.ru}»`, e.pkg], ['Дорога', e.dist], ['Этажи без лифта', e.floors], ['Доп. услуги', e.extras], ['Дата', adj], ['Корректировка', x.manual]];
+      $('[data-tm-rows]').innerHTML = rows.filter(([, n], i) => i === 0 || n).map(([k, n]) => `<div><dt>${k}</dt><dd>${n > 0 && k !== rows[0][0] ? '+' : ''}${nf.format(n)} zł</dd></div>`).join('');
+    }
+    form.addEventListener('input', calc);
+    form.addEventListener('change', calc);
+    calc();
+
+    $('[data-tm-create]').addEventListener('click', async () => {
+      const err = $('[data-tm-err]'); err.hidden = true;
+      const key = v('key');
+      if (!key) { err.textContent = 'Введите пароль команды.'; err.hidden = false; return; }
+      try { localStorage.setItem(KEY, key); } catch {}
+      const btn = $<HTMLButtonElement>('[data-tm-create]'); btn.disabled = true;
+      try {
+        const r = await fetch('/api/offer/create', { method: 'POST', headers: { 'content-type': 'application/json', 'x-team-key': key }, body: JSON.stringify(input()) });
+        const d = await r.json().catch(() => ({}));
+        if (!r.ok || !d.ok) throw new Error(d.error === 'bad_key' ? 'Неверный пароль команды.' : d.error === 'already_accepted' ? `Оферта ${d.id} уже принята клиентом — создайте новую без № заявки.` : d.error === 'not_configured' ? 'На сервере не задан TEAM_KEY или хранилище.' : 'Не получилось создать оферту.');
+        const o = d.offer, lang = o.lang as 'ru' | 'pl' | 'uk' | 'en';
+        const date = o.date ? new Intl.DateTimeFormat(lang, { day: 'numeric', month: 'long' }).format(new Date(`${o.date}T12:00:00`)) : '';
+        const money = `${new Intl.NumberFormat(lang === 'en' ? 'en' : 'ru').format(o.price.total)} zł`;
+        const msg = offerText.message[lang].replace('{name}', o.name || '').replace('{total}', money).replace('{pkg}', PACKAGES[o.pkg].name[lang]).replace('{date}', date).replace('{url}', d.url).replace(/, ,/g, ',').replace(/ ,/g, ',');
+        $('[data-tm-id]').textContent = d.id;
+        $<HTMLInputElement>('[data-tm-url]').value = d.url;
+        $<HTMLTextAreaElement>('[data-tm-msg]').value = msg;
+        $<HTMLAnchorElement>('[data-tm-open]').href = d.url;
+        const digits = v('phone').replace(/\D/g, '');
+        $<HTMLAnchorElement>('[data-tm-wa]').href = `https://wa.me/${digits.length === 9 ? '48' + digits : digits}?text=${encodeURIComponent(msg)}`;
+        $('[data-tm-res]').hidden = false;
+      } catch (e) {
+        err.textContent = (e as Error).message; err.hidden = false;
+      } finally { btn.disabled = false; }
+    });
+    $('[data-tm-copy]').addEventListener('click', () => { navigator.clipboard?.writeText($<HTMLTextAreaElement>('[data-tm-msg]').value); });
+  </script>
+
+  <style is:global>
+    .tm__top img { height: 28px; width: auto; }
+    .tm { background: var(--paper); color: var(--ink); min-height: 100vh; }
+    .tm__top { display: flex; align-items: center; gap: 16px; padding: 16px 24px; background: var(--graphite); color: #fff; font-size: .95rem; }
+    .tm__grid { display: grid; gap: 24px; padding: 24px; max-width: 1280px; margin: 0 auto; }
+    @media (min-width: 1024px) { .tm__grid { grid-template-columns: 1fr 400px; align-items: start; } .tm__side { position: sticky; top: 24px; } }
+    .tm__form { display: grid; gap: 16px; min-width: 0; }
+    .tm fieldset { border: 1px solid var(--hair); background: #fff; padding: 18px; display: grid; gap: 12px; min-width: 0; border-radius: 3px; }
+    .tm legend { font-weight: 600; padding: 0 6px; }
+    .f { display: grid; gap: 4px; font-size: .85rem; color: var(--muted); min-width: 0; }
+    .f input, .f select, .f textarea { height: 44px; padding: 0 12px; border: 1px solid var(--hair); border-radius: 3px; background: #fff; color: var(--ink); font: inherit; font-size: .95rem; width: 100%; }
+    .f textarea { height: auto; padding: 10px 12px; resize: vertical; }
+    .r3 { display: grid; gap: 12px; }
+    @media (min-width: 720px) { .r3 { grid-template-columns: repeat(3, 1fr); align-items: end; } .r3--addr { grid-template-columns: 2fr 1fr 1fr; } .f--2 { grid-column: span 2; } }
+    .chk { display: flex; align-items: center; gap: 8px; min-height: 44px; font-size: .95rem; }
+    .chk input { width: 18px; height: 18px; accent-color: var(--deep); }
+    .chk small { color: var(--deep); }
+    .ex { display: grid; gap: 0 16px; }
+    @media (min-width: 720px) { .ex { grid-template-columns: 1fr 1fr; } }
+    .tm__side { display: grid; gap: 16px; }
+    .tm__card { display: grid; gap: 12px; padding: 20px; background: var(--graphite); color: #fff; border-radius: 3px; }
+    .tm__card + .tm__card { background: #fff; color: var(--ink); border: 1px solid var(--hair); }
+    .tm__k { color: var(--dark-muted); font-size: .88rem; }
+    .tm__card + .tm__card .tm__k { color: var(--muted); }
+    .tm__total { font-family: var(--font-display); font-weight: 200; font-size: 3rem; letter-spacing: -0.05em; line-height: 1; }
+    .tm__rows { margin: 0; border-top: 1px solid #26303B; }
+    .tm__rows > div { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #26303B; font-size: .9rem; }
+    .tm__rows dd { margin: 0; }
+    .tm__err { padding: 10px 12px; background: #FDECEC; color: #8A1C1C; border-radius: 3px; }
+    .tm__btns { display: flex; flex-wrap: wrap; gap: 8px; }
+  </style>
+</body>
+</html>

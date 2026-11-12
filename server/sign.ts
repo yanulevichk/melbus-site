@@ -22,3 +22,22 @@ export async function checkLink(env: Env, key: string, e: string | null, s: stri
   let diff = 0; for (let i = 0; i < good.length; i++) diff |= good.charCodeAt(i) ^ s.charCodeAt(i);
   return diff === 0;
 }
+
+/** подпись любого текста (например, «offer:M-261112-K4F2») и проверка */
+export const sign = (env: Env, data: string) => hmac(env, data);
+export async function verify(env: Env, data: string, s: string | null) {
+  if (!s) return false;
+  const good = await hmac(env, data);
+  if (good.length !== s.length) return false;
+  let diff = 0; for (let i = 0; i < good.length; i++) diff |= good.charCodeAt(i) ^ s.charCodeAt(i);
+  return diff === 0;
+}
+
+/** сравнение пароля команды без утечки по времени ответа */
+export async function sameSecret(given: string | null, real: string | undefined) {
+  if (!given || !real) return false;
+  const h = async (x: string) => new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(x)));
+  const [a, b] = await Promise.all([h(given), h(real)]);
+  let diff = 0; for (let i = 0; i < a.length; i++) diff |= a[i] ^ b[i];
+  return diff === 0;
+}

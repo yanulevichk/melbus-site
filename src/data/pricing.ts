@@ -13,7 +13,7 @@
  */
 import type { L } from '../i18n/text';
 
-export const PRICE_STATUS: 'demo' | 'proposal' | 'approved' = 'proposal';
+export const PRICE_STATUS = 'proposal' as 'demo' | 'proposal' | 'approved';
 export const DEMO = PRICE_STATUS !== 'approved';
 
 const l = (ru: string, pl: string, uk: string, en: string): L => ({ ru, pl, uk, en });
@@ -138,3 +138,15 @@ export const money = (n: number, lang: string) => new Intl.NumberFormat(moneyLoc
 
 /** табло на главной: «от …» = пакет «Перевозка», по Варшаве, с лифтом, обычное количество вещей */
 export const boardOptions = SIZES.map((s, i) => ({ label: s.label, status: s.status, value: GRID[i][0] }));
+
+/** ОФЕРТА: коэффициент даты (выбирает менеджер; клиент видит строку со скидкой/надбавкой) */
+export const DATE_ADJ = [
+  { k: 0, label: l('Обычная дата', 'Zwykły termin', 'Звичайна дата', 'Regular date') },
+  { k: -0.1, label: l('«Зелёная» дата: вт–чт в середине месяца, −10 %', '„Zielony” termin: wt–czw w środku miesiąca, −10%', '«Зелена» дата: вт–чт у середині місяця, −10 %', '“Green” date: Tue–Thu mid-month, −10%') },
+  { k: -0.05, label: l('Ранняя бронь за 14+ дней, −5 %', 'Wczesna rezerwacja 14+ dni, −5%', 'Раннє бронювання за 14+ днів, −5 %', 'Early booking 14+ days ahead, −5%') },
+  { k: 0.1, label: l('Пиковая дата: конец/начало месяца, суббота летом, +10 %', 'Termin szczytowy: koniec/początek miesiąca, sobota latem, +10%', 'Пікова дата: кінець/початок місяця, субота влітку, +10 %', 'Peak date: end/start of month, summer Saturday, +10%') },
+];
+/** задаток (zadatek): закрепляет дату; доля от суммы, но не меньше минимума */
+export const DEPOSIT = { pct: 0.2, min: 200 };
+/** сколько дней действует оферта */
+export const OFFER_DAYS = 14;

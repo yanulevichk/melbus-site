@@ -19,7 +19,7 @@ export const enabledLocales = (Object.keys(locales) as Locale[]).filter((l) => l
 export type PageKey =
   | 'home' | 'services' | 'pricing' | 'calculator' | 'quote' | 'guarantee' | 'how'
   | 'about' | 'faq' | 'contact' | 'terms' | 'privacy' | 'cookies' | 'complaints' | 'lux'
-  | 'areas' | `service:${string}` | `area:${string}`;
+  | 'areas' | 'offer' | `service:${string}` | `area:${string}`;
 
 /** слаги страниц; '' = главная языка */
 export const slugs: Record<string, Partial<Record<Locale, string>>> = {
@@ -38,6 +38,7 @@ export const slugs: Record<string, Partial<Record<Locale, string>>> = {
   cookies:    { ru: 'cookies', pl: 'cookies', uk: 'cookies', en: 'cookies' },
   complaints: { ru: 'reklamacii', pl: 'reklamacje', uk: 'reklamatsii', en: 'complaints' },
   areas:      { ru: 'rayony', pl: 'gdzie-dzialamy', uk: 'rayony', en: 'areas' },
+  offer:      { ru: 'oferta', pl: 'oferta', uk: 'oferta', en: 'offer' }, // оферта по ссылке (noindex)
   lux:        { ru: 'lux', pl: 'lux', uk: 'lux', en: 'lux' }, // копия главной (noindex): люкс-версия стала главной 12.11.2026
 };
 

@@ -3,7 +3,7 @@
  * Ответ: { ok: true, id: "M-261112-K4F2" } или { ok: false, error: "phone" | "spam" | "send" }.
  */
 import { json, rand, KEY_RE, type Env } from '../../server/env';
-import { check, quoteMessage, type QuotePayload } from '../../server/message';
+import { check, quoteMessage, teamOfferUrl, type QuotePayload } from '../../server/message';
 import { sendTelegram } from '../../server/telegram';
 import { videoLink } from '../../server/sign';
 
@@ -20,7 +20,7 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   const origin = new URL(request.url).origin;
   const links = await Promise.all(p.videos.map((v) => videoLink(env, origin, v.key)));
   try {
-    await sendTelegram(env, quoteMessage(id, p, links));
+    await sendTelegram(env, quoteMessage(id, p, links, teamOfferUrl(origin, id, p)));
   } catch (e) {
     console.error('quote send failed', e);
     return json({ ok: false, error: 'send' }, 502);

@@ -30,7 +30,7 @@ export function check(p: QuotePayload): string | null {
   return null;
 }
 
-export function quoteMessage(id: string, p: QuotePayload, links: string[]) {
+export function quoteMessage(id: string, p: QuotePayload, links: string[], teamUrl = '') {
   const ru = 'ru' as const;
   const lines: string[] = [];
   const add = (label: string, value: string) => value && lines.push(`<b>${label}:</b> ${value}`);
@@ -71,5 +71,29 @@ export function quoteMessage(id: string, p: QuotePayload, links: string[]) {
   const skipped = Array.isArray(p.skipped) ? p.skipped.slice(0, 10) : [];
   if (skipped.length) lines.push(`⚠️ <b>Видео не загрузилось:</b> ${skipped.map((v) => `${esc(str(v.name, 80))} (${mb(v.size)})`).join(', ')} — попросите прислать в WhatsApp`);
   if (!vids.length && !skipped.length) lines.push('🎥 Видео не прислали — попросите снять квартиру.');
+  if (teamUrl) lines.push(`👉 <a href="${teamUrl}">Создать оферту по этой заявке</a>`);
   return lines.join('\n');
+}
+
+/**
+ * Ссылка на инструмент менеджера /team/oferta/ с уже заполненными полями из заявки.
+ * Номера вариантов формы заявки переводим в номера калькулятора (src/data/pricing.ts).
+ */
+export function teamOfferUrl(origin: string, id: string, p: QuotePayload) {
+  const q = new URLSearchParams({ id });
+  const iv = (v: unknown, min: number, max: number, def: number) => { const n = int(v, min, max); return n < 0 ? def : n; };
+  const s = iv(p.size, 0, 6, -1);
+  if (s >= 0) { q.set('size', String([0, 1, 2, 2, 3, 4, 0][s])); q.set('amount', String(s === 3 ? 2 : s === 6 ? 0 : 1)); }
+  const ex = (Array.isArray(p.extras) ? p.extras : []).filter((e) => Number.isInteger(e));
+  let pkg = iv(p.pkg, 0, 3, 3);
+  if (pkg === 3) pkg = ex.includes(0) || ex.includes(6) ? 2 : ex.includes(1) ? 1 : 1;
+  q.set('pkg', String(pkg));
+  const map: Record<number, number> = { 2: 0, 3: 1, 7: 2, 4: 3, 5: 4 };
+  const pex = ex.map((e) => map[e]).filter((e) => e !== undefined);
+  if (pex.length) q.set('ex', pex.join(','));
+  for (const [k, v] of [['lang', str(p.lang, 5)], ['name', str(p.name, 80)], ['phone', str(p.phone, 40)], ['from', str(p.from?.addr, 200)], ['to', str(p.to?.addr, 200)], ['date', str(p.date, 10)]] as const) if (v) q.set(k, v);
+  const fl = (a?: Addr) => String(Math.max(0, Math.min(30, parseInt(str(a?.floor, 10), 10) || 0)));
+  q.set('ff', fl(p.from)); q.set('ft', fl(p.to));
+  q.set('lf', iv(p.from?.lift, 0, 2, 0) > 0 ? '1' : '0'); q.set('lt', iv(p.to?.lift, 0, 2, 0) > 0 ? '1' : '0');
+  return `${origin}/team/oferta/?${q}`;
 }
