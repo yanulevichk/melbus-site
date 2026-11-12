@@ -1,23 +1,21 @@
 ---
 /**
  * КАЛЬКУЛЯТОР ПЕРЕЕЗДА. Слева вопросы, справа (на телефоне — ниже) графитовая панель с табло-барабанами.
- * Тексты — src/content/calculator.ts, суммы — src/data/pricing-demo.ts (calcDemo, ДЕМО).
+ * Тексты — src/content/calculator.ts, формула и ставки — src/data/pricing.ts (estimate, та же у менеджера).
  * Кнопка «Получить точную цену» переносит выбор в заявку: ?size=…&ex=…&est=…
  */
 import PageHero from '../components/PageHero.astro';
 import { href, type Locale } from '../i18n/routes';
-import { boardOptions, calcDemo as C, DEMO } from '../data/pricing-demo';
+import { boardOptions, SIZES, ZONES, PACKING, EXTRAS, DEMO } from '../data/pricing';
 import { calcText as T } from '../content/calculator';
 interface Props { locale: Locale; eyebrow?: string; title: string; lead?: string }
 const { locale: L, eyebrow, title, lead } = Astro.props;
 const quote = href(L, 'quote');
+// подписи для браузера (сама формула импортируется в скрипт из pricing.ts)
 const model = {
-  sizes: boardOptions.map((o, i) => ({ value: o.value, status: o.status[L], k: C.sizeK[i], q: C.sizeQuote[i] })),
-  dist: C.distance.map((d) => ({ add: d.add, label: d.label[L] })),
-  floor: C.floorNoLift,
-  pack: C.packing.map((p) => ({ pct: p.pct, q: p.quote })),
-  extras: C.extras.map((e) => ({ add: e.add, q: e.quote })),
-  ground: T.ground[L],
+  status: SIZES.map((s) => s.status[L]), zones: ZONES.map((z) => z.label[L]),
+  sizeQ: SIZES.map((s) => s.quote), packQ: PACKING.map((p) => p.quote), extraQ: EXTRAS.map((e) => e.quote),
+  ground: T.ground[L], crew: T.crew[L], h: T.hours[L],
 };
 const SIZE0 = 1;
 const floors: ['from' | 'to', number, boolean][] = [['from', 3, true], ['to', 2, true]];
@@ -41,7 +39,7 @@ const floors: ['from' | 'to', number, boolean][] = [['from', 3, true], ['to', 2,
       <fieldset class="cx__q">
         <legend class="cx__h">{T.qDist[L]}</legend>
         <div class="cx-seg">
-          {C.distance.map((d, i) => (
+          {ZONES.map((d, i) => (
             <label><input type="radio" name="dist" value={i} checked={i === 0} /><span>{d.label[L]}</span></label>
           ))}
         </div>
@@ -70,7 +68,7 @@ const floors: ['from' | 'to', number, boolean][] = [['from', 3, true], ['to', 2,
       <fieldset class="cx__q">
         <legend class="cx__h">{T.qPack[L]}</legend>
         <div class="cx-seg">
-          {C.packing.map((p, i) => (
+          {PACKING.map((p, i) => (
             <label><input type="radio" name="pack" value={i} checked={i === 0} /><span>{p.label[L]}</span></label>
           ))}
         </div>
@@ -79,7 +77,7 @@ const floors: ['from' | 'to', number, boolean][] = [['from', 3, true], ['to', 2,
       <fieldset class="cx__q">
         <legend class="cx__h">{T.qExtras[L]}</legend>
         <div class="cx-checks">
-          {C.extras.map((e, i) => (
+          {EXTRAS.map((e, i) => (
             <label class="cx-check"><input type="checkbox" name="extra" value={i} /><i aria-hidden="true"></i><span>{e.label[L]}</span></label>
           ))}
         </div>
@@ -95,7 +93,7 @@ const floors: ['from' | 'to', number, boolean][] = [['from', 3, true], ['to', 2,
       <div class="cx__panel">
         <p class="cx__eyebrow">{T.estimate[L]}</p>
         <div class="cx-board" id="board-calc" data-board>
-          <p class="cx-board__status" data-board-status>{boardOptions[SIZE0].status[L]} · {C.distance[0].label[L]}</p>
+          <p class="cx-board__status" data-board-status>{boardOptions[SIZE0].status[L]} · {ZONES[0].label[L]}</p>
           <div class="cx-board__row" aria-hidden="true">
             <span class="cx-board__from">{T.from[L]}</span>
             {[0, 1, 2, 3, 4].map((i) => (
@@ -108,7 +106,7 @@ const floors: ['from' | 'to', number, boolean][] = [['from', 3, true], ['to', 2,
 
         <dl class="cx-break">
           {(['base', 'dist', 'floors', 'pack', 'extras'] as const).map((r) => (
-            <div data-row={r} hidden={r !== 'base'}><dt>{T.rows[r][L]}</dt><dd data-row-v>—</dd></div>
+            <div data-row={r} hidden={r !== 'base'}><dt>{T.rows[r][L]}{r === 'base' && <small data-crew></small>}</dt><dd data-row-v>—</dd></div>
           ))}
         </dl>
 
@@ -123,7 +121,8 @@ const floors: ['from' | 'to', number, boolean][] = [['from', 3, true], ['to', 2,
 </section>
 
 <script>
-  type Model = { sizes: { value: number; status: string; k: number; q: number }[]; dist: { add: number; label: string }[]; floor: number; pack: { pct: number; q: number }[]; extras: { add: number; q: number }[]; ground: string };
+  import { estimate } from '../data/pricing';
+  type Model = { status: string[]; zones: string[]; sizeQ: number[]; packQ: number[]; extraQ: number[]; ground: string; crew: string; h: string };
   function initCalc() {
     const form = document.querySelector<HTMLFormElement>('[data-calc]');
     if (!form || form.dataset.ready) return;
@@ -132,35 +131,34 @@ const floors: ['from' | 'to', number, boolean][] = [['from', 3, true], ['to', 2,
     const board = document.getElementById('board-calc')!;
     const cta = document.querySelector<HTMLAnchorElement>('[data-calc-cta]')!;
     const mini = form.querySelector<HTMLElement>('[data-calc-mini]')!;
+    const crewEl = document.querySelector<HTMLElement>('[data-crew]');
     const base = cta.getAttribute('href')!;
     const fmt = new Intl.NumberFormat(document.documentElement.lang || 'pl');
-    const r10 = (n: number) => Math.round(n / 10) * 10;
     const radio = (n: string) => Number(form.querySelector<HTMLInputElement>(`input[name="${n}"]:checked`)?.value ?? 0);
-    const row = (k: string, v: number, plus = true) => {
+    const row = (k: string, v: number) => {
       const el = document.querySelector<HTMLElement>(`[data-row="${k}"]`)!;
       el.hidden = k !== 'base' && v === 0;
-      el.querySelector('[data-row-v]')!.textContent = `${plus && k !== 'base' ? '+ ' : ''}${fmt.format(v)} zł`;
+      el.querySelector('[data-row-v]')!.textContent = `${k !== 'base' ? '+ ' : ''}${fmt.format(v)} zł`;
     };
 
     const calc = () => {
-      const s = M.sizes[radio('size')], d = M.dist[radio('dist')], p = M.pack[radio('pack')];
+      const size = radio('size'), zone = radio('dist'), pack = radio('pack');
       let fl = 0;
       form.querySelectorAll<HTMLElement>('[data-floor]').forEach((w) => {
         const f = Number(w.querySelector<HTMLInputElement>('input[type="hidden"]')!.value);
-        const lift = w.querySelector<HTMLInputElement>('input[type="checkbox"]')!.checked;
-        if (!lift) fl += f;
+        if (!w.querySelector<HTMLInputElement>('input[type="checkbox"]')!.checked) fl += f;
       });
-      const ex = [...form.querySelectorAll<HTMLInputElement>('input[name="extra"]:checked')].map((c) => M.extras[Number(c.value)]);
-      const v = { base: s.value, dist: r10(d.add * s.k), floors: r10(fl * M.floor * s.k), pack: r10(s.value * p.pct), extras: r10(ex.reduce((a, e) => a + e.add * s.k, 0)) };
-      const total = r10(v.base + v.dist + v.floors + v.pack + v.extras);
-      (Object.keys(v) as (keyof typeof v)[]).forEach((k) => row(k, v[k]));
-      mini.textContent = fmt.format(total);
-      const st = `${s.status} · ${d.label}`;
-      board.dataset.value = String(total);
+      const extras = [...form.querySelectorAll<HTMLInputElement>('input[name="extra"]:checked')].map((c) => Number(c.value));
+      const r = estimate({ size, zone, floorsNoLift: fl, pack, extras });
+      (['base', 'dist', 'floors', 'pack', 'extras'] as const).forEach((k) => row(k, r[k]));
+      if (crewEl) crewEl.textContent = ` · ${M.crew.replace('{n}', String(r.crew))} · ~${fmt.format(r.hours)} ${M.h}`;
+      mini.textContent = fmt.format(r.total);
+      const st = `${M.status[size]} · ${M.zones[zone]}`;
+      board.dataset.value = String(r.total);
       board.querySelector('[data-board-status]')!.textContent = st;
-      board.dispatchEvent(new CustomEvent('board:set', { detail: { value: total, status: st } }));
-      const q = new URLSearchParams({ size: String(s.q), est: String(total) });
-      const exq = [...(p.q >= 0 ? [p.q] : []), ...ex.map((e) => e.q)];
+      board.dispatchEvent(new CustomEvent('board:set', { detail: { value: r.total, status: st } }));
+      const q = new URLSearchParams({ size: String(M.sizeQ[size]), est: String(r.total) });
+      const exq = [...(M.packQ[pack] >= 0 ? [M.packQ[pack]] : []), ...extras.map((i) => M.extraQ[i])];
       if (exq.length) q.set('ex', exq.join(','));
       cta.href = `${base}?${q}`;
     };
@@ -267,6 +265,7 @@ const floors: ['from' | 'to', number, boolean][] = [['from', 3, true], ['to', 2,
   .cx-break > div { display: flex; justify-content: space-between; gap: 16px; padding: 12px 0; border-bottom: 1px solid #26303B; font-size: .95rem; }
   .cx-break > div[hidden] { display: none; }
   .cx-break dt { color: var(--dark-muted); }
+  .cx-break dt small { font-size: .85em; opacity: .8; }
   .cx-break dd { margin: 0; font-variant-numeric: tabular-nums; white-space: nowrap; }
   .cx-note { color: var(--dark-muted); font-size: .85rem; line-height: 1.55; }
   .cx__cta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 28px; }

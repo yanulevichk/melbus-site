@@ -1,6 +1,6 @@
 /**
  * КАЛЬКУЛЯТОР — все тексты, каждая фраза сразу на 4 языках (ru, pl, uk, en).
- * Суммы и варианты (расстояние, упаковка, доп. услуги) — в src/data/pricing-demo.ts (calcDemo).
+ * Ставки, формула и варианты (расстояние, упаковка, доп. услуги) — в src/data/pricing.ts.
  */
 import type { L } from '../i18n/text';
 
@@ -18,6 +18,8 @@ export const calcText = {
   floor: l('Этаж', 'Piętro', 'Поверх', 'Floor'),
   ground: l('партер', 'parter', 'партер', 'ground'),
   lift: l('Есть лифт', 'Jest winda', 'Є ліфт', 'There’s a lift'),
+  crew: l('бригада {n} чел.', 'ekipa {n} os.', 'бригада {n} ос.', 'crew of {n}'),
+  hours: l('ч', 'h', 'год', 'h'),
   less: l('Ниже', 'Niżej', 'Нижче', 'Lower'),
   more: l('Выше', 'Wyżej', 'Вище', 'Higher'),
   qPack: l('Упаковка', 'Pakowanie', 'Пакування', 'Packing'),
