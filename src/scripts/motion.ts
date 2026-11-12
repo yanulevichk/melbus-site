@@ -202,19 +202,31 @@ function filmHero(sec: HTMLElement, desktop: boolean, reduceNow: boolean, local:
     let k = 0, alive = true;
     const pump = () => { if (!alive) return; const end = Math.min(order.length, k + 16); for (; k < end; k++) load(order[k]); if (k < order.length) setTimeout(pump, 80); };
     whenIdle(pump, 300);
+    // Прокрутка задаёт, ДО какого места дойти; фильм идёт туда сам, не быстрее задуманного темпа монтажа
+    // (резкий рывок колесом не проматывает фильм). Назад, к началу, — быстрее.
+    const FWD = 1.5, BACK = 5; // секунд фильма за секунду
+    let target = 0, shown = 0;
+    const render = () => { cur = Math.min(count - 1, Math.round((shown / dur) * (count - 1))); draw(); setTime(shown); };
+    const tick = (_t: number, dtMs: number) => {
+      const d = target - shown;
+      if (Math.abs(d) < 0.0005) return;
+      const step = (d > 0 ? FWD : BACK) * Math.min(dtMs, 100) / 1000;
+      shown += Math.sign(d) * Math.min(Math.abs(d), step);
+      render();
+    };
+    gsap.ticker.add(tick);
     const st = ScrollTrigger.create({
       trigger: sec, start: 'top top', end: () => '+=' + (Number(sec.dataset.length) || 4) * window.innerHeight,
-      pin: stage, scrub: 0.5, anticipatePin: 1, invalidateOnRefresh: true,
+      pin: stage, scrub: true, anticipatePin: 1, invalidateOnRefresh: true,
       refreshPriority: 10, // закрепление фильма считается первым — блоки ниже не «наезжают»
       onUpdate: (self) => {
         const p = self.progress;
-        cur = Math.min(count - 1, Math.round(p * (count - 1)));
-        draw(); setTime(p * dur);
-        if (intro) { const q = Math.min(1, p / 0.04); gsap.set(intro, { autoAlpha: 1 - q, y: -48 * q }); }
+        target = p * dur;
+        if (intro) { const q = Math.min(1, p / 0.03); gsap.set(intro, { autoAlpha: 1 - q, y: -48 * q }); }
       },
     });
     window.addEventListener('resize', draw);
-    local.push(() => { alive = false; st.kill(); window.removeEventListener('resize', draw); });
+    local.push(() => { alive = false; gsap.ticker.remove(tick); st.kill(); window.removeEventListener('resize', draw); });
   } else if (video) {
     let raf = 0;
     const tick = () => { setTime(video.currentTime); raf = requestAnimationFrame(tick); };

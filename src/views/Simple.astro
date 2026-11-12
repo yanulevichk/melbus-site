@@ -11,11 +11,22 @@ import CtaBand from '../components/CtaBand.astro';
 import type { Locale } from '../i18n/routes';
 
 export interface Block { type: 'list' | 'text' | 'faq' | 'cards'; eyebrow?: string; title: string; lead?: string; items?: [string, string][] }
-interface Props { locale: Locale; eyebrow?: string; title: string; lead?: string; scene?: { id: string; title: string; length?: number }; blocks?: Block[]; cta?: boolean }
-const { locale, eyebrow, title, lead, scene, blocks = [], cta = true } = Astro.props;
+export interface Media { video: string; poster: string; alt: string; caption?: string; square?: boolean }
+interface Props { locale: Locale; eyebrow?: string; title: string; lead?: string; scene?: { id: string; title: string; length?: number }; media?: Media; blocks?: Block[]; cta?: boolean }
+const { locale, eyebrow, title, lead, scene, media, blocks = [], cta = true } = Astro.props;
 ---
 <PageHero eyebrow={eyebrow} title={title} lead={lead}>
-  {scene && <SceneSlot id={scene.id} title={scene.title} length={scene.length ?? 1.4} />}
+  {media ? (
+    <figure class={`pmedia${media.square ? ' pmedia--sq' : ''}`} data-tape>
+      <div class="tape__media pmedia__frame" data-video="1">
+        <video muted loop playsinline preload="none" poster={media.poster} width="1280" height="720" aria-label={media.alt}>
+          <source data-src={media.video} type="video/mp4" />
+        </video>
+        <span class="pmedia__ai">Визуализация</span>
+      </div>
+      {media.caption && <figcaption>{media.caption}</figcaption>}
+    </figure>
+  ) : scene && <SceneSlot id={scene.id} title={scene.title} length={scene.length ?? 1.4} />}
 </PageHero>
 
 {blocks.map((b) => (
@@ -38,6 +49,14 @@ const { locale, eyebrow, title, lead, scene, blocks = [], cta = true } = Astro.p
 {cta && <CtaBand locale={locale} />}
 
 <style>
+  .pmedia { margin: 0; display: grid; gap: 14px; }
+  .pmedia__frame { position: relative; aspect-ratio: 4 / 3; overflow: hidden; background: #10161D; }
+  @media (min-width: 768px) { .pmedia__frame { aspect-ratio: 21 / 9; } }
+  .pmedia__frame video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .pmedia__ai { position: absolute; right: 12px; top: 12px; z-index: 2; font-size: .72rem; padding: 4px 8px; border-radius: 2px; background: rgba(16,22,29,.55); color: #fff; backdrop-filter: blur(6px); }
+  .pmedia--sq { max-width: 560px; }
+  .pmedia--sq .pmedia__frame { aspect-ratio: 1; }
+  .pmedia figcaption { color: var(--dark-muted, #8F9AA7); font-size: .95rem; max-width: 60ch; }
   .blist { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
   .blist li { display: grid; grid-template-columns: 48px 1fr; gap: 16px; padding: 26px 0; border-bottom: 1px solid var(--line); }
   .blist li div { display: grid; gap: 8px; max-width: 70ch; }

@@ -35,7 +35,7 @@ export const slugs: Record<string, Partial<Record<Locale, string>>> = {
   privacy:    { ru: 'konfidencialnost', pl: 'polityka-prywatnosci', uk: 'konfidentsiynist', en: 'privacy' },
   cookies:    { ru: 'cookies', pl: 'cookies', uk: 'cookies', en: 'cookies' },
   complaints: { ru: 'reklamacii', pl: 'reklamacje', uk: 'reklamatsii', en: 'complaints' },
-  lux:        { ru: 'lux', pl: 'lux', uk: 'lux', en: 'lux' }, // черновик люкс-версии главной для сравнения (noindex)
+  lux:        { ru: 'lux', pl: 'lux', uk: 'lux', en: 'lux' }, // копия главной (noindex): люкс-версия стала главной 12.11.2026
 };
 
 export function href(locale: Locale, key: PageKey): string {
