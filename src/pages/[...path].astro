@@ -10,15 +10,20 @@ import Services from '../views/Services.astro';
 import Service from '../views/Service.astro';
 import Quote from '../views/Quote.astro';
 import Calculator from '../views/Calculator.astro';
+import Area from '../views/Area.astro';
+import Areas from '../views/Areas.astro';
 import Simple, { type Block, type MediaProps } from '../views/Simple.astro';
 import { enabledLocales, href, type Locale, type PageKey } from '../i18n/routes';
 import { services, serviceById } from '../data/services';
 import { faqFor } from '../data/faq';
 import { meta, pages, misc, type LBlock, type LMedia } from '../content/pages';
+import { areas, areaById } from '../data/areas';
+import { areaText } from '../content/areas';
+import { ui } from '../i18n/ui';
 import { brand } from '../config/brand';
 
 export function getStaticPaths() {
-  const keys: PageKey[] = ['home', 'services', 'pricing', 'calculator', 'quote', 'guarantee', 'how', 'about', 'faq', 'contact', 'terms', 'privacy', 'cookies', 'complaints', 'lux', ...services.map((s) => `service:${s.id}` as PageKey)];
+  const keys: PageKey[] = ['home', 'services', 'pricing', 'calculator', 'quote', 'guarantee', 'how', 'about', 'faq', 'contact', 'terms', 'privacy', 'cookies', 'complaints', 'lux', 'areas', ...services.map((s) => `service:${s.id}` as PageKey), ...areas.map((a) => `area:${a.id}` as PageKey)];
   return enabledLocales.flatMap((locale) => keys.map((key) => ({
     params: { path: href(locale, key).replace(/^\/|\/$/g, '') || undefined },
     props: { locale, key },
@@ -29,10 +34,25 @@ const { locale, key } = Astro.props as { locale: Locale; key: PageKey };
 const L = locale;
 
 const svc = key.startsWith('service:') ? serviceById(key.slice(8))! : null;
+const area = key.startsWith('area:') ? areaById(key.slice(5))! : null;
 const mm = meta[key];
-const m = svc ? { title: svc.title[L], description: svc.lead[L], nav: 'services' } : { title: mm.title[L], description: mm.description[L], nav: mm.nav };
+const m = svc ? { title: svc.title[L], description: svc.lead[L], nav: 'services' }
+  : area ? { title: areaText.title[L](area.name[L]), description: areaText.description[L](area.loc[L]), nav: undefined }
+  : key === 'areas' ? { title: areaText.hub.metaTitle[L], description: areaText.hub.metaDesc[L], nav: undefined }
+  : { title: mm.title[L], description: mm.description[L], nav: mm.nav };
 const legal = ['terms', 'privacy', 'cookies', 'complaints'].includes(key);
 const faq = faqFor(L);
+const abs = (k: PageKey) => new URL(href(L, k), brand.site).href;
+const areaSchema = area ? [
+  { '@context': 'https://schema.org', '@type': 'Service', serviceType: 'Moving', name: m.title, inLanguage: L,
+    provider: { '@type': 'MovingCompany', name: brand.name, url: brand.site },
+    areaServed: { '@type': area.kind === 'town' ? 'City' : 'AdministrativeArea', name: area.kind === 'town' ? area.name.pl : `${area.name.pl}, Warszawa` } },
+  { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [
+    { '@type': 'ListItem', position: 1, name: brand.name, item: abs('home') },
+    { '@type': 'ListItem', position: 2, name: areaText.hub.eyebrow[L], item: abs('areas') },
+    { '@type': 'ListItem', position: 3, name: area.name[L], item: abs(key) },
+  ] },
+] : [];
 const faqSchema = key === 'faq' || key === 'home' || key === 'lux' ? [{ '@context': 'https://schema.org', '@type': 'FAQPage', inLanguage: L, mainEntity: faq.map(([q, a]) => ({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: a } })) }] : [];
 
 // тексты страницы на нужном языке
@@ -41,12 +61,14 @@ const blk = (b: LBlock): Block => ({ type: b.type, eyebrow: b.eyebrow?.[L], titl
 const med = (x?: LMedia): MediaProps | undefined => x && { video: x.video, poster: x.poster, alt: x.alt[L], caption: x.caption?.[L], square: x.square };
 const simple = pg && { eyebrow: pg.eyebrow[L], title: pg.title[L], lead: pg.lead?.[L], media: med(pg.media), blocks: (pg.blocks ?? []).map(blk) };
 ---
-<Base locale={locale} pageKey={key} title={m.title} description={m.description} nav={m.nav} schema={faqSchema} noindex={key === 'lux'} theme="lux">
+<Base locale={locale} pageKey={key} title={m.title} description={m.description} nav={m.nav} schema={[...faqSchema, ...areaSchema]} noindex={key === 'lux'} theme="lux">
   {/* 12.11.2026: люкс-версия стала главной; /lux/ — та же страница (noindex) */}
   {(key === 'home' || key === 'lux') && <HomeLux locale={locale} />}
   {key === 'services' && <Services locale={locale} />}
   {svc && <Service locale={locale} service={svc} />}
   {key === 'quote' && <Quote locale={locale} />}
+  {area && <Area locale={locale} area={area} />}
+  {key === 'areas' && <Areas locale={locale} />}
 
   {['pricing', 'guarantee', 'how', 'about'].includes(key) && simple && <Simple locale={locale} {...simple} />}
   {key === 'calculator' && simple && <Calculator locale={locale} eyebrow={simple.eyebrow} title={simple.title} lead={simple.lead} />}

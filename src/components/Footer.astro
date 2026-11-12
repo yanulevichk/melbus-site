@@ -3,6 +3,7 @@ import Logo from './Logo.astro';
 import { brand } from '../config/brand';
 import { ui } from '../i18n/ui';
 import { href, type Locale } from '../i18n/routes';
+import { areaText } from '../content/areas';
 import { services } from '../data/services';
 const { locale } = Astro.props as { locale: Locale };
 const year = new Date().getFullYear();
@@ -26,6 +27,7 @@ const year = new Date().getFullYear();
         <a href={href(locale, 'how')}>{ui.nav.how[locale]}</a>
         <a href={href(locale, 'guarantee')}>{ui.nav.guarantee[locale]}</a>
         <a href={href(locale, 'about')}>{ui.nav.about[locale]}</a>
+        <a href={href(locale, 'areas')}>{areaText.hub.eyebrow[locale]}</a>
         <a href={href(locale, 'faq')}>{ui.nav.faq[locale]}</a>
         <a href={href(locale, 'contact')}>{ui.nav.contact[locale]}</a>
       </nav>

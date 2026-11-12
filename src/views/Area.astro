@@ -1,0 +1,96 @@
+---
+/**
+ * Страница района или города: «Przeprowadzki na Mokotowie».
+ * Текст про место — src/data/areas.ts, общие надписи — src/content/areas.ts.
+ */
+import PageHero from '../components/PageHero.astro';
+import CtaBand from '../components/CtaBand.astro';
+import { href, type Locale } from '../i18n/routes';
+import { ui } from '../i18n/ui';
+import { areas, areaById, type Area } from '../data/areas';
+import { areaText as T } from '../content/areas';
+interface Props { locale: Locale; area: Area }
+const { locale: L, area: a } = Astro.props;
+const loc = a.loc[L];
+const near = a.near.map(areaById).filter((x): x is Area => !!x);
+// калькулятор сразу с нужным расстоянием: район — «по Варшаве», город — «до 50 км»
+const calc = `${href(L, 'calculator')}?dist=${a.kind === 'town' ? 1 : 0}`;
+---
+<PageHero eyebrow={a.kind === 'town' ? T.eyebrowTown[L] : T.eyebrowDistrict[L]} title={T.h1[L](loc)} lead={T.lead[L](loc)}>
+  <Fragment slot="actions">
+    <a href={href(L, 'quote')} class="btn btn--primary">{ui.cta.quote[L]}</a>
+    <a href={calc} class="lux-link ar__calc">{T.calc[L]}</a>
+  </Fragment>
+</PageHero>
+
+<section class="ar">
+  <div class="container ar__grid">
+    <div class="ar__head">
+      <h2 class="ar__h2">{T.matters[L](loc)}</h2>
+      <p class="ar__intro">{a.intro[L]}</p>
+    </div>
+    <dl class="ar__list">
+      {a.points.map(([t, d]) => <div><dt>{t[L]}</dt><dd>{d[L]}</dd></div>)}
+    </dl>
+  </div>
+</section>
+
+<section class="ar ar--how">
+  <div class="container">
+    <h2 class="ar__h2">{T.howTitle[L]}</h2>
+    <ol class="ar__how">
+      {T.how.map(([t, d], i) => <li><span class="ar__n">{i + 1}</span><strong>{t[L]}</strong><p>{d[L]}</p></li>)}
+    </ol>
+    <p class="ar__more"><a class="lux-link" href={href(L, 'guarantee')}>{ui.nav.guarantee[L]}</a></p>
+  </div>
+</section>
+
+<section class="ar ar--near">
+  <div class="container">
+    <h2 class="ar__h3">{T.near[L]}</h2>
+    <ul class="ar__links">
+      {near.map((n) => <li><a href={href(L, `area:${n.id}`)}>{n.name[L]}</a></li>)}
+      <li><a href={href(L, 'areas')} class="is-all">{T.all[L]}</a></li>
+    </ul>
+  </div>
+</section>
+
+<CtaBand locale={L} />
+
+<style>
+  .ar { padding-block: clamp(72px, 10vw, 160px); background: #FFFFFF; }
+  .ar__grid { display: grid; gap: 48px; }
+  @media (min-width: 1024px) { .ar__grid { grid-template-columns: 5fr 7fr; gap: 8%; align-items: start; } }
+  .ar__head { display: grid; gap: 24px; align-content: start; }
+  .ar__h2 { font-family: var(--font-display); font-weight: 200; font-size: var(--fs-l); letter-spacing: -0.045em; line-height: 1.02; max-width: 16ch; }
+  .ar__h3 { font-family: var(--font-display); font-weight: 200; font-size: var(--fs-m); letter-spacing: -0.03em; }
+  .ar__intro { font-size: clamp(1.05rem, 1rem + .3vw, 1.2rem); line-height: 1.6; color: var(--muted); max-width: 46ch; }
+  .ar__list { margin: 0; border-top: 1px solid var(--hair); }
+  .ar__list > div { display: grid; gap: 8px; padding: 26px 0; border-bottom: 1px solid var(--hair); }
+  @media (min-width: 640px) { .ar__list > div { grid-template-columns: 15em 1fr; gap: 32px; } }
+  .ar__list dt { font-weight: 500; }
+  .ar__list dd { margin: 0; color: var(--muted); max-width: 52ch; }
+
+  .ar--how { background: var(--paper); }
+  .ar--how .container { display: grid; gap: 40px; }
+  .ar__how { list-style: none; margin: 0; padding: 0; display: grid; border-top: 1px solid var(--hair); }
+  .ar__how li { display: grid; grid-template-columns: 3rem 1fr; column-gap: 16px; row-gap: 4px; padding: 24px 0; border-bottom: 1px solid var(--hair); }
+  .ar__how strong { font-weight: 500; }
+  .ar__how p { grid-column: 2; color: var(--muted); }
+  .ar__n { grid-row: 1 / 3; font-family: var(--font-display); font-weight: 200; font-size: 2.2rem; line-height: 1; letter-spacing: -0.05em; color: var(--deep); }
+  @media (min-width: 900px) {
+    .ar__how { grid-template-columns: repeat(3, 1fr); border-bottom: 0; }
+    .ar__how li { grid-template-columns: 1fr; padding: 28px 32px 8px 0; border-bottom: 0; }
+    .ar__how li + li { padding-left: 32px; border-left: 1px solid var(--hair); }
+    .ar__how p { grid-column: 1; }
+    .ar__n { grid-row: auto; margin-bottom: 12px; }
+  }
+
+  .ar--near { padding-block: clamp(56px, 7vw, 104px); }
+  .ar--near .container { display: grid; gap: 24px; }
+  .ar__links { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 10px; }
+  .ar__links a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 18px; border: 1px solid var(--hair); border-radius: 3px; transition: border-color .25s; }
+  .ar__links a:hover { border-color: var(--graphite); }
+  .ar__links a.is-all { border-color: transparent; text-decoration: underline; text-underline-offset: 4px; }
+  .ar__calc { color: #fff; }
+</style>

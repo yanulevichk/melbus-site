@@ -173,6 +173,12 @@ const floors: ['from' | 'to', number, boolean][] = [['from', 3, true], ['to', 2,
       w.querySelector('[data-dec]')!.addEventListener('click', () => set(Math.max(0, Number(inp.value) - 1)));
       w.querySelector('[data-inc]')!.addEventListener('click', () => set(Math.min(30, Number(inp.value) + 1)));
     });
+    // ссылка со страницы района: ?dist=1 (до 50 км), ?size=2
+    const qs = new URLSearchParams(location.search);
+    (['size', 'dist'] as const).forEach((n) => {
+      const r = form.querySelector<HTMLInputElement>(`input[name="${n}"][value="${qs.get(n)}"]`);
+      if (r) r.checked = true;
+    });
     form.addEventListener('change', calc);
     form.addEventListener('submit', (e) => e.preventDefault());
     calc();

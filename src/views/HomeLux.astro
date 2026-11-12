@@ -10,6 +10,7 @@ import { brand } from '../config/brand';
 import { faqFor } from '../data/faq';
 import { boardOptions, DEMO } from '../data/pricing-demo';
 import { home as H } from '../content/home';
+import { areaText } from '../content/areas';
 const { locale } = Astro.props as { locale: Locale };
 const L = locale;
 const quote = href(locale, 'quote');
@@ -254,6 +255,7 @@ const qr = (seed: number) => {
     <div>
       <h2 class="lx-h2">{H.area.h2[L]}</h2>
       <p class="lx-lead">{H.area.lead[L]}</p>
+      <a class="lux-link" href={href(locale, 'areas')}>{areaText.all[L]}</a>
     </div>
     <svg class="lx-map" viewBox="0 0 400 400" role="img" aria-label={H.area.mapAria[L]}>
       <path data-draw class="lx-map__outer" d="M200 20 a180 180 0 1 1 -0.01 0" />
@@ -539,7 +541,7 @@ const qr = (seed: number) => {
   /* ---------- карта ---------- */
   .lx-area__grid { display: grid; gap: 56px; align-items: center; }
   @media (min-width: 960px) { .lx-area__grid { grid-template-columns: 6fr 5fr; } }
-  .lx-area__grid > div { display: grid; gap: 28px; }
+  .lx-area__grid > div { display: grid; gap: 28px; justify-items: start; }
   .lx-map { width: 100%; max-width: 480px; justify-self: center; overflow: visible; }
   .lx-map__outer { fill: none; stroke: var(--steel); stroke-width: 1; vector-effect: non-scaling-stroke; }
   .lx-map__ring { fill: none; stroke: var(--hair); stroke-width: 1; stroke-dasharray: 2 6; }

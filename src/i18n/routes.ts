@@ -3,6 +3,7 @@
  * Все 4 языка включены. PL — основной (без префикса): «/», RU — /ru/, UA — /uk/, EN — /en/.
  */
 import { serviceSlug } from '../data/services';
+import { areaPrefix } from '../data/areas';
 
 export type Locale = 'ru' | 'pl' | 'uk' | 'en';
 
@@ -18,7 +19,7 @@ export const enabledLocales = (Object.keys(locales) as Locale[]).filter((l) => l
 export type PageKey =
   | 'home' | 'services' | 'pricing' | 'calculator' | 'quote' | 'guarantee' | 'how'
   | 'about' | 'faq' | 'contact' | 'terms' | 'privacy' | 'cookies' | 'complaints' | 'lux'
-  | `service:${string}`;
+  | 'areas' | `service:${string}` | `area:${string}`;
 
 /** слаги страниц; '' = главная языка */
 export const slugs: Record<string, Partial<Record<Locale, string>>> = {
@@ -36,11 +37,13 @@ export const slugs: Record<string, Partial<Record<Locale, string>>> = {
   privacy:    { ru: 'konfidencialnost', pl: 'polityka-prywatnosci', uk: 'konfidentsiynist', en: 'privacy' },
   cookies:    { ru: 'cookies', pl: 'cookies', uk: 'cookies', en: 'cookies' },
   complaints: { ru: 'reklamacii', pl: 'reklamacje', uk: 'reklamatsii', en: 'complaints' },
+  areas:      { ru: 'rayony', pl: 'gdzie-dzialamy', uk: 'rayony', en: 'areas' },
   lux:        { ru: 'lux', pl: 'lux', uk: 'lux', en: 'lux' }, // копия главной (noindex): люкс-версия стала главной 12.11.2026
 };
 
 export function href(locale: Locale, key: PageKey): string {
   const p = locales[locale].prefix;
+  if (key.startsWith('area:')) return `${p}/${areaPrefix[locale]}-${key.slice(5)}/`;
   if (key.startsWith('service:')) {
     return `${p}/${slugs.services[locale]}/${serviceSlug(key.slice(8), locale)}/`;
   }
