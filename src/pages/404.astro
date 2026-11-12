@@ -1,19 +1,31 @@
 ---
+/** 404 — одна страница на сайт: по-польски (основной язык) + ссылки на главные других языков. */
 import Base from '../layouts/Base.astro';
-import SceneSlot from '../components/SceneSlot.astro';
-import { href } from '../i18n/routes';
+import { href, enabledLocales, locales } from '../i18n/routes';
+import { ui } from '../i18n/ui';
+const L = 'pl' as const;
+const T = ui.notFound;
 ---
-<Base locale="ru" pageKey="home" title="Страница не найдена" description="Такого адреса нет." noindex>
+<Base locale={L} pageKey="home" title={T.title[L]} description={T.lead[L]} noindex theme="lux">
   <section class="nf container">
-    <span class="t-eyebrow">Ошибка 404</span>
-    <h1 class="t-hero">Такого адреса<br />нет.</h1>
-    <p class="t-lead">Но мы доставим вас куда нужно.</p>
-    <a href={href('ru', 'home')} class="btn btn--primary">На главную <span class="arrow">→</span></a>
-    <SceneSlot id="404" title="Потерявшаяся белая коробка ищет адрес" pin={false} ratio="21 / 9" ratioMobile="4 / 3" />
+    <span class="nf__eyebrow">{T.eyebrow[L]}</span>
+    <h1 class="nf__h" set:html={T.h1[L]} />
+    <p class="nf__lead">{T.lead[L]}</p>
+    <a href={href(L, 'home')} class="btn btn--primary">{T.home[L]}</a>
+    <ul class="nf__langs">
+      {enabledLocales.filter((l) => l !== L).map((l) => (
+        <li><a href={href(l, 'home')} lang={locales[l].htmlLang} hreflang={locales[l].htmlLang}>{T.home[l]}</a></li>
+      ))}
+    </ul>
   </section>
 </Base>
 
 <style>
-  .nf { display: grid; gap: 22px; justify-items: start; padding-top: calc(var(--header-h) + 64px); padding-bottom: 96px; }
-  .nf :global(.scene) { width: 100%; margin-top: 24px; }
+  .nf { display: grid; gap: 24px; justify-items: start; min-height: 80svh; align-content: center; padding-top: calc(var(--header-h) + 64px); padding-bottom: 96px; }
+  .nf__eyebrow { color: var(--muted); }
+  .nf__h { font-family: var(--font-display); font-weight: 200; font-size: var(--fs-xl); letter-spacing: -0.045em; line-height: .98; }
+  .nf__lead { font-size: 1.15rem; color: var(--muted); }
+  .nf__langs { list-style: none; padding: 0; margin: 16px 0 0; display: flex; flex-wrap: wrap; gap: 8px 24px; font-size: .95rem; }
+  .nf__langs a { color: var(--muted); }
+  .nf__langs a:hover { color: var(--ink); }
 </style>

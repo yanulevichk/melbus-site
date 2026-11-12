@@ -484,7 +484,7 @@ function initPage() {
       const grid = el.querySelector<HTMLElement>('.scene__grid');
       if (bar) tl.to(bar, { scaleX: 1, ease: 'none', duration: 1 }, 0);
       if (grid) tl.fromTo(grid, { '--shift': '0px' }, { '--shift': '-240px', ease: 'none', duration: 1 }, 0);
-      if (label) tl.eventCallback('onUpdate', () => (label.textContent = `кадр ${Math.round(tl.progress() * 149) + 1} / 150`));
+      if (label) tl.eventCallback('onUpdate', () => (label.textContent = `${Math.round(tl.progress() * 149) + 1} / 150`));
       sceneFrames(el, tl);
       scene3d(el, tl, local);
       el.querySelectorAll<HTMLElement>('[data-at]').forEach((cap) => {

@@ -1,0 +1,27 @@
+---
+/** Ролик на странице (первый экран внутренних страниц): грузится и играет только на экране, пометка «Визуализация». */
+import { ui } from '../i18n/ui';
+import type { Locale } from '../i18n/routes';
+interface Props { locale: Locale; video: string; poster: string; alt: string; caption?: string; square?: boolean }
+const { locale, video, poster, alt, caption, square = false } = Astro.props;
+---
+<figure class={`pmedia${square ? ' pmedia--sq' : ''}`} data-tape>
+  <div class="tape__media pmedia__frame" data-video="1">
+    <video muted loop playsinline preload="none" poster={poster} width="1280" height="720" aria-label={alt}>
+      <source data-src={video} type="video/mp4" />
+    </video>
+    <span class="pmedia__ai">{ui.aiLabel[locale]}</span>
+  </div>
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>
+
+<style>
+  .pmedia { margin: 0; display: grid; gap: 14px; }
+  .pmedia__frame { position: relative; aspect-ratio: 4 / 3; overflow: hidden; background: #10161D; }
+  @media (min-width: 768px) { .pmedia__frame { aspect-ratio: 21 / 9; } }
+  .pmedia__frame video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .pmedia__ai { position: absolute; right: 12px; top: 12px; z-index: 2; font-size: .72rem; padding: 4px 8px; border-radius: 2px; background: rgba(16,22,29,.55); color: #fff; backdrop-filter: blur(6px); }
+  .pmedia--sq { max-width: 560px; }
+  .pmedia--sq .pmedia__frame { aspect-ratio: 1; }
+  .pmedia figcaption { color: var(--dark-muted, #8F9AA7); font-size: .95rem; max-width: 60ch; }
+</style>

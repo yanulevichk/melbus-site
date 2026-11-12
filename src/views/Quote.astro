@@ -2,103 +2,104 @@
 /**
  * Заявка: 6 шагов, по одному вопросу на экран. Сейчас это макет:
  * отправка в CRM, загрузка видео и календарь свободных дат подключаются на этапе «Заявка и CRM».
+ * Тексты — src/content/quote.ts (сразу на 4 языках).
  */
 import { brand } from '../config/brand';
-const sizes = ['Студия', '2 комнаты', '3 комнаты', '4+ комнаты', 'Дом', 'Офис', 'Несколько вещей'];
-const items = ['Диван', 'Шкаф', 'Кровать', 'Стол', 'Холодильник', 'Стиральная машина', 'Телевизор', 'Коробки'];
-const extras = ['Упаковка всего', 'Упаковка хрупкого', 'Коробки заранее', 'Разборка и сборка мебели', 'Вывоз старой мебели', 'Уборка', 'Распаковка и расстановка'];
-const steps = ['Что везём', 'Адреса', 'Дата', 'Вещи', 'Услуги', 'Контакт'];
+import type { Locale } from '../i18n/routes';
+import { quoteText as Q } from '../content/quote';
+const { locale: L } = Astro.props as { locale: Locale };
 ---
+
 <section class="q">
   <div class="container q__in">
     <div class="q__head">
-      <span class="t-eyebrow">Заявка · фиксированная цена по видео</span>
-      <h1 class="t-h2">Расскажите о переезде</h1>
-      <ol class="q__steps" aria-label="Шаги заявки">{steps.map((s, i) => <li data-step-dot={i}><span>{i + 1}</span>{s}</li>)}</ol>
+      <span class="t-eyebrow">{Q.eyebrow[L]}</span>
+      <h1 class="t-h2">{Q.h1[L]}</h1>
+      <ol class="q__steps" aria-label={Q.stepsAria[L]}>{Q.steps.map((s, i) => <li data-step-dot={i}><span>{i + 1}</span>{s[L]}</li>)}</ol>
       <div class="q__bar" aria-hidden="true"><i data-q-bar></i></div>
     </div>
 
     <form class="q__form" data-quote novalidate>
       <fieldset data-q-step="0">
-        <legend class="t-h3">Что перевозим?</legend>
-        <div class="opts">{sizes.map((s, i) => <label class="opt"><input type="radio" name="size" value={s} id={`size-${i}`} checked={i === 1} /><span>{s}</span></label>)}</div>
+        <legend class="t-h3">{Q.q0[L]}</legend>
+        <div class="opts">{Q.sizes.map((s, i) => <label class="opt"><input type="radio" name="size" value={s[L]} id={`size-${i}`} checked={i === 1} /><span>{s[L]}</span></label>)}</div>
       </fieldset>
 
       <fieldset data-q-step="1" hidden>
-        <legend class="t-h3">Откуда и куда?</legend>
+        <legend class="t-h3">{Q.q1[L]}</legend>
         {['from', 'to'].map((k) => (
           <div class="addr">
-            <label class="fld"><span>{k === 'from' ? 'Откуда' : 'Куда'}</span><input id={`addr-${k}`} name={`addr_${k}`} autocomplete="street-address" placeholder="Улица, дом, город" /></label>
+            <label class="fld"><span>{k === 'from' ? Q.from[L] : Q.to[L]}</span><input id={`addr-${k}`} name={`addr_${k}`} autocomplete="street-address" placeholder={Q.addrPh[L]} /></label>
             <div class="row3">
-              <label class="fld"><span>Этаж</span><input id={`floor-${k}`} name={`floor_${k}`} inputmode="numeric" placeholder="3" /></label>
-              <label class="fld"><span>Лифт</span><select id={`lift-${k}`} name={`lift_${k}`}><option>Нет</option><option>Пассажирский</option><option>Грузовой</option></select></label>
-              <label class="fld"><span>От парковки, м</span><input id={`dist-${k}`} name={`dist_${k}`} inputmode="numeric" placeholder="20" /></label>
+              <label class="fld"><span>{Q.floor[L]}</span><input id={`floor-${k}`} name={`floor_${k}`} inputmode="numeric" placeholder="3" /></label>
+              <label class="fld"><span>{Q.lift[L]}</span><select id={`lift-${k}`} name={`lift_${k}`}>{Q.liftOpts.map((o) => <option>{o[L]}</option>)}</select></label>
+              <label class="fld"><span>{Q.dist[L]}</span><input id={`dist-${k}`} name={`dist_${k}`} inputmode="numeric" placeholder="20" /></label>
             </div>
           </div>
         ))}
-        <p class="hint">Подсказки адресов и расчёт расстояния подключим с Google Places.</p>
+        <p class="hint">{Q.hintAddr[L]}</p>
       </fieldset>
 
       <fieldset data-q-step="2" hidden>
-        <legend class="t-h3">Когда?</legend>
+        <legend class="t-h3">{Q.q2[L]}</legend>
         <div class="row2">
-          <label class="fld"><span>Дата</span><input type="date" id="date" name="date" /></label>
-          <label class="fld"><span>Начало</span><select id="time" name="time"><option>08:00</option><option>09:00</option><option>12:00</option><option>15:00</option><option>Вечер</option></select></label>
+          <label class="fld"><span>{Q.date[L]}</span><input type="date" id="date" name="date" /></label>
+          <label class="fld"><span>{Q.start[L]}</span><select id="time" name="time"><option>08:00</option><option>09:00</option><option>12:00</option><option>15:00</option><option>{Q.evening[L]}</option></select></label>
         </div>
-        <label class="check"><input type="checkbox" id="flex" name="flex" /> Дата гибкая, ±2 дня</label>
-        <p class="hint">Свободные даты будут подсвечиваться из календаря CRM.</p>
+        <label class="check"><input type="checkbox" id="flex" name="flex" /> {Q.flex[L]}</label>
+        <p class="hint">{Q.hintDate[L]}</p>
       </fieldset>
 
       <fieldset data-q-step="3" hidden>
-        <legend class="t-h3">Основные вещи</legend>
-        <div class="cnt">{items.map((it, i) => (
-          <div class="cnt__row"><span>{it}</span><div class="cnt__ctl"><button type="button" data-dec aria-label={`Меньше: ${it}`}>−</button><input id={`item-${i}`} name={`item_${i}`} value="0" inputmode="numeric" aria-label={it} /><button type="button" data-inc aria-label={`Больше: ${it}`}>+</button></div></div>
-        ))}</div>
-        <label class="check"><input type="checkbox" id="skip-items" name="skip_items" /> Покажу всё на видео</label>
+        <legend class="t-h3">{Q.q3[L]}</legend>
+        <div class="cnt">{Q.items.map((x, i) => { const it = x[L]; return (
+          <div class="cnt__row"><span>{it}</span><div class="cnt__ctl"><button type="button" data-dec aria-label={`${Q.less[L]}: ${it}`}>−</button><input id={`item-${i}`} name={`item_${i}`} value="0" inputmode="numeric" aria-label={it} /><button type="button" data-inc aria-label={`${Q.more[L]}: ${it}`}>+</button></div></div>
+        ); })}</div>
+        <label class="check"><input type="checkbox" id="skip-items" name="skip_items" /> {Q.skipItems[L]}</label>
       </fieldset>
 
       <fieldset data-q-step="4" hidden>
-        <legend class="t-h3">Что ещё сделать?</legend>
-        <div class="opts">{extras.map((e, i) => <label class="opt"><input type="checkbox" name="extras" value={e} id={`ex-${i}`} /><span>{e}</span></label>)}</div>
+        <legend class="t-h3">{Q.q4[L]}</legend>
+        <div class="opts">{Q.extras.map((e, i) => <label class="opt"><input type="checkbox" name="extras" value={e[L]} id={`ex-${i}`} /><span>{e[L]}</span></label>)}</div>
       </fieldset>
 
       <fieldset data-q-step="5" hidden>
-        <legend class="t-h3">Как с вами связаться?</legend>
+        <legend class="t-h3">{Q.q5[L]}</legend>
         <div class="row2">
-          <label class="fld"><span>Имя</span><input id="name" name="name" autocomplete="name" /></label>
-          <label class="fld"><span>Телефон</span><input id="phone" name="phone" type="tel" autocomplete="tel" placeholder="+48" /></label>
+          <label class="fld"><span>{Q.name[L]}</span><input id="name" name="name" autocomplete="name" /></label>
+          <label class="fld"><span>{Q.phone[L]}</span><input id="phone" name="phone" type="tel" autocomplete="tel" placeholder="+48" /></label>
         </div>
-        <div class="opts opts--sm">{['WhatsApp', 'Telegram', 'Звонок', 'Email'].map((c, i) => <label class="opt"><input type="radio" name="channel" value={c} id={`ch-${i}`} checked={i === 0} /><span>{c}</span></label>)}</div>
+        <div class="opts opts--sm">{Q.channels.map((c, i) => <label class="opt"><input type="radio" name="channel" value={c[L]} id={`ch-${i}`} checked={i === 0} /><span>{c[L]}</span></label>)}</div>
         <div id="video" class="video">
-          <strong>Покажите квартиру на видео</strong>
-          <p class="t-muted">По 30–60 секунд на комнату, откройте шкафы, покажите лестницу. Так цена будет точной и окончательной.</p>
+          <strong>{Q.videoT[L]}</strong>
+          <p class="t-muted">{Q.videoD[L]}</p>
           <div class="video__opts">
-            <label class="btn btn--ghost btn--sm">Загрузить видео<input type="file" accept="video/*" multiple hidden id="video-file" /></label>
-            <a class="btn btn--ghost btn--sm" href={`https://wa.me/${brand.contact.whatsapp}`} target="_blank" rel="noopener">Отправить в WhatsApp</a>
+            <label class="btn btn--ghost btn--sm">{Q.upload[L]}<input type="file" accept="video/*" multiple hidden id="video-file" /></label>
+            <a class="btn btn--ghost btn--sm" href={`https://wa.me/${brand.contact.whatsapp}`} target="_blank" rel="noopener">{Q.sendWa[L]}</a>
           </div>
         </div>
-        <label class="check"><input type="checkbox" id="nip" name="nip" /> Нужна фактура на фирму (NIP)</label>
+        <label class="check"><input type="checkbox" id="nip" name="nip" /> {Q.nip[L]}</label>
       </fieldset>
 
       <div class="q__done" data-q-done hidden>
-        <span class="t-eyebrow">Заявка № 0001 · макет</span>
-        <h2 class="t-h2">Приняли!</h2>
-        <p class="t-lead">В течение 2 часов днём пришлём фиксированную цену в WhatsApp. Сейчас это макет — заявки ещё не отправляются.</p>
+        <span class="t-eyebrow">{Q.doneEyebrow[L]}</span>
+        <h2 class="t-h2">{Q.doneH[L]}</h2>
+        <p class="t-lead">{Q.doneLead[L]}</p>
       </div>
 
       <div class="q__nav">
-        <button type="button" class="btn btn--ghost" data-q-prev hidden>Назад</button>
-        <button type="button" class="btn btn--primary" data-q-next>Дальше <span class="arrow">→</span></button>
+        <button type="button" class="btn btn--ghost" data-q-prev hidden>{Q.prev[L]}</button>
+        <button type="button" class="btn btn--primary" data-q-next data-l-next={Q.next[L]} data-l-send={Q.send[L]}>{Q.next[L]} <span class="arrow">→</span></button>
       </div>
     </form>
 
-    <aside class="q__sum" aria-label="Ваш переезд">
-      <span class="t-eyebrow">Ваш переезд</span>
+    <aside class="q__sum" aria-label={Q.sum[L]}>
+      <span class="t-eyebrow">{Q.sum[L]}</span>
       <dl>
-        <dt>Объём</dt><dd data-sum="size">2 комнаты</dd>
-        <dt>Ориентир</dt><dd>от — zł</dd>
+        <dt>{Q.vol[L]}</dt><dd data-sum="size">{Q.sizes[1][L]}</dd>
+        <dt>{Q.est[L]}</dt><dd>{Q.estVal[L]}</dd>
       </dl>
-      <p class="t-muted">Точная цена — после видео. Она не изменится в день переезда.</p>
+      <p class="t-muted">{Q.sumNote[L]}</p>
     </aside>
   </div>
 </section>
@@ -121,7 +122,7 @@ const steps = ['Что везём', 'Адреса', 'Дата', 'Вещи', 'У�
       dots.forEach((d, k) => { d.classList.toggle('is-done', k < n); d.classList.toggle('is-on', k === n); });
       bar.style.transform = `scaleX(${(n + 1) / steps.length})`;
       prev.hidden = n === 0;
-      next.innerHTML = n === steps.length - 1 ? 'Отправить заявку' : 'Дальше <span class="arrow">→</span>';
+      next.innerHTML = n === steps.length - 1 ? (next.dataset.lSend ?? '') : `${next.dataset.lNext ?? ''} <span class="arrow">→</span>`;
       steps[n].querySelector<HTMLElement>('input,select,button')?.focus({ preventScroll: true });
     };
     next.addEventListener('click', () => {
@@ -189,5 +190,7 @@ const steps = ['Что везём', 'Адреса', 'Дата', 'Вещи', 'У�
   .q__sum { align-self: start; position: sticky; top: calc(var(--header-h) + 24px); display: grid; gap: 14px; padding: 24px; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--line); }
   .q__sum dl { display: grid; grid-template-columns: auto 1fr; gap: 8px 16px; margin: 0; }
   .q__sum dt { color: var(--muted); } .q__sum dd { margin: 0; font-weight: 600; text-align: right; }
-  @media (max-width: 1023px) { .q__sum { position: static; order: -1; } }
+  @media (max-width: 1023px) { .q__head { order: -2; } .q__sum { position: static; order: -1; } }
+  /* страница начинается со светлого фона — шапке нужен тёмный фон, иначе белое «MEL» не видно */
+  :global(html:has(.q) .hdr) { background: color-mix(in oklab, var(--dark) 92%, transparent); backdrop-filter: saturate(1.4) blur(14px); -webkit-backdrop-filter: saturate(1.4) blur(14px); box-shadow: 0 1px 0 #26303B; }
 </style>

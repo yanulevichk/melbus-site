@@ -7,6 +7,7 @@ import Footer from '../components/Footer.astro';
 import MobileBar from '../components/MobileBar.astro';
 import { brand } from '../config/brand';
 import { locales, enabledLocales, href, type Locale, type PageKey } from '../i18n/routes';
+import { ui } from '../i18n/ui';
 
 interface Props {
   locale: Locale;
@@ -19,8 +20,8 @@ interface Props {
   image?: string;   // картинка для соцсетей (1200×630)
   theme?: 'lux';    // люкс-тема (черновик для сравнения)
 }
-const { locale, pageKey, title, description, nav, noindex = false, schema = [], image = '/og-ru.jpg', theme } = Astro.props;
-const ogImage = new URL(image, brand.site).href;
+const { locale, pageKey, title, description, nav, noindex = false, schema = [], image, theme } = Astro.props;
+const ogImage = new URL(image ?? `/og-${locale}.jpg`, brand.site).href;
 const ogLocale = { ru: 'ru_RU', pl: 'pl_PL', uk: 'uk_UA', en: 'en_GB' }[locale];
 const canonical = new URL(href(locale, pageKey), brand.site).href;
 const fullTitle = pageKey === 'home' ? `${brand.name} — ${title}` : `${title} · ${brand.name}`;
@@ -73,15 +74,16 @@ const site = { '@context': 'https://schema.org', '@type': 'WebSite', '@id': `${b
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
   <link rel="manifest" href="/site.webmanifest" />
-  {pageKey === 'home' && <link rel="preload" as="image" href="/scenes/home-hero/poster-m.webp" media="(max-width: 767px)" fetchpriority="high" />}
+  {pageKey === 'home' && <link rel="preload" as="image" href="/scenes/film/poster-m.webp" media="(max-width: 1023px)" fetchpriority="high" />}
+  {pageKey === 'home' && <link rel="preload" as="image" href="/scenes/film/poster-d.webp" media="(min-width: 1024px)" fetchpriority="high" />}
   <script type="application/ld+json" set:html={JSON.stringify([org, site, ...schema])} />
   <script is:inline>(function(){var d=document.documentElement;d.classList.add('js');try{if(!sessionStorage.getItem('mb-tape'))d.classList.add('tape');}catch(e){}})();</script>
   <ClientRouter />
 </head>
 <body data-page={pageKey}>
   <div class="curtain" data-curtain aria-hidden="true" transition:persist="curtain"><img src="/brand/mark-dark.svg" alt="" width="72" height="70" /></div>
-  <a href="#main" class="skip">К содержанию</a>
-  <Header locale={locale} current={nav} />
+  <a href="#main" class="skip">{ui.a11y.skip[locale]}</a>
+  <Header locale={locale} current={nav} pageKey={pageKey} />
   <main id="main"><slot /></main>
   <Footer locale={locale} />
   <MobileBar locale={locale} />

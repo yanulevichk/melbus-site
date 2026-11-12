@@ -1,35 +1,35 @@
 ---
 import Logo from './Logo.astro';
-import { href, type Locale, locales, enabledLocales } from '../i18n/routes';
-import { ui } from '../i18n/ru';
+import { href, type Locale, type PageKey, locales, enabledLocales } from '../i18n/routes';
+import { ui } from '../i18n/ui';
 import { brand } from '../config/brand';
 
-interface Props { locale: Locale; current?: string }
-const { locale, current = '' } = Astro.props;
+interface Props { locale: Locale; current?: string; pageKey?: PageKey }
+const { locale, current = '', pageKey = 'home' } = Astro.props;
 const nav = [
-  ['services', ui.nav.services],
-  ['pricing', ui.nav.pricing],
-  ['how', ui.nav.how],
-  ['guarantee', ui.nav.guarantee],
-  ['about', ui.nav.about],
-  ['contact', ui.nav.contact],
+  ['services', ui.nav.services[locale]],
+  ['pricing', ui.nav.pricing[locale]],
+  ['how', ui.nav.how[locale]],
+  ['guarantee', ui.nav.guarantee[locale]],
+  ['about', ui.nav.about[locale]],
+  ['contact', ui.nav.contact[locale]],
 ] as const;
 ---
-<header class="hdr dark-hdr" data-header transition:persist="header">
+<header class="hdr dark-hdr" data-header transition:persist={`header-${locale}`}>
   <div class="container hdr__in">
-    <a href={href(locale, 'home')} class="hdr__logo" aria-label={`${brand.name} — главная`}><Logo variant="dark" /><i class="hdr__tape" data-logo-tape aria-hidden="true"></i></a>
-    <nav class="hdr__nav" aria-label="Основное меню">
+    <a href={href(locale, 'home')} class="hdr__logo" aria-label={`${brand.name} — ${ui.a11y.home[locale]}`}><Logo variant="dark" /><i class="hdr__tape" data-logo-tape aria-hidden="true"></i></a>
+    <nav class="hdr__nav" aria-label={ui.a11y.mainNav[locale]}>
       {nav.map(([k, label]) => (
         <a href={href(locale, k)} class="hdr__link" aria-current={current === k ? 'page' : undefined}>{label}</a>
       ))}
     </nav>
     <div class="hdr__right">
       {enabledLocales.length > 1 && (
-        <div class="hdr__langs">{enabledLocales.map((l) => <a href={href(l, 'home')} lang={locales[l].htmlLang} aria-current={l === locale ? 'true' : undefined}>{locales[l].label}</a>)}</div>
+        <nav class="hdr__langs" aria-label={ui.a11y.langs[locale]}>{enabledLocales.map((l) => <a href={href(l, pageKey)} lang={locales[l].htmlLang} hreflang={locales[l].htmlLang} data-astro-reload aria-current={l === locale ? 'true' : undefined}>{locales[l].label}</a>)}</nav>
       )}
-      <a href={href(locale, 'quote')} class="btn btn--primary btn--sm hdr__cta" data-magnetic>{ui.cta.price}</a>
+      <a href={href(locale, 'quote')} class="btn btn--primary btn--sm hdr__cta" data-magnetic>{ui.cta.price[locale]}</a>
       <button class="hdr__burger" type="button" aria-expanded="false" aria-controls="menu" data-menu-toggle>
-        <span class="sr">{ui.cta.menu}</span><i></i><i></i>
+        <span class="sr">{ui.cta.menu[locale]}</span><i></i><i></i>
       </button>
     </div>
   </div>
@@ -37,7 +37,7 @@ const nav = [
   <i class="hdr__progress" data-progress aria-hidden="true"></i>
   <div class="menu" id="menu" data-menu hidden>
     <div class="container menu__in">
-      <nav class="menu__nav" aria-label="Меню">
+      <nav class="menu__nav" aria-label={ui.cta.menu[locale]}>
         {nav.map(([k, label], i) => (
           <a href={href(locale, k)} class="menu__link" data-menu-item style={`--i:${i}`}>
             <span class="menu__num">{String(i + 1).padStart(2, '0')}</span>{label}
@@ -46,7 +46,7 @@ const nav = [
       </nav>
       <div class="menu__foot" data-menu-item>
         <a href={`tel:${brand.contact.phoneHref}`} class="menu__phone">{brand.contact.phone}</a>
-        <a href={href(locale, 'quote')} class="btn btn--primary">{ui.cta.price}</a>
+        <a href={href(locale, 'quote')} class="btn btn--primary">{ui.cta.price[locale]}</a>
       </div>
     </div>
   </div>

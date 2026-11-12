@@ -42,7 +42,8 @@
 
 ## Техника
 - Astro 7 + Tailwind 4, Lenis + GSAP (ScrollTrigger, SplitText), Vanta (только десктоп, лениво), three@0.134. Деплой позже на Cloudflare.
-- Языки: сейчас только **RU** (черновик, `/ru/`), затем PL (основной, без префикса), UA, EN. Таблица адресов: `src/i18n/routes.ts` (enabled-флаги).
+- **Языки (12.11.2026): сайт на 4 языках** — PL основной без префикса (`/`), RU `/ru/`, UA `/uk/`, EN `/en/`. Адреса и слаги — `src/i18n/routes.ts`. **Все тексты — записи `L` = {ru, pl, uk, en}** (тип требует все 4 языка, иначе ошибка сборки): общие надписи `src/i18n/ui.ts`, главная `src/content/home.ts`, внутренние страницы и meta `src/content/pages.ts`, заявка `src/content/quote.ts`, услуги (и их слаги по языкам) `src/data/services.ts`, вопросы `src/data/faq.ts`, табло `src/data/pricing-demo.ts`. Превью ссылок — `public/og-<язык>.jpg`. 404 — по-польски со ссылками на другие языки. Переводы PL/UK стоит показать носителю языка перед запуском.
+- Старая главная `Home.astro` и `src/i18n/ru.ts` удалены (есть в истории git); 3D-сцены `scenes3d.ts` сейчас ни на одной странице не используются (наклейки в них — по-русски).
 - Бренд/контакты: `src/config/brand.ts` (контакты и реквизиты — заглушки TODO).
 - Слоты контента: `SceneSlot` (сцена под скролл: кадры в `public/scenes/<id>/{desktop,mobile}/0001.webp`, `frames={{count}}`), `VideoSlot` (ролики в `public/video/<id>.mp4|webm|avif`). ID роликов: V1–V8, D1–D5 (см. Home.astro).
 - Движок анимаций: `src/scripts/motion.ts` (data-split, data-reveal, data-scene, data-marquee, data-words, data-hscroll, data-count-to, data-magnetic, data-swap, data-vanta).

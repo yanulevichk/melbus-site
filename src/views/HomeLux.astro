@@ -1,54 +1,19 @@
 ---
 /**
- * ГЛАВНАЯ — ЛЮКС-ВЕРСИЯ (черновик для сравнения, /ru/lux/, noindex).
- * Один запоминающийся предмет — белая коробка MELBUS (3D) на графите; всё остальное тихо.
- * Движение: открытие первого экрана, «лента скотча» на кадрах, горизонтальные шаги.
+ * ГЛАВНАЯ (люкс). Все тексты — в src/content/home.ts, каждая фраза сразу на 4 языках.
+ * Движение: фильм первого экрана, «лента скотча» на кадрах, горизонтальные шаги.
  */
 import Faq from '../components/Faq.astro';
 import { href, type Locale } from '../i18n/routes';
+import { ui } from '../i18n/ui';
 import { brand } from '../config/brand';
-import { faqHome } from '../data/faq';
+import { faqFor } from '../data/faq';
 import { boardOptions, DEMO } from '../data/pricing-demo';
+import { home as H } from '../content/home';
 const { locale } = Astro.props as { locale: Locale };
+const L = locale;
 const quote = href(locale, 'quote');
-
-// подписи фильма: [с, до, заголовок, пояснение] — секунды монтажа (23 с), моменты замедлений
-const caps: [number, number, string, string][] = [
-  [4.8, 6.5, 'Цена по видео', 'Снимаете квартиру на телефон — мы называем окончательную цену.'],
-  [6.6, 8.4, 'Упакуем всё', 'От кровати и холодильника до последней вилки.'],
-  [9.9, 11.7, 'Белые коробки MELBUS', 'Бирюзовый скотч и наклейка комнаты на каждой.'],
-  [12.7, 14.2, 'Только ваши вещи', 'Бус едет без перегрузок и попутных грузов.'],
-  [14.5, 16.9, 'Варшава, Польша, Европа', 'Варшава и 150 км вокруг — семь дней в неделю.'],
-  [18.8, 20.6, 'Распакуем и расставим', 'Соберём мебель и поставим всё по местам.'],
-];
-const stepImg: Record<string, string> = { V2: 'step-1-video', V3: 'step-2-price', V4: 'step-3-book', V5: 'step-4-pack', V6: 'step-5-road', V7: 'step-6-home' };
-const steps = [
-  ['V2', 'Видео', 'Снимаете квартиру на телефон: две-три минуты, комната за комнатой.'],
-  ['V3', 'Цена', 'В течение двух часов днём присылаем окончательную цену и список вещей.'],
-  ['V4', 'Бронь', 'Подтверждаете предоплатой BLIK или картой — дата закреплена за вами.'],
-  ['V5', 'Упаковка', 'Бригада в форме, перчатках и бахилах упаковывает всё по комнатам.'],
-  ['V6', 'Дорога', 'Бус MELBUS везёт только ваши вещи, без перегрузок по пути.'],
-  ['V7', 'Новый дом', 'Заносим, собираем мебель и расставляем всё по местам.'],
-];
-const standards = [
-  ['Чистота с порога', 'Бахилы поверх рабочей обуви и чистые перчатки — до того, как мы войдём в квартиру.'],
-  ['Защита дома', 'Дорожки на пол, накладки на дверные косяки и углы. Уходя, убираем за собой.'],
-  ['Хрупкое отдельно', 'Посуда в бумаге, бокалы в пузырчатой плёнке, коробки с перегородками.'],
-  ['Порядок в коробках', 'Цвет наклейки — комната, номер — коробка, QR — список вещей внутри.'],
-  ['Одежда на вешалках', 'Гардеробные коробки со штангой: вещи приезжают не мятыми.'],
-];
-const rooms: [string, string, string][] = [
-  ['Кухня', '#14DCD5', '07'], ['Спальня', '#077E79', '12'], ['Гостиная', '#10161D', '03'], ['Детская', '#8F9AA7', '21'], ['Ванная', '#C9D1D9', '05'],
-];
-const packages = [
-  { name: 'Перевозка', note: 'Вы пакуете, мы перевозим', items: ['Бус и бригада', 'Защита мебели плёнкой и одеялами', 'Разборка и сборка кровати', 'Фиксированная цена'] },
-  { name: 'Стандарт', note: 'Чаще всего выбирают', items: ['Всё из «Перевозки»', 'Упаковка кухни и хрупкого', 'Набор белых коробок', 'Сборка всей мебели'], featured: true },
-  { name: 'Под ключ', note: 'Вы приезжаете в готовый дом', items: ['Всё из «Стандарта»', 'Упаковка всей квартиры', 'Распаковка и расстановка', 'Вывоз упаковки'] },
-];
-const places: [number, number, string, boolean?][] = [
-  [200, 200, 'Варшава', true], [204, 140, 'Легионово'], [128, 214, 'Прушков'], [210, 262, 'Пясечно'], [258, 246, 'Отвоцк'],
-  [96, 104, 'Плоцк'], [332, 186, 'Седльце'], [222, 338, 'Радом'], [80, 296, 'Лодзь'],
-];
+const ai = ui.aiLabel[L];
 // мини-QR для наклеек (декоративный узор)
 const qr = (seed: number) => {
   let r = seed; const rnd = () => ((r = (r * 9301 + 49297) % 233280) / 233280);
@@ -67,41 +32,41 @@ const qr = (seed: number) => {
   <div class="lx-film__stage" data-film-stage>
     <picture class="lx-film__poster">
       <source media="(max-width: 1023px)" srcset="/scenes/film/poster-m.webp" width="540" height="960" />
-      <img src="/scenes/film/poster-d.webp" alt="Вид сверху на жилой комплекс в Варшаве в золотой час — начало фильма о переезде MELBUS" width="1600" height="900" fetchpriority="high" decoding="async" />
+      <img src="/scenes/film/poster-d.webp" alt={H.posterAlt[L]} width="1600" height="900" fetchpriority="high" decoding="async" />
     </picture>
     <canvas class="lx-film__canvas" data-film-canvas aria-hidden="true"></canvas>
     <video class="lx-film__video" data-film-video data-src="/video/film-m.mp4" muted playsinline loop preload="none" poster="/scenes/film/poster-m.webp" aria-hidden="true"></video>
     <div class="lx-film__shade" aria-hidden="true"></div>
 
     <div class="container lx-film__intro" data-film-intro>
-      <p class="lx-film__kicker" data-intro-fade>Переезды по Варшаве, Польше и Европе</p>
-      <h1 class="lx-film__title" data-intro-title>Переезд<br />без доплат</h1>
+      <p class="lx-film__kicker" data-intro-fade>{H.kicker[L]}</p>
+      <h1 class="lx-film__title" data-intro-title>{H.title[0][L]}<br />{H.title[1][L]}</h1>
       <i class="lx-film__line" data-intro-line aria-hidden="true"></i>
-      <p class="lx-film__lead" data-intro-fade>Вы снимаете квартиру на видео — мы называем окончательную цену. Упакуем, перевезём и расставим всё по местам.</p>
+      <p class="lx-film__lead" data-intro-fade>{H.lead[L]}</p>
       <div class="lx-film__cta" data-intro-fade>
-        <a href={quote} class="btn btn--primary">Рассчитать цену</a>
-        <a href={quote + '#video'} class="lux-link">Отправить видео</a>
+        <a href={quote} class="btn btn--primary">{ui.cta.price[L]}</a>
+        <a href={quote + '#video'} class="lux-link">{ui.cta.video[L]}</a>
       </div>
-      <p class="lx-film__hint" data-intro-fade aria-hidden="true"><i></i>Прокрутите — фильм пойдёт</p>
+      <p class="lx-film__hint" data-intro-fade aria-hidden="true"><i></i>{H.hint[L]}</p>
     </div>
 
     <div class="container lx-film__caps" aria-hidden="true">
-      {caps.map(([from, to, t, d]) => (
-        <p class="lx-film__cap" data-film-cap data-from={from} data-to={to}><strong>{t}</strong><span>{d}</span></p>
+      {H.caps.map(([from, to, t, d]) => (
+        <p class="lx-film__cap" data-film-cap data-from={from} data-to={to}><strong>{t[L]}</strong><span>{d[L]}</span></p>
       ))}
     </div>
 
     <div class="container lx-film__end" data-film-cap data-from="21.6" data-to="99">
-      <p class="lx-film__endt">Ваш новый адрес ждёт</p>
+      <p class="lx-film__endt">{H.endTitle[L]}</p>
       <div class="lx-film__cta">
-        <a href={quote} class="btn btn--primary">Рассчитать цену</a>
-        <a href={quote + '#video'} class="lux-link">Отправить видео</a>
+        <a href={quote} class="btn btn--primary">{ui.cta.price[L]}</a>
+        <a href={quote + '#video'} class="lux-link">{ui.cta.video[L]}</a>
       </div>
     </div>
 
     <div class="lx-film__foot">
-      <button type="button" class="lx-film__watch" data-film-open><i aria-hidden="true"></i>Смотреть ролик · 0:23</button>
-      <span class="lx-film__ai">Визуализация</span>
+      <button type="button" class="lx-film__watch" data-film-open><i aria-hidden="true"></i>{H.watch[L]}</button>
+      <span class="lx-film__ai">{ai}</span>
     </div>
     <div class="lx-film__bar" aria-hidden="true"><i data-film-progress></i></div>
   </div>
@@ -111,9 +76,7 @@ const qr = (seed: number) => {
 <section class="lx-band dark">
   <div class="container">
     <ul class="lx-band__facts">
-      <li><strong>Цена по видео</strong><span>окончательная, без доплат на месте</span></li>
-      <li><strong>Фактура VAT</strong><span>BLIK, карта или перевод</span></li>
-      <li><strong>7 дней в неделю</strong><span>Варшава и 150 км вокруг</span></li>
+      {H.band.map(([t, d]) => <li><strong>{t[L]}</strong><span>{d[L]}</span></li>)}
     </ul>
   </div>
 </section>
@@ -122,17 +85,17 @@ const qr = (seed: number) => {
 <section class="lx-sec lx-statement">
   <div class="container lx-statement__grid">
     <div class="lx-statement__body">
-      <p class="lx-statement__text">Цена, которую вы приняли, — это цена, которую вы заплатите. Никаких «а тут ещё этаж» и «шкаф оказался тяжелее». Если что-то меняется — только с вашего согласия и до начала работ.</p>
-      <a class="lux-link" href={href(locale, 'guarantee')}>Как работает гарантия цены</a>
+      <p class="lx-statement__text">{H.statement[L]}</p>
+      <a class="lux-link" href={href(locale, 'guarantee')}>{H.statementLink[L]}</a>
     </div>
     <figure class="lx-statement__media" data-tape>
       <div class="tape__media lx-vid" data-video="1">
-        <video muted loop playsinline preload="none" poster="/img/site/phone.webp" width="900" height="900" aria-label="Рука с телефоном снимает квартиру на видео">
+        <video muted loop playsinline preload="none" poster="/img/site/phone.webp" width="900" height="900" aria-label={H.phoneAlt[L]}>
           <source data-src="/video/phone.mp4" type="video/mp4" />
         </video>
-        <span class="lx-ai">Визуализация</span>
+        <span class="lx-ai">{ai}</span>
       </div>
-      <figcaption>Две-три минуты видео на телефон — и мы называем окончательную цену.</figcaption>
+      <figcaption>{H.phoneCaption[L]}</figcaption>
     </figure>
   </div>
 </section>
@@ -141,26 +104,26 @@ const qr = (seed: number) => {
 <section class="lx-sec lx-price">
   <div class="container lx-price__grid">
     <div class="lx-price__head">
-      <h2 class="lx-h2">Сколько стоит переезд</h2>
-      <p class="lx-lead">Ориентир за полминуты. Окончательную цену зафиксируем по видео.</p>
+      <h2 class="lx-h2">{H.price.h2[L]}</h2>
+      <p class="lx-lead">{H.price.lead[L]}</p>
     </div>
     <div class="lx-price__calc">
-      <div class="lx-seg" role="group" aria-label="Что перевозим" data-board-for="board-lux">
-        {boardOptions.map((o, i) => <button type="button" class="lx-seg__b" data-value={o.value} data-status={o.status} aria-pressed={i === 1 ? 'true' : 'false'}>{o.label}</button>)}
+      <div class="lx-seg" role="group" aria-label={H.price.seg[L]} data-board-for="board-lux">
+        {boardOptions.map((o, i) => <button type="button" class="lx-seg__b" data-value={o.value} data-status={o.status[L]} aria-pressed={i === 1 ? 'true' : 'false'}>{o.label[L]}</button>)}
       </div>
       <div class="lx-board" id="board-lux" data-board>
-        <p class="lx-board__status" data-board-status>{boardOptions[1].status}</p>
+        <p class="lx-board__status" data-board-status>{boardOptions[1].status[L]}</p>
         <div class="lx-board__row" aria-hidden="true">
-          <span class="lx-board__from">от</span>
+          <span class="lx-board__from">{H.price.from[L]}</span>
           {[0, 1, 2, 3].map((i) => (
             <span class={`lx-reel${i === 0 ? ' lx-reel--k' : ''}`} data-reel><span class="lx-reel__strip">{Array.from({ length: 33 }, (_, k) => <i>{k % 11 === 10 ? '' : k % 11}</i>)}</span></span>
           ))}
           <span class="lx-board__cur">zł</span>
         </div>
-        <p class="sr-only" aria-live="polite">Ориентировочная цена: от <span data-board-value>{boardOptions[1].value}</span> zł</p>
+        <p class="sr-only" aria-live="polite">{H.price.sr[L]} <span data-board-value>{boardOptions[1].value}</span> zł</p>
       </div>
-      {DEMO && <p class="lx-note">Демо-цифры: ставки ещё утверждаются.</p>}
-      <a href={href(locale, 'calculator')} class="btn btn--primary">Продолжить расчёт</a>
+      {DEMO && <p class="lx-note">{H.price.demo[L]}</p>}
+      <a href={href(locale, 'calculator')} class="btn btn--primary">{H.price.next[L]}</a>
     </div>
   </div>
 </section>
@@ -168,25 +131,26 @@ const qr = (seed: number) => {
 <!-- 4. ШАГИ (это последовательность — номера по делу) -->
 <section class="lx-sec lx-steps">
   <div class="container lx-head">
-    <h2 class="lx-h2">Как проходит переезд</h2>
-    <p class="lx-lead">Шесть шагов от видео на телефоне до последней собранной полки. На каждом шаге вы знаете, что будет дальше.</p>
+    <h2 class="lx-h2">{H.steps.h2[L]}</h2>
+    <p class="lx-lead">{H.steps.lead[L]}</p>
   </div>
   <div class="lx-hs" data-hscroll>
     <div class="lx-hs__track container" data-hscroll-track>
       <div class="lx-route" aria-hidden="true"><svg viewBox="0 0 2400 40" preserveAspectRatio="none"><path class="lx-route__base" d="M0 20 L2400 20" /><path data-route d="M0 20 L2400 20" /></svg></div>
       <i class="lx-hs__fill" data-fill aria-hidden="true"></i>
-      {steps.map(([id, t, d], i) => (
+      {H.steps.items.map(([img, t, d], i) => (
         <article class="lx-step">
-          <div class="lx-step__media" data-slot={id}>
-            <img src={`/img/film/${stepImg[id]}.webp`} alt="" width="720" height="900" loading="lazy" decoding="async" />
+          <div class="lx-step__media" data-slot={`V${i + 2}`}>
+            <img src={`/img/film/${img}.webp`} alt="" width="720" height="900" loading="lazy" decoding="async" />
             <span class="lx-step__n">{i + 1}</span>
           </div>
-          <h3 class="lx-step__t">{t}</h3>
-          <p class="lx-step__d">{d}</p>
+          <h3 class="lx-step__t">{t[L]}</h3>
+          <p class="lx-step__d">{d[L]}</p>
         </article>
       ))}
     </div>
   </div>
+  <p class="container lx-note lx-steps__note">{H.steps.note[L]}</p>
 </section>
 
 <!-- 5. СТАНДАРТЫ -->
@@ -194,17 +158,17 @@ const qr = (seed: number) => {
   <div class="container lx-std__grid">
     <div class="lx-std__media" data-tape>
       <div class="tape__media lx-std__img lx-vid" data-slot="D1" data-video="1">
-        <video muted loop playsinline preload="none" poster="/img/site/gloves.webp" width="720" height="900" aria-label="Руки в фирменных перчатках MELBUS упаковывают бокал в бумагу и кладут в коробку">
+        <video muted loop playsinline preload="none" poster="/img/site/gloves.webp" width="720" height="900" aria-label={H.std.alt[L]}>
           <source data-src="/video/gloves.mp4" type="video/mp4" />
         </video>
-        <span class="lx-ai">Визуализация</span>
+        <span class="lx-ai">{ai}</span>
       </div>
     </div>
     <div class="lx-std__text">
-      <h2 class="lx-h2">Аккуратность, которую видно</h2>
-      <p class="lx-lead">Двадцать бусов и пять лет в логистике научили нас простому правилу: вещи клиента — как свои.</p>
+      <h2 class="lx-h2">{H.std.h2[L]}</h2>
+      <p class="lx-lead">{H.std.lead[L]}</p>
       <dl class="lx-list">
-        {standards.map(([t, d]) => <div><dt>{t}</dt><dd>{d}</dd></div>)}
+        {H.std.items.map(([t, d]) => <div><dt>{t[L]}</dt><dd>{d[L]}</dd></div>)}
       </dl>
     </div>
   </div>
@@ -214,22 +178,22 @@ const qr = (seed: number) => {
 <section class="lx-sec lx-boxes">
   <div class="container">
     <div class="lx-head">
-      <h2 class="lx-h2">Белые коробки с порядком внутри</h2>
-      <p class="lx-lead">Привезём набор за несколько дней до переезда. Цвет наклейки показывает комнату, номер — коробку, QR — список вещей внутри.</p>
+      <h2 class="lx-h2">{H.boxes.h2[L]}</h2>
+      <p class="lx-lead">{H.boxes.lead[L]}</p>
     </div>
     <figure class="lx-boxes__img" data-tape>
       <div class="tape__media">
         <picture>
           <source media="(max-width: 767px)" srcset="/scenes/box/poster-m.webp" />
-          <img src="/scenes/box/poster-d.webp" alt="Белая коробка MELBUS, заклеенная бирюзовым скотчем, с наклейкой «Кухня, коробка 07»" width="1600" height="688" loading="lazy" decoding="async" />
+          <img src="/scenes/box/poster-d.webp" alt={H.boxes.alt[L]} width="1600" height="688" loading="lazy" decoding="async" />
         </picture>
       </div>
     </figure>
-    <ul class="lx-rooms" aria-label="Цвета наклеек по комнатам">
-      {rooms.map(([room, color, n], i) => (
+    <ul class="lx-rooms" aria-label={H.boxes.roomsAria[L]}>
+      {H.boxes.rooms.map(([room, color, n], i) => (
         <li class="lx-sticker">
           <i class="lx-sticker__bar" style={`--c:${color}`}></i>
-          <span class="lx-sticker__room">{room}</span>
+          <span class="lx-sticker__room">{room[L]}</span>
           <span class="lx-sticker__n">{n}</span>
           <svg class="lx-sticker__qr" viewBox="0 0 15 15" aria-hidden="true">
             <path d="M0 0h5v5H0zM10 0h5v5h-5zM0 10h5v5H0z" fill="none" stroke="currentColor" stroke-width="1" transform="translate(.5 .5) scale(.933)" />
@@ -245,17 +209,17 @@ const qr = (seed: number) => {
 <section class="lx-sec lx-pk">
   <div class="container">
     <div class="lx-head">
-      <h2 class="lx-h2">Три пакета</h2>
-      <p class="lx-lead">Цены опубликуем после анализа рынка. Состав пакетов пока на утверждении.</p>
+      <h2 class="lx-h2">{H.packages.h2[L]}</h2>
+      <p class="lx-lead">{H.packages.lead[L]}</p>
     </div>
     <div class="lx-pk__cols">
-      {packages.map((p) => (
+      {H.packages.items.map((p) => (
         <article class={`lx-pk__col${p.featured ? ' is-f' : ''}`}>
-          <p class="lx-pk__note">{p.note}</p>
-          <h3 class="lx-pk__name">{p.name}</h3>
-          <p class="lx-pk__price">от … zł</p>
-          <ul>{p.items.map((it) => <li>{it}</li>)}</ul>
-          <a class="lux-link" href={quote}>Получить цену</a>
+          <p class="lx-pk__note">{p.note[L]}</p>
+          <h3 class="lx-pk__name">{p.name[L]}</h3>
+          <p class="lx-pk__price">{H.packages.priceFrom[L]}</p>
+          <ul>{p.items.map((it) => <li>{it[L]}</li>)}</ul>
+          <a class="lux-link" href={quote}>{ui.cta.quote[L]}</a>
         </article>
       ))}
     </div>
@@ -265,21 +229,21 @@ const qr = (seed: number) => {
 <!-- 8. ГАРАНТИЯ -->
 <section class="lx-sec lx-guar dark grain">
   <div class="container">
-    <h2 class="lx-xl">Цена из оферты —<br />окончательная.</h2>
+    <h2 class="lx-xl" set:html={H.guarantee.h2[L]} />
     <div class="lx-guar__cols">
-      {[['Фиксированная цена', 'Риск «не уложились по времени» — наш. Сумма из принятой оферты не меняется.'], ['Пунктуальность', 'Окно прибытия — 30 минут. Опоздали по своей вине — скидка за каждые 30 минут.'], ['Сохранность', 'Защищаем мебель и дом. Если что-то повредили — возмещаем по процедуре рекламации.']].map(([t, d]) => (
-        <div><h3>{t}</h3><p>{d}</p></div>
+      {H.guarantee.cols.map(([t, d]) => (
+        <div><h3>{t[L]}</h3><p>{d[L]}</p></div>
       ))}
     </div>
-    <a class="lux-link" href={href(locale, 'guarantee')}>Условия гарантии</a>
+    <a class="lux-link" href={href(locale, 'guarantee')}>{H.guarantee.link[L]}</a>
   </div>
 </section>
 
 <!-- 9. ЦИФРЫ -->
 <section class="lx-facts">
   <div class="container lx-facts__row">
-    {[[`${brand.facts.years}+`, 'лет в логистике'], ['≈30 000', 'доставок в месяц'], ['≈20', 'бусов в своём парке'], ['7/7', 'работаем без выходных']].map(([n, l]) => (
-      <div class="lx-fact"><strong>{n}</strong><span>{l}</span></div>
+    {H.facts.map(([n, l], i) => (
+      <div class="lx-fact"><strong>{i === 0 ? `${brand.facts.years}+` : n[L]}</strong><span>{l[L]}</span></div>
     ))}
   </div>
 </section>
@@ -288,16 +252,16 @@ const qr = (seed: number) => {
 <section class="lx-sec lx-area">
   <div class="container lx-area__grid">
     <div>
-      <h2 class="lx-h2">Варшава и 150 км вокруг</h2>
-      <p class="lx-lead">Мокотув, Воля, Урсынов, Прага, Белоленка и все районы города. Пясечно, Прушков, Легионово, Марки и дальше. По Польше и в страны ЕС — по запросу.</p>
+      <h2 class="lx-h2">{H.area.h2[L]}</h2>
+      <p class="lx-lead">{H.area.lead[L]}</p>
     </div>
-    <svg class="lx-map" viewBox="0 0 400 400" role="img" aria-label="Карта: Варшава в центре, кольцо 150 км, ближайшие города">
+    <svg class="lx-map" viewBox="0 0 400 400" role="img" aria-label={H.area.mapAria[L]}>
       <path data-draw class="lx-map__outer" d="M200 20 a180 180 0 1 1 -0.01 0" />
       <circle cx="200" cy="200" r="110" class="lx-map__ring" />
       <circle cx="200" cy="200" r="46" class="lx-map__city" />
-      <text x="200" y="12" class="lx-map__km">150 км</text>
-      {places.map(([x, y, n, big]) => (
-        <g class={big ? 'lx-map__pt is-big' : 'lx-map__pt'}><circle cx={x} cy={y} r={big ? 4.5 : 2.6} /><text x={x + (big ? 9 : 6)} y={y + 4}>{n}</text></g>
+      <text x="200" y="12" class="lx-map__km">{H.area.km[L]}</text>
+      {H.area.places.map(([x, y, n, big]) => (
+        <g class={big ? 'lx-map__pt is-big' : 'lx-map__pt'}><circle cx={x} cy={y} r={big ? 4.5 : 2.6} /><text x={x + (big ? 9 : 6)} y={y + 4}>{n[L]}</text></g>
       ))}
     </svg>
   </div>
@@ -306,15 +270,15 @@ const qr = (seed: number) => {
 <!-- 11. ОТЗЫВЫ (честно) -->
 <section class="lx-reviews">
   <div class="container">
-    <p class="lx-reviews__t">Мы новое направление, поэтому отзывов пока нет. Первые появятся здесь и в Google — публикуем только настоящие.</p>
+    <p class="lx-reviews__t">{H.reviews[L]}</p>
   </div>
 </section>
 
 <!-- 12. ВОПРОСЫ -->
 <section class="lx-sec lx-faq">
   <div class="container lx-faq__grid">
-    <h2 class="lx-h2">Частые вопросы</h2>
-    <Faq items={faqHome} reveal={false} />
+    <h2 class="lx-h2">{H.faqH2[L]}</h2>
+    <Faq items={faqFor(locale)} reveal={false} />
   </div>
 </section>
 
@@ -322,27 +286,27 @@ const qr = (seed: number) => {
 <section class="lx-sec lx-cta dark grain">
   <figure class="lx-cta__film" data-tape>
     <div class="tape__media lx-vid" data-video="1">
-      <video muted loop playsinline preload="none" poster="/img/site/van-side.webp" width="1280" height="720" aria-label="Белый бус MELBUS едет по улице Варшавы в золотой час">
+      <video muted loop playsinline preload="none" poster="/img/site/van-side.webp" width="1280" height="720" aria-label={H.vanAlt[L]}>
         <source data-src="/video/van.mp4" type="video/mp4" />
       </video>
-      <span class="lx-ai">Визуализация</span>
+      <span class="lx-ai">{ai}</span>
     </div>
   </figure>
   <div class="container">
-    <h2 class="lx-mega">Ваш новый адрес ждёт</h2>
+    <h2 class="lx-mega">{H.endTitle[L]}</h2>
     <div class="lx-cta__row">
-      <p class="lx-lead">Пришлите видео квартиры — в течение двух часов днём получите цену, которая не изменится.</p>
+      <p class="lx-lead">{H.finalLead[L]}</p>
       <div class="lx-cta__btns">
-        <a href={quote} class="btn btn--primary">Получить цену</a>
-        <a href={`https://wa.me/${brand.contact.whatsapp}`} class="lux-link" target="_blank" rel="noopener">Написать в WhatsApp</a>
+        <a href={quote} class="btn btn--primary">{ui.cta.quote[L]}</a>
+        <a href={`https://wa.me/${brand.contact.whatsapp}`} class="lux-link" target="_blank" rel="noopener">{ui.cta.writeWhatsapp[L]}</a>
       </div>
     </div>
   </div>
 </section>
 
 <!-- окно «Смотреть ролик» (видео грузится только по нажатию) -->
-<dialog class="lx-modal" data-film-modal aria-label="Ролик MELBUS: вся квартира в одной коробке">
-  <button type="button" class="lx-modal__x" data-film-close aria-label="Закрыть">×</button>
+<dialog class="lx-modal" data-film-modal aria-label={H.modalAria[L]}>
+  <button type="button" class="lx-modal__x" data-film-close aria-label={ui.cta.close[L]}>×</button>
   <video data-src="/video/film-1280.mp4" controls playsinline preload="none" poster="/scenes/film/poster-d.webp" width="1280" height="720"></video>
 </dialog>
 
@@ -356,6 +320,7 @@ const qr = (seed: number) => {
   .lx-head { display: grid; gap: 28px; margin-bottom: clamp(48px, 7vw, 104px); }
   @media (min-width: 960px) { .lx-head { grid-template-columns: 7fr 5fr; align-items: end; } }
   .lx-note { font-size: .875rem; color: var(--muted); }
+  .lx-steps__note { margin-top: 32px; }
 
   /* ---------- первый экран: фильм ---------- */
   .lx-film { position: relative; background: var(--graphite); color: #fff; }
@@ -370,7 +335,7 @@ const qr = (seed: number) => {
 
   .lx-film__intro { position: absolute; left: 0; right: 0; bottom: clamp(88px, 13vh, 150px); z-index: 2; display: grid; justify-items: start; }
   .lx-film__kicker { color: rgba(255,255,255,.72); font-size: 1rem; margin-bottom: clamp(16px, 2.4vw, 28px); }
-  .lx-film__title { font-family: var(--font-display); font-size: clamp(3rem, .9rem + 6.1vw, 8.2rem); font-weight: 200; letter-spacing: -0.055em; line-height: .9; color: #fff; }
+  .lx-film__title { font-family: var(--font-display); font-size: clamp(2.2rem, max(min(11vw, 3rem), .9rem + 6.1vw), 8.2rem); font-weight: 200; letter-spacing: -0.055em; line-height: .9; color: #fff; }
   html.js .lx-film__title { visibility: hidden; }
   .lx-film__line { display: block; width: min(420px, 60%); height: 2px; margin: clamp(24px, 3vw, 40px) 0 clamp(20px, 2.6vw, 32px); background: var(--tape); transform-origin: 0 50%; }
   html.js .lx-film__line { transform: scaleX(0); }

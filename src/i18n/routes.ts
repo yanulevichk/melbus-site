@@ -1,15 +1,16 @@
 /**
  * Таблица маршрутов: один ключ страницы → свой адрес на каждом языке.
- * Включённые языки генерируются; остальные ждут перевода.
- * PL станет основным (без префикса) — пока черновики пишем на русском.
+ * Все 4 языка включены. PL — основной (без префикса): «/», RU — /ru/, UA — /uk/, EN — /en/.
  */
+import { serviceSlug } from '../data/services';
+
 export type Locale = 'ru' | 'pl' | 'uk' | 'en';
 
 export const locales: Record<Locale, { label: string; htmlLang: string; prefix: string; enabled: boolean }> = {
   ru: { label: 'RU', htmlLang: 'ru', prefix: '/ru', enabled: true },
-  pl: { label: 'PL', htmlLang: 'pl', prefix: '', enabled: false },
-  uk: { label: 'UA', htmlLang: 'uk', prefix: '/uk', enabled: false },
-  en: { label: 'EN', htmlLang: 'en', prefix: '/en', enabled: false },
+  pl: { label: 'PL', htmlLang: 'pl', prefix: '', enabled: true },
+  uk: { label: 'UA', htmlLang: 'uk', prefix: '/uk', enabled: true },
+  en: { label: 'EN', htmlLang: 'en', prefix: '/en', enabled: true },
 };
 
 export const enabledLocales = (Object.keys(locales) as Locale[]).filter((l) => locales[l].enabled);
@@ -41,7 +42,7 @@ export const slugs: Record<string, Partial<Record<Locale, string>>> = {
 export function href(locale: Locale, key: PageKey): string {
   const p = locales[locale].prefix;
   if (key.startsWith('service:')) {
-    return `${p}/${slugs.services[locale]}/${key.slice(8)}/`;
+    return `${p}/${slugs.services[locale]}/${serviceSlug(key.slice(8), locale)}/`;
   }
   const s = slugs[key]?.[locale] ?? '';
   return s ? `${p}/${s}/` : `${p}/` || '/';
