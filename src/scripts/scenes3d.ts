@@ -102,7 +102,9 @@ function stickerTexture(room: string, num: string, top = 'КОМНАТА', mid =
     c.fillStyle = '#10161D';
     c.font = '600 30px "Onest Variable", system-ui, sans-serif';
     c.fillText(top, 92, 78);
-    c.font = '700 64px "Unbounded Variable", "Arial Black", sans-serif';
+    // название комнаты уменьшается, чтобы не заходить на QR (польское «KUCHNIA» длиннее русского «КУХНЯ»)
+    let fs = 64;
+    do { c.font = `700 ${fs}px "Unbounded Variable", "Arial Black", sans-serif`; fs -= 2; } while (c.measureText(room).width > 292 && fs > 30);
     c.fillText(room, 92, 152);
     c.font = '600 30px "Onest Variable", system-ui, sans-serif';
     c.fillStyle = '#5B6673'; c.fillText(mid, 92, 250);
@@ -715,7 +717,7 @@ async function boxScene(host: HTMLElement): Promise<SceneApi> {
     { pos: [W / 2, 0, 0], yaw: Math.PI / 2, len: D, sticker: true },
     { pos: [-W / 2, 0, 0], yaw: -Math.PI / 2, len: D },
   ];
-  const sticker = stickerTexture(host.dataset.room || 'КУХНЯ', host.dataset.num || '07');
+  const sticker = stickerTexture(host.dataset.room || 'КУХНЯ', host.dataset.num || '07', host.dataset.top || undefined, host.dataset.mid || undefined);
   const stickerM = new THREE.MeshStandardMaterial({ map: sticker, transparent: true, roughness: 0.6, opacity: 0 });
   let stickerMesh: THREE.Mesh | null = null;
   const tapeM = mat(C.teal, { rough: 0.4, emissive: C.teal, ei: 0.18 });
@@ -838,7 +840,7 @@ async function boxHeroScene(host: HTMLElement): Promise<SceneApi> {
   const dec = new THREE.Mesh(new THREE.PlaneGeometry(W * 0.6, (W * 0.6) / LOGO_RATIO), new THREE.MeshStandardMaterial({ map: logo, transparent: true, roughness: 0.7, envMapIntensity: 0.4 }));
   dec.position.set(0, H * 0.52, D / 2 + 0.002); root.add(dec);
   const stW = D * 0.66;
-  const sticker = new THREE.Mesh(new THREE.PlaneGeometry(stW, stW * 400 / 640), new THREE.MeshStandardMaterial({ map: stickerTexture(host.dataset.room || 'КУХНЯ', host.dataset.num || '07'), transparent: true, roughness: 0.55, envMapIntensity: 0.5 }));
+  const sticker = new THREE.Mesh(new THREE.PlaneGeometry(stW, stW * 400 / 640), new THREE.MeshStandardMaterial({ map: stickerTexture(host.dataset.room || 'КУХНЯ', host.dataset.num || '07', host.dataset.top || undefined, host.dataset.mid || undefined), transparent: true, roughness: 0.55, envMapIntensity: 0.5 }));
   sticker.rotation.y = Math.PI / 2; sticker.position.set(W / 2 + 0.002, H * 0.4, 0.05); root.add(sticker);
 
   // мягкая контактная тень (поверх «пола», которого не видно)

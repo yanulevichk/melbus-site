@@ -192,8 +192,8 @@ const qr = (seed: number) => {
     <figure class="lx-boxes__img" data-tape>
       <div class="tape__media">
         <picture>
-          <source media="(max-width: 767px)" srcset="/scenes/box/poster-m.webp" />
-          <img src="/scenes/box/poster-d.webp" alt={H.boxes.alt[L]} width="1600" height="688" loading="lazy" decoding="async" />
+          <source media="(max-width: 767px)" srcset={`/scenes/box/poster-m-${L}.webp`} />
+          <img src={`/scenes/box/poster-d-${L}.webp`} alt={H.boxes.alt[L]} width="1600" height="688" loading="lazy" decoding="async" />
         </picture>
       </div>
     </figure>

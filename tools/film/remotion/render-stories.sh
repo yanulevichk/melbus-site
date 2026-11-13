@@ -15,7 +15,7 @@ R() { npx remotion render src/index.ts "$@" --browser-executable=$BX --log=error
 # 1) материалы: готовые картинки и ролики сайта, кадры 3D-черновика, скриншоты сайта, ваши фото и картинки GPT
 mkdir -p $P/shots $P/real $P/gpt; rm -f $P/real/* $P/gpt/*
 cp $ROOT/public/img/site/{phone,gloves,pack,tape,van-side}.webp $ROOT/public/img/film/step-*.webp $P/
-cp $ROOT/public/scenes/box/poster-m.webp $P/box-render.webp
+cp $ROOT/public/scenes/box/poster-m-pl.webp $P/box-render.webp
 cp $ROOT/public/video/{film-m,phone,gloves,van}.mp4 $P/
 cp $M/src/pv-*.jpg $M/src/film-*.jpg $P/
 cp $M/src/*-ru.jpg $M/src/*-pl.jpg $M/src/*-uk.jpg $M/src/*-en.jpg $P/shots/
