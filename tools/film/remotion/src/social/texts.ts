@@ -54,8 +54,9 @@ export const FILM = {
 };
 
 // ---------- короткие Reels из одного ролика ----------
-export type ClipReel = {clip: string; square: boolean; title: [L, L]; lines: [L, L, L]; endTitle: L};
-export const CLIP_REELS: Record<'Price' | 'Care' | 'Van', ClipReel> = {
+// vertical — вертикальный ролик (Higgsfield 9:16) на весь экран; иначе — в рамке (square — квадрат, нет — 16:9)
+export type ClipReel = {clip: string; square: boolean; vertical?: boolean; title: [L, L]; lines: [L, L, L]; endTitle: L};
+export const CLIP_REELS: Record<'Price' | 'Care' | 'Van' | 'Seal' | 'Qr' | 'FirstNight' | 'Wardrobe', ClipReel> = {
   Price: {
     clip: 'phone.mp4', square: true,
     title: [{ru: 'Цена', pl: 'Cena', uk: 'Ціна', en: 'Price'}, {ru: 'по видео', pl: 'z wideo', uk: 'за відео', en: 'from a video'}],
@@ -86,6 +87,47 @@ export const CLIP_REELS: Record<'Price' | 'Care' | 'Van', ClipReel> = {
     ],
     endTitle: {ru: 'Бус MELBUS — только для вас', pl: 'Bus MELBUS — tylko dla Ciebie', uk: 'Бус MELBUS — лише для вас', en: 'A MELBUS van — just for you'},
   },
+  // ---- 13.11.2026: ролики Higgsfield (вертикальные, «Визуализация») ----
+  Seal: {
+    clip: 'hf-tape.mp4', square: false, vertical: true,
+    title: [{ru: 'Цену', pl: 'Cenę', uk: 'Ціну', en: 'We seal'}, {ru: 'запечатываем', pl: 'zaklejamy', uk: 'запечатуємо', en: 'the price'}],
+    lines: [
+      {ru: 'Цена — по видео, до начала работ', pl: 'Cena z wideo — przed rozpoczęciem pracy', uk: 'Ціна — за відео, до початку робіт', en: 'The price comes from your video, before we start'},
+      {ru: 'Изменения — только с вашего согласия', pl: 'Zmiany — tylko za Twoją zgodą', uk: 'Зміни — лише з вашої згоди', en: 'Changes only with your consent'},
+      {ru: 'Что приняли в оферте — то и платите', pl: 'Płacisz tyle, ile przyjąłeś w ofercie', uk: 'Що прийняли в оферті — те й платите', en: 'You pay what you accepted in the offer'},
+    ],
+    endTitle: {ru: 'Цена закрыта, как коробка', pl: 'Cena zamknięta jak karton', uk: 'Ціна закрита, як коробка', en: 'A price sealed like a box'},
+  },
+  Qr: {
+    clip: 'hf-qr.mp4', square: false, vertical: true,
+    title: [{ru: 'Каждая коробка', pl: 'Każdy karton', uk: 'Кожна коробка', en: 'Every box'}, {ru: 'знает, что в ней', pl: 'wie, co ma w środku', uk: 'знає, що в ній', en: 'knows what’s inside'}],
+    lines: [
+      {ru: 'Цвет наклейки — комната', pl: 'Kolor naklejki to pokój', uk: 'Колір наліпки — кімната', en: 'Label colour = room'},
+      {ru: 'Номер — коробка, QR — список вещей', pl: 'Numer to karton, QR to lista rzeczy', uk: 'Номер — коробка, QR — список речей', en: 'Number = box, QR = list of contents'},
+      {ru: 'Распаковка по комнатам, без поисков', pl: 'Rozpakowanie pokój po pokoju, bez szukania', uk: 'Розпакування по кімнатах, без пошуків', en: 'Unpacking room by room, no searching'},
+    ],
+    endTitle: {ru: 'Порядок с первой коробки', pl: 'Porządek od pierwszego kartonu', uk: 'Порядок з першої коробки', en: 'Order from the very first box'},
+  },
+  FirstNight: {
+    clip: 'hf-first-night.mp4', square: false, vertical: true,
+    title: [{ru: 'Коробка', pl: 'Karton', uk: 'Коробка', en: 'The first-night'}, {ru: 'первой ночи', pl: 'pierwszej nocy', uk: 'першої ночі', en: 'box'}],
+    lines: [
+      {ru: 'Чайник, кружки, чай и кофе', pl: 'Czajnik, kubki, herbata i kawa', uk: 'Чайник, кружки, чай і кава', en: 'Kettle, mugs, tea and coffee'},
+      {ru: 'Зарядки, удлинитель, аптечка', pl: 'Ładowarki, przedłużacz, apteczka', uk: 'Зарядки, подовжувач, аптечка', en: 'Chargers, extension lead, first-aid kit'},
+      {ru: 'Постельное и полотенца', pl: 'Pościel i ręczniki', uk: 'Постіль і рушники', en: 'Bedding and towels'},
+    ],
+    endTitle: {ru: 'Едет последней — открывается первой', pl: 'Jedzie ostatni — otwierasz go pierwszy', uk: 'Їде останньою — відкривається першою', en: 'Goes on last, comes off first'},
+  },
+  Wardrobe: {
+    clip: 'hf-wardrobe.mp4', square: false, vertical: true,
+    title: [{ru: 'Одежда', pl: 'Ubrania', uk: 'Одяг', en: 'Clothes'}, {ru: 'на вешалках', pl: 'na wieszakach', uk: 'на вішаках', en: 'on hangers'}],
+    lines: [
+      {ru: 'Гардеробные коробки со штангой', pl: 'Kartony garderobiane z drążkiem', uk: 'Гардеробні коробки зі штангою', en: 'Wardrobe boxes with a rail'},
+      {ru: 'Из шкафа — сразу на вешалку в коробку', pl: 'Z szafy — od razu na wieszak w kartonie', uk: 'Із шафи — одразу на вішак у коробку', en: 'Straight from the wardrobe onto the rail'},
+      {ru: 'Вещи приезжают не мятыми', pl: 'Ubrania przyjeżdżają niepogniecione', uk: 'Речі приїжджають не м’ятими', en: 'Clothes arrive uncreased'},
+    ],
+    endTitle: {ru: 'Из шкафа — в шкаф', pl: 'Z szafy do szafy', uk: 'Із шафи — у шафу', en: 'From wardrobe to wardrobe'},
+  },
 };
 
 // ---------- карусель «Переезд за 6 шагов» ----------
@@ -113,6 +155,12 @@ export const CAROUSEL: [number, number, string, L, L][] = [
     {ru: 'Новый дом', pl: 'Nowy dom', uk: 'Новий дім', en: 'New home'},
     {ru: 'Заносим, собираем мебель и расставляем всё по местам.', pl: 'Wnosimy, składamy meble i ustawiamy wszystko na miejscu.', uk: 'Заносимо, збираємо меблі й розставляємо все по місцях.', en: 'We carry in, assemble the furniture and put everything in place.'}],
 ];
+
+// ---------- карусель «Мы не продаём часы» (13.11.2026): заголовок и сравнение — из src/content/prices.ts (как на сайте) ----------
+export const HOURS = {
+  ctaTitle: {ru: 'Цена за весь переезд — до начала работ', pl: 'Cena za całą przeprowadzkę — przed startem', uk: 'Ціна за весь переїзд — до початку робіт', en: 'One price for the whole move — before we start'},
+  ctaText: {ru: 'Снимите квартиру на телефон — пришлём окончательную цену в течение 2 часов днём. Калькулятор — по ссылке в профиле.', pl: 'Nagraj mieszkanie telefonem — wyślemy ostateczną cenę w ciągu 2 godzin (w dzień). Kalkulator — link w profilu.', uk: 'Зніміть квартиру на телефон — надішлемо остаточну ціну протягом 2 годин удень. Калькулятор — за посиланням у профілі.', en: 'Film your flat on your phone — we’ll send the final price within 2 hours (daytime). Calculator — link in bio.'},
+} satisfies Record<string, L>;
 
 // размер шрифта под длину строки: широкий Unbounded ≈ 0,66 em на знак
 export const fitSize = (lines: string[], base: number, width: number, k = 0.62) =>

@@ -9,7 +9,9 @@
     letterSpacing: n.ls ? n.ls / 100 + 'em' : 'normal', color: rgba(n.color, n.alpha ?? 1), textDecoration: n.strike ? 'line-through' : 'none', textDecorationColor: rgba(C.steel, 0.7)});
   const child = (n, parent) => {
     const mt = (n.mt || 0) + 'px';
-    if (n.t === 'text') return el('div', {...textCss(n), marginTop: mt}, parent, n.text);
+    if (n.t === 'text') return el('div', {...textCss(n), marginTop: mt, whiteSpace: 'pre-line', maxWidth: n.maxW ? n.maxW + 'px' : 'none'}, parent, n.text);
+    if (n.t === 'bar') return el('div', {width: n.w + 'px', height: n.h + 'px', background: n.color, marginTop: mt}, parent);
+    if (n.t === 'logo') { const i = el('img', {display: 'block', width: n.w + 'px', height: n.w / 4.606 + 'px', marginTop: mt}, parent); i.src = 'brand/melbus-white.svg'; return i; }
     if (n.t === 'bullets') {
       const box = el('div', {display: 'grid', gap: n.gap + 'px', marginTop: mt}, parent);
       for (const it of n.items) {
@@ -32,8 +34,9 @@
     }
   };
   const story = (st) => {
-    const f = el('div', {position: 'relative', width: S.W + 'px', height: S.H + 'px', overflow: 'hidden', color: '#fff', fontFamily: 'Onest',
-      background: st.bg === 'radial' ? `radial-gradient(90% 55% at 88% 0%, ${C.glow} 0%, ${C.graphite} 62%)` : C.graphite});
+    const FW = st.w || S.W, FH = st.h || S.H;
+    const f = el('div', {position: 'relative', width: FW + 'px', height: FH + 'px', overflow: 'hidden', color: '#fff', fontFamily: 'Onest',
+      background: st.bg === 'radial' ? `radial-gradient(90% 55% at 88% 0%, ${C.glow} 0%, ${C.graphite} 62%)` : st.bg === 'radial60' ? `radial-gradient(90% 60% at 88% 0%, ${C.glow} 0%, ${C.graphite} 62%)` : C.graphite});
     f.dataset.id = st.id;
     const after = [];
     for (const n of st.nodes) {
@@ -42,7 +45,7 @@
           background: `${n.fill || 'transparent'} url(img/${n.key}.jpg) center/cover no-repeat`, border: n.stroke ? `${n.stroke.w}px solid ${n.stroke.color}` : 'none',
           boxShadow: n.shadow ? '0 40px 90px rgba(0,0,0,.55)' : 'none'}, f);
       } else if (n.t === 'grad') {
-        el('div', {position: 'absolute', inset: 0, background: `linear-gradient(180deg, ${n.stops.map(([p, c, a]) => `${rgba(c, a)} ${p * 100}%`).join(', ')})`}, f);
+        el('div', {position: 'absolute', inset: 0, background: `linear-gradient(${n.dir === 'h' ? 90 : 180}deg, ${n.stops.map(([p, c, a]) => `${rgba(c, a)} ${p * 100}%`).join(', ')})`}, f);
       } else if (n.t === 'header') {
         const h = el('div', {position: 'absolute', left: S.PADX + 'px', right: S.PADX + 'px', top: '232px', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline',
           fontSize: '30px', color: `rgba(255,255,255,${n.alpha})`, textShadow: n.shadow ? '0 2px 12px rgba(0,0,0,.6)' : 'none'}, f);
@@ -52,7 +55,11 @@
       } else if (n.t === 'stack') {
         const s = el('div', {position: 'absolute', left: n.x + 'px', width: n.w + 'px', top: n.y + 'px'}, f);
         n.children.forEach((c, i) => { const e = child(c, s); if (i === 0 && e) e.style.marginTop = '0px'; });
-        after.push(() => { const h = s.offsetHeight; s.style.top = (n.lift ? Math.max(n.y - n.lift, Math.min(n.y, S.H - 390 - h)) : n.y) + 'px'; });
+        after.push(() => { const h = s.offsetHeight; s.style.top = (n.anchor === 'bottom' ? n.y - h : n.anchor === 'center' ? n.y - h / 2 : n.lift ? Math.max(n.y - n.lift, Math.min(n.y, FH - 390 - h)) : n.y) + 'px'; });
+      } else if (n.t === 'atext') {
+        el('div', {...textCss(n), position: 'absolute', left: n.x + 'px', top: n.y + 'px', width: n.w + 'px', textAlign: n.align === 'RIGHT' ? 'right' : 'left'}, f, n.text);
+      } else if (n.t === 'logoAt') {
+        el('img', {position: 'absolute', left: n.x + 'px', top: n.y + 'px', width: n.w + 'px', height: n.w / 4.606 + 'px'}, f).src = 'brand/melbus-white.svg';
       } else if (n.t === 'pair') {
         const g = el('div', {position: 'absolute', left: n.x + 'px', top: n.y + 'px', width: n.w + 'px', display: 'grid', gap: n.gap + 'px'}, f);
         for (const b of n.boxes) {
@@ -66,12 +73,16 @@
       } else if (n.t === 'mark') {
         el('img', {position: 'absolute', left: n.x + 'px', top: n.y + 'px', width: n.w + 'px', height: n.h + 'px'}, f).src = 'brand/mark-white.svg';
       } else if (n.t === 'ai') {
-        el('div', {position: 'absolute', right: S.PADX + 'px', bottom: '304px', fontSize: '24px', color: 'rgba(255,255,255,.6)', letterSpacing: '0.3px'}, f, n.text);
+        if (n.x != null) {
+          const a = el('div', {position: 'absolute', right: FW - n.x + 'px', fontSize: (n.size || 24) + 'px', color: 'rgba(255,255,255,.6)', letterSpacing: '0.3px'}, f, n.text);
+          if (n.top != null) a.style.top = n.top + 'px'; else a.style.bottom = FH - n.bot + 'px';
+        } else el('div', {position: 'absolute', right: S.PADX + 'px', bottom: '304px', fontSize: '24px', color: 'rgba(255,255,255,.6)', letterSpacing: '0.3px'}, f, n.text);
       }
     }
     return {f, after};
   };
   const root = document.getElementById('root');
   const all = S.stories[L].map((st) => { const r = story(st); root.appendChild(r.f); return r; });
+  S.posts[L].forEach((sec, si) => sec.frames.forEach((st, i) => { const r = story(Object.assign({}, st, {id: `P${si}-${i}`})); root.appendChild(r.f); all.push(r); }));
   document.fonts.ready.then(() => { all.forEach((r) => r.after.forEach((fn) => fn())); document.body.dataset.ready = '1'; });
 })();

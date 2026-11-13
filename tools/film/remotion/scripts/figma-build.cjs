@@ -61,7 +61,7 @@ body{margin:0;background:#333}#root{display:flex;flex-wrap:wrap;gap:40px;padding
   }
   if (process.argv.includes('--compare')) {
     fs.mkdirSync(`${OUT}/cmp`, {recursive: true});
-    await page.setViewportSize({width: 1200, height: 2000});
+    await page.setViewportSize({width: 1800, height: 2000});
     for (const lang of SPEC.langs) {
       await page.goto('file://' + path.resolve(OUT, `preview-${lang}.html`));
       await page.waitForFunction(() => document.body.dataset.ready === '1', null, {timeout: 60000});
@@ -72,7 +72,25 @@ body{margin:0;background:#333}#root{display:flex;flex-wrap:wrap;gap:40px;padding
         await page.locator(`[data-id="${st.id}"]`).screenshot({path: shot});
         const ref = `${MK}/${lang}/${st.id}.jpg`;
         execFileSync('ffmpeg', ['-loglevel', 'error', '-y', '-i', ref, '-i', shot, '-filter_complex',
-          '[0]scale=540:-1[a];[1]scale=540:-1[b];[a][b]hstack,format=yuv420p', '-q:v', '4', `${OUT}/cmp/${lang}-${st.id}.jpg`]);
+          '[0]scale=540:-2[a];[1]scale=540:-2[b];[a][b]hstack,format=yuv420p', '-q:v', '4', `${OUT}/cmp/${lang}-${st.id}.jpg`]);
+        fs.rmSync(shot);
+      }
+      // посты: сравнение с готовыми картинками из marketing/social (если уже собраны ./render-social.sh)
+      const SOC = path.resolve('../../../marketing/social/2026-11-12', lang);
+      const NN = (i) => String(i + 1).padStart(2, '0');
+      const refs = [
+        (fr, i) => `${SOC}/covers/${NN(i)}-cover-${fr.name.split('Reels ')[1]}-${lang}.jpg`,
+        (fr, i) => `${SOC}/carousel/${NN(i)}-melbus-carousel-${lang}.jpg`,
+        (fr, i) => `${SOC}/carousel-hours/${NN(i)}-melbus-hours-${lang}.jpg`,
+        (fr, i) => `${SOC}/${i === 0 ? 'og-1200x630' : 'cover-facebook-1640x624'}.jpg`,
+      ];
+      for (const [si, sec] of SPEC.posts[lang].entries()) for (const [i, fr] of sec.frames.entries()) {
+        const ref = refs[si](fr, i);
+        if (!fs.existsSync(ref)) continue;
+        const shot = `${OUT}/cmp/${lang}-P${si}-${i}-p.png`;
+        await page.locator(`[data-id="P${si}-${i}"]`).screenshot({path: shot});
+        execFileSync('ffmpeg', ['-loglevel', 'error', '-y', '-i', ref, '-i', shot, '-filter_complex',
+          '[0]scale=540:-2[a];[1]scale=540:-2[b];[a][b]hstack,format=yuv420p', '-q:v', '4', `${OUT}/cmp/${lang}-P${si}-${i}.jpg`]);
         fs.rmSync(shot);
       }
     }

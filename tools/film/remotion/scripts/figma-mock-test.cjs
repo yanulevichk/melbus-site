@@ -129,8 +129,9 @@ done().then(() => {
   if (/^Ошибка/.test(closed)) { console.error('ОШИБКА В ПЛАГИНЕ'); process.exit(1); }
   const pages = figma.root.children.map((p) => `${p.name} (${p.children.length})`);
   console.log('страницы:', pages.join(', '));
-  const frames = all.filter((n) => n.type === 'FRAME' && n.width === 1080 && n.height === 1920 && n.parent && n.parent.type === 'SECTION');
-  console.log('фреймов сторис:', frames.length, '· узлов всего:', nodeCount, '· стилей:', STYLES.length);
+  const frames = all.filter((n) => n.type === 'FRAME' && n.width === 1080 && n.height === 1920 && n.parent && n.parent.type === 'SECTION' && /^D\d\d-/.test(n.name));
+  const postsN = all.filter((n) => n.type === 'FRAME' && n.parent && n.parent.type === 'SECTION' && !/^D\d\d-/.test(n.name)).length;
+  console.log('фреймов сторис:', frames.length, '· постов:', postsN, '· узлов всего:', nodeCount, '· стилей:', STYLES.length);
   // текст не должен заходить на логотип (по грубой оценке высоты текста в макете)
   let over = 0;
   for (const f of frames) for (const c of f.children) if (c.name === 'Текст' && c.y + c.height > 1920 - 300 - 41 + 2) { over++; if (over < 6) warns.push(`текст ниже логотипа (оценка): ${f.name} ${Math.round(c.y + c.height)}`); }

@@ -3,7 +3,6 @@
 // в разделе — дни (ряд) × время (09:00, 13:00, 19:00). Каждая сторис — фрейм 1080×1920 с живым текстом в автолейауте.
 
 const W = SPEC.W, H = SPEC.H, PADX = SPEC.PADX, TW = W - PADX * 2;
-const BOTTOM = H - 390; // текст не опускается ниже — там логотип и поле ответа Instagram
 const C = SPEC.colors;
 const COL = (hex) => ({r: parseInt(hex.slice(1, 3), 16) / 255, g: parseInt(hex.slice(3, 5), 16) / 255, b: parseInt(hex.slice(5, 7), 16) / 255});
 const solid = (hex, a = 1) => ({type: 'SOLID', color: COL(hex), opacity: a});
@@ -132,23 +131,28 @@ async function compareNode(n) {
   for (const [a, b] of n.rows) await row(`Строка ${++i}`, a, b, false);
   return box;
 }
-async function childNode(n) {
-  if (n.t === 'text') return text(n, TW);
+async function childNode(n, w) {
+  if (n.t === 'text') return text(n, w);
+  if (n.t === 'bar') { const r = figma.createRectangle(); r.name = n.name; r.resize(n.w, n.h); await paint(r, n.color); return r; }
+  if (n.t === 'logo') { const l = LOGO.createInstance(); l.name = n.name; l.resize(n.w, n.w / 4.606); return l; }
   if (n.t === 'bullets') return bulletsNode(n);
   if (n.t === 'compare') return compareNode(n);
   throw new Error('неизвестный блок ' + n.t);
 }
 // отступы между блоками: автолейаут даёт один отступ на рамку, поэтому разные отступы — вложенными рамками
-async function stackNode(name, kids) {
-  const f = auto(name, 'VERTICAL', TW);
-  f.appendChild(await childNode(kids[0])); fill(f.children[0]);
+const FIXED_W = ['bar', 'logo']; // линии и логотип — своей ширины, остальное — на всю ширину блока
+async function stackNode(name, kids, w = TW) {
+  const f = auto(name, 'VERTICAL', w);
+  // maxW — текст не шире заданного (как max-width в вёрстке): фиксированная ширина вместо «на всю ширину»
+  const add = async (k) => { const c = await childNode(k, k.maxW || w); f.appendChild(c); if (!FIXED_W.includes(k.t) && !k.maxW) fill(c); };
+  await add(kids[0]);
   const rest = kids.slice(1);
   if (rest.length) {
     f.itemSpacing = rest[0].mt || 0;
     if (rest.every((k) => (k.mt || 0) === (rest[0].mt || 0))) {
-      for (const k of rest) { const c = await childNode(k); f.appendChild(c); fill(c); }
+      for (const k of rest) await add(k);
     } else {
-      const sub = await stackNode(rest.map((k) => k.name).join(' + '), [Object.assign({}, rest[0], {mt: 0}), ...rest.slice(1)]);
+      const sub = await stackNode(rest.map((k) => k.name).join(' + '), [Object.assign({}, rest[0], {mt: 0}), ...rest.slice(1)], w);
       f.appendChild(sub); fill(sub);
     }
   }
@@ -167,13 +171,17 @@ function imageComponent(name, key, w, h) {
 
 // ---------- сторис ----------
 async function storyFrame(st) {
+  const FW = st.w || W, FH = st.h || H;
   const f = figma.createFrame();
   f.name = st.name;
-  f.resize(W, H);
+  f.resize(FW, FH);
   f.clipsContent = true;
-  if (st.bg === 'radial') {
-    f.fills = [{type: 'GRADIENT_RADIAL', gradientTransform: [[0.5 / 0.9, 0, 0.5 - 0.88 * 0.5 / 0.9], [0, 0.5 / 0.55, 0.5]],
+  if (st.bg === 'radial' || st.bg === 'radial60') {
+    const ry = st.bg === 'radial' ? 0.55 : 0.6;
+    f.fills = [{type: 'GRADIENT_RADIAL', gradientTransform: [[0.5 / 0.9, 0, 0.5 - 0.88 * 0.5 / 0.9], [0, 0.5 / ry, 0.5]],
       gradientStops: [{position: 0, color: Object.assign(COL(C.glow), {a: 1})}, {position: 0.62, color: Object.assign(COL(C.graphite), {a: 1})}, {position: 1, color: Object.assign(COL(C.graphite), {a: 1})}]}];
+  } else if (!st.video) {
+    await paint(f, C.graphite);
   } else {
     // видео: фон отдельным слоем — его и кадр из ролика можно скрыть и выгрузить PNG-подпись поверх ролика
     f.fills = [];
@@ -191,8 +199,8 @@ async function storyFrame(st) {
       f.appendChild(r);
     } else if (n.t === 'grad') {
       const r = figma.createRectangle();
-      r.name = n.name; r.resize(W, H);
-      r.fills = [{type: 'GRADIENT_LINEAR', gradientTransform: [[0, 1, 0], [-1, 0, 1]],
+      r.name = n.name; r.resize(FW, FH);
+      r.fills = [{type: 'GRADIENT_LINEAR', gradientTransform: n.dir === 'h' ? [[1, 0, 0], [0, 1, 0]] : [[0, 1, 0], [-1, 0, 1]],
         gradientStops: n.stops.map(([p, c, a]) => ({position: p, color: Object.assign(COL(c), {a})}))}];
       f.appendChild(r);
     } else if (n.t === 'header') {
@@ -208,10 +216,18 @@ async function storyFrame(st) {
       const r = figma.createRectangle(); r.name = 'Линия скотча'; r.resize(120, 4); r.x = PADX; r.y = 288;
       await paint(r, C.tape); f.appendChild(r);
     } else if (n.t === 'stack') {
-      const s = await stackNode(n.name, n.children);
+      const s = await stackNode(n.name, n.children, n.w);
       f.appendChild(s);
       s.x = n.x;
-      s.y = n.lift ? Math.max(n.y - n.lift, Math.min(n.y, BOTTOM - s.height)) : n.y;
+      s.y = n.anchor === 'bottom' ? n.y - s.height : n.anchor === 'center' ? n.y - s.height / 2
+        : n.lift ? Math.max(n.y - n.lift, Math.min(n.y, FH - 390 - s.height)) : n.y;
+    } else if (n.t === 'atext') {
+      const t = await text(n, n.w);
+      if (n.align) t.textAlignHorizontal = n.align;
+      f.appendChild(t); t.x = n.x; t.y = n.y;
+    } else if (n.t === 'logoAt') {
+      const l = LOGO.createInstance(); l.name = 'Логотип'; f.appendChild(l);
+      l.resize(n.w, n.w / 4.606); l.x = n.x; l.y = n.y;
     } else if (n.t === 'pair') {
       const g = auto(n.name, 'VERTICAL', n.w);
       g.itemSpacing = n.gap;
@@ -238,9 +254,12 @@ async function storyFrame(st) {
       const m = MARK.createInstance(); m.name = 'Знак MELBUS'; f.appendChild(m);
       m.resize(n.w, n.h); m.x = n.x; m.y = n.y;
     } else if (n.t === 'ai') {
-      const t = await text({t: 'text', name: 'Визуализация', text: n.text, font: 'O400', size: 24, ls: 1.25, color: '#FFFFFF', alpha: 0.6}, 400);
+      const size = n.size || 24;
+      const t = await text({t: 'text', name: 'Визуализация', text: n.text, font: 'O400', size, ls: 0.3 / size * 100, color: '#FFFFFF', alpha: 0.6}, 400);
       t.textAlignHorizontal = 'RIGHT';
-      f.appendChild(t); t.x = W - PADX - 400; t.y = H - 304 - t.height;
+      f.appendChild(t);
+      t.x = (n.x != null ? n.x : FW - PADX) - 400;
+      t.y = n.top != null ? n.top : (n.bot != null ? n.bot : FH - 304) - t.height;
     } else if (n.t === 'sticker') {
       const r = figma.createRectangle();
       r.name = n.label; r.resize(n.w, n.h); r.x = n.x; r.y = n.y; r.cornerRadius = 24;
@@ -258,7 +277,8 @@ async function langPage(page, lang) {
   const list = SPEC.stories[lang];
   let y0 = 0;
   const info = await text({t: 'text', name: 'Как пользоваться', font: 'O400', size: 40, lh: 140, color: '#FFFFFF', text: [
-    `MELBUS · Сторис «Дневник запуска» · ${SPEC.langNames[lang]} · 16.11–13.12.2026`,
+    `MELBUS · ${SPEC.langNames[lang]} · сторис «Дневник запуска» (16.11–13.12.2026) и посты профиля`,
+    'Сверху — 4 раздела сторис (главы по неделям), ниже — посты: обложки Reels, карусели «6 шагов» и «Не продаём часы», превью ссылки и обложка Facebook.',
     'Каждая сторис — фрейм 1080×1920. Текст живой: двойной клик и правьте; блок «Текст» — автолейаут, растёт вниз (если стал длинным — поднимите блок, чтобы не задеть логотип).',
     'Не опускайте текст ниже ~1530 px и не ставьте важное выше ~250 px: там поле ответа и имя профиля Instagram.',
     'Цвета — стили «MELBUS/…» (правка стиля меняет все сторис). Логотип — компонент на странице «⚙︎ Компоненты».',
@@ -298,6 +318,23 @@ async function langPage(page, lang) {
     }
     y0 += PAD + days * ROWH + 400;
   }
+  // посты профиля: каждый раздел — ряд фреймов
+  for (const sec of SPEC.posts[lang]) {
+    const section = figma.createSection();
+    section.name = sec.name;
+    const gap = 100, maxH = Math.max(...sec.frames.map((f) => f.h));
+    const totalW = sec.frames.reduce((a, f) => a + f.w + gap, -gap);
+    section.resizeWithoutConstraints(PAD * 2 + totalW, PAD * 2 + maxH);
+    section.x = 0; section.y = y0;
+    let x = PAD;
+    for (const st of sec.frames) {
+      const fr = await storyFrame(st);
+      section.appendChild(fr); fr.x = x; fr.y = PAD;
+      x += st.w + gap;
+    }
+    figma.notify(`MELBUS ${lang.toUpperCase()}: ${sec.name}`, {timeout: 800});
+    y0 += PAD * 2 + maxH + 400;
+  }
 }
 
 async function highlightsPage(page) {
@@ -312,8 +349,11 @@ async function highlightsPage(page) {
     t.x = f.x; t.y = H + 40;
     i++;
   }
+  const av = figma.createFrame();
+  av.name = 'Аватар профиля (1080×1080)'; av.resize(1080, 1080); av.fills = [imageFill('avatar')];
+  av.x = i * (W + 100) + 200; av.y = 0;
   const note = await text({t: 'text', name: 'Как пользоваться', font: 'O400', size: 40, lh: 140, color: '#FFFFFF',
-    text: 'Обложки «Актуального» (без текста, одни на все языки). Названия задаются в Instagram — подписи под обложками.'}, 3000);
+    text: 'Обложки «Актуального» (без текста, одни на все языки) и аватар. Названия «Актуального» задаются в Instagram — подписи под обложками.'}, 3000);
   note.x = 0; note.y = -200;
 }
 
@@ -332,8 +372,8 @@ async function main() {
     if (pages.length === 0 && first.children.length === 0) { first.name = name; pages.push(first); return first; }
     const p = figma.createPage(); p.name = name; pages.push(p); return p;
   };
-  const langPages = SPEC.langs.map((l) => newPage(`Сторис ${l.toUpperCase()}`));
-  const hlPage = newPage('Актуальное (обложки)');
+  const langPages = SPEC.langs.map((l) => newPage(`${l.toUpperCase()} · сторис и посты`));
+  const hlPage = newPage('Профиль: аватар и «Актуальное»');
   const compPage = newPage('⚙︎ Компоненты');
 
   await figma.setCurrentPageAsync(compPage);
@@ -350,6 +390,7 @@ async function main() {
   await figma.setCurrentPageAsync(langPages[0]);
   figma.viewport.scrollAndZoomIntoView(langPages[0].children);
   const n = SPEC.langs.reduce((a, l) => a + SPEC.stories[l].length, 0);
-  figma.closePlugin(`Готово: ${n} сторис на ${SPEC.langs.length} языках.` + (missingFonts.length ? ` Нет шрифтов: ${missingFonts.join(', ')} — стоит Inter, установите их и замените.` : ''));
+  const np = SPEC.langs.reduce((a, l) => a + SPEC.posts[l].reduce((b, sec) => b + sec.frames.length, 0), 0);
+  figma.closePlugin(`Готово: ${n} сторис и ${np} постов на ${SPEC.langs.length} языках.` + (missingFonts.length ? ` Нет шрифтов: ${missingFonts.join(', ')} — стоит Inter, установите их и замените.` : ''));
 }
 main().catch((e) => { console.error(e); figma.closePlugin('Ошибка: ' + (e && e.message ? e.message : e)); });
