@@ -16,8 +16,8 @@ export const faqHome: [L, L][] = [
     { ru: 'Пройдите с телефоном по каждой комнате 30–60 секунд, откройте шкафы и антресоль, покажите подъезд и лестницу. Загрузите видео в форме заявки или отправьте в WhatsApp.', pl: 'Przejdź z telefonem przez każdy pokój przez 30–60 sekund, otwórz szafy i antresole, pokaż klatkę schodową i schody. Wgraj wideo w formularzu zapytania albo wyślij na WhatsApp.', uk: 'Пройдіть із телефоном кожною кімнатою 30–60 секунд, відкрийте шафи й антресолі, покажіть під’їзд і сходи. Завантажте відео у формі заявки або надішліть у WhatsApp.', en: 'Walk through each room with your phone for 30–60 seconds, open wardrobes and top cupboards, and show the stairwell and stairs. Upload the video in the quote form or send it on WhatsApp.' },
   ],
   [
-    { ru: 'Сколько нужно предоплаты?', pl: 'Jaka jest przedpłata?', uk: 'Скільки потрібно передоплати?', en: 'How much is the prepayment?' },
-    { ru: 'Предоплата фиксирует дату за вами. Размер и условия возврата указаны в оферте — пока утверждаем их окончательно.', pl: 'Przedpłata rezerwuje dla Ciebie termin. Wysokość i warunki zwrotu podajemy w ofercie — właśnie je ostatecznie zatwierdzamy.', uk: 'Передоплата закріплює дату за вами. Розмір і умови повернення вказані в оферті — зараз затверджуємо їх остаточно.', en: 'The prepayment secures your date. The amount and refund terms are in the offer — we are finalising them now.' },
+    { ru: 'Какой нужен задаток?', pl: 'Jaki jest zadatek?', uk: 'Який потрібен завдаток?', en: 'How much is the deposit?' },
+    { ru: 'Задаток закрепляет дату за вами. Размер и условия указаны в оферте — пока утверждаем их окончательно.', pl: 'Zadatek rezerwuje dla Ciebie termin. Wysokość i warunki podajemy w ofercie — właśnie je ostatecznie zatwierdzamy.', uk: 'Завдаток закріплює дату за вами. Розмір і умови вказані в оферті — зараз затверджуємо їх остаточно.', en: 'The deposit secures your date. The amount and terms are in the offer — we are finalising them now.' },
   ],
   [
     { ru: 'Вы выставляете фактуру?', pl: 'Wystawiacie fakturę?', uk: 'Ви виставляєте фактуру?', en: 'Do you issue invoices?' },

@@ -9,6 +9,7 @@ import {OgCard} from './social/OgCard';
 import {Avatar, CoverFB, Highlight, HIGHLIGHTS, HighlightV2, HIGHLIGHTS_V2} from './social/ProfileKit';
 import {StoryStills, StoryVideo, STORY_VIDEO} from './social/Story';
 import {CarouselHours, COVERS, HOURS_SLIDES, ReelCovers} from './social/PostKit';
+import {GPT_COUNT, GptPosts, GptStories} from './social/GptKit';
 import {STILLS, VIDEOS, VIDEO_OPTS} from './social/stories';
 
 import {LANGS} from './social/texts';
@@ -30,6 +31,9 @@ export const Root: React.FC = () => (
         {/* посты для профиля (13.11.2026): обложки всех Reels и карусель «Мы не продаём часы» */}
         <Composition id={`ReelCovers-${lang}`} component={ReelCovers} durationInFrames={COVERS.length} fps={24} width={1080} height={1920} defaultProps={{lang}} />
         <Composition id={`CarouselHours-${lang}`} component={CarouselHours} durationInFrames={HOURS_SLIDES} fps={1} width={1080} height={1350} defaultProps={{lang}} />
+        {/* посты из картинок ChatGPT (gptbank.ts): готовые по списку gpt-media.json */}
+        <Composition id={`GptPosts-${lang}`} component={GptPosts} durationInFrames={GPT_COUNT} fps={1} width={1080} height={1350} defaultProps={{lang}} />
+        <Composition id={`GptStories-${lang}`} component={GptStories} durationInFrames={GPT_COUNT} fps={1} width={1080} height={1920} defaultProps={{lang}} />
         <Composition id={`OgCard-${lang}`} component={OgCard} durationInFrames={1} fps={1} width={1200} height={630} defaultProps={{lang}} />
         <Composition id={`CoverFB-${lang}`} component={CoverFB} durationInFrames={1} fps={1} width={1640} height={624} defaultProps={{lang}} />
         {/* сторис «Дневник запуска» (stories.ts): все картинки — одной последовательностью, видео — по одному */}

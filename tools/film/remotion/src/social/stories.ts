@@ -74,7 +74,7 @@ export type Story = {
   gpt?: string;            // id подсказки ChatGPT; картинка → marketing/stories/2026-11/gpt/<id>.jpg
   sticker?: Sticker;
   hl?: Hl;
-  after?: 'prices' | 'site'; // публиковать после утверждения цен / запуска сайта
+  after?: 'prices' | 'site' | 'both'; // публиковать после утверждения цен / запуска сайта / и того и другого (скриншоты с ценами)
   note?: string;           // заметка команде (по-русски)
 };
 
@@ -93,20 +93,20 @@ export const STORIES: Story[] = [
   // ───────── НЕДЕЛЯ 1 · ЗНАКОМСТВО ─────────
   {id: 'D01-1', day: 1, slot: 1, rubric: 'diary', kind: 'photo', img: 'stories/film-van.jpg', ai: true, hl: 'diary',
     real: 'Фото: ряд ваших бусов на базе утром (без номеров и лиц). Если есть — заменит визуализацию.',
-    title: l('5 лет мы возим чужие посылки', 'Od 5 lat wozimy cudze paczki', '5 років ми возимо чужі посилки', 'For 5 years we’ve delivered other people’s parcels'),
-    body: l('Около 30 000 доставок в месяц и 20 своих бусов. Теперь мы перевозим целые дома.', 'Około 30 000 dostaw miesięcznie i 20 własnych busów. Teraz przewozimy całe domy.', 'Близько 30 000 доставок на місяць і 20 власних бусів. Тепер ми перевозимо цілі домівки.', 'Around 30,000 deliveries a month and 20 vans of our own. Now we move entire homes.')},
+    title: l('5 лет мы возим чужие посылки', 'Od 5 lat wozimy cudze paczki', '5 років ми возимо чужі посилки', 'We’ve been delivering parcels for 5 years'),
+    body: l('Около 30 000 доставок в месяц и около 20 своих бусов. Теперь беремся за переезды.', 'Około 30 000 dostaw miesięcznie i około 20 własnych busów. Teraz zajmujemy się też przeprowadzkami.', 'Близько 30 000 доставок на місяць і близько 20 власних бусів. Тепер беремося за переїзди.', 'Around 30,000 deliveries a month and about 20 vans of our own. Now we’re starting full home moves.')},
   {id: 'D01-2', day: 1, slot: 2, rubric: 'ask', kind: 'text',
     title: l('Что пугает в переезде больше всего?', 'Co najbardziej przeraża w przeprowadzce?', 'Що найбільше лякає в переїзді?', 'What scares you most about moving?'),
     sticker: {t: 'poll', opts: [l('Упаковка', 'Pakowanie', 'Пакування', 'Packing'), l('Доплаты в конце', 'Dopłaty na koniec', 'Доплати наприкінці', 'Extra fees at the end'), l('Разбитые вещи', 'Stłuczone rzeczy', 'Розбиті речі', 'Broken things'), l('Всё сразу', 'Wszystko naraz', 'Усе одразу', 'All of it')]}},
   {id: 'D01-3', day: 1, slot: 3, rubric: 'melbus', kind: 'photo', img: 'stories/film-aerial.jpg', ai: true, hl: 'diary',
-    title: l('Мы запускаем переезды под ключ', 'Startujemy z przeprowadzkami pod klucz', 'Ми запускаємо переїзди під ключ', 'We’re launching full-service moves'),
+    title: l('Мы запускаем полный сервис переездов', 'Startujemy z kompleksowymi przeprowadzkami', 'Ми запускаємо повний сервіс переїздів', 'We’re launching a complete moving service'),
     body: l('Цена по видео — окончательная. Каждый день в сторис — как мы готовимся.', 'Cena z wideo — ostateczna. Codziennie w relacjach pokazujemy, jak się przygotowujemy.', 'Ціна за відео — остаточна. Щодня в сторіс — як ми готуємося.', 'One final price from a video. Every day in stories: how we’re getting ready.')},
 
   {id: 'D02-1', day: 2, slot: 1, rubric: 'diary', kind: 'text', hl: 'diary',
     title: l('Почему именно переезды?', 'Dlaczego przeprowadzki?', 'Чому саме переїзди?', 'Why moving?'),
     body: l('Мы видели, как это бывает: «доплата за этаж», оплата за часы, вещи в мусорных пакетах. Мы решили сделать иначе.', 'Widzieliśmy, jak to wygląda: „dopłata za piętro”, płatność za godziny, rzeczy w workach na śmieci. Postanowiliśmy zrobić to inaczej.', 'Ми бачили, як це буває: «доплата за поверх», оплата за години, речі в сміттєвих пакетах. Ми вирішили зробити інакше.', 'We’ve seen how it goes: a “floor surcharge”, hourly billing, belongings in bin bags. We decided to do it differently.')},
   {id: 'D02-2', day: 2, slot: 2, rubric: 'myth', kind: 'text',
-    title: l('Переезд всегда выходит дороже, чем обещали?', 'Przeprowadzka zawsze kosztuje więcej, niż obiecano?', 'Переїзд завжди виходить дорожчим, ніж обіцяли?', 'Does a move always cost more than promised?'),
+    title: l('Переезд всегда выходит дороже, чем обещали', 'Przeprowadzka zawsze kosztuje więcej, niż obiecano', 'Переїзд завжди виходить дорожчим, ніж обіцяли', 'A move always costs more than promised'),
     body: l('Ответ — завтра: как работает цена по видео.', 'Odpowiedź jutro: jak działa cena z wideo.', 'Відповідь — завтра: як працює ціна за відео.', 'Answer tomorrow: how a price from a video works.'),
     sticker: {t: 'quiz', opts: FACT_MYTH, ok: 1}},
 
@@ -117,7 +117,7 @@ export const STORIES: Story[] = [
     title: l('Как снять квартиру для оценки', 'Jak nagrać mieszkanie do wyceny', 'Як зняти квартиру для оцінки', 'How to film your home for a quote'),
     items: [
       l('30–60 секунд на комнату', '30–60 sekund na pokój', '30–60 секунд на кімнату', '30–60 seconds per room'),
-      l('Откройте шкафы и антресоли', 'Otwórz szafy i antresole', 'Відкрийте шафи й антресолі', 'Open wardrobes and top cupboards'),
+      l('Откройте шкафы и антресоли', 'Otwórz szafy i pawlacze', 'Відкрийте шафи й антресолі', 'Open wardrobes and top cupboards'),
       l('Балкон, кладовка, подвал', 'Balkon, komórka, piwnica', 'Балкон, комора, підвал', 'Balcony, storage room, cellar'),
       l('Лестница и парковка у подъезда', 'Klatka schodowa i parking przy wejściu', 'Сходи й паркування біля під’їзду', 'Stairs and parking by the entrance'),
     ]},
@@ -136,25 +136,25 @@ export const STORIES: Story[] = [
 
   {id: 'D05-1', day: 5, slot: 1, rubric: 'num', kind: 'number', hl: 'diary',
     big: l('≈30 000', '≈30 000', '≈30 000', '≈30,000'),
-    title: l('доставок в месяц', 'dostaw miesięcznie', 'доставок на місяць', 'deliveries a month'),
+    title: l('доставок посылок в месяц', 'dostaw paczek miesięcznie', 'доставок посилок на місяць', 'parcel deliveries a month'),
     body: l('Приезжать вовремя для нас — рабочая привычка, а не обещание.', 'Punktualność to dla nas codzienny nawyk, a nie obietnica.', 'Приїжджати вчасно для нас — робоча звичка, а не обіцянка.', 'Arriving on time is a work habit for us, not a promise.')},
   {id: 'D05-2', day: 5, slot: 2, rubric: 'ask', kind: 'text', real: 'Можно фоном: фото ваших бусов (без номеров).',
     title: l('Сколько бусов в нашем парке?', 'Ile busów jest w naszej flocie?', 'Скільки бусів у нашому парку?', 'How many vans are in our fleet?'),
     sticker: {t: 'quiz', opts: [same('5'), same('≈20'), same('50')], ok: 1}},
-  {id: 'D05-3', day: 5, slot: 3, rubric: 'melbus', kind: 'shot', shot: 'calc-board', hl: 'price', after: 'site',
-    title: l('Посчитайте свой переезд', 'Policz swoją przeprowadzkę', 'Порахуйте свій переїзд', 'Price your move'),
-    body: l('Калькулятор на сайте: 30 секунд, без регистрации.', 'Kalkulator na stronie: 30 sekund, bez rejestracji.', 'Калькулятор на сайті: 30 секунд, без реєстрації.', 'The calculator on our site: 30 seconds, no sign-up.'),
+  {id: 'D05-3', day: 5, slot: 3, rubric: 'melbus', kind: 'shot', shot: 'calc-board', hl: 'price', after: 'both',
+    title: l('Посчитайте свой переезд', 'Oblicz koszt przeprowadzki', 'Порахуйте свій переїзд', 'Price your move'),
+    body: l('Калькулятор на сайте: минута, без регистрации.', 'Kalkulator na stronie: minuta, bez rejestracji.', 'Калькулятор на сайті: хвилина, без реєстрації.', 'The calculator on our site: one minute, no sign-up.'),
     sticker: {t: 'link', to: 'calc', label: LINK.calc}},
 
   {id: 'D06-1', day: 6, slot: 1, rubric: 'bts', kind: 'photo', img: 'stories/film-load.jpg', ai: true, hl: 'boxes', gpt: 'boxes',
     title: l('Почему коробки белые', 'Dlaczego kartony są białe', 'Чому коробки білі', 'Why our boxes are white'),
-    body: l('На белом видно наклейку комнаты и номер. Чисто — и сразу ясно, что это MELBUS.', 'Na bieli widać naklejkę pokoju i numer. Czysto — i od razu widać, że to MELBUS.', 'На білому видно наліпку кімнати й номер. Чисто — і одразу зрозуміло, що це MELBUS.', 'White shows the room label and number. Clean — and clearly MELBUS.')},
+    body: l('На белом видно наклейку комнаты и номер. Чисто — и сразу ясно, что это MELBUS.', 'Na bieli widać naklejkę pokoju i numer. Czysto — i od razu wiadomo, że to MELBUS.', 'На білому видно наліпку кімнати й номер. Чисто — і одразу зрозуміло, що це MELBUS.', 'On white, the room label and number stand out. Clean — and unmistakably MELBUS.')},
   {id: 'D06-2', day: 6, slot: 2, rubric: 'ask', kind: 'text',
     title: l('Насколько вы любите упаковывать вещи?', 'Jak bardzo lubisz pakowanie?', 'Наскільки ви любите пакувати речі?', 'How much do you enjoy packing?'),
     sticker: {t: 'slider', q: l('Честно', 'Szczerze', 'Чесно', 'Honestly'), emoji: '😩'}},
 
   {id: 'D07-1', day: 7, slot: 1, rubric: 'sun', kind: 'video', video: 'stories/film-m.mp4', ai: true,
-    title: l('Вся квартира — в одну коробку', 'Całe mieszkanie — w jednym kartonie', 'Уся квартира — в одну коробку', 'Your whole home — in one box'),
+    title: l('Вся квартира — в одну коробку', 'Całe mieszkanie — w jednym kartonie', 'Уся квартира — в одну коробку', 'Your whole flat — in one box'),
     body: l('Наш фильм о переезде.', 'Nasz film o przeprowadzce.', 'Наш фільм про переїзд.', 'Our film about moving.')},
   {id: 'D07-2', day: 7, slot: 2, rubric: 'diary', kind: 'text', hl: 'diary',
     title: l('Неделя 1: знакомство', 'Tydzień 1: poznajmy się', 'Тиждень 1: знайомство', 'Week 1: meet us'),
@@ -162,7 +162,7 @@ export const STORIES: Story[] = [
 
   // ───────── НЕДЕЛЯ 2 · ЦЕНА БЕЗ ЧАСОВ ─────────
   {id: 'D08-1', day: 8, slot: 1, rubric: 'how', kind: 'photo', img: 'stories/step-2-price.webp', ai: true, hl: 'how',
-    title: l('Шаг 2. Цена за 2 часа', 'Krok 2. Cena w 2 godziny', 'Крок 2. Ціна за 2 години', 'Step 2. A price within 2 hours'),
+    title: l('Шаг 2. Цена — в течение 2 часов', 'Krok 2. Cena w 2 godziny', 'Крок 2. Ціна — протягом 2 годин', 'Step 2. A price within 2 hours'),
     body: l('Днём в течение двух часов — окончательная цена и список вещей.', 'W dzień, w ciągu dwóch godzin — ostateczna cena i lista rzeczy.', 'Удень протягом двох годин — остаточна ціна й список речей.', 'Within two hours (daytime): the final price and a list of items.')},
   {id: 'D08-2', day: 8, slot: 2, rubric: 'ask', kind: 'text',
     title: l('Вам называли одну цену, а в конце просили больше?', 'Podano Ci jedną cenę, a na koniec chciano więcej?', 'Вам називали одну ціну, а наприкінці просили більше?', 'Were you quoted one price and asked for more at the end?'),
@@ -171,12 +171,12 @@ export const STORIES: Story[] = [
   {id: 'D09-1', day: 9, slot: 1, rubric: 'diary', kind: 'compare', hl: 'price',
     title: noHours.h2 as L},
   {id: 'D09-2', day: 9, slot: 2, rubric: 'myth', kind: 'text',
-    title: l('Почасовая оплата — это дешевле?', 'Płatność za godzinę jest tańsza?', 'Погодинна оплата — дешевше?', 'Is hourly billing cheaper?'),
+    title: l('Почасовая оплата — это дешевле?', 'Płatność za godzinę jest tańsza?', 'Погодинна оплата — це дешевше?', 'Is hourly billing cheaper?'),
     body: l('Минимум 2–3 часа, пробки и перекуры — за ваш счёт.', 'Minimum 2–3 godziny, korki i przerwy — na Twój koszt.', 'Мінімум 2–3 години, затори й перекури — за ваш рахунок.', 'A 2–3 hour minimum, plus traffic and breaks on your bill.'),
     sticker: {t: 'quiz', opts: [l('Да', 'Tak', 'Так', 'Yes'), l('Не всегда', 'Nie zawsze', 'Не завжди', 'Not always')], ok: 1}},
-  {id: 'D09-3', day: 9, slot: 3, rubric: 'melbus', kind: 'shot', shot: 'calc-pkg', hl: 'price', after: 'site',
+  {id: 'D09-3', day: 9, slot: 3, rubric: 'melbus', kind: 'shot', shot: 'calc-pkg', hl: 'price', after: 'both',
     title: l('Сравните сами', 'Sprawdź i porównaj', 'Порівняйте самі', 'See for yourself'),
-    body: l('Наша цена — за весь переезд. Посчитайте за 30 секунд.', 'Nasza cena jest za całą przeprowadzkę. Policz w 30 sekund.', 'Наша ціна — за весь переїзд. Порахуйте за 30 секунд.', 'Our price covers the whole move. Work it out in 30 seconds.'),
+    body: l('Наша цена — за весь переезд. Посчитайте за минуту.', 'Nasza cena jest za całą przeprowadzkę. Policz w minutę.', 'Наша ціна — за весь переїзд. Порахуйте за хвилину.', 'Our price covers the whole move. Work it out in a minute.'),
     sticker: {t: 'link', to: 'calc', label: LINK.calc}},
 
   {id: 'D10-1', day: 10, slot: 1, rubric: 'tip', kind: 'text', hl: 'price',
@@ -184,7 +184,7 @@ export const STORIES: Story[] = [
     body: l('Покажите лестницу на видео — доплаты на месте не будет.', 'Pokaż schody na wideo — na miejscu nie będzie dopłat.', 'Покажіть сходи на відео — доплати на місці не буде.', 'Show the stairs on video — no extra charge on the day.')},
   {id: 'D10-2', day: 10, slot: 2, rubric: 'ask', kind: 'text',
     title: l('Ваш этаж?', 'Twoje piętro?', 'Ваш поверх?', 'Which floor are you on?'),
-    sticker: {t: 'poll', opts: [l('Партер–2', 'Parter–2', 'Партер–2', 'Ground–2'), same('3–5'), same('6+'), l('Есть лифт', 'Mam windę', 'Є ліфт', 'There’s a lift')]}},
+    sticker: {t: 'poll', opts: [l('Партер–2', 'Parter–2', 'Партер–2', 'Ground–2'), same('3–5'), same('6+'), l('Есть лифт', 'Jest winda', 'Є ліфт', 'There’s a lift')]}},
 
   {id: 'D11-1', day: 11, slot: 1, rubric: 'bts', kind: 'shot', shot: 'price-table', hl: 'price', after: 'prices',
     title: l('Как мы считаем цену', 'Jak liczymy cenę', 'Як ми рахуємо ціну', 'How we work out the price'),
@@ -198,9 +198,9 @@ export const STORIES: Story[] = [
     title: l('Чёрная пятница? У нас честная цена каждый день', 'Black Friday? U nas uczciwa cena każdego dnia', 'Чорна п’ятниця? У нас чесна ціна щодня', 'Black Friday? Our price is honest every day'),
     body: l('Без «скидок» с завышенной цены. Одна цена за весь переезд — до начала работ.', 'Bez „promocji” od zawyżonej ceny. Jedna cena za całą przeprowadzkę — przed startem.', 'Без «знижок» із завищеної ціни. Одна ціна за весь переїзд — до початку робіт.', 'No “discounts” off an inflated price. One price for the whole move, before we start.')},
   {id: 'D12-2', day: 12, slot: 2, rubric: 'melbus', kind: 'number', after: 'prices', hl: 'price',
-    big: same('−5 %'),
+    big: l('−5 %', '−5%', '−5 %', '−5%'),
     title: l('за раннюю бронь', 'za wczesną rezerwację', 'за раннє бронювання', 'for early booking'),
-    body: l('Бронируйте за 14+ дней. Зимой больше «зелёных» дат — ещё −10 %.', 'Zarezerwuj 14+ dni wcześniej. Zimą więcej „zielonych” terminów — kolejne −10%.', 'Бронюйте за 14+ днів. Взимку більше «зелених» дат — ще −10 %.', 'Book 14+ days ahead. Winter has more “green” dates — another −10%.'),
+    body: l('Бронируйте за 14+ дней. А вт–чт в середине месяца — «зелёные» даты: −10 %.', 'Zarezerwuj 14+ dni wcześniej. A wt–czw w środku miesiąca to „zielone” terminy: −10%.', 'Бронюйте за 14+ днів. А вт–чт у середині місяця — «зелені» дати: −10 %.', 'Book 14+ days ahead. Tue–Thu mid-month are “green” dates: −10%.'),
     note: 'Скидки — из предложения цен (DATE_ADJ). Публиковать только если утвердите. Совмещать ли скидки — решите вы.'},
   {id: 'D12-3', day: 12, slot: 3, rubric: 'melbus', kind: 'photo', img: 'stories/phone.webp', ai: true, after: 'site',
     title: l('Пришлите видео — получите цену', 'Wyślij wideo — otrzymasz cenę', 'Надішліть відео — отримайте ціну', 'Send a video, get a price'),
@@ -209,7 +209,7 @@ export const STORIES: Story[] = [
 
   {id: 'D13-1', day: 13, slot: 1, rubric: 'how', kind: 'shot', shot: 'offer', hl: 'how', after: 'prices',
     title: l('Шаг 3. Оферта и бронь', 'Krok 3. Oferta i rezerwacja', 'Крок 3. Оферта й бронювання', 'Step 3. Offer and booking'),
-    body: l('Цена, дата и что входит — в оферте по ссылке. Принимаете — дата за вами.', 'Cena, termin i zakres — w ofercie pod linkiem. Akceptujesz — termin jest Twój.', 'Ціна, дата й що входить — в оферті за посиланням. Приймаєте — дата за вами.', 'Price, date and what’s included — in an offer by link. Accept it, and the date is yours.'),
+    body: l('Цена, дата и что входит — в оферте по ссылке. Принимаете и вносите задаток — дата за вами.', 'Cena, termin i zakres — w ofercie pod linkiem. Akceptujesz i wpłacasz zadatek — termin jest Twój.', 'Ціна, дата й що входить — в оферті за посиланням. Приймаєте й вносите завдаток — дата за вами.', 'Price, date and what’s included — in an online offer we send you. Accept it and pay a deposit, and the date is yours.'),
     note: 'На скриншоте — пример оферты.'},
   {id: 'D13-2', day: 13, slot: 2, rubric: 'ask', kind: 'text',
     title: l('Когда планируете переезд?', 'Kiedy planujesz przeprowadzkę?', 'Коли плануєте переїзд?', 'When are you planning to move?'),
@@ -218,10 +218,10 @@ export const STORIES: Story[] = [
 
   {id: 'D14-1', day: 14, slot: 1, rubric: 'sun', kind: 'video', video: 'stories/van.mp4', ai: true, hl: 'vans',
     title: l('Только ваши вещи', 'Tylko Twoje rzeczy', 'Лише ваші речі', 'Only your things'),
-    body: l('Бус едет без перегрузок и попутных грузов.', 'Bez przeładunków i cudzych ładunków po drodze.', 'Бус їде без перевантажень і попутних вантажів.', 'No reloading and no other cargo on the way.')},
+    body: l('Бус едет без перегрузок и попутных грузов.', 'Bez przeładunków i doładunków po drodze.', 'Бус їде без перевантажень і попутних вантажів.', 'No reloading and no other cargo on the way.')},
   {id: 'D14-2', day: 14, slot: 2, rubric: 'diary', kind: 'text', hl: 'diary',
     title: l('Неделя 2: цена', 'Tydzień 2: cena', 'Тиждень 2: ціна', 'Week 2: the price'),
-    body: l('Цена по видео, без часов и доплат. Дальше — детали, которые видно.', 'Cena z wideo, bez godzin i dopłat. Dalej — szczegóły, które widać.', 'Ціна за відео, без годин і доплат. Далі — деталі, які видно.', 'A price from a video, no hours, no extra fees. Next: details you can see.')},
+    body: l('Цена по видео, без часов и доплат. Дальше — детали, которые видно.', 'Cena z wideo, bez liczenia godzin i dopłat. Dalej — szczegóły, które widać.', 'Ціна за відео, без годин і доплат. Далі — деталі, які видно.', 'A price from a video, no hourly billing, no extra fees. Next: details you can see.')},
 
   // ───────── НЕДЕЛЯ 3 · ДЕТАЛИ, КОТОРЫЕ ВИДНО ─────────
   {id: 'D15-1', day: 15, slot: 1, rubric: 'how', kind: 'photo', img: 'stories/step-4-pack.webp', ai: true, hl: 'care',
@@ -254,7 +254,7 @@ export const STORIES: Story[] = [
     ]},
   {id: 'D17-2', day: 17, slot: 2, rubric: 'ask', kind: 'text',
     title: l('Что обязательно будет в вашей коробке первой ночи?', 'Co musi być w Twoim kartonie pierwszej nocy?', 'Що обов’язково буде у вашій коробці першої ночі?', 'What’s a must in your first-night box?'),
-    sticker: {t: 'poll', opts: [l('Кофе', 'Kawa', 'Кава', 'Coffee'), l('Зарядки', 'Ładowarki', 'Зарядки', 'Chargers'), l('Пижама', 'Piżama', 'Піжама', 'Pyjamas'), l('Игрушки детей', 'Zabawki dzieci', 'Іграшки дітей', 'Kids’ toys')]}},
+    sticker: {t: 'poll', opts: [l('Кофе', 'Kawa', 'Кава', 'Coffee'), l('Зарядки', 'Ładowarki', 'Зарядки', 'Chargers'), l('Пижама', 'Piżama', 'Піжама', 'Pyjamas'), l('Детские игрушки', 'Zabawki dla dzieci', 'Дитячі іграшки', 'Kids’ toys')]}},
 
   {id: 'D18-1', day: 18, slot: 1, rubric: 'bts', kind: 'text', gpt: 'uniform', hl: 'care',
     title: l('Форма бригады', 'Strój ekipy', 'Форма бригади', 'Our crew’s uniform'),
@@ -292,9 +292,9 @@ export const STORIES: Story[] = [
   // ───────── НЕДЕЛЯ 4 · КАК МЫ СНЯЛИ ФИЛЬМ + ЗАПИСЬ ─────────
   {id: 'D22-1', day: 22, slot: 1, rubric: 'bts', kind: 'pair', pair: ['stories/pv-aerial.jpg', 'stories/film-aerial.jpg'], ai: true, hl: 'diary',
     title: l('Как мы сняли фильм без съёмки', 'Jak nakręciliśmy film bez kamery', 'Як ми зняли фільм без зйомки', 'How we made a film without filming'),
-    body: l('Сначала — серые 3D-модели и камера, как у дрона. Потом ИИ «перекрасил» их в кино.', 'Najpierw szare modele 3D i kamera jak z drona. Potem AI „przemalowało” je w kino.', 'Спершу — сірі 3D-моделі й камера, як у дрона. Потім ШІ «перефарбував» їх у кіно.', 'First, grey 3D models and a drone-like camera. Then AI “repainted” them into cinema.')},
+    body: l('Сначала — серые 3D-модели и камера, как у дрона. Потом ИИ «перекрасил» их в кино.', 'Najpierw szare modele 3D i kamera jak z drona. Potem AI zamieniło je w filmowe ujęcia.', 'Спершу — сірі 3D-моделі й камера, як у дрона. Потім ШІ «перефарбував» їх у кіно.', 'First, grey 3D models and a drone-like camera. Then AI turned them into cinematic footage.')},
   {id: 'D22-2', day: 22, slot: 2, rubric: 'ask', kind: 'text',
-    title: l('Догадались, что фильм нарисован?', 'Wiedzieliście, że film jest wygenerowany?', 'Здогадалися, що фільм намальований?', 'Could you tell the film was generated?'),
+    title: l('Догадались, что фильм сгенерирован ИИ?', 'Domyśliliście się, że film jest wygenerowany?', 'Здогадалися, що фільм згенерований ШІ?', 'Could you tell the film was AI-generated?'),
     sticker: {t: 'poll', opts: YES_NO}},
 
   {id: 'D23-1', day: 23, slot: 1, rubric: 'bts', kind: 'pair', pair: ['stories/pv-box.jpg', 'stories/film-box.jpg'], ai: true, hl: 'diary',
@@ -303,16 +303,16 @@ export const STORIES: Story[] = [
   {id: 'D23-2', day: 23, slot: 2, rubric: 'how', kind: 'photo', img: 'stories/step-6-home.webp', ai: true, hl: 'how',
     title: l('Шаг 6. Новый дом', 'Krok 6. Nowy dom', 'Крок 6. Новий дім', 'Step 6. Your new home'),
     body: l('Заносим, собираем мебель, расставляем. Кровать — первой.', 'Wnosimy, składamy meble, ustawiamy. Łóżko — jako pierwsze.', 'Заносимо, збираємо меблі, розставляємо. Ліжко — першим.', 'We carry in, assemble and arrange. The bed goes first.')},
-  {id: 'D23-3', day: 23, slot: 3, rubric: 'melbus', kind: 'shot', shot: 'calc-board', after: 'site',
+  {id: 'D23-3', day: 23, slot: 3, rubric: 'melbus', kind: 'shot', shot: 'calc-board', after: 'both',
     title: l('Сколько стоит ваш переезд?', 'Ile kosztuje Twoja przeprowadzka?', 'Скільки коштує ваш переїзд?', 'What will your move cost?'),
     sticker: {t: 'link', to: 'calc', label: LINK.calc}},
 
   {id: 'D24-1', day: 24, slot: 1, rubric: 'how', kind: 'shot', shot: 'area', hl: 'areas',
     title: l('Где мы работаем', 'Gdzie działamy', 'Де ми працюємо', 'Where we work'),
-    body: l('Варшава и 150 км вокруг. По Польше и в ЕС — по запросу.', 'Warszawa i 150 km wokół. Po Polsce i do UE — na zapytanie.', 'Варшава і 150 км довкола. Польщею та до ЄС — за запитом.', 'Warsaw and 150 km around. Across Poland and the EU on request.')},
+    body: l('Варшава и 150 км вокруг. Другие города Польши и страны ЕС — по запросу.', 'Warszawa i okolice do 150 km. Inne miasta w Polsce i kraje UE — na zapytanie.', 'Варшава і 150 км довкола. Інші міста Польщі та країни ЄС — за запитом.', 'Warsaw and up to 150 km around. Other Polish cities and EU countries on request.')},
   {id: 'D24-2', day: 24, slot: 2, rubric: 'ask', kind: 'text', hl: 'areas',
     title: l('Откуда вы переезжаете?', 'Skąd się przeprowadzasz?', 'Звідки ви переїжджаєте?', 'Where are you moving from?'),
-    sticker: {t: 'poll', opts: [l('Варшава', 'Warszawa', 'Варшава', 'Warsaw'), l('Пригород', 'Okolice', 'Передмістя', 'Suburbs'), l('Другой город', 'Inne miasto', 'Інше місто', 'Another city'), l('Из-за границы', 'Z zagranicy', 'З-за кордону', 'Abroad')]}},
+    sticker: {t: 'poll', opts: [l('Варшава', 'Warszawa', 'Варшава', 'Warsaw'), l('Пригород', 'Okolice', 'Передмістя', 'Suburbs'), l('Другой город', 'Inne miasto', 'Інше місто', 'Another city'), l('Из-за границы', 'Z zagranicy', 'З-за кордону', 'From abroad')]}},
 
   {id: 'D25-1', day: 25, slot: 1, rubric: 'myth', kind: 'text',
     title: l('Зимой переезжать дороже?', 'Zimą przeprowadzka jest droższa?', 'Взимку переїжджати дорожче?', 'Is moving in winter more expensive?'),
@@ -325,7 +325,7 @@ export const STORIES: Story[] = [
     big: same('3'),
     title: l('пакета на выбор', 'pakiety do wyboru', 'пакети на вибір', 'packages to choose from'),
     body: l(`Для 2 комнат «Под ключ» — всего на ${zl(g[2] - g[1], 'ru')} дороже «Стандарта».`, `Dla 2 pokoi „Pod klucz” to tylko ${zl(g[2] - g[1], 'pl')} więcej niż „Standard”.`, `Для 2 кімнат «Під ключ» — усього на ${zl(g[2] - g[1], 'uk')} дорожче за «Стандарт».`, `For 2 rooms, “Full service” is just ${zl(g[2] - g[1], 'en')} more than “Standard”.`)},
-  {id: 'D26-2', day: 26, slot: 2, rubric: 'ask', kind: 'shot', shot: 'calc-pkg', hl: 'packages',
+  {id: 'D26-2', day: 26, slot: 2, rubric: 'ask', kind: 'shot', shot: 'calc-pkg', hl: 'packages', after: 'prices',
     title: l('Какой пакет выбрали бы вы?', 'Który pakiet wybierasz?', 'Який пакет обрали б ви?', 'Which package would you pick?'),
     sticker: {t: 'poll', opts: PACKAGES.map((p) => p.name as L)}},
   {id: 'D26-3', day: 26, slot: 3, rubric: 'melbus', kind: 'shot', shot: 'price-table', after: 'prices',
@@ -342,14 +342,14 @@ export const STORIES: Story[] = [
     items: [
       l('Закажите коробки заранее', 'Zamów kartony wcześniej', 'Замовте коробки заздалегідь', 'Order boxes in advance'),
       l('Разберите ненужное', 'Pozbądź się zbędnych rzeczy', 'Розберіть непотрібне', 'Declutter what you don’t need'),
-      l('Договоритесь о лифте и парковке', 'Ustal windę i parking', 'Домовтеся про ліфт і паркування', 'Sort out the lift and parking'),
+      l('Договоритесь о лифте и парковке', 'Zarezerwuj windę i miejsce parkingowe', 'Домовтеся про ліфт і паркування', 'Sort out the lift and parking'),
       l('Снимите видео — получите цену', 'Nagraj wideo — dostaniesz cenę', 'Зніміть відео — отримайте ціну', 'Film a video — get your price'),
     ]},
 
   {id: 'D28-1', day: 28, slot: 1, rubric: 'sun', kind: 'video', video: 'stories/hf-van.mp4', ai: true,
     title: l('Ваш новый адрес ждёт', 'Twój nowy adres czeka', 'Ваша нова адреса чекає', 'Your new address is waiting')},
   {id: 'D28-2', day: 28, slot: 2, rubric: 'diary', kind: 'text', hl: 'diary',
-    title: l('Месяц дневника позади', 'Miesiąc dziennika za nami', 'Місяць щоденника позаду', 'A month of our diary'),
+    title: l('Месяц дневника позади', 'Miesiąc dziennika za nami', 'Місяць щоденника позаду', 'One month of our diary — done'),
     body: l('Спасибо, что вы с нами. Дальше — первые настоящие переезды: покажем их как есть.', 'Dziękujemy, że jesteście z nami. Dalej — pierwsze prawdziwe przeprowadzki: pokażemy je bez upiększeń.', 'Дякуємо, що ви з нами. Далі — перші справжні переїзди: покажемо їх як є.', 'Thanks for being here. Next: our first real moves, shown as they are.')},
   {id: 'D28-3', day: 28, slot: 3, rubric: 'melbus', kind: 'photo', img: 'stories/film-van.jpg', gpt: 'keys', ai: true, after: 'site',
     title: l('Запишитесь на переезд', 'Zarezerwuj przeprowadzkę', 'Запишіться на переїзд', 'Book your move'),
@@ -379,8 +379,8 @@ export const TIMES = {1: '09:00', 2: '13:00', 3: '19:00'} as const;
 export const PROFILE = {
   name: l('MELBUS Переезды Варшава', 'MELBUS Przeprowadzki Warszawa', 'MELBUS Переїзди Варшава', 'MELBUS Movers Warsaw'),
   bio: l(
-    'Переезды под ключ: Варшава +150 км 📦\nЦена по видео — без доплат и без оплаты за часы.\nФактура VAT · BLIK · 7/7 · PL RU UA EN',
-    'Przeprowadzki pod klucz: Warszawa +150 km 📦\nStała cena z wideo — bez dopłat i liczenia godzin.\nFaktura VAT · BLIK · 7/7 · PL RU UA EN',
-    'Переїзди під ключ: Варшава +150 км 📦\nЦіна за відео — без доплат і без оплати за години.\nФактура VAT · BLIK · 7/7 · PL RU UA EN',
-    'Full-service moves: Warsaw +150 km 📦\nOne fixed price from a video — no extras, no hourly billing.\nVAT invoice · BLIK · 7/7 · PL RU UA EN'),
+    'Полный сервис переездов: Варшава +150 км 📦\nОкончательная цена по видео — без доплат и оплаты за часы.\nФактура VAT · BLIK · 7/7 · PL RU UA EN',
+    'Kompleksowe przeprowadzki: Warszawa +150 km 📦\nStała cena z wideo — bez dopłat i liczenia godzin.\nFaktura VAT · BLIK · 7/7 · PL RU UA EN',
+    'Повний сервіс переїздів: Варшава +150 км 📦\nОстаточна ціна за відео — без доплат і оплати за години.\nФактура VAT · BLIK · 7/7 · PL RU UA EN',
+    'Complete moving service: Warsaw +150 km 📦\nOne fixed price from a video — no extra fees, no hourly billing.\nVAT invoice · BLIK · 7/7 · PL RU UA EN'),
 };

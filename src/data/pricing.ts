@@ -58,7 +58,7 @@ export const PACKAGES = [
     items: [
       l('Всё из «Стандарта»', 'Wszystko z pakietu „Standard”', 'Усе зі «Стандарту»', 'Everything in “Standard”'),
       l('Упакуем всю квартиру — вы не трогаете ни одной коробки', 'Spakujemy całe mieszkanie — nie dotykasz żadnego kartonu', 'Запакуємо всю квартиру — ви не торкаєтеся жодної коробки', 'We pack the whole home — you don’t touch a single box'),
-      l('Распакуем и расставим по местам', 'Rozpakujemy i ustawimy wszystko na miejscu', 'Розпакуємо й розставимо по місцях', 'We unpack and put everything in place'),
+      l('Распакуем и расставим по местам', 'Rozpakujemy i ustawimy wszystko na swoje miejsca', 'Розпакуємо й розставимо по місцях', 'We unpack and put everything in place'),
       l('Повесим ТВ и до 5 картин или полок', 'Powiesimy TV i do 5 obrazów lub półek', 'Повісимо ТВ і до 5 картин або полиць', 'We mount the TV and up to 5 pictures or shelves'),
       l('Вывезем упаковку и мусор', 'Wywieziemy opakowania i śmieci', 'Вивеземо пакування й сміття', 'We take away packaging and rubbish'),
       l('«Коробка первой ночи» — открываем первой', '„Karton pierwszej nocy” — otwieramy go pierwszy', '«Коробка першої ночі» — відкриваємо першою', 'A “first-night box” — opened first'),

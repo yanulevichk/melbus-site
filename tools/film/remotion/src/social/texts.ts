@@ -20,8 +20,8 @@ export const HEADLINE: [L, L] = [
   {ru: 'Переезд', pl: 'Przeprowadzka', uk: 'Переїзд', en: 'Moving,'},
   {ru: 'без доплат', pl: 'bez dopłat', uk: 'без доплат', en: 'no extra fees'},
 ];
-export const PRICE_FINAL: L = {ru: 'Цена по видео — окончательная.', pl: 'Cena z wideo — ostateczna.', uk: 'Ціна за відео — остаточна.', en: 'Price from a video — final.'};
-export const WHERE: L = {ru: 'Варшава, Польша, Европа.', pl: 'Warszawa, Polska, Europa.', uk: 'Варшава, Польща, Європа.', en: 'Warsaw, Poland, Europe.'};
+export const PRICE_FINAL: L = {ru: 'Цена по видео — окончательная.', pl: 'Cena z wideo — ostateczna.', uk: 'Ціна за відео — остаточна.', en: 'The price from your video is final.'};
+export const WHERE: L = {ru: 'Варшава, Польша, ЕС.', pl: 'Warszawa, Polska, UE.', uk: 'Варшава, Польща, ЄС.', en: 'Warsaw, Poland, the EU.'};
 export const COVER_LINE: L = {ru: 'Цена по видео · Варшава + 150 км · 7/7', pl: 'Cena z wideo · Warszawa + 150 km · 7/7', uk: 'Ціна за відео · Варшава + 150 км · 7/7', en: 'Price from a video · Warsaw + 150 km · 7/7'};
 
 // ---------- Reels «фильм» ----------
@@ -43,13 +43,13 @@ export const FILM = {
       {ru: 'Бирюзовый скотч и наклейка комнаты на каждой', pl: 'Turkusowa taśma i naklejka pokoju na każdym', uk: 'Бірюзовий скотч і наліпка кімнати на кожній', en: 'Turquoise tape and a room label on every one'}],
     [12.7, 14.2,
       {ru: 'Только ваши вещи', pl: 'Tylko Twoje rzeczy', uk: 'Лише ваші речі', en: 'Only your things'},
-      {ru: 'Бус едет без перегрузок и попутных грузов', pl: 'Bez przeładunków i cudzych ładunków po drodze', uk: 'Бус їде без перевантажень і попутних вантажів', en: 'No reloading and no other cargo on the way'}],
+      {ru: 'Бус едет без перегрузок и попутных грузов', pl: 'Bez przeładunków i doładunków po drodze', uk: 'Бус їде без перевантажень і попутних вантажів', en: 'No reloading and no other cargo on the way'}],
     [14.5, 16.9,
-      {ru: 'Варшава, Польша, Европа', pl: 'Warszawa, Polska, Europa', uk: 'Варшава, Польща, Європа', en: 'Warsaw, Poland, Europe'},
-      {ru: 'Варшава и 150 км вокруг — 7 дней в неделю', pl: 'Warszawa i 150 km wokół — 7 dni w tygodniu', uk: 'Варшава і 150 км довкола — 7 днів на тиждень', en: 'Warsaw and 150 km around — 7 days a week'}],
+      {ru: 'Варшава, Польша, ЕС', pl: 'Warszawa, Polska, UE', uk: 'Варшава, Польща, ЄС', en: 'Warsaw, Poland, the EU'},
+      {ru: 'Варшава и 150 км вокруг — 7 дней в неделю', pl: 'Warszawa i okolice do 150 km — 7 dni w tygodniu', uk: 'Варшава і 150 км довкола — 7 днів на тиждень', en: 'Within 150 km of Warsaw — 7 days a week'}],
     [18.8, 20.6,
       {ru: 'Распакуем и расставим', pl: 'Rozpakujemy i ustawimy', uk: 'Розпакуємо й розставимо', en: 'Unpacked and in place'},
-      {ru: 'Соберём мебель и поставим всё по местам', pl: 'Złożymy meble i ustawimy wszystko na miejscu', uk: 'Зберемо меблі й поставимо все на місця', en: 'We assemble the furniture and put everything in place'}],
+      {ru: 'Соберём мебель и поставим всё по местам', pl: 'Złożymy meble i ustawimy wszystko na swoje miejsca', uk: 'Зберемо меблі й поставимо все на місця', en: 'We assemble the furniture and put everything in place'}],
   ] as [number, number, L, L][],
 };
 
@@ -65,7 +65,7 @@ export const CLIP_REELS: Record<'Price' | 'Care' | 'Van' | 'Seal' | 'Qr' | 'Firs
       {ru: 'Окончательная цена в течение двух часов днём', pl: 'Ostateczna cena w ciągu dwóch godzin (w dzień)', uk: 'Остаточна ціна протягом двох годин удень', en: 'The final price within two hours (daytime)'},
       {ru: 'В день переезда — никаких доплат', pl: 'W dniu przeprowadzki — żadnych dopłat', uk: 'У день переїзду — жодних доплат', en: 'No extra fees on moving day'},
     ],
-    endTitle: {ru: 'Цена, которая не изменится', pl: 'Cena, która się nie zmieni', uk: 'Ціна, яка не зміниться', en: "A price that won't change"},
+    endTitle: {ru: 'Цена, которая не изменится', pl: 'Cena, która się nie zmieni', uk: 'Ціна, яка не зміниться', en: 'A price that won’t change'},
   },
   Care: {
     clip: 'gloves.mp4', square: true,
@@ -75,28 +75,28 @@ export const CLIP_REELS: Record<'Price' | 'Care' | 'Van' | 'Seal' | 'Qr' | 'Firs
       {ru: 'Посуда — в бумагу, коробки — с перегородками', pl: 'Naczynia — w papier, kartony — z przegródkami', uk: 'Посуд — у папір, коробки — з перегородками', en: 'Dishes in paper, boxes with dividers'},
       {ru: 'Каждая коробка подписана: комната и номер', pl: 'Każdy karton opisany: pokój i numer', uk: 'Кожна коробка підписана: кімната й номер', en: 'Every box labelled: room and number'},
     ],
-    endTitle: {ru: 'Вещи клиента — как свои', pl: 'Rzeczy klienta — jak własne', uk: 'Речі клієнта — як свої', en: 'Your things, treated as our own'},
+    endTitle: {ru: 'Ваши вещи — как свои', pl: 'Twoje rzeczy — jak własne', uk: 'Ваші речі — як свої', en: 'Your things, treated as our own'},
   },
   Van: {
     clip: 'van.mp4', square: false,
     title: [{ru: 'Только', pl: 'Tylko', uk: 'Лише', en: 'Only'}, {ru: 'ваши вещи', pl: 'Twoje rzeczy', uk: 'ваші речі', en: 'your things'}],
     lines: [
-      {ru: 'Без перегрузок и попутных грузов', pl: 'Bez przeładunków i cudzych ładunków', uk: 'Без перевантажень і попутних вантажів', en: 'No reloading, no other cargo'},
-      {ru: 'Варшава и 150 км вокруг — 7 дней в неделю', pl: 'Warszawa i 150 km wokół — 7 dni w tygodniu', uk: 'Варшава і 150 км довкола — 7 днів на тиждень', en: 'Warsaw and 150 km around — 7 days a week'},
-      {ru: 'Польша и Европа — по запросу', pl: 'Polska i Europa — na zapytanie', uk: 'Польща і Європа — за запитом', en: 'Poland and Europe — on request'},
+      {ru: 'Без перегрузок и попутных грузов', pl: 'Bez przeładunków i doładunków', uk: 'Без перевантажень і попутних вантажів', en: 'No reloading, no other cargo'},
+      {ru: 'Варшава и 150 км вокруг — 7 дней в неделю', pl: 'Warszawa i okolice do 150 km — 7 dni w tygodniu', uk: 'Варшава і 150 км довкола — 7 днів на тиждень', en: 'Within 150 km of Warsaw — 7 days a week'},
+      {ru: 'Польша и страны ЕС — по запросу', pl: 'Polska i kraje UE — na zapytanie', uk: 'Польща і країни ЄС — за запитом', en: 'Poland and EU countries on request'},
     ],
     endTitle: {ru: 'Бус MELBUS — только для вас', pl: 'Bus MELBUS — tylko dla Ciebie', uk: 'Бус MELBUS — лише для вас', en: 'A MELBUS van — just for you'},
   },
   // ---- 13.11.2026: ролики Higgsfield (вертикальные, «Визуализация») ----
   Seal: {
     clip: 'hf-tape.mp4', square: false, vertical: true,
-    title: [{ru: 'Цену', pl: 'Cenę', uk: 'Ціну', en: 'We seal'}, {ru: 'запечатываем', pl: 'zaklejamy', uk: 'запечатуємо', en: 'the price'}],
+    title: [{ru: 'Цену', pl: 'Cenę', uk: 'Ціну', en: 'We seal'}, {ru: 'запечатываем', pl: 'pieczętujemy', uk: 'запечатуємо', en: 'the price'}],
     lines: [
       {ru: 'Цена — по видео, до начала работ', pl: 'Cena z wideo — przed rozpoczęciem pracy', uk: 'Ціна — за відео, до початку робіт', en: 'The price comes from your video, before we start'},
       {ru: 'Изменения — только с вашего согласия', pl: 'Zmiany — tylko za Twoją zgodą', uk: 'Зміни — лише з вашої згоди', en: 'Changes only with your consent'},
-      {ru: 'Что приняли в оферте — то и платите', pl: 'Płacisz tyle, ile przyjąłeś w ofercie', uk: 'Що прийняли в оферті — те й платите', en: 'You pay what you accepted in the offer'},
+      {ru: 'Что приняли в оферте — то и платите', pl: 'Płacisz tyle, ile w zaakceptowanej ofercie', uk: 'Що прийняли в оферті — те й платите', en: 'You pay what you accepted in the offer'},
     ],
-    endTitle: {ru: 'Цена закрыта, как коробка', pl: 'Cena zamknięta jak karton', uk: 'Ціна закрита, як коробка', en: 'A price sealed like a box'},
+    endTitle: {ru: 'Цена запечатана, как коробка', pl: 'Cena zamknięta jak karton', uk: 'Ціна запечатана, як коробка', en: 'A price sealed like a box'},
   },
   Qr: {
     clip: 'hf-qr.mp4', square: false, vertical: true,
@@ -124,7 +124,7 @@ export const CLIP_REELS: Record<'Price' | 'Care' | 'Van' | 'Seal' | 'Qr' | 'Firs
     lines: [
       {ru: 'Гардеробные коробки со штангой', pl: 'Kartony garderobiane z drążkiem', uk: 'Гардеробні коробки зі штангою', en: 'Wardrobe boxes with a rail'},
       {ru: 'Из шкафа — сразу на вешалку в коробку', pl: 'Z szafy — od razu na wieszak w kartonie', uk: 'Із шафи — одразу на вішак у коробку', en: 'Straight from the wardrobe onto the rail'},
-      {ru: 'Вещи приезжают не мятыми', pl: 'Ubrania przyjeżdżają niepogniecione', uk: 'Речі приїжджають не м’ятими', en: 'Clothes arrive uncreased'},
+      {ru: 'Вещи приезжают немятыми', pl: 'Ubrania przyjeżdżają niepogniecione', uk: 'Речі приїжджають нем’ятими', en: 'Clothes arrive uncreased'},
     ],
     endTitle: {ru: 'Из шкафа — в шкаф', pl: 'Z szafy do szafy', uk: 'Із шафи — у шафу', en: 'From wardrobe to wardrobe'},
   },
@@ -144,7 +144,7 @@ export const CAROUSEL: [number, number, string, L, L][] = [
     {ru: 'В течение двух часов днём присылаем окончательную цену и список вещей.', pl: 'W ciągu dwóch godzin (w dzień) wysyłamy ostateczną cenę i listę rzeczy.', uk: 'Протягом двох годин удень надсилаємо остаточну ціну та список речей.', en: 'Within two hours (daytime) we send the final price and a list of items.'}],
   [24.45, 50, '3',
     {ru: 'Бронь', pl: 'Rezerwacja', uk: 'Бронювання', en: 'Booking'},
-    {ru: 'Подтверждаете предоплатой BLIK или картой — дата закреплена за вами.', pl: 'Potwierdzasz przedpłatą BLIK lub kartą — termin jest Twój.', uk: 'Підтверджуєте передоплатою BLIK або карткою — дата закріплена за вами.', en: 'Confirm with a BLIK or card prepayment — the date is yours.'}],
+    {ru: 'Подтверждаете задатком BLIK или картой — дата закреплена за вами.', pl: 'Potwierdzasz zadatkiem BLIK lub kartą — termin jest Twój.', uk: 'Підтверджуєте завдатком BLIK або карткою — дата закріплена за вами.', en: 'Confirm with a deposit by BLIK or card — the date is yours.'}],
   [20.0, 35, '4',
     {ru: 'Упаковка', pl: 'Pakowanie', uk: 'Пакування', en: 'Packing'},
     {ru: 'Бригада в форме, перчатках и бахилах упаковывает всё по комнатам.', pl: 'Ekipa w uniformach, rękawicach i ochraniaczach na buty pakuje wszystko pokój po pokoju.', uk: 'Бригада у формі, рукавичках і бахілах пакує все по кімнатах.', en: 'A crew in uniforms, gloves and shoe covers packs everything room by room.'}],
@@ -153,7 +153,7 @@ export const CAROUSEL: [number, number, string, L, L][] = [
     {ru: 'Бус MELBUS везёт только ваши вещи, без перегрузок по пути.', pl: 'Bus MELBUS wiezie tylko Twoje rzeczy, bez przeładunków po drodze.', uk: 'Бус MELBUS везе лише ваші речі, без перевантажень у дорозі.', en: 'A MELBUS van carries only your things, with no reloading on the way.'}],
   [41.7, 50, '6',
     {ru: 'Новый дом', pl: 'Nowy dom', uk: 'Новий дім', en: 'New home'},
-    {ru: 'Заносим, собираем мебель и расставляем всё по местам.', pl: 'Wnosimy, składamy meble i ustawiamy wszystko na miejscu.', uk: 'Заносимо, збираємо меблі й розставляємо все по місцях.', en: 'We carry in, assemble the furniture and put everything in place.'}],
+    {ru: 'Заносим, собираем мебель и расставляем всё по местам.', pl: 'Wnosimy, składamy meble i ustawiamy wszystko na swoje miejsca.', uk: 'Заносимо, збираємо меблі й розставляємо все по місцях.', en: 'We carry in, assemble the furniture and put everything in place.'}],
 ];
 
 // ---------- карусель «Мы не продаём часы» (13.11.2026): заголовок и сравнение — из src/content/prices.ts (как на сайте) ----------

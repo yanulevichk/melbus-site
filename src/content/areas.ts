@@ -40,7 +40,7 @@ export const areaText = {
   // страница «Где работаем»
   hub: {
     eyebrow: l('Где работаем', 'Gdzie działamy', 'Де працюємо', 'Where we work'),
-    title: l('Варшава<br>и 150 км вокруг', 'Warszawa<br>i 150 km wokół', 'Варшава<br>і 150 км довкола', 'Warsaw<br>and 150 km around'),
+    title: l('Варшава<br>и 150 км вокруг', 'Warszawa<br>i okolice do 150 km', 'Варшава<br>і 150 км довкола', 'Warsaw<br>and up to 150 km around'),
     lead: l('Все районы Варшавы и города вокруг. По Польше и в страны ЕС — по запросу.', 'Wszystkie dzielnice Warszawy i miejscowości wokół. Po Polsce i do krajów UE — na zapytanie.', 'Усі райони Варшави й міста довкола. Польщею та до країн ЄС — за запитом.', 'Every district of Warsaw and the towns around it. Across Poland and to EU countries on request.'),
     districts: l('Районы Варшавы', 'Dzielnice Warszawy', 'Райони Варшави', 'Warsaw districts'),
     towns: l('Города рядом', 'Miejscowości w okolicy', 'Міста поруч', 'Nearby towns'),

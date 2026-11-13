@@ -105,7 +105,7 @@ for (let day = 1; day <= 28; day++) {
   p('| Время | Файл | Рубрика · вид | Текст (RU) | Стикер | Актуальное | Заметки |');
   p('|---|---|---|---|---|---|---|');
   for (const s of STORIES.filter((x) => x.day === day)) {
-    const flags = [s.after === 'prices' ? '🔒 после утверждения цен' : '', s.after === 'site' ? '🌐 после запуска сайта' : '', s.ai ? 'ИИ-визуализация' : '', s.video?.includes('/hf-') ? `ролик ${s.video.slice(8, -4)}` : '', s.gpt ? `ИИ-картинка «${s.gpt}»` : '', s.real ? 'лучше своё фото' : '', s.note ?? ''].filter(Boolean).join(' · ');
+    const flags = [s.after === 'prices' || s.after === 'both' ? '🔒 после утверждения цен' : '', s.after === 'site' || s.after === 'both' ? '🌐 после запуска сайта' : '', s.ai ? 'ИИ-визуализация' : '', s.video?.includes('/hf-') ? `ролик ${s.video.slice(8, -4)}` : '', s.gpt ? `ИИ-картинка «${s.gpt}»` : '', s.real ? 'лучше своё фото' : '', s.note ?? ''].filter(Boolean).join(' · ');
     const txt = [s.big ? `**${s.big.ru}** ` : '', `**${s.title.ru}**`, s.body ? ` — ${s.body.ru}` : '', s.items ? ` (${s.items.map((i) => i.ru).join('; ')})` : ''].join('');
     p(`| ${TIMES[s.slot]} | ${file(s)} | ${RUBRICS[s.rubric].ru} · ${KIND[s.kind]}${s.kind === 'video' ? (s.video?.includes('/hf-') ? ' 5 с' : ' 8 с') : ''} | ${txt.replace(/\|/g, '/')} | ${st(s.sticker)} | ${s.hl ? HL[s.hl].ru : ''} | ${flags} |`);
   }

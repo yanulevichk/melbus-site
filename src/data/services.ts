@@ -31,7 +31,7 @@ export const services: Service[] = [
     slug: { ru: 'pereezd-kvartiry', pl: 'przeprowadzka-mieszkania', uk: 'pereyizd-kvartyry', en: 'flat-moving' },
     title: { ru: 'Переезд квартиры', pl: 'Przeprowadzka mieszkania', uk: 'Переїзд квартири', en: 'Flat move' },
     short: { ru: 'Студии, 2–4 комнаты', pl: 'Kawalerki, 2–4 pokoje', uk: 'Студії, 2–4 кімнати', en: 'Studios, 2–4 rooms' },
-    lead: { ru: 'Упакуем, перевезём и расставим всё по местам. Цена фиксируется по видео и не меняется в день переезда.', pl: 'Spakujemy, przewieziemy i ustawimy wszystko na miejscu. Cenę ustalamy z wideo i nie zmienia się w dniu przeprowadzki.', uk: 'Запакуємо, перевеземо й розставимо все по місцях. Ціну фіксуємо за відео, і вона не змінюється в день переїзду.', en: 'We pack, move and put everything in place. The price is fixed from a video and doesn’t change on moving day.' },
+    lead: { ru: 'Упакуем, перевезём и расставим всё по местам. Цена фиксируется по видео и не меняется в день переезда.', pl: 'Spakujemy, przewieziemy i ustawimy wszystko na swoje miejsca. Cenę ustalamy z wideo i nie zmienia się w dniu przeprowadzki.', uk: 'Запакуємо, перевеземо й розставимо все по місцях. Ціну фіксуємо за відео, і вона не змінюється в день переїзду.', en: 'We pack, move and put everything in place. The price is fixed from a video and doesn’t change on moving day.' },
     includes: [
       { ru: 'Защита полов и дверных проёмов', pl: 'Zabezpieczenie podłóg i futryn', uk: 'Захист підлог і дверних прорізів', en: 'Floor and door frame protection' },
       { ru: 'Плёнка, одеяла и ремни для мебели', pl: 'Folia, koce i pasy do mebli', uk: 'Плівка, ковдри й ремені для меблів', en: 'Film, blankets and straps for furniture' },

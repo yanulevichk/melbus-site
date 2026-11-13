@@ -29,7 +29,7 @@ export const ui = {
     langs: { ru: 'Язык', pl: 'Język', uk: 'Мова', en: 'Language' },
   },
   footer: {
-    note: { ru: 'Переезды квартир, домов и офисов по Варшаве, Польше и Европе.', pl: 'Przeprowadzki mieszkań, domów i biur w Warszawie, w Polsce i w Europie.', uk: 'Переїзди квартир, будинків і офісів Варшавою, Польщею та Європою.', en: 'Flat, house and office moves in Warsaw, across Poland and Europe.' },
+    note: { ru: 'Переезды квартир, домов и офисов по Варшаве, Польше и ЕС.', pl: 'Przeprowadzki mieszkań, domów i biur w Warszawie, w Polsce i w UE.', uk: 'Переїзди квартир, будинків і офісів Варшавою, Польщею та ЄС.', en: 'Flat, house and office moves in Warsaw, across Poland and the EU.' },
     company: { ru: 'Компания', pl: 'Firma', uk: 'Компанія', en: 'Company' },
     docs: { ru: 'Документы', pl: 'Dokumenty', uk: 'Документи', en: 'Documents' },
     terms: { ru: 'Регламент', pl: 'Regulamin', uk: 'Регламент', en: 'Terms' },

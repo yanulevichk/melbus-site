@@ -17,6 +17,7 @@
 - **Порядок и даты** (по одному посту в день; номер = порядок ниже): 14.11 — 1, 15.11 — 2, 16.11 — 3 … 23.11 — 10. Первые три — до старта сторис 16.11.
 - **Закрепить** (📌, в профиле наверху): 1. Reels «Вся квартира — в одну коробку» · 2. Карусель «Переезд за 6 шагов» · 6. Карусель «Мы не продаём часы».
 - **Обложки Reels**: при публикации → «Обложка» → «Добавить из фотоплёнки» → `<язык>/covers/NN-cover-…jpg` (номер указан у каждого ролика). Все обложки в одном стиле — сетка профиля выглядит цельно. Важное на обложке — в середине: сетка режет её до 3:4.
+- **Дальше (25.11 – 4.01)** — 16 постов из картинок ChatGPT: подсказки и подписи — `marketing/gpt/README.md` и страница с кнопками «Скопировать» (ссылка в CLAUDE.md).
 - **Как будет выглядеть сетка**: `profile/grid-<язык>.jpg` (закреплённые сверху, дальше — от новых к старым).
 - Профиль: `profile/avatar.jpg` (аватар), обложки «Актуального» — `marketing/stories/2026-11/highlights/` (9 шт., названия — в README сторис), `<язык>/cover-facebook-1640x624.jpg`, превью ссылки `<язык>/og-1200x630.jpg`.
 
@@ -37,11 +38,11 @@
 > #переезд #ценапереезда #варшава #melbus
 
 **4. Reels «Аккуратность, которую видно»** — `ru/melbus-ReelCare-ru.mp4` · обложка `ru/covers/03-cover-Care-ru.jpg`
-> Чистые перчатки и бахилы — ещё до порога. Посуда — в бумагу, коробки — с перегородками. Вещи клиента — как свои.
+> Чистые перчатки и бахилы — ещё до порога. Посуда — в бумагу, коробки — с перегородками. Ваши вещи — как свои.
 > #переезд #упаковка #варшава #melbus
 
 **5. Reels «Только ваши вещи»** — `ru/melbus-ReelVan-ru.mp4` · обложка `ru/covers/04-cover-Van-ru.jpg`
-> Бус MELBUS везёт только ваши вещи — без перегрузок и попутных грузов. Варшава и 150 км вокруг, Польша и Европа — по запросу.
+> Бус MELBUS везёт только ваши вещи — без перегрузок и попутных грузов. Варшава и 150 км вокруг, Польша и страны ЕС — по запросу.
 > #переезд #грузоперевозки #варшава #melbus
 
 **6. Карусель «Мы не продаём часы»** 📌 — `ru/carousel-hours/01…05-melbus-hours-ru.jpg`
@@ -68,8 +69,8 @@
 
 **1. Reels „Całe mieszkanie w jednym kartonie”** 📌 — `pl/melbus-ReelFilm-pl.mp4` · обложка `pl/covers/01-cover-Film-pl.jpg`
 > Całe mieszkanie w jednym kartonie. Prawie dosłownie 📦
-> Nagrywasz mieszkanie telefonem — podajemy ostateczną cenę. Spakujemy, przewieziemy i ustawimy wszystko na miejscu. Bez dopłat w dniu przeprowadzki.
-> Warszawa i 150 km wokół · 7 dni w tygodniu · faktura VAT
+> Nagrywasz mieszkanie telefonem — podajemy ostateczną cenę. Spakujemy, przewieziemy i ustawimy wszystko na swoje miejsca. Bez dopłat w dniu przeprowadzki.
+> Warszawa i okolice do 150 km · 7 dni w tygodniu · faktura VAT
 > #przeprowadzka #przeprowadzkawarszawa #warszawa #przeprowadzki #melbus
 
 **2. Karuzela „Przeprowadzka w 6 krokach”** 📌 — `pl/carousel/01…07-melbus-carousel-pl.jpg`
@@ -81,19 +82,19 @@
 > #przeprowadzka #cenaprzeprowadzki #warszawa #melbus
 
 **4. Reels „Staranność, którą widać”** — `pl/melbus-ReelCare-pl.mp4` · обложка `pl/covers/03-cover-Care-pl.jpg`
-> Czyste rękawice i ochraniacze na buty — już od progu. Naczynia w papier, kartony z przegródkami. Rzeczy klienta — jak własne.
+> Czyste rękawice i ochraniacze na buty — już od progu. Naczynia w papier, kartony z przegródkami. Twoje rzeczy — jak własne.
 > #przeprowadzka #pakowanie #warszawa #melbus
 
 **5. Reels „Tylko Twoje rzeczy”** — `pl/melbus-ReelVan-pl.mp4` · обложка `pl/covers/04-cover-Van-pl.jpg`
-> Bus MELBUS wiezie tylko Twoje rzeczy — bez przeładunków i cudzych ładunków. Warszawa i 150 km wokół, Polska i Europa — na zapytanie.
+> Bus MELBUS wiezie tylko Twoje rzeczy — bez przeładunków i doładunków. Warszawa i okolice do 150 km, Polska i kraje UE — na zapytanie.
 > #przeprowadzka #transport #warszawa #melbus
 
 **6. Karuzela „Nie sprzedajemy godzin”** 📌 — `pl/carousel-hours/01…05-melbus-hours-pl.jpg`
 > Dlaczego nie liczymy za godziny? W firmie liczącej za godzinę wolna praca to wyższy rachunek. U nas cenę za całą przeprowadzkę znasz z góry — a ekipie opłaca się pracować szybko i starannie. Przesuń 👉 i zapisz, żeby porównać z innymi ofertami.
 > #przeprowadzka #cenaprzeprowadzki #warszawa #melbus
 
-**7. Reels „Cenę zaklejamy”** — `pl/melbus-ReelSeal-pl.mp4` · обложка `pl/covers/05-cover-Seal-pl.jpg`
-> Cenę zaklejamy jak karton: płacisz tyle, ile przyjąłeś w ofercie. Zmiany — tylko za Twoją zgodą i przed rozpoczęciem pracy.
+**7. Reels „Cenę pieczętujemy”** — `pl/melbus-ReelSeal-pl.mp4` · обложка `pl/covers/05-cover-Seal-pl.jpg`
+> Cenę pieczętujemy jak karton: płacisz tyle, ile w zaakceptowanej ofercie. Zmiany — tylko za Twoją zgodą i przed rozpoczęciem pracy.
 > #przeprowadzka #cenaprzeprowadzki #warszawa #melbus
 
 **8. Reels „Każdy karton wie, co ma w środku”** — `pl/melbus-ReelQr-pl.mp4` · обложка `pl/covers/06-cover-Qr-pl.jpg`
@@ -125,11 +126,11 @@
 > #переїзд #цінапереїзду #варшава #melbus
 
 **4. Reels «Акуратність, яку видно»** — `uk/melbus-ReelCare-uk.mp4` · обложка `uk/covers/03-cover-Care-uk.jpg`
-> Чисті рукавички й бахіли — ще до порога. Посуд — у папір, коробки — з перегородками. Речі клієнта — як свої.
+> Чисті рукавички й бахіли — ще до порога. Посуд — у папір, коробки — з перегородками. Ваші речі — як свої.
 > #переїзд #пакування #варшава #melbus
 
 **5. Reels «Лише ваші речі»** — `uk/melbus-ReelVan-uk.mp4` · обложка `uk/covers/04-cover-Van-uk.jpg`
-> Бус MELBUS везе лише ваші речі — без перевантажень і попутних вантажів. Варшава і 150 км довкола, Польща і Європа — за запитом.
+> Бус MELBUS везе лише ваші речі — без перевантажень і попутних вантажів. Варшава і 150 км довкола, Польща і країни ЄС — за запитом.
 > #переїзд #вантажоперевезення #варшава #melbus
 
 **6. Карусель «Ми не продаємо години»** 📌 — `uk/carousel-hours/01…05-melbus-hours-uk.jpg`
@@ -157,7 +158,7 @@
 **1. Reel “Your whole flat in one box”** 📌 — `en/melbus-ReelFilm-en.mp4` · обложка `en/covers/01-cover-Film-en.jpg`
 > Your whole flat in one box. Almost literally 📦
 > Film your flat on your phone — we give you the final price. We pack, move and put everything in place. No extra fees on moving day.
-> Warsaw and 150 km around · 7 days a week · VAT invoice
+> Within 150 km of Warsaw · 7 days a week · VAT invoice
 > #moving #warsaw #movingtowarsaw #poland #melbus
 
 **2. Carousel “Moving in 6 steps”** 📌 — `en/carousel/01…07-melbus-carousel-en.jpg`
@@ -173,11 +174,11 @@
 > #moving #packing #warsaw #melbus
 
 **5. Reel “Only your things”** — `en/melbus-ReelVan-en.mp4` · обложка `en/covers/04-cover-Van-en.jpg`
-> A MELBUS van carries only your things — no reloading, no other cargo. Warsaw and 150 km around, Poland and Europe on request.
+> A MELBUS van carries only your things — no reloading, no other cargo. Within 150 km of Warsaw, Poland and EU countries on request.
 > #moving #removals #warsaw #melbus
 
 **6. Carousel “We don’t sell hours”** 📌 — `en/carousel-hours/01…05-melbus-hours-en.jpg`
-> Why don’t we charge by the hour? With hourly movers, slow work means a bigger bill. With us, you know the price for the whole move in advance — so the crew gains from working fast and carefully. Swipe 👉 and save it to compare with other offers.
+> Why don’t we charge by the hour? With hourly movers, slow work means a bigger bill. With us, you know the price for the whole move in advance — so it pays for our crew to work fast and carefully. Swipe 👉 and save it to compare with other offers.
 > #moving #movingwarsaw #warsaw #melbus
 
 **7. Reel “We seal the price”** — `en/melbus-ReelSeal-en.mp4` · обложка `en/covers/05-cover-Seal-en.jpg`
