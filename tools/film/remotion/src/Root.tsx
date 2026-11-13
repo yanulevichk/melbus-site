@@ -6,7 +6,12 @@ import {ReelFilm, FILM_FRAMES, END_FRAMES} from './social/ReelFilm';
 import {ReelClip, CLIP_FRAMES, CLIP_END} from './social/ReelClip';
 import {Carousel, SLIDE_COUNT} from './social/Carousel';
 import {OgCard} from './social/OgCard';
-import {Avatar, CoverFB, Highlight, HIGHLIGHTS} from './social/ProfileKit';
+import {Avatar, CoverFB, Highlight, HIGHLIGHTS, HighlightV2, HIGHLIGHTS_V2} from './social/ProfileKit';
+import {StoryStills, StoryVideo, STORY_VIDEO} from './social/Story';
+import {STILLS, VIDEOS} from './social/stories';
+
+// видео-сторис: вертикальный фильм — на весь экран; квадратные/горизонтальные ролики — в рамке
+const VIDEO_OPTS: Record<string, {from?: number; vertical?: boolean}> = {'D07-1': {vertical: true, from: 0}, 'D28-1': {vertical: true, from: 14}};
 import {LANGS} from './social/texts';
 
 export const Root: React.FC = () => (
@@ -25,10 +30,16 @@ export const Root: React.FC = () => (
         <Composition id={`Carousel-${lang}`} component={Carousel} durationInFrames={SLIDE_COUNT} fps={1} width={1080} height={1350} defaultProps={{lang}} />
         <Composition id={`OgCard-${lang}`} component={OgCard} durationInFrames={1} fps={1} width={1200} height={630} defaultProps={{lang}} />
         <Composition id={`CoverFB-${lang}`} component={CoverFB} durationInFrames={1} fps={1} width={1640} height={624} defaultProps={{lang}} />
+        {/* сторис «Дневник запуска» (stories.ts): все картинки — одной последовательностью, видео — по одному */}
+        <Composition id={`Stories-${lang}`} component={StoryStills} durationInFrames={STILLS.length} fps={1} width={1080} height={1920} defaultProps={{lang}} />
+        {VIDEOS.map((s) => (
+          <Composition key={s.id} id={`Story-${s.id}-${lang}`} component={StoryVideo} durationInFrames={STORY_VIDEO.fps * STORY_VIDEO.seconds} fps={STORY_VIDEO.fps} width={1080} height={1920} defaultProps={{s, lang, ...VIDEO_OPTS[s.id]}} />
+        ))}
       </React.Fragment>
     ))}
     {/* оформление профиля */}
     <Composition id="Avatar" component={Avatar} durationInFrames={1} fps={1} width={1080} height={1080} />
     <Composition id="Highlights" component={Highlight} durationInFrames={HIGHLIGHTS.length} fps={1} width={1080} height={1920} />
+    <Composition id="HighlightsV2" component={HighlightV2} durationInFrames={HIGHLIGHTS_V2.length} fps={1} width={1080} height={1920} />
   </>
 );

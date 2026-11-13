@@ -20,8 +20,27 @@ const ICONS: Record<string, React.ReactNode> = {
   care: (<g {...S}><path d="M200 50 320 96v96c0 80-52 136-120 160C132 328 80 272 80 192V96Z" /><path d="M140 200l44 44 80-92" /></g>),
   van: (<g {...S}><path d="M40 270V120c0-16 12-28 28-28h186c12 0 22 6 28 16l52 78 30 14v70" /><path d="M40 270h324" /><circle cx="110" cy="290" r="30" /><circle cx="300" cy="290" r="30" /><path d="M256 110v80h86" /><path d="M60 230h300" opacity=".5" /></g>),
   faq: (<g {...S}><circle cx="200" cy="200" r="150" /><path d="M150 160c0-30 22-52 52-52s50 20 50 46c0 34-46 40-46 76" /><circle cx="206" cy="282" r="8" fill={C.tape} stroke="none" /></g>),
+  // v2: как работаем (телефон с кнопкой «видео»), пакеты (три коробки по росту), районы (метка на карте), дневник (блокнот со «скотчем»)
+  how: (<g {...S}><rect x="122" y="40" width="156" height="320" rx="26" /><path d="M176 74h48" /><path d="M178 168v84l70-42Z" /></g>),
+  packages: (<g {...S}><rect x="34" y="236" width="96" height="104" rx="6" /><rect x="150" y="186" width="110" height="154" rx="6" /><rect x="280" y="126" width="88" height="214" rx="6" /><path d="M34 268h96M150 222h110M280 162h88" opacity=".5" /><path d="M82 236v32M205 186v36M324 126v36" /></g>),
+  // ценник с отверстием и «zł»-полосками (вместо телефона — понятнее как «Цена»)
+  tag: (<g {...S}><path d="M200 50h120a30 30 0 0 1 30 30v120L190 360a30 30 0 0 1-42 0L60 272a30 30 0 0 1 0-42Z" /><circle cx="292" cy="108" r="20" /><path d="M150 230l60-60M180 260l40-40" opacity=".6" /></g>),
+  areas: (<g {...S}><path d="M200 360s-110-110-110-190a110 110 0 0 1 220 0c0 80-110 190-110 190Z" /><circle cx="200" cy="170" r="40" /><path d="M60 360h280" opacity=".5" /></g>),
+  diary: (<g {...S}><path d="M90 60h200a20 20 0 0 1 20 20v260H110a20 20 0 0 1-20-20Z" /><path d="M90 320a20 20 0 0 1 20-20h200" /><path d="M150 130h110M150 180h110M150 230h70" opacity=".6" /><path d="M250 40l40 40" strokeWidth={14} /></g>),
 };
 export const HIGHLIGHTS = ['price', 'box', 'care', 'van', 'faq'];
+/** v2 (12.11): порядок в профиле — дневник, цена, пакеты, как работаем, коробки, аккуратность, бусы, районы, вопросы */
+export const HIGHLIGHTS_V2 = ['diary', 'tag', 'packages', 'how', 'box', 'care', 'van', 'areas', 'faq'];
+export const HighlightV2: React.FC = () => {
+  const i = useCurrentFrame();
+  return (
+    <AbsoluteFill style={{background: C.graphite, justifyContent: 'center', alignItems: 'center'}}>
+      <div style={{width: 760, height: 760, borderRadius: '50%', background: 'radial-gradient(closest-side, #18242C, #10161D)', display: 'grid', placeItems: 'center'}}>
+        <svg viewBox="0 0 400 400" width={420} height={420}>{ICONS[HIGHLIGHTS_V2[Math.min(i, HIGHLIGHTS_V2.length - 1)]]}</svg>
+      </div>
+    </AbsoluteFill>
+  );
+};
 export const Highlight: React.FC = () => {
   const i = useCurrentFrame();
   return (
