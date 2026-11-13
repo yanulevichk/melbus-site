@@ -1,12 +1,12 @@
 // Собирает marketing/stories/2026-11/README.md из stories.ts и prompts.ts (не править README руками):
 //   npx tsx scripts/stories-readme.ts > ../../../marketing/stories/2026-11/README.md
 import {STORIES, RUBRICS, HL, PROFILE, TIMES, dateOf, type Story, type Sticker} from '../src/social/stories';
-import {GPT_PROMPTS, HF_PLAN, HF_IMAGE_CREDITS, STYLE} from '../src/social/prompts';
+import {GPT_PROMPTS, HF_PLAN, HF_DONE, STYLE} from '../src/social/prompts';
 import {LANGS} from '../src/social/texts';
 
 const WD = ['вс', 'пн', 'вт', 'ср', 'чт', 'пт', 'сб'];
 const CH = ['', 'Глава 1 · Знакомство', 'Глава 2 · Цена без часов', 'Глава 3 · Детали, которые видно', 'Глава 4 · Как мы сняли фильм + запись на переезд'];
-const KIND: Record<string, string> = {text: 'текст', photo: 'фото + текст', number: 'большая цифра', list: 'список', compare: 'сравнение', shot: 'скриншот сайта', pair: 'черновик → готовый кадр', logo: 'логотип', video: 'видео 8 с'};
+const KIND: Record<string, string> = {text: 'текст', photo: 'фото + текст', number: 'большая цифра', list: 'список', compare: 'сравнение', shot: 'скриншот сайта', pair: 'черновик → готовый кадр', logo: 'логотип', video: 'видео'};
 const st = (s?: Sticker) => {
   if (!s) return '';
   const opts = (o: {ru: string; pl: string; uk: string; en: string}[]) => LANGS.map((L) => `${L.toUpperCase()}: ${o.map((x) => x[L]).join(' / ')}`).join('<br>');
@@ -52,8 +52,8 @@ const reals = STORIES.filter((s) => s.real);
 for (const s of reals) p(`- **${s.id}** — ${s.real} → сохранить как \`marketing/stories/2026-11/real/${s.id}.jpg\``);
 p('- Каждую неделю (по желанию, без лиц): утро на базе, бус выезжает, руки бригады клеят бирюзовый скотч, коробки на складе. Это «живой» фон для рубрики «За кадром».');
 p();
-p('## Картинки в ChatGPT (бесплатно по вашей подписке)');
-p('Как: откройте ChatGPT → прикрепите логотип `brand/export/MELBUS_logo_na_belom.png` → вставьте **общий стиль + подсказку** → скачайте → сохраните как `marketing/stories/2026-11/gpt/<id>.jpg` → `./render-stories.sh` (или напишите Claude — пересоберу).');
+p(`## Картинки ИИ — готово ${HF_DONE.date} (Higgsfield, GPT Image)`);
+p('Все 8 лежат в `marketing/stories/2026-11/gpt/<id>.jpg` (1080×1920) и уже стоят в сторис (см. «для»). Логотип только на предметах, без лиц. Подсказки ниже — если захотите переделать: в ChatGPT (бесплатно по подписке) прикрепите логотип `brand/export/MELBUS_logo_na_belom.png`, вставьте **общий стиль + подсказку**, сохраните с тем же именем и запустите `./render-stories.sh` (или напишите Claude).');
 p();
 p('**Общий стиль (вставлять перед каждой подсказкой):**');
 p('```');
@@ -66,14 +66,15 @@ for (const g of GPT_PROMPTS) {
   p('  ```');
 }
 p();
-p('## Видео в Higgsfield (только после вашего «да» — это платно)');
-p('Короткие ролики 5 с (Kling 3.0, без звука) из картинок выше как стартовый кадр. Логотип — только образцом, при неточности накладываем настоящий.');
+p(`## Ролики ИИ — готово ${HF_DONE.date} (Higgsfield, Kling 3.0 pro)`);
+p('5 роликов по 5 с без звука, стартовый кадр — картинки выше. Сжатые версии (для сторис) — `marketing/stories/2026-11/hf/<id>.mp4`; оригиналы в git не кладём (можно скачать в Higgsfield → история). «Запас» — для будущих сторис и Reels.');
 p();
-p('| Ролик | Из картинки | Что происходит | Кредиты |');
-p('|---|---|---|---|');
-for (const h of HF_PLAN) p(`| ${h.id} | ${h.from} | ${h.what} | ≈ ${h.credits} |`);
-const total = HF_PLAN.reduce((a, h) => a + h.credits, 0) + GPT_PROMPTS.length * HF_IMAGE_CREDITS;
-p(`| **Итого** | | ${HF_PLAN.length} видео + ${GPT_PROMPTS.length} картинок (если делать картинки тоже в Higgsfield, по ${HF_IMAGE_CREDITS} кр.) | **≈ ${total.toFixed(2)}** |`);
+p('| Ролик | Из картинки | Что происходит | Где | Кредиты |');
+p('|---|---|---|---|---|');
+for (const h of HF_PLAN) p(`| ${h.id} | ${h.from} | ${h.what} | ${h.use} | ${h.credits} |`);
+p();
+p(`**Потрачено всего: ${HF_DONE.spent} кр.**`);
+for (const x of HF_DONE.lines) p(`- ${x}`);
 p();
 p('## Актуальное (Highlights)');
 p('Обложки без текста — `marketing/stories/2026-11/highlights/` (9 шт., фирменные линии на графите). Названия задаются в Instagram:');
@@ -103,9 +104,9 @@ for (let day = 1; day <= 28; day++) {
   p('| Время | Файл | Рубрика · вид | Текст (RU) | Стикер | Актуальное | Заметки |');
   p('|---|---|---|---|---|---|---|');
   for (const s of STORIES.filter((x) => x.day === day)) {
-    const flags = [s.after === 'prices' ? '🔒 после утверждения цен' : '', s.after === 'site' ? '🌐 после запуска сайта' : '', s.ai ? 'ИИ-визуализация' : '', s.gpt ? `картинка GPT «${s.gpt}» (по желанию)` : '', s.real ? 'лучше своё фото' : '', s.note ?? ''].filter(Boolean).join(' · ');
+    const flags = [s.after === 'prices' ? '🔒 после утверждения цен' : '', s.after === 'site' ? '🌐 после запуска сайта' : '', s.ai ? 'ИИ-визуализация' : '', s.video?.includes('/hf-') ? `ролик ${s.video.slice(8, -4)}` : '', s.gpt ? `ИИ-картинка «${s.gpt}»` : '', s.real ? 'лучше своё фото' : '', s.note ?? ''].filter(Boolean).join(' · ');
     const txt = [s.big ? `**${s.big.ru}** ` : '', `**${s.title.ru}**`, s.body ? ` — ${s.body.ru}` : '', s.items ? ` (${s.items.map((i) => i.ru).join('; ')})` : ''].join('');
-    p(`| ${TIMES[s.slot]} | ${file(s)} | ${RUBRICS[s.rubric].ru} · ${KIND[s.kind]} | ${txt.replace(/\|/g, '/')} | ${st(s.sticker)} | ${s.hl ? HL[s.hl].ru : ''} | ${flags} |`);
+    p(`| ${TIMES[s.slot]} | ${file(s)} | ${RUBRICS[s.rubric].ru} · ${KIND[s.kind]}${s.kind === 'video' ? (s.video?.includes('/hf-') ? ' 5 с' : ' 8 с') : ''} | ${txt.replace(/\|/g, '/')} | ${st(s.sticker)} | ${s.hl ? HL[s.hl].ru : ''} | ${flags} |`);
   }
 }
 p();

@@ -17,6 +17,7 @@ mkdir -p $P/shots $P/real $P/gpt; rm -f $P/real/* $P/gpt/*
 cp $ROOT/public/img/site/{phone,gloves,pack,tape,van-side}.webp $ROOT/public/img/film/step-*.webp $P/
 cp $ROOT/public/scenes/box/poster-m-pl.webp $P/box-render.webp
 cp $ROOT/public/video/{film-m,phone,gloves,van}.mp4 $P/
+cp $M/hf/hf-*.mp4 $P/   # ролики Higgsfield (5 с, сжатые; оригиналы — hf/full/, в git не кладём)
 cp $M/src/pv-*.jpg $M/src/film-*.jpg $P/
 cp $M/src/*-ru.jpg $M/src/*-pl.jpg $M/src/*-uk.jpg $M/src/*-en.jpg $P/shots/
 for d in real gpt; do [ -d $M/$d ] && find $M/$d -maxdepth 1 -name '*.jpg' -exec cp {} $P/$d/ \; ; done

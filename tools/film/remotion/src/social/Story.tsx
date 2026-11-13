@@ -55,8 +55,16 @@ const Body: React.FC<{text?: string; style?: React.CSSProperties}> = ({text, sty
   <div style={{fontSize: fitWrap(text, 42, TEXT_W, 5, 0.52, 30), lineHeight: 1.45, color: 'rgba(255,255,255,.82)', marginTop: 36, ...style}}>{text}</div>
 ) : null;
 
-const Bullets: React.FC<{items: string[]}> = ({items}) => (
-  <div style={{display: 'grid', gap: 34, marginTop: 56}}>
+/** блок текста над логотипом: обычно начинается с top; длинный текст поднимается (до top − lift), но не заходит на логотип (низ — 390 px от края) */
+const TextBlock: React.FC<{top: number; lift: number; children: React.ReactNode}> = ({top, lift, children}) => (
+  <div style={{position: 'absolute', left: PADX, right: PADX, top: top - lift, bottom: 390, display: 'flex', flexDirection: 'column'}}>
+    <div style={{flex: `0 1 ${lift}px`, minHeight: 0}} />
+    <div>{children}</div>
+  </div>
+);
+
+const Bullets: React.FC<{items: string[]; compact?: boolean}> = ({items, compact}) => (
+  <div style={{display: 'grid', gap: compact ? 22 : 34, marginTop: compact ? 36 : 56}}>
     {items.map((t) => (
       <div key={t} style={{display: 'grid', gridTemplateColumns: '56px 1fr', alignItems: 'baseline', fontSize: fitWrap(t, 46, TEXT_W - 56, 2, 0.52, 32), lineHeight: 1.35}}>
         <span style={{width: 34, height: 4, background: C.tape, display: 'block', transform: 'translateY(-10px)'}} />
@@ -90,11 +98,14 @@ export const StoryCard: React.FC<{s: Story; lang: Lang}> = ({s, lang}) => {
     return (
       <Frame s={s} lang={lang} ai={bg.ai}>
         {bg.src && <Img src={staticFile(bg.src)} style={{position: 'absolute', left: 0, top: 0, width: W, height: 1180, objectFit: 'cover'}} />}
-        <AbsoluteFill style={{background: 'linear-gradient(180deg, rgba(16,22,29,.92) 0%, rgba(16,22,29,.55) 14%, rgba(16,22,29,0) 30%, rgba(16,22,29,0) 46%, rgba(16,22,29,1) 61%)'}} />
-        <div style={{position: 'absolute', left: PADX, right: PADX, top: 1080}}>
+        <AbsoluteFill style={{background: s.kind === 'list'
+          ? 'linear-gradient(180deg, rgba(16,22,29,.92) 0%, rgba(16,22,29,.55) 14%, rgba(16,22,29,0) 28%, rgba(16,22,29,0) 36%, rgba(16,22,29,1) 51%)'
+          : 'linear-gradient(180deg, rgba(16,22,29,.92) 0%, rgba(16,22,29,.55) 14%, rgba(16,22,29,0) 30%, rgba(16,22,29,0) 46%, rgba(16,22,29,1) 61%)'}} />
+        {/* текст начинается с 1080, а если длинный — поднимается (список — выше), чтобы не задеть логотип */}
+        <TextBlock top={1080} lift={s.kind === 'list' ? 280 : 200}>
           <Title text={t} max={90} lines={3} />
-          {s.kind === 'list' && s.items ? <Bullets items={s.items.map((x) => x[lang])} /> : <Body text={b} style={{marginTop: 28}} />}
-        </div>
+          {s.kind === 'list' && s.items ? <Bullets items={s.items.map((x) => x[lang])} compact /> : <Body text={b} style={{marginTop: 28}} />}
+        </TextBlock>
       </Frame>
     );
   }
@@ -188,10 +199,10 @@ export const StoryVideo: React.FC<{s: Story; lang: Lang; from?: number; vertical
         <span>{RUBRICS[s.rubric][lang]}</span><span>{DAY_WORD[lang]} {s.day}</span>
       </div>
       <div style={{position: 'absolute', left: PADX, top: 288, width: 120, height: 4, background: C.tape, transformOrigin: '0 50%', scale: `${interpolate(f, [6, 24], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: EASE})} 1`}} />
-      <div style={{position: 'absolute', left: PADX, right: PADX, top: 1180}}>
+      <TextBlock top={1180} lift={220}>
         <div style={rise(f, 12, 20)}><Title text={t} max={88} lines={3} /></div>
         {b && <div style={rise(f, 24, 20)}><Body text={b} style={{marginTop: 24}} /></div>}
-      </div>
+      </TextBlock>
       <Logo width={190} style={{position: 'absolute', left: PADX, bottom: 300}} />
       {s.ai && <AiLabel lang={lang} style={{position: 'absolute', right: PADX, bottom: 304, fontSize: 24}} />}
     </AbsoluteFill>

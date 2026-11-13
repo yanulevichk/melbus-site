@@ -10,6 +10,8 @@
  *
  * Картинки: готовые материалы (фильм, ролики, скриншоты сайта, кадры 3D-черновика); слоты для фото команды (real)
  * и картинок ChatGPT (gpt) — если файл положить в marketing/stories/2026-11/{real,gpt}/<id>.jpg, сторис пересоберётся с ним.
+ * 13.11.2026 картинки gpt сгенерированы в Higgsfield (8 шт., marketing/stories/2026-11/gpt/), ролики 5 с — marketing/stories/2026-11/hf/
+ * (D16-1 QR, D21-1 коробка первой ночи, D28-1 двери буса; запас — hf-tape, hf-wardrobe и картинки qr/wardrobe/van-rear).
  * Цены берутся из формулы сайта (src/data/pricing.ts) — поменяли цену на сайте, пересобрали сторис.
  */
 import type {L, Lang} from './texts';
@@ -230,7 +232,7 @@ export const STORIES: Story[] = [
     sticker: {t: 'quiz', opts: [l('Стопкой плашмя', 'Płasko w stos', 'Стосом плазом', 'Flat in a stack'), l('Ребром, как пластинки', 'Na sztorc, jak płyty', 'Ребром, як платівки', 'On edge, like records')], ok: 1},
     note: 'Правильный ответ — ребром: так тарелки лучше выдерживают удар. Можно ответить в следующей сторис текстом.'},
 
-  {id: 'D16-1', day: 16, slot: 1, rubric: 'bts', kind: 'shot', shot: 'stickers', hl: 'boxes',
+  {id: 'D16-1', day: 16, slot: 1, rubric: 'bts', kind: 'video', video: 'stories/hf-qr.mp4', ai: true, hl: 'boxes',
     title: l('Наклейка комнаты: цвет, номер, QR', 'Naklejka pokoju: kolor, numer, QR', 'Наліпка кімнати: колір, номер, QR', 'Room label: colour, number, QR'),
     body: l('Цвет — комната, номер — коробка, QR — список вещей внутри.', 'Kolor to pokój, numer to karton, QR to lista rzeczy w środku.', 'Колір — кімната, номер — коробка, QR — список речей усередині.', 'Colour is the room, number is the box, QR lists what’s inside.')},
   {id: 'D16-2', day: 16, slot: 2, rubric: 'ask', kind: 'text',
@@ -280,7 +282,7 @@ export const STORIES: Story[] = [
     title: l('Какую вещь страшнее всего перевозить?', 'Którą rzecz najbardziej boisz się przewozić?', 'Яку річ найстрашніше перевозити?', 'Which item are you most nervous about moving?'),
     sticker: {t: 'question', q: l('Напишите', 'Napisz', 'Напишіть', 'Tell us')}},
 
-  {id: 'D21-1', day: 21, slot: 1, rubric: 'sun', kind: 'video', video: 'stories/gloves.mp4', ai: true,
+  {id: 'D21-1', day: 21, slot: 1, rubric: 'sun', kind: 'video', video: 'stories/hf-first-night.mp4', ai: true,
     title: l('День святого Николая 🎁', 'Mikołajki 🎁', 'День святого Миколая 🎁', 'St Nicholas Day 🎁'),
     body: l('Лучший подарок на новоселье — переезд без стресса и доплат.', 'Najlepszy prezent na nowe mieszkanie — przeprowadzka bez stresu i dopłat.', 'Найкращий подарунок на новосілля — переїзд без стресу й доплат.', 'The best housewarming gift: a move with no stress and no extra fees.')},
   {id: 'D21-2', day: 21, slot: 2, rubric: 'diary', kind: 'text', hl: 'diary',
@@ -344,12 +346,12 @@ export const STORIES: Story[] = [
       l('Снимите видео — получите цену', 'Nagraj wideo — dostaniesz cenę', 'Зніміть відео — отримайте ціну', 'Film a video — get your price'),
     ]},
 
-  {id: 'D28-1', day: 28, slot: 1, rubric: 'sun', kind: 'video', video: 'stories/film-m.mp4', ai: true,
+  {id: 'D28-1', day: 28, slot: 1, rubric: 'sun', kind: 'video', video: 'stories/hf-van.mp4', ai: true,
     title: l('Ваш новый адрес ждёт', 'Twój nowy adres czeka', 'Ваша нова адреса чекає', 'Your new address is waiting')},
   {id: 'D28-2', day: 28, slot: 2, rubric: 'diary', kind: 'text', hl: 'diary',
     title: l('Месяц дневника позади', 'Miesiąc dziennika za nami', 'Місяць щоденника позаду', 'A month of our diary'),
     body: l('Спасибо, что вы с нами. Дальше — первые настоящие переезды: покажем их как есть.', 'Dziękujemy, że jesteście z nami. Dalej — pierwsze prawdziwe przeprowadzki: pokażemy je bez upiększeń.', 'Дякуємо, що ви з нами. Далі — перші справжні переїзди: покажемо їх як є.', 'Thanks for being here. Next: our first real moves, shown as they are.')},
-  {id: 'D28-3', day: 28, slot: 3, rubric: 'melbus', kind: 'photo', img: 'stories/film-van.jpg', ai: true, after: 'site',
+  {id: 'D28-3', day: 28, slot: 3, rubric: 'melbus', kind: 'photo', img: 'stories/film-van.jpg', gpt: 'keys', ai: true, after: 'site',
     title: l('Запишитесь на переезд', 'Zarezerwuj przeprowadzkę', 'Запишіться на переїзд', 'Book your move'),
     body: l('Декабрь и январь — есть свободные даты.', 'Grudzień i styczeń — są wolne terminy.', 'Грудень і січень — є вільні дати.', 'December and January — dates available.'),
     sticker: {t: 'link', to: 'quote', label: LINK.quote},

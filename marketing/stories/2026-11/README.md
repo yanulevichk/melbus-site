@@ -28,12 +28,12 @@
 - **D05-2** — Можно фоном: фото ваших бусов (без номеров). → сохранить как `marketing/stories/2026-11/real/D05-2.jpg`
 - Каждую неделю (по желанию, без лиц): утро на базе, бус выезжает, руки бригады клеят бирюзовый скотч, коробки на складе. Это «живой» фон для рубрики «За кадром».
 
-## Картинки в ChatGPT (бесплатно по вашей подписке)
-Как: откройте ChatGPT → прикрепите логотип `brand/export/MELBUS_logo_na_belom.png` → вставьте **общий стиль + подсказку** → скачайте → сохраните как `marketing/stories/2026-11/gpt/<id>.jpg` → `./render-stories.sh` (или напишите Claude — пересоберу).
+## Картинки ИИ — готово 13.11.2026 (Higgsfield, GPT Image)
+Все 8 лежат в `marketing/stories/2026-11/gpt/<id>.jpg` (1080×1920) и уже стоят в сторис (см. «для»). Логотип только на предметах, без лиц. Подсказки ниже — если захотите переделать: в ChatGPT (бесплатно по подписке) прикрепите логотип `brand/export/MELBUS_logo_na_belom.png`, вставьте **общий стиль + подсказку**, сохраните с тем же именем и запустите `./render-stories.sh` (или напишите Claude).
 
 **Общий стиль (вставлять перед каждой подсказкой):**
 ```
-Photorealistic, premium commercial photography, soft natural daylight, calm and tidy. Colour palette: graphite #10161D, clean white, turquoise #14DCD5 accents only on tape, stickers and details. Vertical 9:16 (1080x1920), keep the lower 40% visually calm for text. No people’s faces (hands only if needed). No text anywhere except the MELBUS logo from the attached reference image, copied exactly.
+Photorealistic, premium commercial photography, soft natural daylight, calm and tidy. Colour palette: graphite #10161D, clean white, turquoise #14DCD5 accents only on tape, stickers and details. Vertical 9:16 (1080x1920), keep the lower 40% visually calm for text. No people’s faces (hands only if needed). All cardboard boxes are pure white (never brown or kraft). The MELBUS logo from the attached reference image may appear ONLY printed on physical objects (boxes, clothing, van), copied exactly; never as a floating overlay, watermark or graphic on the floor, wall or sky. No other text anywhere.
 ```
 - **first-night** — Коробка первой ночи (вид сверху) · для: D17-1
   ```
@@ -51,34 +51,41 @@ Photorealistic, premium commercial photography, soft natural daylight, calm and 
   ```
   A neat stack of white cardboard moving boxes sealed with turquoise tape, each with a room label sticker (colour stripe, large number, QR code) and the MELBUS logo, in an empty bright living room with big windows, warm morning light on the floor.
   ```
-- **qr** — Наклейка с QR крупно, рука с телефоном · для: будущие сторис
+- **qr** — Наклейка с QR крупно, рука с телефоном · для: D16-1 (старт-кадр ролика)
   ```
-  Close-up of the corner of a white moving box with a room label sticker: turquoise colour stripe, large number 07, a QR code. A hand holds a smartphone scanning the QR code, the phone screen shows a simple list. Hand only, shallow depth of field.
+  Close-up of the corner of a white moving box with a room label sticker: turquoise colour stripe, large number 07, a QR code. A hand holds a smartphone scanning the QR code, the phone screen shows a simple checklist made of abstract grey lines and turquoise ticks (no readable words). Hand only, shallow depth of field.
   ```
-- **wardrobe** — Гардеробная коробка с одеждой на вешалках · для: будущие сторис
+- **wardrobe** — Гардеробная коробка с одеждой на вешалках · для: запас (старт-кадр ролика)
   ```
   A tall white wardrobe moving box with a metal hanging rail, front open, shirts and dresses on hangers inside, standing in a bright hallway; turquoise tape on the edges, MELBUS logo on the side.
   ```
-- **keys** — Ключи от нового дома (только руки) · для: будущие сторис
+- **keys** — Ключи от нового дома (только руки) · для: D28-3
   ```
-  Close-up of one hand passing house keys on a turquoise keyring into another open hand, white moving boxes softly blurred in the background. Hands only, no faces.
+  Close-up of one hand passing house keys on a turquoise keyring into another open hand, white moving boxes with turquoise tape softly blurred in the background, bright empty new flat. Hands only, no faces.
   ```
-- **van-rear** — Задние двери буса: аккуратно уложенные коробки · для: будущие сторис
+- **van-rear** — Задние двери буса: аккуратно уложенные коробки · для: D28-1 (старт-кадр ролика)
   ```
-  Open rear doors of a white delivery van, inside neatly stacked white moving boxes with turquoise tape, secured with straps and moving blankets, quiet Warsaw residential street at golden hour, no people, no licence plate visible.
+  Open rear doors of a white delivery van, inside neatly stacked white moving boxes with turquoise tape, secured with straps and moving blankets, quiet Warsaw residential street with old tenement houses and trees at golden hour, no people, no licence plate visible.
   ```
 
-## Видео в Higgsfield (только после вашего «да» — это платно)
-Короткие ролики 5 с (Kling 3.0, без звука) из картинок выше как стартовый кадр. Логотип — только образцом, при неточности накладываем настоящий.
+## Ролики ИИ — готово 13.11.2026 (Higgsfield, Kling 3.0 pro)
+5 роликов по 5 с без звука, стартовый кадр — картинки выше. Сжатые версии (для сторис) — `marketing/stories/2026-11/hf/<id>.mp4`; оригиналы в git не кладём (можно скачать в Higgsfield → история). «Запас» — для будущих сторис и Reels.
 
-| Ролик | Из картинки | Что происходит | Кредиты |
-|---|---|---|---|
-| hf-first-night | first-night | Руки в перчатках открывают коробку первой ночи и достают чайник | ≈ 8.75 |
-| hf-tape | boxes | Бирюзовый скотч запечатывает коробку (макро) | ≈ 8.75 |
-| hf-qr | qr | Телефон сканирует QR — на экране список вещей | ≈ 8.75 |
-| hf-wardrobe | wardrobe | Одежда на вешалках «въезжает» в гардеробную коробку | ≈ 8.75 |
-| hf-van | van-rear | Двери буса закрываются на уложенных коробках | ≈ 8.75 |
-| **Итого** | | 5 видео + 8 картинок (если делать картинки тоже в Higgsfield, по 0.25 кр.) | **≈ 45.75** |
+| Ролик | Из картинки | Что происходит | Где | Кредиты |
+|---|---|---|---|---|
+| hf-first-night | first-night | Руки в перчатках достают чайник из коробки первой ночи | D21-1 | 8.75 |
+| hf-tape | boxes | Рука в перчатке приглаживает бирюзовый скотч, камера наезжает | запас | 8.75 |
+| hf-qr | qr | Телефон сканирует QR — на экране список вещей | D16-1 | 8.75 |
+| hf-wardrobe | wardrobe | Рука вешает рубашку в гардеробную коробку | запас | 8.75 |
+| hf-van | van-rear | Двери буса закрываются на уложенных коробках | D28-1 | 8.75 |
+
+**Потрачено всего: 59.5 кр.**
+- 8 картинок GPT Image (0,25 кр.) — 2 кр.
+- 4 картинки переделаны в 2K (1 кр.): ИИ поставил логотип «водяным знаком» на пол/небо (floor, qr, keys, van-rear) — 4 кр.
+- keys ещё раз (1 кр.): в фоне была коричневая коробка — 1 кр.
+- 5 роликов Kling 3.0 pro, 5 с, без звука (8,75 кр.) — 43,75 кр.
+- hf-first-night ещё раз (8,75 кр.): ИИ дорисовал вторую пару рук — 8,75 кр.
+- hf-van: выдуманный номер «MELBUS» и надпись-эмблема размыты монтажом (бесплатно, tools: OpenCV-трекинг).
 
 ## Актуальное (Highlights)
 Обложки без текста — `marketing/stories/2026-11/highlights/` (9 шт., фирменные линии на графите). Названия задаются в Instagram:
@@ -162,7 +169,7 @@ VAT invoice · BLIK · 7/7 · PL RU UA EN
 #### День 6 · сб 21.11
 | Время | Файл | Рубрика · вид | Текст (RU) | Стикер | Актуальное | Заметки |
 |---|---|---|---|---|---|---|
-| 09:00 | D06-1.jpg | За кадром · фото + текст | **Почему коробки белые** — На белом видно наклейку комнаты и номер. Чисто — и сразу ясно, что это MELBUS. |  | Коробки | ИИ-визуализация · картинка GPT «boxes» (по желанию) |
+| 09:00 | D06-1.jpg | За кадром · фото + текст | **Почему коробки белые** — На белом видно наклейку комнаты и номер. Чисто — и сразу ясно, что это MELBUS. |  | Коробки | ИИ-визуализация · ИИ-картинка «boxes» |
 | 13:00 | D06-2.jpg | Ваш голос · текст | **Насколько вы любите упаковывать вещи?** | **Шкала-эмодзи** 😩 — подпись: RU «Честно», PL «Szczerze», UK «Чесно», EN «Honestly» |  |  |
 
 #### День 7 · вс 22.11
@@ -228,27 +235,27 @@ VAT invoice · BLIK · 7/7 · PL RU UA EN
 #### День 16 · вт 01.12
 | Время | Файл | Рубрика · вид | Текст (RU) | Стикер | Актуальное | Заметки |
 |---|---|---|---|---|---|---|
-| 09:00 | D16-1.jpg | За кадром · скриншот сайта | **Наклейка комнаты: цвет, номер, QR** — Цвет — комната, номер — коробка, QR — список вещей внутри. |  | Коробки |  |
+| 09:00 | D16-1.mp4 | За кадром · видео 5 с | **Наклейка комнаты: цвет, номер, QR** — Цвет — комната, номер — коробка, QR — список вещей внутри. |  | Коробки | ИИ-визуализация · ролик hf-qr |
 | 13:00 | D16-2.jpg | Ваш голос · текст | **Сколько коробок не разобрано после прошлого переезда?** | **Шкала-эмодзи** 📦 — подпись: RU «Признавайтесь», PL «Przyznaj się», UK «Зізнавайтеся», EN «Be honest» |  |  |
 | 19:00 | D16-3.jpg | MELBUS · фото + текст | **Посмотрите, как это работает** — Фильм, цены и калькулятор — на сайте. | **Ссылка** → главная — подпись: RU «Сайт», PL «Strona», UK «Сайт», EN «Website» |  | 🌐 после запуска сайта · ИИ-визуализация |
 
 #### День 17 · ср 02.12
 | Время | Файл | Рубрика · вид | Текст (RU) | Стикер | Актуальное | Заметки |
 |---|---|---|---|---|---|---|
-| 09:00 | D17-1.jpg | Совет · список | **Коробка первой ночи** — Едет последней — открывается первой. (Чайник, кружки, чай и кофе; Зарядки и удлинитель; Постельное и полотенца; Аптечка и туалетная бумага) |  | Коробки | картинка GPT «first-night» (по желанию) |
+| 09:00 | D17-1.jpg | Совет · список | **Коробка первой ночи** — Едет последней — открывается первой. (Чайник, кружки, чай и кофе; Зарядки и удлинитель; Постельное и полотенца; Аптечка и туалетная бумага) |  | Коробки | ИИ-картинка «first-night» |
 | 13:00 | D17-2.jpg | Ваш голос · текст | **Что обязательно будет в вашей коробке первой ночи?** | **Опрос** — варианты:<br>RU: Кофе / Зарядки / Пижама / Игрушки детей<br>PL: Kawa / Ładowarki / Piżama / Zabawki dzieci<br>UK: Кава / Зарядки / Піжама / Іграшки дітей<br>EN: Coffee / Chargers / Pyjamas / Kids’ toys |  |  |
 
 #### День 18 · чт 03.12
 | Время | Файл | Рубрика · вид | Текст (RU) | Стикер | Актуальное | Заметки |
 |---|---|---|---|---|---|---|
-| 09:00 | D18-1.jpg | За кадром · текст | **Форма бригады** — Графит с бирюзовым кантом, чёрные перчатки, бахилы с логотипом — ещё до порога. |  | Аккуратность | картинка GPT «uniform» (по желанию) · Когда сошьют форму — заменить настоящим фото (без лиц или с согласия сотрудника). |
+| 09:00 | D18-1.jpg | За кадром · текст | **Форма бригады** — Графит с бирюзовым кантом, чёрные перчатки, бахилы с логотипом — ещё до порога. |  | Аккуратность | ИИ-картинка «uniform» · Когда сошьют форму — заменить настоящим фото (без лиц или с согласия сотрудника). |
 | 13:00 | D18-2.jpg | Миф или правда · текст | **Что бригада надевает до входа в квартиру?** | **Викторина** (верный — №1):<br>RU: Бахилы / Ничего / Шапку<br>PL: Ochraniacze na buty / Nic / Czapkę<br>UK: Бахіли / Нічого / Шапку<br>EN: Shoe covers / Nothing / A hat | Аккуратность |  |
 
 #### День 19 · пт 04.12
 | Время | Файл | Рубрика · вид | Текст (RU) | Стикер | Актуальное | Заметки |
 |---|---|---|---|---|---|---|
 | 09:00 | D19-1.jpg | Цифра · большая цифра | **0 zł** **доплат в день переезда** — Изменения — только с вашего согласия и до начала работ. |  | Цена |  |
-| 13:00 | D19-2.jpg | Совет · фото + текст | **Как мы защищаем дом** — Дорожки на пол, накладки на косяки и углы. Это стандарт, а не платная услуга. |  | Аккуратность | ИИ-визуализация · картинка GPT «floor» (по желанию) |
+| 13:00 | D19-2.jpg | Совет · фото + текст | **Как мы защищаем дом** — Дорожки на пол, накладки на косяки и углы. Это стандарт, а не платная услуга. |  | Аккуратность | ИИ-визуализация · ИИ-картинка «floor» |
 | 19:00 | D19-3.jpg | MELBUS · фото + текст | **Отправьте видео — мы назовём цену** | **Ссылка** → заявка — подпись: RU «Заявка», PL «Wycena», UK «Заявка», EN «Get a quote» |  | 🌐 после запуска сайта · ИИ-визуализация |
 
 #### День 20 · сб 05.12
@@ -260,7 +267,7 @@ VAT invoice · BLIK · 7/7 · PL RU UA EN
 #### День 21 · вс 06.12
 | Время | Файл | Рубрика · вид | Текст (RU) | Стикер | Актуальное | Заметки |
 |---|---|---|---|---|---|---|
-| 09:00 | D21-1.mp4 | Воскресенье · видео 8 с | **День святого Николая 🎁** — Лучший подарок на новоселье — переезд без стресса и доплат. |  |  | ИИ-визуализация |
+| 09:00 | D21-1.mp4 | Воскресенье · видео 5 с | **День святого Николая 🎁** — Лучший подарок на новоселье — переезд без стресса и доплат. |  |  | ИИ-визуализация · ролик hf-first-night |
 | 13:00 | D21-2.jpg | Дневник запуска · текст | **Неделя 3: детали** — Коробки, наклейки, форма и защита дома. Дальше — как мы сняли фильм. |  | Дневник |  |
 
 ### Глава 4 · Как мы сняли фильм + запись на переезд
@@ -306,9 +313,9 @@ VAT invoice · BLIK · 7/7 · PL RU UA EN
 #### День 28 · вс 13.12
 | Время | Файл | Рубрика · вид | Текст (RU) | Стикер | Актуальное | Заметки |
 |---|---|---|---|---|---|---|
-| 09:00 | D28-1.mp4 | Воскресенье · видео 8 с | **Ваш новый адрес ждёт** |  |  | ИИ-визуализация |
+| 09:00 | D28-1.mp4 | Воскресенье · видео 5 с | **Ваш новый адрес ждёт** |  |  | ИИ-визуализация · ролик hf-van |
 | 13:00 | D28-2.jpg | Дневник запуска · текст | **Месяц дневника позади** — Спасибо, что вы с нами. Дальше — первые настоящие переезды: покажем их как есть. |  | Дневник |  |
-| 19:00 | D28-3.jpg | MELBUS · фото + текст | **Запишитесь на переезд** — Декабрь и январь — есть свободные даты. | **Ссылка** → заявка — подпись: RU «Заявка», PL «Wycena», UK «Заявка», EN «Get a quote» |  | 🌐 после запуска сайта · ИИ-визуализация · Только если свободные даты правда есть. |
+| 19:00 | D28-3.jpg | MELBUS · фото + текст | **Запишитесь на переезд** — Декабрь и январь — есть свободные даты. | **Ссылка** → заявка — подпись: RU «Заявка», PL «Wycena», UK «Заявка», EN «Get a quote» |  | 🌐 после запуска сайта · ИИ-визуализация · ИИ-картинка «keys» · Только если свободные даты правда есть. |
 
 ## После месяца
 Когда пойдут настоящие переезды: «Сегодня переезжаем» (район → район, без адресов), «До и после» (настоящие фото, с согласия клиента), «Бригада дня» (с согласия), «Ответ на вопрос», «Цифра месяца» (настоящие числа). Отзывы — только реальные, со ссылкой на Google.

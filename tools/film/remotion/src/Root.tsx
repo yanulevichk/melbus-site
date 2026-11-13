@@ -11,7 +11,11 @@ import {StoryStills, StoryVideo, STORY_VIDEO} from './social/Story';
 import {STILLS, VIDEOS} from './social/stories';
 
 // видео-сторис: вертикальный фильм — на весь экран; квадратные/горизонтальные ролики — в рамке
-const VIDEO_OPTS: Record<string, {from?: number; vertical?: boolean}> = {'D07-1': {vertical: true, from: 0}, 'D28-1': {vertical: true, from: 14}};
+// ролики Higgsfield (hf-*) — вертикальные, 5 с
+const VIDEO_OPTS: Record<string, {from?: number; vertical?: boolean; seconds?: number}> = {
+  'D07-1': {vertical: true, from: 0},
+  'D16-1': {vertical: true, seconds: 5}, 'D21-1': {vertical: true, seconds: 5}, 'D28-1': {vertical: true, seconds: 5},
+};
 import {LANGS} from './social/texts';
 
 export const Root: React.FC = () => (
@@ -33,7 +37,7 @@ export const Root: React.FC = () => (
         {/* сторис «Дневник запуска» (stories.ts): все картинки — одной последовательностью, видео — по одному */}
         <Composition id={`Stories-${lang}`} component={StoryStills} durationInFrames={STILLS.length} fps={1} width={1080} height={1920} defaultProps={{lang}} />
         {VIDEOS.map((s) => (
-          <Composition key={s.id} id={`Story-${s.id}-${lang}`} component={StoryVideo} durationInFrames={STORY_VIDEO.fps * STORY_VIDEO.seconds} fps={STORY_VIDEO.fps} width={1080} height={1920} defaultProps={{s, lang, ...VIDEO_OPTS[s.id]}} />
+          <Composition key={s.id} id={`Story-${s.id}-${lang}`} component={StoryVideo} durationInFrames={Math.round(STORY_VIDEO.fps * (VIDEO_OPTS[s.id]?.seconds ?? STORY_VIDEO.seconds))} fps={STORY_VIDEO.fps} width={1080} height={1920} defaultProps={{s, lang, ...VIDEO_OPTS[s.id]}} />
         ))}
       </React.Fragment>
     ))}
