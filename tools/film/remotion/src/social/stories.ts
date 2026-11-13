@@ -361,6 +361,13 @@ export const STORIES: Story[] = [
 /** сторис-картинки (всё, кроме видео) — по порядку кадров рендера */
 export const STILLS = STORIES.filter((s) => s.kind !== 'video');
 export const VIDEOS = STORIES.filter((s) => s.kind === 'video');
+// видео-сторис: вертикальный фильм — на весь экран; квадратные/горизонтальные ролики — в рамке
+// ролики Higgsfield (hf-*) — вертикальные, 5 с
+export const VIDEO_OPTS: Record<string, {from?: number; vertical?: boolean; seconds?: number}> = {
+  'D07-1': {vertical: true, from: 0},
+  'D16-1': {vertical: true, seconds: 5}, 'D21-1': {vertical: true, seconds: 5}, 'D28-1': {vertical: true, seconds: 5},
+};
+
 export const dateOf = (day: number) => {
   const d = new Date(`${START}T12:00:00Z`);
   d.setUTCDate(d.getUTCDate() + day - 1);

@@ -8,14 +8,8 @@ import {Carousel, SLIDE_COUNT} from './social/Carousel';
 import {OgCard} from './social/OgCard';
 import {Avatar, CoverFB, Highlight, HIGHLIGHTS, HighlightV2, HIGHLIGHTS_V2} from './social/ProfileKit';
 import {StoryStills, StoryVideo, STORY_VIDEO} from './social/Story';
-import {STILLS, VIDEOS} from './social/stories';
+import {STILLS, VIDEOS, VIDEO_OPTS} from './social/stories';
 
-// видео-сторис: вертикальный фильм — на весь экран; квадратные/горизонтальные ролики — в рамке
-// ролики Higgsfield (hf-*) — вертикальные, 5 с
-const VIDEO_OPTS: Record<string, {from?: number; vertical?: boolean; seconds?: number}> = {
-  'D07-1': {vertical: true, from: 0},
-  'D16-1': {vertical: true, seconds: 5}, 'D21-1': {vertical: true, seconds: 5}, 'D28-1': {vertical: true, seconds: 5},
-};
 import {LANGS} from './social/texts';
 
 export const Root: React.FC = () => (

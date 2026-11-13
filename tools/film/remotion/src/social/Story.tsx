@@ -8,25 +8,14 @@ import {COMMON, type Lang, type L} from './texts';
 import {DAY_WORD, PAIR_LABELS, RUBRICS, STILLS, type Story} from './stories';
 import {noHours} from '../../../../../src/content/prices';
 import media from './stories-media.json';
+import {fitWrap} from './fit';
 
 loadBrandFonts();
 
 const W = 1080, PADX = 84, TEXT_W = W - PADX * 2;
 const INTERACTIVE = new Set(['poll', 'quiz', 'question', 'slider']);
 
-/** размер шрифта, чтобы текст поместился в maxLines строк ширины width (оценка по словам) */
-export const fitWrap = (text: string, max: number, width: number, maxLines: number, k = 0.6, min = 34) => {
-  for (let size = max; size > min; size -= 2) {
-    const cpl = Math.floor(width / (k * size));
-    let lines = 1, cur = 0;
-    for (const w of text.split(/\s+/)) {
-      if (w.length > cpl) { lines = 99; break; }
-      if (cur === 0) cur = w.length; else if (cur + 1 + w.length <= cpl) cur += 1 + w.length; else { lines++; cur = w.length; }
-    }
-    if (lines <= maxLines) return size;
-  }
-  return min;
-};
+export {fitWrap};
 
 /** фон: своё фото команды или картинка ChatGPT, если их положили; иначе — запасная картинка */
 const bgOf = (s: Story): {src?: string; ai: boolean} => {
