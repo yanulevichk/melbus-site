@@ -1,0 +1,182 @@
+---
+/**
+ * ОФЕРТА ДЛЯ КЛИЕНТА: /oferta/?id=…&s=… (ru/uk — /ru/oferta/, /uk/oferta/; en — /en/offer/). noindex.
+ * Данные берутся с сервера (/api/offer/get) по подписанной ссылке; принятие — /api/offer/accept.
+ * Тексты — src/content/offer.ts, пакеты и подписи — src/data/pricing.ts.
+ */
+import { href, type Locale } from '../i18n/routes';
+import { brand } from '../config/brand';
+import { offerText as T } from '../content/offer';
+import { PACKAGES, SIZES, AMOUNTS, ZONES, EXTRAS, DATE_ADJ } from '../data/pricing';
+interface Props { locale: Locale }
+const { locale: L } = Astro.props;
+const pick = (o: Record<string, any>): any => Object.fromEntries(Object.entries(o).map(([k, v]) => [k, Array.isArray(v) ? v.map((x) => x[L] ?? pick(x)) : v && typeof v === 'object' && !('ru' in v) ? pick(v) : v[L]]));
+const data = {
+  t: pick(T),
+  pkgNames: PACKAGES.map((p) => p.name[L]), pkgItems: PACKAGES.map((p) => p.items.map((i) => i[L])),
+  sizes: SIZES.map((s) => s.status[L]), amounts: AMOUNTS.map((a) => a.label[L]), zones: ZONES.map((z) => z.label[L]),
+  extras: EXTRAS.map((e) => e.label[L]), adj: DATE_ADJ.map((d) => d.label[L]),
+};
+const wa = `https://wa.me/${brand.contact.whatsapp}`;
+---
+<section class="of-hero dark grain">
+  <div class="container of-hero__in" data-of-hero>
+    <p class="of-eyebrow" data-of-title>{T.loading[L]}</p>
+    <p class="of-total" hidden><span data-of-total></span> zł</p>
+    <p class="of-sub" data-of-sub hidden></p>
+    <p class="of-nohours" data-of-nohours hidden>{T.noHours[L]}</p>
+    <p class="of-valid" data-of-valid hidden></p>
+  </div>
+</section>
+
+<section class="of" data-offer data-lang={L} data-wa={wa} data-terms={href(L, 'terms')}>
+  <script is:inline type="application/json" data-of-data set:html={JSON.stringify(data)} />
+  <div class="container of__in">
+    <p class="of__msg" data-of-msg hidden></p>
+    <div class="of__grid" data-of-body hidden>
+      <div class="of__main">
+        <h2 class="of__h">{T.details[L]}</h2>
+        <dl class="of__dl" data-of-details></dl>
+        <h2 class="of__h">{T.included[L]}</h2>
+        <ul class="of__inc" data-of-inc></ul>
+      </div>
+      <aside class="of__side">
+        <h2 class="of__h">{T.price[L]}</h2>
+        <dl class="of__price" data-of-price></dl>
+        <div class="of__box"><strong>{T.guaranteeH[L]}</strong><p>{T.guarantee[L]}</p></div>
+        <div class="of__box"><strong>{T.depositH[L]}</strong><p data-of-deposit></p></div>
+        <div class="of__box"><strong>{T.cancelH[L]}</strong><p>{T.cancel[L]}</p></div>
+        <div class="of__act" data-of-act>
+          <label class="of__agree"><input type="checkbox" data-of-agree /> <span>{T.agree[L]} <a href={href(L, 'terms')} target="_blank" rel="noopener">{T.terms[L]}</a></span></label>
+          <p class="of__err" role="alert" data-of-err hidden></p>
+          <button type="button" class="btn btn--primary" data-of-accept>{T.accept[L]}</button>
+        </div>
+        <div class="of__done" data-of-done hidden><strong data-of-done-h></strong><p data-of-done-t></p></div>
+        <a class="lux-link" href={wa} target="_blank" rel="noopener">{T.ask[L]}</a>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<script>
+  type D = { t: Record<string, any>; pkgNames: string[]; pkgItems: string[][]; sizes: string[]; amounts: string[]; zones: string[]; extras: string[]; adj: string[] };
+  type O = { id: string; name: string; size: number; amount: number; pkg: number; zone: number; floorsFrom: number; liftFrom: boolean; floorsTo: number; liftTo: boolean; extras: number[]; from: string; to: string; date: string; window: string; items: string; note: string; dateAdj: number; price: Record<string, number>; validUntil: string; status: string; expired: boolean };
+  function initOffer() {
+    const root = document.querySelector<HTMLElement>('[data-offer]');
+    if (!root || root.dataset.ready) return;
+    root.dataset.ready = '1';
+    const D: D = JSON.parse(root.querySelector('[data-of-data]')!.textContent || '{}');
+    const t = D.t;
+    const lang = root.dataset.lang || 'pl';
+    const nf = new Intl.NumberFormat(lang === 'en' ? 'en' : 'ru');
+    const zl = (n: number) => `${nf.format(n)} zł`;
+    const date = (s: string) => new Intl.DateTimeFormat(lang, { day: 'numeric', month: 'long', year: 'numeric', weekday: lang === 'en' ? 'long' : undefined }).format(new Date(`${s.slice(0, 10)}T12:00:00`));
+    const fill = (tpl: string, v: Record<string, string>) => tpl.replace(/\{(\w+)\}/g, (_, k) => v[k] ?? '');
+    const $ = <T extends HTMLElement>(sel: string) => document.querySelector<T>(sel)!;
+    const qs = new URLSearchParams(location.search);
+    const id = qs.get('id') || '', s = qs.get('s') || '';
+    const msg = (text: string) => { const m = $('[data-of-msg]'); m.textContent = text; m.hidden = false; $('[data-of-title]').textContent = ''; };
+    const row = (dl: HTMLElement, k: string, v: string, cls = '') => {
+      if (!v) return;
+      const d = document.createElement('div'); if (cls) d.className = cls;
+      const dt = document.createElement('dt'); dt.textContent = k;
+      const dd = document.createElement('dd'); dd.textContent = v;
+      d.append(dt, dd); dl.append(d);
+    };
+    const floorTxt = (n: number, lift: boolean) => `${n === 0 ? t.ground : fill(t.floor, { n: String(n) })}, ${lift ? t.lift : t.noLift}`;
+
+    const done = (h: string, p: string) => { $('[data-of-act]').hidden = true; $('[data-of-done]').hidden = false; $('[data-of-done-h]').textContent = h; $('[data-of-done-t]').textContent = p; };
+
+    function render(o: O) {
+      $('[data-of-title]').textContent = `${fill(t.title, { id: o.id })}${o.name ? ' · ' + fill(t.forName, { name: o.name }) : ''}`;
+      $('[data-of-total]').textContent = nf.format(o.price.total);
+      $('.of-total').hidden = false;
+      const sub = $('[data-of-sub]'); sub.textContent = fill(t.totalFor, { pkg: D.pkgNames[o.pkg] }); sub.hidden = false;
+      $('[data-of-nohours]').hidden = false;
+      const v = $('[data-of-valid]'); v.textContent = fill(t.valid, { date: date(o.validUntil) }); v.hidden = o.status === 'accepted';
+      const dl = $('[data-of-details]'); dl.innerHTML = '';
+      row(dl, t.when, `${o.date ? date(o.date) : t.noDate}${o.window ? ' · ' + fill(t.arrival, { w: o.window }) : ''}`);
+      row(dl, t.from, [o.from, floorTxt(o.floorsFrom, o.liftFrom)].filter(Boolean).join(' · '));
+      row(dl, t.to, [o.to, floorTxt(o.floorsTo, o.liftTo)].filter(Boolean).join(' · '));
+      row(dl, t.what, `${D.sizes[o.size]} · ${D.amounts[o.amount]} · ${D.zones[o.zone]}`);
+      row(dl, t.items, o.items, 'is-pre');
+      row(dl, t.extras, o.extras.map((e) => D.extras[e]).join(', '));
+      row(dl, t.note, o.note, 'is-pre');
+      const inc = $('[data-of-inc]'); inc.innerHTML = '';
+      D.pkgItems[o.pkg].forEach((x) => { const li = document.createElement('li'); li.textContent = x; inc.append(li); });
+      const pr = $('[data-of-price]'); pr.innerHTML = '';
+      const p = o.price;
+      row(pr, fill(t.rows.pkg, { n: D.pkgNames[o.pkg] }), zl(p.pkg));
+      if (p.dist) row(pr, t.rows.dist, `+ ${zl(p.dist)}`);
+      if (p.floors) row(pr, t.rows.floors, `+ ${zl(p.floors)}`);
+      if (p.extras) row(pr, t.rows.extras, `+ ${zl(p.extras)}`);
+      if (p.adj) row(pr, D.adj[o.dateAdj], `${p.adj > 0 ? '+ ' : '− '}${zl(Math.abs(p.adj))}`);
+      if (p.manual) row(pr, t.rows.manual, `${p.manual > 0 ? '+ ' : '− '}${zl(Math.abs(p.manual))}`);
+      row(pr, t.rows.total, zl(p.total), 'is-total');
+      $('[data-of-deposit]').textContent = fill(t.deposit, { d: zl(p.deposit) });
+      $('[data-of-body]').hidden = false;
+      if (o.status === 'accepted') done(t.acceptedH, t.accepted);
+      else if (o.expired) done(t.expiredH, t.expired);
+    }
+
+    if (!id || !s) { msg(t.notFound); return; }
+    fetch(`/api/offer/get?id=${encodeURIComponent(id)}&s=${encodeURIComponent(s)}`)
+      .then((r) => r.json()).then((d) => (d.ok ? render(d.offer) : msg(t.notFound))).catch(() => msg(t.notFound));
+
+    const btn = $<HTMLButtonElement>('[data-of-accept]');
+    const err = $('[data-of-err]');
+    btn.addEventListener('click', async () => {
+      if (!$<HTMLInputElement>('[data-of-agree]').checked) { err.textContent = t.errAgree; err.hidden = false; return; }
+      err.hidden = true; btn.disabled = true; btn.textContent = t.accepting;
+      try {
+        const r = await fetch('/api/offer/accept', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id, s, agree: true }) });
+        const d = await r.json().catch(() => ({}));
+        if (r.status === 410) return done(t.expiredH, t.expired);
+        if (!r.ok || !d.ok) throw new Error();
+        done(t.acceptedH, t.accepted);
+        $('[data-of-valid]').hidden = true;
+      } catch {
+        err.textContent = t.err; err.hidden = false;
+      } finally { btn.disabled = false; btn.textContent = t.accept; }
+    });
+  }
+  document.addEventListener('astro:page-load', initOffer);
+</script>
+
+<style is:global>
+  /* is:global — строки оферты создаются в браузере, стили компонента на них иначе не действуют (классы of- уникальны) */
+  .of-hero { padding-top: calc(var(--header-h) + env(safe-area-inset-top, 0px) + clamp(40px, 7vw, 88px)); padding-bottom: clamp(48px, 6vw, 88px); background: radial-gradient(70% 90% at 85% 0%, #14262C 0%, var(--dark) 60%); color: #fff; }
+  .of-hero__in { display: grid; gap: 14px; }
+  .of-eyebrow { color: var(--dark-muted); }
+  .of-total { font-family: var(--font-display); font-weight: 200; font-size: clamp(3.2rem, 1.4rem + 7vw, 8rem); letter-spacing: -0.06em; line-height: .95; font-variant-numeric: tabular-nums; }
+  .of-sub { font-size: clamp(1.05rem, 1rem + .4vw, 1.3rem); }
+  .of-nohours { color: var(--tape); }
+  .of-valid { color: var(--dark-muted); font-size: .92rem; }
+  .of { padding-block: clamp(56px, 7vw, 112px); background: #FFFFFF; }
+  .of__msg { font-size: 1.1rem; color: var(--muted); }
+  .of__grid { display: grid; gap: 48px; }
+  @media (min-width: 1024px) { .of__grid { grid-template-columns: 7fr 5fr; gap: 7%; align-items: start; } .of__side { position: sticky; top: calc(var(--header-h) + 24px); } }
+  .of__main, .of__side { display: grid; gap: 22px; align-content: start; min-width: 0; }
+  .of__h { font-family: var(--font-display); font-weight: 200; font-size: var(--fs-m); letter-spacing: -0.03em; }
+  .of__dl, .of__price { margin: 0 0 12px; border-top: 1px solid var(--hair); }
+  .of__dl > div { display: grid; gap: 4px; padding: 14px 0; border-bottom: 1px solid var(--hair); }
+  @media (min-width: 640px) { .of__dl > div { grid-template-columns: 11em 1fr; gap: 24px; } }
+  .of__dl dt { color: var(--muted); }
+  .of__dl dd { margin: 0; overflow-wrap: anywhere; }
+  .of__dl .is-pre dd { white-space: pre-line; }
+  .of__price > div { display: flex; justify-content: space-between; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--hair); }
+  .of__price dd { margin: 0; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .of__price .is-total { font-weight: 600; font-size: 1.15rem; border-bottom: 2px solid var(--graphite); }
+  .of__inc { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  .of__inc li { position: relative; padding-left: 18px; }
+  .of__inc li::before { content: ""; position: absolute; left: 0; top: .6em; width: 8px; height: 2px; background: var(--tape); }
+  .of__box { display: grid; gap: 4px; padding: 14px 16px; background: var(--paper); border-left: 2px solid var(--tape); }
+  .of__box p { color: var(--muted); font-size: .92rem; }
+  .of__act { display: grid; gap: 14px; justify-items: start; margin-top: 6px; }
+  .of__agree { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; }
+  .of__agree input { width: 20px; height: 20px; margin-top: 2px; accent-color: var(--deep); flex: none; }
+  .of__agree a { color: var(--deep); text-decoration: underline; text-underline-offset: 3px; }
+  .of__err { padding: 10px 14px; background: #FDECEC; color: #8A1C1C; border-radius: 3px; font-weight: 500; }
+  .of__done { display: grid; gap: 6px; padding: 18px; background: rgba(20,220,213,.1); border-left: 2px solid var(--tape); }
+  .of__done strong { font-family: var(--font-display); font-weight: 300; font-size: 1.4rem; letter-spacing: -0.03em; }
+</style>

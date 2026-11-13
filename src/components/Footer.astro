@@ -1,8 +1,9 @@
 ---
 import Logo from './Logo.astro';
 import { brand } from '../config/brand';
-import { ui } from '../i18n/ru';
+import { ui } from '../i18n/ui';
 import { href, type Locale } from '../i18n/routes';
+import { areaText } from '../content/areas';
 import { services } from '../data/services';
 const { locale } = Astro.props as { locale: Locale };
 const year = new Date().getFullYear();
@@ -12,35 +13,36 @@ const year = new Date().getFullYear();
     <div class="ftr__top">
       <div class="ftr__brand">
         <Logo variant="dark" />
-        <p class="t-muted">{ui.footer.note}</p>
+        <p class="t-muted">{ui.footer.note[locale]}</p>
         <a href={`tel:${brand.contact.phoneHref}`} class="ftr__phone">{brand.contact.phone}</a>
         <a href={`mailto:${brand.contact.email}`} class="t-muted">{brand.contact.email}</a>
       </div>
-      <nav class="ftr__col" aria-label={ui.nav.services}>
-        <span class="t-eyebrow">{ui.nav.services}</span>
-        {services.slice(0, 7).map((s) => <a href={href(locale, `service:${s.slug}`)}>{s.title}</a>)}
+      <nav class="ftr__col" aria-label={ui.nav.services[locale]}>
+        <span class="t-eyebrow">{ui.nav.services[locale]}</span>
+        {services.slice(0, 7).map((s) => <a href={href(locale, `service:${s.id}`)}>{s.title[locale]}</a>)}
       </nav>
-      <nav class="ftr__col" aria-label="Компания">
+      <nav class="ftr__col" aria-label={ui.footer.company[locale]}>
         <span class="t-eyebrow">MELBUS</span>
-        <a href={href(locale, 'pricing')}>{ui.nav.pricing}</a>
-        <a href={href(locale, 'how')}>{ui.nav.how}</a>
-        <a href={href(locale, 'guarantee')}>{ui.nav.guarantee}</a>
-        <a href={href(locale, 'about')}>{ui.nav.about}</a>
-        <a href={href(locale, 'faq')}>Вопросы и ответы</a>
-        <a href={href(locale, 'contact')}>{ui.nav.contact}</a>
+        <a href={href(locale, 'pricing')}>{ui.nav.pricing[locale]}</a>
+        <a href={href(locale, 'how')}>{ui.nav.how[locale]}</a>
+        <a href={href(locale, 'guarantee')}>{ui.nav.guarantee[locale]}</a>
+        <a href={href(locale, 'about')}>{ui.nav.about[locale]}</a>
+        <a href={href(locale, 'areas')}>{areaText.hub.eyebrow[locale]}</a>
+        <a href={href(locale, 'faq')}>{ui.nav.faq[locale]}</a>
+        <a href={href(locale, 'contact')}>{ui.nav.contact[locale]}</a>
       </nav>
-      <nav class="ftr__col" aria-label={ui.footer.docs}>
-        <span class="t-eyebrow">{ui.footer.docs}</span>
-        <a href={href(locale, 'terms')}>Регламент</a>
-        <a href={href(locale, 'privacy')}>Политика конфиденциальности</a>
+      <nav class="ftr__col" aria-label={ui.footer.docs[locale]}>
+        <span class="t-eyebrow">{ui.footer.docs[locale]}</span>
+        <a href={href(locale, 'terms')}>{ui.footer.terms[locale]}</a>
+        <a href={href(locale, 'privacy')}>{ui.footer.privacy[locale]}</a>
         <a href={href(locale, 'cookies')}>Cookies</a>
-        <a href={href(locale, 'complaints')}>Рекламации</a>
+        <a href={href(locale, 'complaints')}>{ui.footer.complaints[locale]}</a>
       </nav>
     </div>
     <div class="ftr__word" aria-hidden="true">{brand.name}</div>
     <div class="ftr__legal">
       <span>© {year} {brand.legal.company}. {brand.legal.address}. NIP {brand.legal.nip}, KRS {brand.legal.krs}.</span>
-      <span>Часть видео на сайте — {ui.aiLabel.toLowerCase()}, созданная ИИ.</span>
+      <span>{ui.footer.ai[locale]}</span>
     </div>
   </div>
 </footer>

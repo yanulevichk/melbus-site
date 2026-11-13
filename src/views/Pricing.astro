@@ -1,0 +1,161 @@
+---
+/**
+ * СТРАНИЦА ЦЕН: таблица «что везём × пакет», что входит, доп. услуги, «мы не продаём часы».
+ * Все цифры — из src/data/pricing.ts (та же формула, что в калькуляторе), тексты — src/content/prices.ts.
+ */
+import PageHero from '../components/PageHero.astro';
+import Media from '../components/Media.astro';
+import NoHours from '../components/NoHours.astro';
+import CtaBand from '../components/CtaBand.astro';
+import { href, type Locale } from '../i18n/routes';
+import { SIZES, PACKAGES, GRID, EXTRAS, ZONES, FLOOR, DEMO, moneyLocale } from '../data/pricing';
+import { priceTable as T, pkgText } from '../content/prices';
+import { pages } from '../content/pages';
+interface Props { locale: Locale }
+const { locale: L } = Astro.props;
+const pg = pages.pricing;
+const fmt = new Intl.NumberFormat(moneyLocale(L));
+const zl = (n: number) => `${fmt.format(n)} zł`;
+const min = (a: number[]) => Math.min(...a);
+const calc = href(L, 'calculator');
+const always = pg.blocks?.find((b) => b.type === 'list')?.items ?? [];
+---
+<PageHero eyebrow={pg.eyebrow[L]} title={pg.title[L]} lead={pg.lead?.[L]}>
+  {pg.media && <Media locale={L} video={pg.media.video} poster={pg.media.poster} alt={pg.media.alt[L]} caption={pg.media.caption?.[L]} square={pg.media.square} />}
+</PageHero>
+
+<section class="pt">
+  <div class="container pt__in">
+    <div class="pt__head">
+      <h2 class="pt__h2">{T.h2[L]}</h2>
+      <p class="pt__cap">{T.caption[L]}</p>
+    </div>
+    <div class="pt__scroll">
+      <table class="pt__table">
+        <thead>
+          <tr>
+            <th scope="col">{T.what[L]}</th>
+            {PACKAGES.map((p, i) => <th scope="col" class={i === 2 ? 'is-f' : ''}>{p.name[L]}{i === 2 && <span class="pt__badge">{pkgText.best[L]}</span>}</th>)}
+          </tr>
+        </thead>
+        <tbody>
+          {SIZES.map((s, si) => (
+            <tr>
+              <th scope="row">{s.status[L]}</th>
+              {PACKAGES.map((pk, pi) => (
+                <td class={pi === 2 ? 'is-f' : ''} data-pkg={pk.name[L]}>
+                  <a href={`${calc}?size=${si}&pkg=${pi}`}><span class="pt__from">{T.from[L]}</span> {zl(GRID[si][pi])}</a>
+                  {pi > 0 && <small>+{zl(GRID[si][pi] - GRID[si][pi - 1])}</small>}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+    {DEMO && <p class="pt__note">{T.demo[L]}</p>}
+    <a class="btn btn--primary" href={calc}>{T.calc[L]}</a>
+  </div>
+</section>
+
+<section class="pt pt--inc">
+  <div class="container pt__in">
+    <h2 class="pt__h2">{T.incH2[L]}</h2>
+    <div class="pt__pk">
+      {PACKAGES.map((p, i) => (
+        <article class={i === 2 ? 'is-f' : ''}>
+          <p class="pt__pnote">{p.note[L]}</p>
+          <h3>{p.name[L]}</h3>
+          <ul>{p.items.map((it) => <li>{it[L]}</li>)}</ul>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<NoHours locale={L} dark />
+
+<section class="pt">
+  <div class="container pt__in pt__two">
+    <div class="pt__head">
+      <h2 class="pt__h2">{T.extrasH2[L]}</h2>
+      <p class="pt__cap">{T.extrasLead[L]}</p>
+    </div>
+    <dl class="pt__list">
+      {EXTRAS.map((e) => <div><dt>{e.label[L]}</dt><dd>{T.from[L]} {zl(min(e.price))}</dd></div>)}
+      <div><dt>{T.floor[L]}</dt><dd>{T.from[L]} {zl(min(FLOOR))}</dd></div>
+      {ZONES.slice(1).map((z) => <div><dt>{z.label[L]}</dt><dd>+ {T.from[L]} {zl(min(z.add))}</dd></div>)}
+      <div><dt>{T.eu[L]}</dt><dd>{T.euPrice[L]}</dd></div>
+    </dl>
+  </div>
+</section>
+
+{always.length > 0 && (
+  <section class="pt pt--inc">
+    <div class="container pt__in pt__two">
+      <div class="pt__head"><h2 class="pt__h2">{T.alwaysH2[L]}</h2></div>
+      <dl class="pt__list pt__list--txt">
+        {always.map(([t, d]) => <div><dt>{t[L]}</dt><dd>{d[L]}</dd></div>)}
+      </dl>
+    </div>
+  </section>
+)}
+
+<CtaBand locale={L} />
+
+<style>
+  .pt { padding-block: clamp(72px, 10vw, 150px); background: #FFFFFF; }
+  .pt--inc { background: var(--paper); }
+  .pt__in { display: grid; gap: clamp(28px, 4vw, 48px); justify-items: start; }
+  .pt__head { display: grid; gap: 18px; }
+  .pt__h2 { font-family: var(--font-display); font-weight: 200; font-size: var(--fs-l); letter-spacing: -0.045em; line-height: 1.02; }
+  .pt__cap { color: var(--muted); max-width: 60ch; }
+  .pt__note { color: var(--muted); font-size: .9rem; }
+  @media (min-width: 1024px) { .pt__two { grid-template-columns: 5fr 7fr; gap: 8%; align-items: start; } }
+
+  .pt__scroll { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .pt__table { width: 100%; min-width: 560px; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+  .pt__table th, .pt__table td { text-align: left; padding: 16px 14px 16px 0; border-bottom: 1px solid var(--hair); vertical-align: top; }
+  .pt__table thead th { font-family: var(--font-display); font-weight: 300; font-size: 1.15rem; letter-spacing: -0.02em; padding-bottom: 18px; }
+  .pt__table thead th:first-child { font-family: var(--font); font-size: .9rem; color: var(--muted); font-weight: 400; }
+  .pt__table tbody th { font-weight: 500; font-size: .95rem; }
+  .pt__table td a { display: inline-block; font-family: var(--font-display); font-weight: 300; font-size: clamp(1.1rem, 1rem + .5vw, 1.45rem); letter-spacing: -0.03em; white-space: nowrap; }
+  .pt__table td a:hover { color: var(--deep); }
+  .pt__from { font-family: var(--font); font-size: .8rem; color: var(--muted); letter-spacing: 0; }
+  .pt__table td small { display: block; margin-top: 2px; color: var(--deep); font-weight: 600; font-size: .78rem; }
+  .pt__table .is-f { background: linear-gradient(rgba(20,220,213,.07), rgba(20,220,213,.07)); padding-left: 14px; }
+  .pt__table thead .is-f { box-shadow: inset 0 2px 0 var(--tape); }
+  .pt__badge { display: block; width: max-content; margin-top: 6px; padding: 2px 8px; font-family: var(--font); font-size: .7rem; font-weight: 600; letter-spacing: 0; background: var(--tape); color: var(--graphite); border-radius: 2px; }
+
+  .pt__pk { width: 100%; display: grid; border-top: 1px solid var(--hair); }
+  .pt__pk article { display: grid; gap: 12px; align-content: start; padding: 28px 0; border-bottom: 1px solid var(--hair); }
+  .pt__pk article.is-f { box-shadow: inset 0 2px 0 var(--tape); }
+  .pt__pk h3 { font-family: var(--font-display); font-weight: 200; font-size: var(--fs-m); letter-spacing: -0.03em; }
+  .pt__pnote { color: var(--muted); font-size: .92rem; }
+  .pt__pk ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  .pt__pk li { position: relative; padding-left: 18px; }
+  .pt__pk li::before { content: ""; position: absolute; left: 0; top: .6em; width: 8px; height: 2px; background: var(--tape); }
+  @media (min-width: 900px) {
+    .pt__pk { grid-template-columns: repeat(3, 1fr); }
+    .pt__pk article { padding: 32px 32px 8px 0; border-bottom: 0; }
+    .pt__pk article + article { padding-left: 32px; border-left: 1px solid var(--hair); }
+  }
+
+  .pt__list { width: 100%; margin: 0; border-top: 1px solid var(--hair); }
+  .pt__list > div { display: flex; justify-content: space-between; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--hair); }
+  .pt__list dd { margin: 0; white-space: nowrap; font-variant-numeric: tabular-nums; font-weight: 500; }
+  .pt__list--txt > div { display: grid; gap: 4px; }
+  .pt__list--txt dd { white-space: normal; color: var(--muted); font-weight: 400; }
+  /* телефон: каждая квартира — строка с тремя ценами, название пакета над ценой */
+  @media (max-width: 639px) {
+    .pt__table { min-width: 0; }
+    .pt__table thead { display: none; }
+    .pt__table tbody tr { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 6px; padding: 16px 0; border-bottom: 1px solid var(--hair); }
+    .pt__table tbody th { grid-column: 1 / -1; border: 0; padding: 0 0 10px; }
+    .pt__table td { border: 0; padding: 6px 6px 6px 0; }
+    .pt__table td::before { content: attr(data-pkg); display: block; font-size: .72rem; color: var(--muted); margin-bottom: 2px; }
+    .pt__table td.is-f { padding-left: 8px; }
+    .pt__table td a { font-size: 1.05rem; }
+    .pt__from { display: none; }
+  }
+</style>

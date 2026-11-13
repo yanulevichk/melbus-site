@@ -5,17 +5,21 @@
  */
 import PageHero from '../components/PageHero.astro';
 import SceneSlot from '../components/SceneSlot.astro';
+import Media from '../components/Media.astro';
 import SectionHead from '../components/SectionHead.astro';
 import Faq from '../components/Faq.astro';
 import CtaBand from '../components/CtaBand.astro';
 import type { Locale } from '../i18n/routes';
 
 export interface Block { type: 'list' | 'text' | 'faq' | 'cards'; eyebrow?: string; title: string; lead?: string; items?: [string, string][] }
-interface Props { locale: Locale; eyebrow?: string; title: string; lead?: string; scene?: { id: string; title: string; length?: number }; blocks?: Block[]; cta?: boolean }
-const { locale, eyebrow, title, lead, scene, blocks = [], cta = true } = Astro.props;
+export interface MediaProps { video: string; poster: string; alt: string; caption?: string; square?: boolean }
+interface Props { locale: Locale; eyebrow?: string; title: string; lead?: string; scene?: { id: string; title: string; length?: number }; media?: MediaProps; blocks?: Block[]; cta?: boolean }
+const { locale, eyebrow, title, lead, scene, media, blocks = [], cta = true } = Astro.props;
 ---
 <PageHero eyebrow={eyebrow} title={title} lead={lead}>
-  {scene && <SceneSlot id={scene.id} title={scene.title} length={scene.length ?? 1.4} />}
+  {media ? (
+    <Media locale={locale} {...media} />
+  ) : scene && <SceneSlot id={scene.id} title={scene.title} length={scene.length ?? 1.4} locale={locale} />}
 </PageHero>
 
 {blocks.map((b) => (

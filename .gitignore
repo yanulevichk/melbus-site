@@ -1,3 +1,9 @@
 node_modules/
 dist/
 .astro/
+.wrangler/
+.dev.vars
+marketing/stories/**/*.mp4
+marketing/stories/**/raw/
+!marketing/stories/2026-11/hf/*.mp4
+marketing/social/**/*.mp4

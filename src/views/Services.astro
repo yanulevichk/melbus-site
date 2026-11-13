@@ -2,21 +2,21 @@
 import PageHero from '../components/PageHero.astro';
 import CtaBand from '../components/CtaBand.astro';
 import { href, type Locale } from '../i18n/routes';
-import { services } from '../data/services';
+import { services, servicesText as T } from '../data/services';
 const { locale } = Astro.props as { locale: Locale };
-const groups = [['move', 'Переезды'], ['extra', 'Дополнительные услуги']] as const;
+const groups = ['move', 'extra'] as const;
 ---
-<PageHero eyebrow="Услуги" title="Всё для переезда<br>в одних руках" lead="От одной коробки до офиса на три этажа. Каждая услуга — с фиксированной ценой и бригадой MELBUS." />
-{groups.map(([g, label]) => (
+<PageHero eyebrow={T.eyebrow[locale]} title={T.title[locale]} lead={T.lead[locale]} />
+{groups.map((g) => (
   <section class="section section--tight">
     <div class="container">
-      <h2 class="t-eyebrow svc-g" data-reveal>{label}</h2>
+      <h2 class="t-eyebrow svc-g" data-reveal>{T.groups[g][locale]}</h2>
       <div class="svc">
         {services.filter((s) => s.group === g).map((s, i) => (
-          <a href={href(locale, `service:${s.slug}`)} class="svc__card" data-reveal>
+          <a href={href(locale, `service:${s.id}`)} class="svc__card" data-reveal>
             <span class="svc__n">{String(i + 1).padStart(2, '0')}</span>
-            <h3 class="t-h3">{s.title}</h3>
-            <p class="t-muted">{s.short}</p>
+            <h3 class="t-h3">{s.title[locale]}</h3>
+            <p class="t-muted">{s.short[locale]}</p>
             <span class="svc__go" aria-hidden="true">→</span>
           </a>
         ))}

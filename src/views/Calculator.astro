@@ -1,0 +1,358 @@
+---
+/**
+ * КАЛЬКУЛЯТОР ПЕРЕЕЗДА — цена за весь переезд, НЕ за часы.
+ * Вопросы: что везём → сколько вещей → куда → этажи → пакет (три карточки с живой ценой) → доп. услуги.
+ * Справа (на телефоне — ниже) графитовая панель с табло-барабанами и разбивкой.
+ * Тексты — src/content/calculator.ts, цены и формула — src/data/pricing.ts (estimate, та же у менеджера).
+ * Кнопка «Получить точную цену» переносит выбор в заявку: ?size=…&pkg=…&ex=…&est=…
+ */
+import PageHero from '../components/PageHero.astro';
+import { href, type Locale } from '../i18n/routes';
+import { SIZES, AMOUNTS, ZONES, PACKAGES, EXTRAS, DEMO, estimate, comparePackages, extraIncluded, moneyLocale } from '../data/pricing';
+import { calcText as T } from '../content/calculator';
+interface Props { locale: Locale; eyebrow?: string; title: string; lead?: string }
+const { locale: L, eyebrow, title, lead } = Astro.props;
+const quote = href(L, 'quote');
+const fmt = new Intl.NumberFormat(moneyLocale(L));
+const SIZE0 = 1, AMT0 = 1, PKG0 = 1;
+const start = { size: SIZE0, amount: AMT0, zone: 0, floorsNoLift: 0, extras: [] as number[] };
+const prices0 = comparePackages(start);
+const total0 = estimate({ ...start, pkg: PKG0 }).total;
+// подписи для браузера (сама формула импортируется в скрипт из pricing.ts)
+const model = {
+  status: SIZES.map((s) => s.status[L]), amounts: AMOUNTS.map((a) => a.label[L]), zones: ZONES.map((z) => z.label[L]),
+  pkgNames: PACKAGES.map((p) => p.name[L]), sizeQ: SIZES.map((s) => s.quote), pkgQ: PACKAGES.map((p) => p.quote), extraQ: EXTRAS.map((e) => e.quote),
+  ground: T.ground[L], nudgeMore: T.nudgeMore[L], nudgeSame: T.nudgeSame[L], nudgeNote: T.nudgeNote.map((n) => n[L]), inPkg: T.inPkg[L],
+};
+const floors: ['from' | 'to', number, boolean][] = [['from', 3, true], ['to', 2, true]];
+---
+<PageHero eyebrow={eyebrow} title={title} lead={lead} />
+
+<section class="cx">
+  <div class="container cx__grid">
+    <form class="cx__form" data-calc novalidate>
+      <script is:inline type="application/json" data-calc-model set:html={JSON.stringify(model)} />
+
+      <fieldset class="cx__q">
+        <legend class="cx__h">{T.qSize[L]}</legend>
+        <div class="cx-seg">
+          {SIZES.map((o, i) => (
+            <label><input type="radio" name="size" value={i} checked={i === SIZE0} /><span>{o.label[L]}</span></label>
+          ))}
+        </div>
+      </fieldset>
+
+      <fieldset class="cx__q">
+        <legend class="cx__h">{T.qAmount[L]}</legend>
+        <div class="cx-cards cx-cards--3">
+          {AMOUNTS.map((a, i) => (
+            <label class="cx-card"><input type="radio" name="amount" value={i} checked={i === AMT0} /><span class="cx-card__in"><span class="cx-card__t">{a.label[L]}</span><span class="cx-card__h">{a.hint[L]}</span></span></label>
+          ))}
+        </div>
+        <p class="cx__hint">{T.amountHint[L]}</p>
+      </fieldset>
+
+      <fieldset class="cx__q">
+        <legend class="cx__h">{T.qDist[L]}</legend>
+        <div class="cx-seg">
+          {ZONES.map((d, i) => (
+            <label><input type="radio" name="dist" value={i} checked={i === 0} /><span>{d.label[L]}</span></label>
+          ))}
+        </div>
+        <p class="cx__hint">{T.euNote[L]} <a href={quote}>{T.euLink[L]}</a></p>
+      </fieldset>
+
+      <fieldset class="cx__q">
+        <legend class="cx__h">{T.qFloors[L]}</legend>
+        <div class="cx-floors">
+          {floors.map(([k, f, lift]) => (
+            <div class="cx-floor" data-floor={k}>
+              <span class="cx-floor__addr">{k === 'from' ? T.addrFrom[L] : T.addrTo[L]}</span>
+              <div class="cx-step">
+                <button type="button" data-dec aria-label={`${T.less[L]} — ${k === 'from' ? T.addrFrom[L] : T.addrTo[L]}`}>−</button>
+                <output aria-live="polite" data-floor-out><span class="cx-step__k">{T.floor[L]}</span> <b>{f}</b></output>
+                <input type="hidden" name={`floor_${k}`} value={f} />
+                <button type="button" data-inc aria-label={`${T.more[L]} — ${k === 'from' ? T.addrFrom[L] : T.addrTo[L]}`}>+</button>
+              </div>
+              <label class="cx-switch"><input type="checkbox" name={`lift_${k}`} checked={lift} /><i aria-hidden="true"></i><span>{T.lift[L]}</span></label>
+            </div>
+          ))}
+        </div>
+        <p class="cx__hint">{T.floorsHint[L]}</p>
+      </fieldset>
+
+      <fieldset class="cx__q">
+        <legend class="cx__h">{T.qPkg[L]}</legend>
+        <div class="cx-cards">
+          {PACKAGES.map((p, i) => (
+            <label class={`cx-card cx-pkg${i === 2 ? ' is-best' : ''}`}>
+              <input type="radio" name="pkg" value={i} checked={i === PKG0} />
+              <span class="cx-card__in" data-badge={T.best[L]}>
+                <span class="cx-pkg__top">
+                  <span><span class="cx-pkg__name">{p.name[L]}</span><span class="cx-pkg__note">{p.note[L]}</span></span>
+                  <span class="cx-pkg__right"><span class="cx-pkg__price"><span data-pkg-price={i}>{fmt.format(prices0[i].pkg)}</span> zł</span><span class="cx-pkg__diff" data-pkg-diff={i}>{i > 0 ? `+${fmt.format(prices0[i].pkg - prices0[i - 1].pkg)} zł` : ''}</span></span>
+                </span>
+                <ul>{p.items.map((it) => <li>{it[L]}</li>)}</ul>
+              </span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
+
+      <fieldset class="cx__q">
+        <legend class="cx__h">{T.qExtras[L]}</legend>
+        <div class="cx-checks">
+          {EXTRAS.map((e, i) => (
+            <label class={`cx-check${extraIncluded(PKG0, i) ? ' is-inc' : ''}`} data-extra={i}>
+              <input type="checkbox" name="extra" value={i} disabled={extraIncluded(PKG0, i)} /><i aria-hidden="true"></i>
+              <span>{e.label[L]}<small data-inc hidden={!extraIncluded(PKG0, i)}>{T.inPkg[L]}</small></span>
+              <span class="cx-check__p" data-extra-price>{extraIncluded(PKG0, i) ? '' : `+${fmt.format(e.price[SIZE0])} zł`}</span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
+
+      <div class="cx-mini" aria-hidden="true">
+        <span>{T.estimate[L]}</span>
+        <strong>{T.from[L]} <b data-calc-mini>{fmt.format(total0)}</b> zł</strong>
+      </div>
+    </form>
+
+    <aside class="cx__res dark grain" aria-label={T.estimate[L]}>
+      <div class="cx__panel">
+        <p class="cx__eyebrow">{T.estimate[L]}</p>
+        <div class="cx-board" id="board-calc" data-board>
+          <p class="cx-board__status" data-board-status>{SIZES[SIZE0].status[L]} · {ZONES[0].label[L]}</p>
+          <div class="cx-board__row" aria-hidden="true">
+            <span class="cx-board__from">{T.from[L]}</span>
+            {[0, 1, 2, 3, 4].map((i) => (
+              <span class={`cx-reel${i === 1 ? ' cx-reel--k' : ''}`} data-reel><span class="cx-reel__strip">{Array.from({ length: 33 }, (_, k) => <i>{k % 11 === 10 ? '' : k % 11}</i>)}</span></span>
+            ))}
+            <span class="cx-board__cur">zł</span>
+          </div>
+          <p class="sr-only" aria-live="polite">{T.sr[L]} <span data-board-value>{total0}</span> zł</p>
+        </div>
+
+        <dl class="cx-break">
+          {(['pkg', 'dist', 'floors', 'extras'] as const).map((r) => (
+            <div data-row={r} hidden={r !== 'pkg'}><dt>{T.rows[r][L]}{r === 'pkg' && <span data-pkg-name> «{PACKAGES[PKG0].name[L]}»</span>}</dt><dd data-row-v>—</dd></div>
+          ))}
+        </dl>
+        <p class="cx-nudge" data-nudge hidden><span data-nudge-t></span><button type="button" data-nudge-go>{T.nudgeGo[L]}</button></p>
+
+        <p class="cx-nohours">{T.noHours[L]}</p>
+        {DEMO && <p class="cx-note">{T.note[L]}</p>}
+        <div class="cx__cta">
+          <a class="btn btn--primary" href={quote} data-calc-cta>{T.cta[L]}</a>
+          <a class="lux-link" href={quote + '#video'}>{T.video[L]}</a>
+        </div>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<script>
+  import { estimate, comparePackages, extraIncluded, EXTRAS, moneyLocale } from '../data/pricing';
+  type Model = { status: string[]; amounts: string[]; zones: string[]; pkgNames: string[]; sizeQ: number[]; pkgQ: number[]; extraQ: number[]; ground: string; nudgeMore: string; nudgeSame: string; nudgeNote: string[]; inPkg: string };
+  function initCalc() {
+    const form = document.querySelector<HTMLFormElement>('[data-calc]');
+    if (!form || form.dataset.ready) return;
+    form.dataset.ready = '1';
+    const M: Model = JSON.parse(form.querySelector('[data-calc-model]')!.textContent || '{}');
+    const board = document.getElementById('board-calc')!;
+    const cta = document.querySelector<HTMLAnchorElement>('[data-calc-cta]')!;
+    const mini = form.querySelector<HTMLElement>('[data-calc-mini]')!;
+    const nudge = document.querySelector<HTMLElement>('[data-nudge]')!;
+    const base = cta.getAttribute('href')!;
+    const fmt = new Intl.NumberFormat(moneyLocale(document.documentElement.lang));
+    const radio = (n: string) => Number(form.querySelector<HTMLInputElement>(`input[name="${n}"]:checked`)?.value ?? 0);
+    const setRadio = (n: string, v: number) => { const r = form.querySelector<HTMLInputElement>(`input[name="${n}"][value="${v}"]`); if (r) r.checked = true; };
+    const row = (k: string, v: number) => {
+      const el = document.querySelector<HTMLElement>(`[data-row="${k}"]`)!;
+      el.hidden = k !== 'pkg' && v === 0;
+      el.querySelector('[data-row-v]')!.textContent = `${k !== 'pkg' ? '+ ' : ''}${fmt.format(v)} zł`;
+    };
+    let nextPkg = -1;
+
+    const calc = () => {
+      const size = radio('size'), amount = radio('amount'), zone = radio('dist'), pkg = radio('pkg');
+      let fl = 0;
+      form.querySelectorAll<HTMLElement>('[data-floor]').forEach((w) => {
+        const f = Number(w.querySelector<HTMLInputElement>('input[type="hidden"]')!.value);
+        if (!w.querySelector<HTMLInputElement>('input[type="checkbox"]')!.checked) fl += f;
+      });
+      // доп. услуги: то, что входит в пакет, — отмечено «в пакете» и не считается
+      form.querySelectorAll<HTMLElement>('[data-extra]').forEach((lab) => {
+        const i = Number(lab.dataset.extra), inc = extraIncluded(pkg, i);
+        const cb = lab.querySelector<HTMLInputElement>('input')!;
+        cb.disabled = inc; if (inc) cb.checked = false;
+        lab.classList.toggle('is-inc', inc);
+        lab.querySelector<HTMLElement>('[data-inc]')!.hidden = !inc;
+        lab.querySelector<HTMLElement>('[data-extra-price]')!.textContent = inc ? '' : `+${fmt.format(EXTRAS[i].price[size])} zł`;
+      });
+      const extras = [...form.querySelectorAll<HTMLInputElement>('input[name="extra"]:checked')].map((c) => Number(c.value));
+      const input = { size, amount, zone, floorsNoLift: fl, extras };
+      const all = comparePackages(input);
+      // карточки пакетов: живая цена и «+X zł» к предыдущему
+      all.forEach((r, i) => {
+        form.querySelector(`[data-pkg-price="${i}"]`)!.textContent = fmt.format(r.pkg);
+        if (i > 0) form.querySelector(`[data-pkg-diff="${i}"]`)!.textContent = `+${fmt.format(r.pkg - all[i - 1].pkg)} zł`;
+      });
+      const r = estimate({ ...input, pkg });
+      (['pkg', 'dist', 'floors', 'extras'] as const).forEach((k) => row(k, r[k]));
+      document.querySelector('[data-pkg-name]')!.textContent = ` «${M.pkgNames[pkg]}»`;
+      // подсказка: следующий пакет — всего +X zł (или не дороже, если допы уже набраны)
+      nextPkg = pkg < all.length - 1 ? pkg + 1 : -1;
+      if (nextPkg > 0) {
+        const diff = all[nextPkg].total - r.total;
+        const tpl = diff <= 0 ? M.nudgeSame : M.nudgeMore;
+        nudge.querySelector('[data-nudge-t]')!.textContent = tpl.replace('{name}', M.pkgNames[nextPkg]).replace('{diff}', fmt.format(diff)).replace('{note}', M.nudgeNote[nextPkg]);
+      }
+      nudge.hidden = nextPkg < 0;
+      mini.textContent = fmt.format(r.total);
+      const st = `${M.status[size]} · ${M.amounts[amount]} · ${M.zones[zone]}`;
+      board.dataset.value = String(r.total);
+      board.querySelector('[data-board-status]')!.textContent = st;
+      board.dispatchEvent(new CustomEvent('board:set', { detail: { value: r.total, status: st } }));
+      const q = new URLSearchParams({ size: String(M.sizeQ[size]), pkg: String(M.pkgQ[pkg]), est: String(r.total) });
+      if (extras.length) q.set('ex', extras.map((i) => M.extraQ[i]).join(','));
+      cta.href = `${base}?${q}`;
+    };
+
+    nudge.querySelector('[data-nudge-go]')!.addEventListener('click', () => { if (nextPkg >= 0) { setRadio('pkg', nextPkg); calc(); } });
+    // этажи: − / +, 0 = партер
+    form.querySelectorAll<HTMLElement>('[data-floor]').forEach((w) => {
+      const inp = w.querySelector<HTMLInputElement>('input[type="hidden"]')!;
+      const out = w.querySelector<HTMLElement>('[data-floor-out] b')!;
+      const set = (n: number) => { inp.value = String(n); out.textContent = n === 0 ? M.ground : String(n); calc(); };
+      w.querySelector('[data-dec]')!.addEventListener('click', () => set(Math.max(0, Number(inp.value) - 1)));
+      w.querySelector('[data-inc]')!.addEventListener('click', () => set(Math.min(30, Number(inp.value) + 1)));
+    });
+    // ссылка со страницы района или цен: ?dist=1, ?size=2, ?pkg=2
+    const qs = new URLSearchParams(location.search);
+    (['size', 'dist', 'pkg'] as const).forEach((n) => { if (qs.has(n)) setRadio(n, Number(qs.get(n))); });
+    form.addEventListener('change', calc);
+    form.addEventListener('submit', (e) => e.preventDefault());
+    calc();
+  }
+  document.addEventListener('astro:page-load', initCalc);
+</script>
+
+<style>
+  .cx { padding-block: clamp(56px, 8vw, 128px); background: #FFFFFF; }
+  .cx__grid { display: grid; gap: 56px; }
+  @media (min-width: 1024px) { .cx__grid { grid-template-columns: minmax(0, 7fr) minmax(380px, 5fr); gap: 7%; align-items: start; } }
+
+  /* ---------- вопросы ---------- */
+  .cx__form { display: grid; gap: clamp(40px, 5vw, 64px); min-width: 0; }
+  .cx__q { border: 0; margin: 0; padding: 0; display: grid; gap: 20px; min-width: 0; }
+  .cx__h { padding: 0; font-family: var(--font-display); font-weight: 200; font-size: var(--fs-m); letter-spacing: -0.03em; margin-bottom: 4px; }
+  .cx__hint { color: var(--muted); font-size: .92rem; max-width: 52ch; }
+  .cx__hint a { color: var(--deep); text-decoration: underline; text-underline-offset: 3px; }
+
+  /* выбор одного варианта: подчёркивание, как на главной */
+  .cx-seg { display: flex; flex-wrap: wrap; gap: 4px 28px; border-bottom: 1px solid var(--hair); }
+  .cx-seg label { position: relative; cursor: pointer; }
+  .cx-seg input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .cx-seg span { display: block; padding: 14px 0 16px; font-size: 1.05rem; color: var(--muted); transition: color .3s; }
+  .cx-seg span::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--graphite); transform: scaleX(0); transform-origin: 0 50%; transition: transform .5s var(--ease-lux); }
+  .cx-seg label:hover span, .cx-seg input:checked + span { color: var(--ink); }
+  .cx-seg input:checked + span::after { transform: scaleX(1); }
+  .cx-seg input:focus-visible + span { outline: 2px solid var(--deep); outline-offset: 4px; }
+
+  /* этажи */
+  .cx-floors { display: grid; border-top: 1px solid var(--hair); }
+  /* телефон: адрес и «есть лифт» в одной строке, этаж под ними; компьютер — всё в одну строку */
+  .cx-floor { display: grid; grid-template-columns: 1fr auto; grid-template-areas: "addr lift" "step step"; align-items: center; gap: 10px 16px; padding: 18px 0; border-bottom: 1px solid var(--hair); }
+  .cx-floor__addr { grid-area: addr; font-weight: 500; }
+  .cx-step { grid-area: step; }
+  .cx-floor .cx-switch { grid-area: lift; }
+  .cx-switch span { white-space: nowrap; }
+  @media (min-width: 640px) { .cx-floor { grid-template-columns: 9.5em auto 1fr; grid-template-areas: "addr step lift"; } .cx-floor .cx-switch { justify-self: end; } }
+  .cx-step { display: inline-flex; align-items: center; gap: 6px; }
+  .cx-step button { width: 44px; height: 44px; border: 1px solid var(--hair); border-radius: 3px; background: none; font-size: 1.25rem; line-height: 1; cursor: pointer; color: var(--ink); transition: border-color .25s; }
+  .cx-step button:hover { border-color: var(--graphite); }
+  .cx-step output { min-width: 7.2em; text-align: center; }
+  .cx-step__k { color: var(--muted); font-size: .9rem; }
+  .cx-step output b { font-family: var(--font-display); font-weight: 300; font-size: 1.35rem; letter-spacing: -0.03em; }
+
+  /* переключатель «есть лифт» и галочки */
+  .cx-switch, .cx-check { display: inline-flex; align-items: center; gap: 12px; cursor: pointer; min-height: 44px; }
+  .cx-switch input, .cx-check input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .cx-switch i { position: relative; width: 44px; height: 24px; border-radius: 12px; background: var(--hair); transition: background .3s; flex: none; }
+  .cx-switch i::after { content: ""; position: absolute; left: 3px; top: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(16,22,29,.25); transition: transform .35s var(--ease-lux); }
+  .cx-switch input:checked + i { background: var(--graphite); }
+  .cx-switch input:checked + i::after { transform: translateX(20px); }
+  .cx-switch input:focus-visible + i, .cx-check input:focus-visible + i { outline: 2px solid var(--deep); outline-offset: 3px; }
+  .cx-checks { display: grid; border-top: 1px solid var(--hair); }
+  .cx-check { padding: 12px 0; border-bottom: 1px solid var(--hair); }
+  .cx-check i { position: relative; width: 22px; height: 22px; border: 1px solid var(--steel); border-radius: 3px; flex: none; transition: background .25s, border-color .25s; }
+  .cx-check i::after { content: ""; position: absolute; left: 7px; top: 3px; width: 6px; height: 11px; border: solid var(--graphite); border-width: 0 2px 2px 0; transform: rotate(45deg) scale(0); transition: transform .3s var(--ease-lux); }
+  .cx-check input:checked + i { background: var(--tape); border-color: var(--tape); }
+  .cx-check input:checked + i::after { transform: rotate(45deg) scale(1); }
+
+  /* на телефоне: итог прилипает над нижней панелью, пока заполняете вопросы */
+  .cx-mini { position: sticky; bottom: calc(var(--bar-h) + env(safe-area-inset-bottom, 0px) + 10px); z-index: 5; display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding: 14px 18px; background: var(--graphite); color: #fff; border-radius: 3px; box-shadow: 0 10px 30px rgba(16,22,29,.25); }
+  .cx-mini span { color: var(--dark-muted); font-size: .9rem; }
+  .cx-mini strong { font-family: var(--font-display); font-weight: 300; font-size: 1.35rem; letter-spacing: -0.03em; }
+  .cx-mini strong b { font-weight: 300; }
+  @media (min-width: 1024px) { .cx-mini { display: none; } }
+
+  /* ---------- панель итога ---------- */
+  .cx__res { background: radial-gradient(90% 70% at 85% 0%, #14262C 0%, var(--graphite) 65%); color: #fff; border-radius: 3px; overflow: hidden; }
+  @media (min-width: 1024px) { .cx__res { position: sticky; top: calc(var(--header-h) + 24px); } }
+  .cx__panel { position: relative; z-index: 4; display: grid; gap: 24px; padding: clamp(24px, 3.4vw, 44px); }
+  .cx__eyebrow { color: var(--dark-muted); font-size: .95rem; }
+  .cx-board { --cell: clamp(60px, 15vw, 92px); display: grid; gap: 6px; }
+  .cx-board__status { color: var(--dark-muted); font-size: .95rem; }
+  .cx-board__row { display: flex; align-items: flex-end; }
+  .cx-board__from { font-size: 1rem; color: var(--dark-muted); margin-right: .6em; padding-bottom: calc(var(--cell) * .16); }
+  .cx-board__cur { font-family: var(--font-display); font-weight: 200; font-size: calc(var(--cell) * .38); margin-left: .3em; padding-bottom: calc(var(--cell) * .14); }
+  .cx-reel { position: relative; width: calc(var(--cell) * .66); height: var(--cell); overflow: hidden; transition: width .5s var(--ease-lux), margin .5s var(--ease-lux);
+    -webkit-mask: linear-gradient(transparent, #000 18%, #000 82%, transparent); mask: linear-gradient(transparent, #000 18%, #000 82%, transparent); }
+  .cx-reel--k { margin-right: calc(var(--cell) * .2); }
+  .cx-reel:global(.is-blank) { width: 0; margin-right: 0; }
+  .cx-reel__strip { display: block; will-change: transform; }
+  .cx-reel__strip i { display: grid; place-items: center; height: var(--cell); font-style: normal; font-family: var(--font-display); font-weight: 200; font-size: calc(var(--cell) * .92); letter-spacing: -0.06em; line-height: 1; font-variant-numeric: tabular-nums; }
+
+  .cx-break { margin: 0; border-top: 1px solid #26303B; }
+  .cx-break > div { display: flex; justify-content: space-between; gap: 16px; padding: 12px 0; border-bottom: 1px solid #26303B; font-size: .95rem; }
+  .cx-break > div[hidden] { display: none; }
+  .cx-break dt { color: var(--dark-muted); }
+  .cx-break dt small { font-size: .85em; opacity: .8; }
+  .cx-break dd { margin: 0; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .cx-note { color: var(--dark-muted); font-size: .85rem; line-height: 1.55; }
+  .cx__cta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 28px; }
+  .cx__cta .lux-link { color: #fff; }
+
+  /* сколько вещей и пакеты — карточки */
+  .cx-cards { display: grid; gap: 10px; }
+  @media (min-width: 640px) { .cx-cards--3 { grid-template-columns: repeat(3, 1fr); } }
+  .cx-card { position: relative; cursor: pointer; display: block; }
+  .cx-card input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .cx-card__in { display: grid; gap: 6px; align-content: start; height: 100%; padding: 16px 18px; border: 1px solid var(--hair); border-radius: 3px; background: #fff; transition: border-color .25s, box-shadow .25s; }
+  .cx-card:hover .cx-card__in { border-color: var(--steel); }
+  .cx-card input:checked + .cx-card__in { border-color: var(--graphite); box-shadow: inset 0 0 0 1px var(--graphite); }
+  .cx-card input:focus-visible + .cx-card__in { outline: 2px solid var(--deep); outline-offset: 3px; }
+  .cx-card__t { font-weight: 500; }
+  .cx-card__h { color: var(--muted); font-size: .88rem; }
+  .cx-pkg .cx-card__in { gap: 10px; padding: 20px; }
+  .cx-pkg__top { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+  .cx-pkg__top > span:first-child { display: grid; gap: 4px; }
+  .cx-pkg__right { display: grid; justify-items: end; gap: 2px; text-align: right; }
+  .cx-pkg__name { font-family: var(--font-display); font-weight: 300; font-size: 1.25rem; letter-spacing: -0.03em; }
+  .cx-pkg__diff { font-size: .8rem; color: var(--deep); font-weight: 600; white-space: nowrap; }
+  .cx-pkg__price { white-space: nowrap; font-family: var(--font-display); font-weight: 200; font-size: 1.9rem; letter-spacing: -0.04em; line-height: 1; font-variant-numeric: tabular-nums; }
+  .cx-pkg__note { color: var(--muted); font-size: .9rem; }
+  .cx-pkg ul { list-style: none; margin: 4px 0 0; padding: 0; display: grid; gap: 6px 20px; font-size: .88rem; }
+  @media (min-width: 640px) { .cx-pkg ul { grid-template-columns: 1fr 1fr; } }
+  .cx-pkg li { position: relative; padding-left: 18px; }
+  .cx-pkg li::before { content: ""; position: absolute; left: 0; top: .55em; width: 8px; height: 2px; background: var(--tape); }
+  .cx-pkg.is-best .cx-card__in::before { content: attr(data-badge); position: absolute; top: -10px; left: 16px; padding: 2px 8px; font-size: .72rem; font-weight: 600; background: var(--tape); color: var(--graphite); border-radius: 2px; }
+  .cx-check.is-inc { opacity: .55; cursor: default; }
+  .cx-check small { color: var(--deep); font-weight: 600; margin-left: 6px; }
+  .cx-check__p { margin-left: auto; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .cx-nudge { padding: 12px 14px; border-left: 2px solid var(--tape); background: rgba(20,220,213,.08); font-size: .92rem; line-height: 1.5; }
+  .cx-nudge button { margin-top: 6px; display: block; padding: 0; border: 0; background: none; color: var(--tape); font: inherit; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+  .cx-nohours { color: #fff; font-size: .92rem; }
+</style>
