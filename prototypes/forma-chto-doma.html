@@ -181,6 +181,40 @@ h2 { font: 300 clamp(23px, 3.4vw, 30px)/1.15 var(--display); letter-spacing: -0.
 .ib--set { margin-left: auto }
 .tape-badge { position: absolute; top: 10px; right: -5px; background: var(--tape); color: var(--graphite); font: 400 15px/1 var(--display); padding: 6px 12px 6px 10px; transform: rotate(-4deg); font-variant-numeric: tabular-nums; pointer-events: none }
 
+/* Поиск, список «В бусе», окно вещи */
+.search { display: flex; align-items: center; gap: 10px; background: var(--white); border: 1px solid var(--steel); border-radius: 3px; padding: 0 12px }
+.search svg.i { color: var(--muted); width: 20px; height: 20px }
+.search input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; font: 16px var(--text); color: var(--ink); padding: 12px 0 }
+.search:focus-within { outline: 3px solid var(--deep); outline-offset: 1px }
+.tile__hint { margin-left: auto; font-size: 12px; color: var(--muted) }
+.bl { background: var(--white); border: 1px solid var(--line); border-radius: 4px; padding: 14px 16px; display: grid; gap: 8px }
+.bl__h { display: flex; justify-content: space-between; align-items: baseline; gap: 10px }
+.bl__h h3 { font: 400 16px var(--display); letter-spacing: -0.02em; margin: 0 }
+.bl__h h3 span { color: var(--deep) }
+.blist { list-style: none; margin: 0; padding: 0; display: grid }
+.brow { display: grid; grid-template-columns: 48px minmax(0, 1fr) auto auto; gap: 10px; align-items: center; padding: 8px 0; border-top: 1px solid var(--line) }
+.brow:first-child { border-top: 0 }
+.brow__t { display: grid; min-width: 0; line-height: 1.3 }
+.brow__t b { font-weight: 500; font-size: 15px }
+.brow__t small { font-size: 13px; color: var(--muted) }
+.pic--s { width: 48px; height: 48px; margin: 0; border-radius: 8px }
+.pic--xs { width: 40px; height: 40px; margin: -6px 0 -6px -4px }
+.stepper--s button { width: 34px; height: 34px; font-size: 18px }
+.stepper--s output { min-width: 1.8em; font-size: 14px }
+.linkbtn { border: 0; background: none; padding: 4px 0; color: var(--deep); font-weight: 500; font-size: 14px; cursor: pointer; text-decoration: underline; text-underline-offset: 3px }
+.pchips { display: flex; flex-wrap: wrap; gap: 8px }
+.pchip { display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 4px; background: var(--white); font-size: 14px; font-weight: 500; cursor: pointer; min-height: 44px; text-align: left }
+.pchip[aria-checked="true"] { border-color: var(--graphite); box-shadow: inset 0 0 0 1px var(--graphite); background: #EAFBFA }
+.hb { width: 12px; height: 26px; display: flex; align-items: flex-end; border-bottom: 2px solid var(--steel) }
+.hb i { display: block; width: 100%; background: var(--deep); border-radius: 2px 2px 0 0 }
+.sheet__f { display: flex; gap: 10px; align-items: center; position: sticky; bottom: 0; background: var(--paper); padding-top: 8px }
+.sheet__f .btn { flex: 1; display: flex; justify-content: space-between; gap: 10px }
+.delta { font-variant-numeric: tabular-nums; opacity: .85 }
+.more-q { border-top: 1px solid var(--line); padding-top: 10px }
+.more-q summary { cursor: pointer; color: var(--deep); font-weight: 500 }
+.more-q[open] summary { margin-bottom: 10px }
+.more-q .opts { margin-top: 10px }
+
 /* Коробки */
 .boxes { background: var(--white); border: 1px solid var(--line); border-radius: 4px; padding: 16px; display: grid; gap: 16px }
 .boxes__top { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 22px }
@@ -288,8 +322,8 @@ dialog { border: 0; padding: 0; background: var(--paper); color: var(--ink); wid
 @media (min-width: 720px) { dialog { margin: auto; border-radius: 8px } }
 dialog::backdrop { background: rgba(16, 22, 29, .6) }
 .sheet { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; padding: 20px max(20px, env(safe-area-inset-right, 0px)) calc(20px + env(safe-area-inset-bottom, 0px)) max(20px, env(safe-area-inset-left, 0px)) }
-.sheet__h { display: grid; grid-template-columns: 60px minmax(0, 1fr) auto; gap: 12px; align-items: center }
-.sheet__h .pic { width: 64px; height: 64px; margin: -6px }
+.sheet__h { display: grid; grid-template-columns: 84px minmax(0, 1fr) auto; gap: 12px; align-items: center }
+.sheet__h .pic { width: 84px; height: 84px; margin: -6px; transition: transform .25s }
 .sheet__h h3 { font: 300 21px/1.2 var(--display); letter-spacing: -0.03em; margin: 0 }
 .sheet p { margin: 0; font-size: 15px; color: var(--muted) }
 .sheet .end { gap: 14px }
@@ -364,8 +398,13 @@ dialog::backdrop { background: rgba(16, 22, 29, .6) }
       </div>
       <div id="items-list" class="stack">
         <div class="chips" id="presets"><span class="chips__k">Начать с:</span></div>
+        <label class="search"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><span class="vh">Найти вещь</span><input type="search" id="q" placeholder="Найти вещь: шкаф, диван, телевизор…" autocomplete="off"></label>
         <div class="tabs" role="tablist" aria-label="Комнаты" id="tabs"></div>
         <div class="grid" id="grid" role="tabpanel"></div>
+        <div class="bl">
+          <div class="bl__h"><h3>В бусе — <span id="blistN"></span></h3><button type="button" class="linkbtn" data-act="lclear" id="blistClear">Очистить</button></div>
+          <ul class="blist" id="blist"></ul>
+        </div>
         <p class="more">Пианино, сейф, аквариум, встроенная мебель — снимите на видео или опишите в заявке, посчитаем отдельно.</p>
       </div>
       <div id="items-video" class="stack" hidden>
@@ -471,44 +510,61 @@ const LEVELS = [
   {id: 2, t: 'Перевозка', d: 'Вы пакуете и разбираете шкафы. Мы выносим, везём, заносим и собираем кровати.', icon: 'carry'},
   {id: 3, t: 'Под ключ', d: 'Разбираем мебель, пакуем в наши белые коробки, везём и собираем на новом месте.', icon: 'key'},
 ];
-const ROOMS = [['bed', 'Спальня'], ['live', 'Гостиная'], ['kit', 'Кухня'], ['kid', 'Детская, кабинет'], ['hall', 'Прихожая, балкон']];
-// id, комната, название, иконка, вынести+занести (чел.-мин), объём м³, разобрать+собрать (чел.-мин), тип
+const ROOMS = [['pop', 'Популярное'], ['bed', 'Спальня'], ['live', 'Гостиная'], ['kit', 'Кухня'], ['kid', 'Детская, кабинет'], ['hall', 'Прихожая, балкон']];
+// Параметры вещей, которые меняют время работы и объём: ширина и высота шкафа, размер кровати и т. д.
+const P = {
+  wardW: {label: 'Ширина', opts: [{t: 'до 1 м', ic: 'wardS'}, {t: '1,5–2 м', ic: 'wardM'}, {t: 'от 2 м, купе', ic: 'wardL'}]},
+  wardH: {label: 'Высота', opts: [{t: 'до 2 м', h: 0.55}, {t: '2–2,4 м', h: 0.75}, {t: 'до потолка', h: 1}]},
+  bedS: {label: 'Ширина спального места', opts: [{t: '90 см'}, {t: '140 см'}, {t: '160 см'}, {t: '180 см и шире'}]},
+  bedT: {label: 'Основание', opts: [{t: 'обычное'}, {t: 'с подъёмным механизмом'}]},
+  sofaT: {label: 'Какой', opts: [{t: '2-местный', ic: 'sofa'}, {t: '3-местный', ic: 'sofa'}, {t: 'угловой', ic: 'sofaC'}, {t: 'большой модульный', ic: 'sofaC'}]},
+  tvS: {label: 'Диагональ', opts: [{t: 'до 55″'}, {t: '55–75″'}, {t: 'больше 75″'}]},
+  fridgeT: {label: 'Какой', opts: [{t: 'обычный'}, {t: 'двухдверный, side-by-side'}]},
+  tableT: {label: 'Какой', opts: [{t: 'на 4 человек'}, {t: 'на 6–8 человек'}, {t: 'со стеклянной столешницей'}]},
+  shelfT: {label: 'Размер', opts: [{t: 'невысокий', h: 0.5}, {t: 'до 2 м', h: 0.75}, {t: 'мебельная стенка', h: 1}]},
+  deskT: {label: 'Какой', opts: [{t: 'обычный'}, {t: 'угловой'}]},
+  mirrorT: {label: 'Размер', opts: [{t: 'до 1 м'}, {t: 'больше 1 м'}]},
+};
+// spec(sel) → {c: вынести+занести (чел.-мин), v: объём м³, a: разобрать+собрать (чел.-мин)}
+const T3 = (arr) => (i) => ({c: arr[i][0], v: arr[i][1], a: arr[i][2] || 0});
 const ITEMS = [
-  ['bed2', 'bed', 'Кровать двуспальная', 'bed2', 45, 1.4, 90, 'bed'],
-  ['bed1', 'bed', 'Кровать односпальная', 'bed1', 30, 0.8, 60, 'bed'],
-  ['wardS', 'bed', 'Шкаф до 1 м', 'wardS', 25, 0.7, 150, 'ward'],
-  ['wardM', 'bed', 'Шкаф 1,5–2 м', 'wardM', 60, 1.6, 270, 'ward'],
-  ['wardL', 'bed', 'Шкаф-купе от 2 м', 'wardL', 80, 2.2, 420, 'ward'],
-  ['dresser', 'bed', 'Комод', 'dresser', 25, 0.6, 0],
-  ['nights', 'bed', 'Тумбочка', 'nights', 6, 0.15, 0],
-  ['mirror', 'bed', 'Большое зеркало', 'mirror', 10, 0.1, 0],
-  ['sofa', 'live', 'Диван', 'sofa', 40, 1.5, 0],
-  ['sofaC', 'live', 'Угловой диван', 'sofaC', 60, 2.5, 30],
-  ['armch', 'live', 'Кресло', 'armch', 15, 0.6, 0],
-  ['tv', 'live', 'Телевизор', 'tv', 15, 0.2, 0, 'tv'],
-  ['tvst', 'live', 'Тумба под ТВ', 'tvst', 15, 0.4, 0],
-  ['shelf', 'live', 'Стеллаж, книжный шкаф', 'shelf', 25, 0.8, 60],
-  ['ctable', 'live', 'Журнальный столик', 'ctable', 8, 0.3, 0],
-  ['rug', 'live', 'Ковёр', 'rug', 8, 0.2, 0],
-  ['lamp', 'live', 'Торшер', 'lamp', 5, 0.15, 0],
-  ['plant', 'live', 'Большой цветок', 'plant', 6, 0.3, 0],
-  ['fridge', 'kit', 'Холодильник', 'fridge', 40, 0.9, 0],
-  ['washer', 'kit', 'Стиральная машина', 'washer', 40, 0.4, 0, 'conn'],
-  ['dishw', 'kit', 'Посудомойка (не встроенная)', 'dishw', 30, 0.4, 0, 'conn'],
-  ['dtable', 'kit', 'Обеденный стол', 'dtable', 15, 0.6, 24],
-  ['chair', 'kit', 'Стул', 'chair', 5, 0.15, 0],
-  ['desk', 'kid', 'Письменный стол', 'desk', 15, 0.5, 60],
-  ['ochair', 'kid', 'Офисное кресло', 'ochair', 5, 0.3, 0],
-  ['bunk', 'kid', 'Двухъярусная кровать', 'bunk', 40, 1.2, 180, 'bed'],
-  ['crib', 'kid', 'Детская кроватка', 'crib', 15, 0.5, 40, 'bed'],
-  ['pc', 'kid', 'Компьютер с монитором', 'pc', 10, 0.2, 0],
-  ['hallw', 'hall', 'Шкаф в прихожей, обувница', 'hall', 20, 0.6, 0],
-  ['bike', 'hall', 'Велосипед', 'bike', 8, 0.5, 0],
-  ['stroll', 'hall', 'Коляска', 'stroll', 5, 0.4, 0],
-  ['balc', 'hall', 'Балконная мебель', 'balc', 10, 0.5, 0],
-  ['tires', 'hall', 'Колёса, комплект', 'tires', 10, 0.4, 0],
-  ['bags', 'hall', 'Сумка, чемодан', 'bags', 3, 0.1, 0],
-].map(([id, room, name, icon, carry, vol, asm, kind]) => ({id, room, name, icon, carry, vol, asm, kind: kind || ''}));
+  {id: 'bed', room: 'bed', pop: 1, name: 'Кровать', icon: 'bed2', kind: 'bed', p: ['bedS', 'bedT'], def: {bedS: 2, bedT: 0},
+    spec: (s) => { const b = T3([[30, 0.8, 60], [40, 1.2, 80], [45, 1.4, 90], [55, 1.6, 100]])(s.bedS); return s.bedT ? {c: b.c + 20, v: b.v + 0.2, a: b.a + 40} : b; },
+    iconFor: (s) => (s.bedS === 0 ? 'bed1' : 'bed2'), alias: 'кровать постель матрас'},
+  {id: 'ward', room: 'bed', pop: 1, name: 'Шкаф', icon: 'wardM', kind: 'ward', p: ['wardW', 'wardH'], def: {wardW: 1, wardH: 0},
+    spec: (s) => { const b = T3([[25, 0.7, 150], [60, 1.6, 270], [80, 2.2, 420]])(s.wardW), k = [1, 1.2, 1.45][s.wardH]; return {c: b.c * k, v: b.v * k, a: b.a * k}; },
+    iconFor: (s) => ['wardS', 'wardM', 'wardL'][s.wardW], alias: 'шкаф гардероб купе pax'},
+  {id: 'dresser', room: 'bed', pop: 1, name: 'Комод', icon: 'dresser', spec: () => ({c: 25, v: 0.6, a: 0})},
+  {id: 'nights', room: 'bed', name: 'Тумбочка', icon: 'nights', spec: () => ({c: 6, v: 0.15, a: 0})},
+  {id: 'mirror', room: 'bed', name: 'Зеркало', icon: 'mirror', p: ['mirrorT'], def: {mirrorT: 1}, spec: (s) => T3([[8, 0.1], [15, 0.2]])(s.mirrorT)},
+  {id: 'sofa', room: 'live', pop: 1, name: 'Диван', icon: 'sofa', p: ['sofaT'], def: {sofaT: 1}, spec: (s) => T3([[30, 1.1], [40, 1.5], [60, 2.5, 30], [80, 3.2, 60]])(s.sofaT),
+    iconFor: (s) => (s.sofaT >= 2 ? 'sofaC' : 'sofa'), alias: 'диван софа угловой'},
+  {id: 'armch', room: 'live', pop: 1, name: 'Кресло', icon: 'armch', spec: () => ({c: 15, v: 0.6, a: 0})},
+  {id: 'tv', room: 'live', pop: 1, name: 'Телевизор', icon: 'tv', kind: 'tv', p: ['tvS'], def: {tvS: 1}, spec: (s) => T3([[15, 0.2], [25, 0.35], [40, 0.5]])(s.tvS), alias: 'телевизор тв tv'},
+  {id: 'tvst', room: 'live', name: 'Тумба под ТВ', icon: 'tvst', spec: () => ({c: 15, v: 0.4, a: 0})},
+  {id: 'shelf', room: 'live', pop: 1, name: 'Стеллаж, стенка', icon: 'shelf', p: ['shelfT'], def: {shelfT: 1}, spec: (s) => T3([[15, 0.5, 40], [25, 0.8, 60], [50, 1.6, 120]])(s.shelfT), alias: 'стеллаж стенка книжный полки'},
+  {id: 'ctable', room: 'live', name: 'Журнальный столик', icon: 'ctable', spec: () => ({c: 8, v: 0.3, a: 0})},
+  {id: 'rug', room: 'live', name: 'Ковёр', icon: 'rug', spec: () => ({c: 8, v: 0.2, a: 0})},
+  {id: 'lamp', room: 'live', name: 'Торшер', icon: 'lamp', spec: () => ({c: 5, v: 0.15, a: 0})},
+  {id: 'plant', room: 'live', name: 'Большой цветок', icon: 'plant', spec: () => ({c: 6, v: 0.3, a: 0})},
+  {id: 'fridge', room: 'kit', pop: 1, name: 'Холодильник', icon: 'fridge', p: ['fridgeT'], def: {fridgeT: 0}, spec: (s) => T3([[40, 0.9], [70, 1.4]])(s.fridgeT)},
+  {id: 'washer', room: 'kit', pop: 1, name: 'Стиральная машина', icon: 'washer', kind: 'conn', spec: () => ({c: 40, v: 0.4, a: 0}), alias: 'стиралка стиральная'},
+  {id: 'dishw', room: 'kit', name: 'Посудомойка', icon: 'dishw', kind: 'conn', spec: () => ({c: 30, v: 0.4, a: 0})},
+  {id: 'dtable', room: 'kit', pop: 1, name: 'Обеденный стол', icon: 'dtable', p: ['tableT'], def: {tableT: 0}, spec: (s) => T3([[15, 0.6, 24], [25, 1.0, 40], [30, 0.8, 40]])(s.tableT), alias: 'стол обеденный кухонный'},
+  {id: 'chair', room: 'kit', pop: 1, name: 'Стул', icon: 'chair', spec: () => ({c: 5, v: 0.15, a: 0})},
+  {id: 'desk', room: 'kid', pop: 1, name: 'Письменный стол', icon: 'desk', p: ['deskT'], def: {deskT: 0}, spec: (s) => T3([[15, 0.5, 60], [25, 0.8, 90]])(s.deskT), alias: 'стол письменный компьютерный'},
+  {id: 'ochair', room: 'kid', name: 'Офисное кресло', icon: 'ochair', spec: () => ({c: 5, v: 0.3, a: 0})},
+  {id: 'bunk', room: 'kid', name: 'Двухъярусная кровать', icon: 'bunk', kind: 'bed', spec: () => ({c: 40, v: 1.2, a: 180})},
+  {id: 'crib', room: 'kid', name: 'Детская кроватка', icon: 'crib', kind: 'bed', spec: () => ({c: 15, v: 0.5, a: 40})},
+  {id: 'pc', room: 'kid', name: 'Компьютер с монитором', icon: 'pc', spec: () => ({c: 10, v: 0.2, a: 0})},
+  {id: 'hallw', room: 'hall', name: 'Шкаф в прихожей, обувница', icon: 'hall', spec: () => ({c: 20, v: 0.6, a: 0})},
+  {id: 'bike', room: 'hall', name: 'Велосипед', icon: 'bike', spec: () => ({c: 8, v: 0.5, a: 0})},
+  {id: 'stroll', room: 'hall', name: 'Коляска', icon: 'stroll', spec: () => ({c: 5, v: 0.4, a: 0})},
+  {id: 'balc', room: 'hall', name: 'Балконная мебель', icon: 'balc', spec: () => ({c: 10, v: 0.5, a: 0})},
+  {id: 'tires', room: 'hall', name: 'Колёса, комплект', icon: 'tires', spec: () => ({c: 10, v: 0.4, a: 0})},
+  {id: 'bags', room: 'hall', name: 'Сумка, чемодан', icon: 'bags', spec: () => ({c: 3, v: 0.1, a: 0})},
+].map((it) => ({kind: '', def: {}, iconFor: () => it.icon, alias: '', ...it}));
+const ITEM = Object.fromEntries(ITEMS.map((i) => [i.id, i]));
 // Допы: минуты работы → цена (минуты × 100 zł/ч). Цены сверены с рынком Польши 2026.
 const EXTRAS = [
   {id: 'tvOff', name: 'Снять телевизор со стены', icon: 'tvwall', min: 48, d: 'Вместе с кронштейном. Старые дюбели остаются в стене.'},
@@ -520,12 +576,13 @@ const EXTRAS = [
   {id: 'conn', name: 'Отключить и подключить стиральную или посудомоечную машину', icon: 'washer', min: 90, d: 'Воду и слив. Транспортные болты поставим, если они у вас есть.'},
   {id: 'junk', name: 'Вывезти старую мебель', icon: 'bin', min: 90, d: 'Вынесем и отвезём в пункт приёма отходов.'},
 ];
+// Заготовки: [вещь, сколько, параметры]
 const PRESETS = {
-  studio: {t: 'Кавалерка', c: {bed2: 1, wardM: 1, dresser: 1, armch: 1, tv: 1, tvst: 1, dtable: 1, chair: 2, fridge: 1, washer: 1, rug: 1, plant: 1, bags: 3}, boxes: 20},
-  two: {t: '2 комнаты', c: {bed2: 1, nights: 2, wardM: 2, dresser: 1, sofa: 1, armch: 1, tv: 1, tvst: 1, ctable: 1, rug: 1, lamp: 1, plant: 2, fridge: 1, washer: 1, dtable: 1, chair: 4, bags: 4}, boxes: 40},
-  three: {t: '3 комнаты', c: {bed2: 1, bed1: 1, nights: 2, wardM: 2, wardS: 1, dresser: 1, sofa: 1, armch: 2, tv: 1, tvst: 1, shelf: 1, ctable: 1, rug: 2, lamp: 1, plant: 3, fridge: 1, washer: 1, dishw: 1, dtable: 1, chair: 4, desk: 1, ochair: 1, pc: 1, hallw: 1, bike: 1, bags: 6}, boxes: 60},
-  house: {t: 'Дом', c: {bed2: 2, bed1: 1, nights: 4, wardM: 3, wardL: 1, dresser: 2, sofaC: 1, armch: 2, tv: 2, tvst: 1, shelf: 2, ctable: 1, rug: 3, lamp: 2, plant: 4, fridge: 1, washer: 1, dishw: 1, dtable: 1, chair: 6, desk: 1, ochair: 1, pc: 1, hallw: 1, bike: 2, balc: 1, tires: 1, bags: 8}, boxes: 90},
-  empty: {t: 'С нуля', c: {}, boxes: 0},
+  studio: {t: 'Кавалерка', items: [['bed', 1, {bedS: 2}], ['ward', 1, {wardW: 1, wardH: 0}], ['dresser', 1], ['armch', 1], ['tv', 1, {tvS: 0}], ['tvst', 1], ['dtable', 1], ['chair', 2], ['fridge', 1], ['washer', 1], ['rug', 1], ['plant', 1], ['bags', 3]], boxes: 20},
+  two: {t: '2 комнаты', items: [['bed', 1, {bedS: 2}], ['nights', 2], ['ward', 2, {wardW: 1, wardH: 0}], ['dresser', 1], ['sofa', 1, {sofaT: 1}], ['armch', 1], ['tv', 1, {tvS: 1}], ['tvst', 1], ['ctable', 1], ['rug', 1], ['lamp', 1], ['plant', 2], ['fridge', 1], ['washer', 1], ['dtable', 1], ['chair', 4], ['bags', 4]], boxes: 40},
+  three: {t: '3 комнаты', items: [['bed', 1, {bedS: 2}], ['bed', 1, {bedS: 0}], ['nights', 2], ['ward', 2, {wardW: 1, wardH: 1}], ['ward', 1, {wardW: 0, wardH: 0}], ['dresser', 1], ['sofa', 1, {sofaT: 2}], ['armch', 2], ['tv', 1, {tvS: 1}], ['tvst', 1], ['shelf', 1], ['ctable', 1], ['rug', 2], ['lamp', 1], ['plant', 3], ['fridge', 1], ['washer', 1], ['dishw', 1], ['dtable', 1, {tableT: 1}], ['chair', 6], ['desk', 1], ['ochair', 1], ['pc', 1], ['hallw', 1], ['bike', 1], ['bags', 6]], boxes: 60},
+  house: {t: 'Дом', items: [['bed', 2, {bedS: 3}], ['bed', 1, {bedS: 0}], ['nights', 4], ['ward', 3, {wardW: 1, wardH: 1}], ['ward', 1, {wardW: 2, wardH: 2}], ['dresser', 2], ['sofa', 1, {sofaT: 3}], ['armch', 2], ['tv', 2, {tvS: 1}], ['tvst', 1], ['shelf', 2, {shelfT: 2}], ['ctable', 1], ['rug', 3], ['lamp', 2], ['plant', 4], ['fridge', 1, {fridgeT: 1}], ['washer', 1], ['dishw', 1], ['dtable', 1, {tableT: 1}], ['chair', 6], ['desk', 1], ['ochair', 1], ['pc', 1], ['hallw', 1], ['bike', 2], ['balc', 1], ['tires', 1], ['bags', 8]], boxes: 90},
+  empty: {t: 'С нуля', items: [], boxes: 0},
 };
 // Адреса-примеры для прототипа. На сайте — поиск точного адреса и маршрут по дорогам (Google Maps или OpenStreetMap).
 const PLACES = [
@@ -562,8 +619,9 @@ function route(S) {                              // только от адрес
 const DOOR = [0, 0.15, 0.3];                   // у подъезда / до 50 м / дальше
 const HOUSE = [0, 0.1, 0];                     // блок / каменица (узкие лестницы, двор) / дом
 const up90 = (x) => Math.max(90, Math.ceil((x - 90) / 100) * 100 + 90);   // вверх до …90
-const asmDefault = (it, lvl) => !!it.asm && (lvl === 3 || (lvl === 2 && it.kind === 'bed'));
-const asmOn = (S, it, lvl) => !!it.asm && (S.asm[it.id] ?? asmDefault(it, lvl));
+const specOf = (e) => ITEM[e.id].spec({...ITEM[e.id].def, ...e.sel});
+const asmDefault = (it, lvl) => lvl === 3 || (lvl === 2 && it.kind === 'bed');
+const asmOn = (e, lvl) => specOf(e).a > 0 && (e.asm ?? asmDefault(ITEM[e.id], lvl));
 const money = (min) => min / 60 * RATE;
 function hrs(m) { return String(Math.round(m / 30) / 2).replace('.', ','); }
 function tdur(m) { return m < 90 ? Math.round(m) + ' мин' : hrs(m) + ' ч'; }
@@ -576,20 +634,20 @@ function calc(S, lvl = S.level) {
     const h = Math.max(2, S.hours), base = h * 150 + kmCost;
     const lines = [['Бус с водителем', h + ' ч × 150 zł', h * 150]];
     if (kmCost) lines.push(['Километры', Math.round(RT.extraKm) + ' км × ' + String(KM_RATE).replace('.', ',') + ' zł', kmCost]);
-    return {lvl, total: Math.round(base * (1 + dk) / 10) * 10, hourly: true, crew: 1, dur: h, vol: 0, buses: 1, fill: 0, lines: lines.concat(dateLine(base)), rt: RT};
+    return {lvl, total: Math.round(base * (1 + dk) / 10) * 10, raw: base, hourly: true, crew: 1, dur: h, vol: 0, buses: 1, fill: 0, lines: lines.concat(dateLine(base)), rt: RT};
   }
   let carry = 0, asm = 0, junk = 0, mount = 0, vol = 0, n = 0;
-  for (const it of ITEMS) {
-    const c = S.counts[it.id] || 0;
+  for (const e of S.list) {
+    const it = ITEM[e.id], sp = specOf(e), c = e.n;
     if (!c) continue;
-    const cond = it.kind === 'ward' ? (S.cond[it.id] || 'ok') : 'ok';
+    const cond = it.kind === 'ward' ? (e.cond || 'ok') : 'ok';
     if (cond === 'drop') { junk += 90 * c; continue; }
     n += c;
-    carry += it.carry * c * (cond === 'whole' ? 1.5 : 1);
-    const on = cond === 'ok' && asmOn(S, it, lvl);
-    const flat = cond === 'fix' || on || (lvl === 2 && it.kind === 'ward' && cond === 'ok');
-    vol += it.vol * c * (flat && it.asm ? FLAT : 1);
-    if (cond === 'fix') asm += (it.asm + 60) * c; else if (on) asm += it.asm * c;
+    carry += sp.c * c * (cond === 'whole' ? 1.5 : 1);
+    const on = cond === 'ok' && asmOn(e, lvl);
+    const flat = sp.a > 0 && (cond === 'fix' || on || (lvl === 2 && it.kind === 'ward' && cond === 'ok'));
+    vol += sp.v * c * (flat ? FLAT : 1);
+    if (cond === 'fix') asm += (sp.a + 60) * c; else if (on) asm += sp.a * c;
   }
   const B = S.boxes || 0;
   carry += B * 4; vol += B * 0.1;
@@ -604,7 +662,7 @@ function calc(S, lvl = S.level) {
     if (e.id === 'junk') junk += e.min * k; else mount += e.min * k;
   }
   const work = carry + small + floors + asm + pack + unpack + mount + junk;
-  if (work <= 0) return {lvl, total: 0, crew: 0, dur: 0, vol: 0, buses: 0, fill: 0, lines: [], empty: true, rt: RT};
+  if (work <= 0) return {lvl, total: 0, raw: 0, crew: 0, dur: 0, vol: 0, buses: 0, fill: 0, lines: [], empty: true, rt: RT};
   const buses = Math.max(1, Math.ceil(vol / CAP - 1e-9));
   const crew = Math.max(work / 60 <= 6 ? 2 : work / 60 <= 16 ? 3 : 4, buses + 1);   // за рулём второго буса — один из бригады
   const travel = n + B > 0 ? RT.min * crew : 0;
@@ -624,7 +682,7 @@ function calc(S, lvl = S.level) {
     ['Бус' + (buses > 1 ? ' × ' + buses : ''), RT.extraKm ? KM_FREE + ' км входят, ещё ' + km(RT.extraKm) + ' × ' + String(KM_RATE).replace('.', ',') + ' zł' : 'до ' + KM_FREE + ' км', busCost],
     ['Коробки, бумага, плёнка', B ? B + ' коробок' : 'плёнка для мебели', mat],
   ].filter((l) => l[2] > 0).concat(dateLine(raw));
-  return {lvl, total: up90(raw * (1 + dk)), raw, crew, dur: work / crew / 60 + (travel ? RT.min / 60 : 0), vol, buses, fill: vol / (buses * CAP), peopleH: (work + travel) / 60, lines, rt: RT};
+  return {lvl, total: up90(raw * (1 + dk)), raw: raw * (1 + dk), crew, dur: work / crew / 60 + (travel ? RT.min / 60 : 0), vol, buses, fill: vol / (buses * CAP), peopleH: (work + travel) / 60, lines, rt: RT, n};
 }
 </script>
 
@@ -682,30 +740,44 @@ const ICO = {
   tune: '<path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/>',
 };
 const ico = (k) => `<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${ICO[k] || ''}</svg>`;
-// 3D-иконки (GPT Image, 14.11.2026): media/icons/<ключ>.webp, 192×192 на белом
-const pic = (k) => `<img class="pic" src="media/icons/${k}.webp" alt="" width="192" height="192" loading="lazy" decoding="async">`;
 document.querySelectorAll('[data-ico]').forEach((s) => { s.setAttribute('aria-hidden', 'true'); s.innerHTML = ICO[s.dataset.ico]; });
-const MINI = '<svg viewBox="0 0 26 26" width="100%" height="100%"><path d="M3 8 13 3l10 5v11l-10 5-10-5z" fill="#fff" stroke="#8F9AA7"/><path d="m3 8 10 5 10-5M13 13v11" fill="none" stroke="#8F9AA7"/><path d="m8 5.5 10 5v11" fill="none" stroke="#14DCD5" stroke-width="2.4"/></svg>';
+// 3D-иконки (GPT Image, 14.11.2026): media/icons/<ключ>.webp, 192×192 на белом
+const pic = (k, cls = 'pic') => `<img class="${cls}" src="media/icons/${k}.webp" alt="" width="192" height="192" loading="lazy" decoding="async">`;
+const MINI = '<svg viewBox="0 0 26 26"><path d="M3 8 13 3l10 5v11l-10 5-10-5z" fill="#fff" stroke="#8F9AA7"/><path d="m3 8 10 5 10-5M13 13v11" fill="none" stroke="#8F9AA7"/><path d="m8 5.5 10 5v11" fill="none" stroke="#14DCD5" stroke-width="2.4"/></svg>';
 
 // ===== Состояние (пример: типичные 2 комнаты, «Под ключ», Мокотув → Бемово) =====
-const ITEM = Object.fromEntries(ITEMS.map((i) => [i.id, i]));
 const EXTRA = Object.fromEntries(EXTRAS.map((e) => [e.id, e]));
 const S = {mode: 'list', level: 3, hours: 2,
   from: {place: 'Warszawa, Mokotów', floor: 4, lift: true, door: 0, house: 0}, to: {place: 'Warszawa, Bemowo', floor: 2, lift: false, door: 1, house: 0},
-  counts: {}, asm: {}, cond: {}, boxes: 0, extras: {}, unpack: false, ahead: false, kitchen: false, preset: 'two', room: 'bed', date: '', dateK: 0, dateLabel: ''};
+  list: [], boxes: 0, extras: {}, unpack: false, ahead: false, kitchen: false, preset: 'two', room: 'pop', q: '', date: '', dateK: 0, dateLabel: ''};
+let uid = 0;
 const $ = (s) => document.querySelector(s);
 const fmt = (n) => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
 const zl = (n) => fmt(Math.round(n / 10) * 10) + ' zł';
 const people = (n) => n + (n === 1 ? ' человек' : n < 5 ? ' человека' : ' человек');
+const things = (n) => n + (n % 10 === 1 && n % 100 !== 11 ? ' вещь' : [2, 3, 4].includes(n % 10) && ![12, 13, 14].includes(n % 100) ? ' вещи' : ' вещей');
 const reduce = matchMedia('(prefers-reduced-motion: reduce)');
 const smooth = () => (reduce.matches ? 'auto' : 'smooth');
 if (reduce.matches) document.querySelectorAll('video').forEach((v) => { v.removeAttribute('autoplay'); v.pause(); });
 
 function applyPreset(k) {
   const p = PRESETS[k];
-  S.preset = k; S.counts = {...p.c}; S.boxes = p.boxes; S.asm = {}; S.cond = {}; S.extras = {};
+  S.preset = k; S.boxes = p.boxes; S.extras = {};
+  S.list = p.items.map(([id, n, sel]) => ({u: ++uid, id, n, sel: {...ITEM[id].def, ...(sel || {})}, cond: 'ok'}));
 }
 applyPreset('two');
+const countOf = (id) => S.list.filter((e) => e.id === id).reduce((a, e) => a + e.n, 0);
+const totalItems = () => S.list.reduce((a, e) => a + e.n, 0);
+/** «1,5–2 м · до потолка · разберём» — коротко о выбранном варианте */
+function summary(e, withWork = true) {
+  const it = ITEM[e.id], parts = (it.p || []).map((k) => P[k].opts[e.sel[k]].t);
+  if (withWork) {
+    const c = e.cond || 'ok';
+    if (it.kind === 'ward' && c !== 'ok') parts.push({whole: 'везём целиком', fix: 'разберём и укрепим', drop: 'не везём: на утилизацию'}[c]);
+    else if (specOf(e).a > 0) parts.push(asmOn(e, S.level) ? 'разберём и соберём' : 'без разборки');
+  }
+  return parts.join(' · ');
+}
 
 // ===== Барабаны цены =====
 function drums(el, value) {
@@ -721,42 +793,48 @@ function drums(el, value) {
   for (const ch of str) if (/\d/.test(ch)) cols[i++].style.transform = `translateY(-${ch}em)`;
 }
 
-// ===== Бусы: белый «глиняный» бус в разрезе, внутри наши коробки; грузим от кабины к задним дверям =====
-const CELLS = 36, VLOGO = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0NjAuNiAxMDAiPgo8ZyB0cmFuc2Zvcm09InNjYWxlKDAuMTUyMjA3MDAxNTIyMDcpIj48c3ZnIHZpZXdCb3g9Ii0xNi4wIC0xNi4wIDY3Mi4wIDY1Ny4wIiB3aWR0aD0iNjcyLjAiIGhlaWdodD0iNjU3LjAiPjxkZWZzPgo8Y2xpcFBhdGggaWQ9Im1lbGJ1cy1saWdodEwiPjxyZWN0IHg9Ii02MCIgeT0iLTYwIiB3aWR0aD0iMzgwIiBoZWlnaHQ9IjkwMCIvPjwvY2xpcFBhdGg+CjxjbGlwUGF0aCBpZD0ibWVsYnVzLWxpZ2h0UiI+PHJlY3QgeD0iMzIwIiB5PSItNjAiIHdpZHRoPSI0MDAiIGhlaWdodD0iOTAwIi8+PC9jbGlwUGF0aD4KPG1hc2sgaWQ9Im1lbGJ1cy1saWdodG0wIiBtYXNrVW5pdHM9InVzZXJTcGFjZU9uVXNlIiB4PSItODAiIHk9Ii04MCIgd2lkdGg9IjgwMCIgaGVpZ2h0PSI5MDAiPjxyZWN0IHg9Ii04MCIgeT0iLTgwIiB3aWR0aD0iODAwIiBoZWlnaHQ9IjkwMCIgZmlsbD0iI2ZmZiIvPgo8cGF0aCBkPSJNMC4wLDE4NS4wIEwzMjAuMCwzNzAuMCBMNjQwLjAsMTg1LjAgTDY0MC4wLDI5MC4wIEwzMjAuMCw0NzUuMCBMMC4wLDI5MC4wIFoiIGZpbGw9IiMwMDAiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSI0NiIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8cGF0aCBkPSJNMC4wLDMzNS4wIEwzMjAuMCwxNTAuMCBMNjQwLjAsMzM1LjAgTDY0MC4wLDQ0MC4wIEwzMjAuMCwyNTUuMCBMMC4wLDQ0MC4wIFoiIGZpbGw9IiMwMDAiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSI0NiIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8cGF0aCBkPSJNMC4wLDE4NS4wIEwzMjAuMCwwLjAgTDY0MC4wLDE4NS4wIEw2NDAuMCwyOTAuMCBMMzIwLjAsMTA1LjAgTDAuMCwyOTAuMCBaIiBmaWxsPSIjMDAwIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iNDYiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPC9tYXNrPgo8bWFzayBpZD0ibWVsYnVzLWxpZ2h0bTEiIG1hc2tVbml0cz0idXNlclNwYWNlT25Vc2UiIHg9Ii04MCIgeT0iLTgwIiB3aWR0aD0iODAwIiBoZWlnaHQ9IjkwMCI+PHJlY3QgeD0iLTgwIiB5PSItODAiIHdpZHRoPSI4MDAiIGhlaWdodD0iOTAwIiBmaWxsPSIjZmZmIi8+CjxwYXRoIGQ9Ik0wLjAsMzM1LjAgTDMyMC4wLDE1MC4wIEw2NDAuMCwzMzUuMCBMNjQwLjAsNDQwLjAgTDMyMC4wLDI1NS4wIEwwLjAsNDQwLjAgWiIgZmlsbD0iIzAwMCIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utd2lkdGg9IjQ2IiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+CjxwYXRoIGQ9Ik0wLjAsMTg1LjAgTDMyMC4wLDAuMCBMNjQwLjAsMTg1LjAgTDY0MC4wLDI5MC4wIEwzMjAuMCwxMDUuMCBMMC4wLDI5MC4wIFoiIGZpbGw9IiMwMDAiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSI0NiIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8L21hc2s+CjxtYXNrIGlkPSJtZWxidXMtbGlnaHRtMiIgbWFza1VuaXRzPSJ1c2VyU3BhY2VPblVzZSIgeD0iLTgwIiB5PSItODAiIHdpZHRoPSI4MDAiIGhlaWdodD0iOTAwIj48cmVjdCB4PSItODAiIHk9Ii04MCIgd2lkdGg9IjgwMCIgaGVpZ2h0PSI5MDAiIGZpbGw9IiNmZmYiLz4KPHBhdGggZD0iTTAuMCwxODUuMCBMMzIwLjAsMC4wIEw2NDAuMCwxODUuMCBMNjQwLjAsMjkwLjAgTDMyMC4wLDEwNS4wIEwwLjAsMjkwLjAgWiIgZmlsbD0iIzAwMCIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utd2lkdGg9IjQ2IiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+CjwvbWFzaz4KPG1hc2sgaWQ9Im1lbGJ1cy1saWdodG0zIiBtYXNrVW5pdHM9InVzZXJTcGFjZU9uVXNlIiB4PSItODAiIHk9Ii04MCIgd2lkdGg9IjgwMCIgaGVpZ2h0PSI5MDAiPjxyZWN0IHg9Ii04MCIgeT0iLTgwIiB3aWR0aD0iODAwIiBoZWlnaHQ9IjkwMCIgZmlsbD0iI2ZmZiIvPgo8L21hc2s+CjwvZGVmcz4KPGcgbWFzaz0idXJsKCNtZWxidXMtbGlnaHRtMCkiPjxwYXRoIGQ9Ik0wLjAsMzM1LjAgTDMyMC4wLDUyMC4wIEw2NDAuMCwzMzUuMCBMNjQwLjAsNDQwLjAgTDMyMC4wLDYyNS4wIEwwLjAsNDQwLjAgWiIgZmlsbD0iIzBBOUM5NyIgc3Ryb2tlPSIjMEE5Qzk3IiBzdHJva2Utd2lkdGg9IjIwIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBjbGlwLXBhdGg9InVybCgjbWVsYnVzLWxpZ2h0TCkiLz48cGF0aCBkPSJNMC4wLDMzNS4wIEwzMjAuMCw1MjAuMCBMNjQwLjAsMzM1LjAgTDY0MC4wLDQ0MC4wIEwzMjAuMCw2MjUuMCBMMC4wLDQ0MC4wIFoiIGZpbGw9IiMzQTQ0NTAiIHN0cm9rZT0iIzNBNDQ1MCIgc3Ryb2tlLXdpZHRoPSIyMCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgY2xpcC1wYXRoPSJ1cmwoI21lbGJ1cy1saWdodFIpIi8+PC9nPgo8ZyBtYXNrPSJ1cmwoI21lbGJ1cy1saWdodG0xKSI+PHBhdGggZD0iTTAuMCwxODUuMCBMMzIwLjAsMzcwLjAgTDY0MC4wLDE4NS4wIEw2NDAuMCwyOTAuMCBMMzIwLjAsNDc1LjAgTDAuMCwyOTAuMCBaIiBmaWxsPSIjMEE5Qzk3IiBzdHJva2U9IiMwQTlDOTciIHN0cm9rZS13aWR0aD0iMjAiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsaXAtcGF0aD0idXJsKCNtZWxidXMtbGlnaHRMKSIvPjxwYXRoIGQ9Ik0wLjAsMTg1LjAgTDMyMC4wLDM3MC4wIEw2NDAuMCwxODUuMCBMNjQwLjAsMjkwLjAgTDMyMC4wLDQ3NS4wIEwwLjAsMjkwLjAgWiIgZmlsbD0iIzNBNDQ1MCIgc3Ryb2tlPSIjM0E0NDUwIiBzdHJva2Utd2lkdGg9IjIwIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBjbGlwLXBhdGg9InVybCgjbWVsYnVzLWxpZ2h0UikiLz48L2c+CjxnIG1hc2s9InVybCgjbWVsYnVzLWxpZ2h0bTIpIj48cGF0aCBkPSJNMC4wLDMzNS4wIEwzMjAuMCwxNTAuMCBMNjQwLjAsMzM1LjAgTDY0MC4wLDQ0MC4wIEwzMjAuMCwyNTUuMCBMMC4wLDQ0MC4wIFoiIGZpbGw9IiMwNzdFNzkiIHN0cm9rZT0iIzA3N0U3OSIgc3Ryb2tlLXdpZHRoPSIyMCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgY2xpcC1wYXRoPSJ1cmwoI21lbGJ1cy1saWdodEwpIi8+PHBhdGggZD0iTTAuMCwzMzUuMCBMMzIwLjAsMTUwLjAgTDY0MC4wLDMzNS4wIEw2NDAuMCw0NDAuMCBMMzIwLjAsMjU1LjAgTDAuMCw0NDAuMCBaIiBmaWxsPSIjMTAxNjFEIiBzdHJva2U9IiMxMDE2MUQiIHN0cm9rZS13aWR0aD0iMjAiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsaXAtcGF0aD0idXJsKCNtZWxidXMtbGlnaHRSKSIvPjwvZz4KPGcgbWFzaz0idXJsKCNtZWxidXMtbGlnaHRtMykiPjxwYXRoIGQ9Ik0wLjAsMTg1LjAgTDMyMC4wLDAuMCBMNjQwLjAsMTg1LjAgTDY0MC4wLDI5MC4wIEwzMjAuMCwxMDUuMCBMMC4wLDI5MC4wIFoiIGZpbGw9IiMwNzdFNzkiIHN0cm9rZT0iIzA3N0U3OSIgc3Ryb2tlLXdpZHRoPSIyMCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgY2xpcC1wYXRoPSJ1cmwoI21lbGJ1cy1saWdodEwpIi8+PHBhdGggZD0iTTAuMCwxODUuMCBMMzIwLjAsMC4wIEw2NDAuMCwxODUuMCBMNjQwLjAsMjkwLjAgTDMyMC4wLDEwNS4wIEwwLjAsMjkwLjAgWiIgZmlsbD0iIzEwMTYxRCIgc3Ryb2tlPSIjMTAxNjFEIiBzdHJva2Utd2lkdGg9IjIwIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBjbGlwLXBhdGg9InVybCgjbWVsYnVzLWxpZ2h0UikiLz48L2c+Cjwvc3ZnPjwvZz4KPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTMyLjI4MzEwNTAyMjgzMTA1LDcyKSBzY2FsZSgwLjAyODE1MDk5MTY4MjY2MTU1LC0wLjAyODE1MDk5MTY4MjY2MTU1KSI+CjxwYXRoIHRyYW5zZm9ybT0idHJhbnNsYXRlKDAsMCkiIGQ9Ik0yMjMgMTU2M0g1NDBMMTEwOCA5OTNMMTY3NiAxNTYzSDE5OTNWMEgxNjc2VjExMjRMMTEwOCA1NzdMNTQwIDExMjRWMEgyMjNaIiBmaWxsPSIjMTAxNjFEIi8+CjxwYXRoIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIyOTcuOTIsMCkiIGQ9Ik0yMjIgMTU2M0gxNTUzVjEyODVINTM5Vjk3M0gxNDM3VjcxMkg1MzlWMjc3SDE1NzRWMEgyMjJaIiBmaWxsPSIjMTAxNjFEIi8+CjxwYXRoIHRyYW5zZm9ybT0idHJhbnNsYXRlKDQwODMuODQsMCkiIGQ9Ik0yMjIgMTU2M0g1MzlWMjc4SDE0NDhWMEgyMjJaIiBmaWxsPSIjMTAxNjFEIi8+CjxwYXRoIHRyYW5zZm9ybT0idHJhbnNsYXRlKDU2OTguNzYsMCkiIGQ9Ik0yMjIgMTU2M0gxMDU3UTEyMTAgMTU2MyAxMzIzLjUgMTUzMC41UTE0MzcgMTQ5OCAxNTEyLjAgMTQ0MS4wUTE1ODcgMTM4NCAxNjIzLjUgMTMwNS41UTE2NjAgMTIyNyAxNjYwIDExMzZRMTY2MCA5ODcgMTU2NiA4NzVRMTY3NCA4MTEgMTcyNy4wIDcwOS4wUTE3ODAgNjA3IDE3ODAgNDc3UTE3ODAgMzY4IDE3NDMuNSAyODAuMFExNzA3IDE5MiAxNjMyLjUgMTI5LjVRMTU1OCA2NyAxNDQ0LjUgMzMuNVExMzMxIDAgMTE3NyAwSDIyMlpNMTE3OSA5NjNRMTIyMCA5NjMgMTI1OSA5NjBRMTMyNiAxMDI0IDEzMjYgMTEwNlExMzI2IDExOTEgMTI1OS41IDEyMzcuNVExMTkzIDEyODQgMTA2NSAxMjg0SDUzOVY5NjNaTTExODUgMjc2UTEzMTMgMjc2IDEzNzkuNSAzMzEuMFExNDQ2IDM4NiAxNDQ2IDQ4NlExNDQ2IDU4NiAxMzc5LjUgNjQyLjBRMTMxMyA2OTggMTE4NSA2OThINTM5VjI3NloiIGZpbGw9IiMwNzdFNzkiLz4KPHBhdGggdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNzY1OS42OCwwKSIgZD0iTTE2MyAxNTYzSDQ4MFY3MDJRNDgwIDU5NiA1MDkuMCA1MTMuNVE1MzggNDMxIDU5NS41IDM3NC4wUTY1MyAzMTcgNzM4LjAgMjg3LjVRODIzIDI1OCA5MzYgMjU4UTEwNDggMjU4IDExMzMuNSAyODcuNVExMjE5IDMxNyAxMjc2LjUgMzc0LjBRMTMzNCA0MzEgMTM2My4wIDUxMy41UTEzOTIgNTk2IDEzOTIgNzAyVjE1NjNIMTcwOVY2NjRRMTcwOSA1MTAgMTY1Ny4wIDM4NC4wUTE2MDUgMjU4IDE1MDYuMCAxNjguMFExNDA3IDc4IDEyNjMuNSAyOS4wUTExMjAgLTIwIDkzNiAtMjBRNzUyIC0yMCA2MDguNSAyOS4wUTQ2NSA3OCAzNjYuMCAxNjguMFEyNjcgMjU4IDIxNS4wIDM4NC4wUTE2MyA1MTAgMTYzIDY2NFoiIGZpbGw9IiMwNzdFNzkiLz4KPHBhdGggdHJhbnNmb3JtPSJ0cmFuc2xhdGUoOTYxNC42LDApIiBkPSJNMjk1IDQ2NVEzODAgNDE3IDQ2Ny41IDM3OC41UTU1NSAzNDAgNjQ5LjAgMzEzLjVRNzQzIDI4NyA4NDYuNSAyNzMuMFE5NTAgMjU5IDEwNjcgMjU5UTEyMDggMjU5IDEzMDcuMCAyNzcuNVExNDA2IDI5NiAxNDY4LjUgMzI4LjVRMTUzMSAzNjEgMTU1OS41IDQwNi4wUTE1ODggNDUxIDE1ODggNTA0UTE1ODggNTg5IDE1MTcuMCA2MzguNVExNDQ2IDY4OCAxMjk4IDY4OFExMjMzIDY4OCAxMTYxLjAgNjc5LjVRMTA4OSA2NzEgMTAxNS41IDY2MS4wUTk0MiA2NTEgODcwLjUgNjQyLjVRNzk5IDYzNCA3MzYgNjM0UTYzMSA2MzQgNTM0LjUgNjYxLjBRNDM4IDY4OCAzNjMuNSA3NDIuMFEyODkgNzk2IDI0NS4wIDg3Ny4wUTIwMSA5NTggMjAxIDEwNjZRMjAxIDExMzAgMjE4LjUgMTE5My4wUTIzNiAxMjU2IDI3NC41IDEzMTMuNVEzMTMgMTM3MSAzNzQuMCAxNDIwLjVRNDM1IDE0NzAgNTIxLjUgMTUwNi4wUTYwOCAxNTQyIDcyMS41IDE1NjIuNVE4MzUgMTU4MyA5ODAgMTU4M1ExMDg1IDE1ODMgMTE5MS4wIDE1NzEuNVExMjk3IDE1NjAgMTM5Ny41IDE1MzkuMFExNDk4IDE1MTggMTU5MS4wIDE0ODguNVExNjg0IDE0NTkgMTc2NCAxNDIzTDE2MjUgMTE2N1ExNTU5IDExOTYgMTQ4My4wIDEyMjAuNVExNDA3IDEyNDUgMTMyNC4wIDEyNjMuMFExMjQxIDEyODEgMTE1Mi41IDEyOTEuNVExMDY0IDEzMDIgOTcyIDEzMDJRODQxIDEzMDIgNzU2LjUgMTI4My4wUTY3MiAxMjY0IDYyMi4wIDEyMzQuNVE1NzIgMTIwNSA1NTIuNSAxMTY4LjVRNTMzIDExMzIgNTMzIDEwOTZRNTMzIDEwMjYgNTk2LjAgOTgxLjVRNjU5IDkzNyA3ODggOTM3UTg0MCA5MzcgOTA3LjUgOTQ0LjVROTc1IDk1MiAxMDQ5LjUgOTYxLjBRMTEyNCA5NzAgMTIwMS41IDk3Ny41UTEyNzkgOTg1IDEzNTIgOTg1UTE0OTAgOTg1IDE1OTYuNSA5NTQuMFExNzAzIDkyMyAxNzc1LjAgODY1LjVRMTg0NyA4MDggMTg4NC4wIDcyNi41UTE5MjEgNjQ1IDE5MjEgNTQ0UTE5MjEgNDA5IDE4NTguNSAzMDMuNVExNzk2IDE5OCAxNjgwLjUgMTI1LjVRMTU2NSA1MyAxNDAyLjAgMTUuNVExMjM5IC0yMiAxMDM5IC0yMlE5MDcgLTIyIDc4MS4wIC01LjVRNjU1IDExIDUzOS41IDQxLjVRNDI0IDcyIDMxOS41IDExNC41UTIxNSAxNTcgMTI2IDIwOFoiIGZpbGw9IiMwNzdFNzkiLz4KPC9nPgo8L3N2Zz4=';
-const vanSVG = (p) => `<svg viewBox="0 0 300 150" aria-hidden="true"><defs>
-  <linearGradient id="${p}g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".72" stop-color="#E8ECF0"/><stop offset="1" stop-color="#C9D1D9"/></linearGradient>
-  <linearGradient id="${p}w" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#45576A"/><stop offset="1" stop-color="#10161D"/></linearGradient>
-  <radialGradient id="${p}r" cx=".38" cy=".34" r=".75"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#8F9AA7"/></radialGradient>
-  <radialGradient id="${p}s" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#000" stop-opacity=".5"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
-  <clipPath id="${p}c"><rect x="22" y="30" width="180" height="72" rx="4"/></clipPath></defs>
-  <ellipse cx="152" cy="138" rx="142" ry="8" fill="url(#${p}s)"/>
+// ===== Бус: белый фургон с высокой крышей (силуэт по кадру нашего фильма), кузов в разрезе, внутри коробки MELBUS =====
+const CELLS = 60, VLOGO = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0NjAuNiAxMDAiPgo8ZyB0cmFuc2Zvcm09InNjYWxlKDAuMTUyMjA3MDAxNTIyMDcpIj48c3ZnIHZpZXdCb3g9Ii0xNi4wIC0xNi4wIDY3Mi4wIDY1Ny4wIiB3aWR0aD0iNjcyLjAiIGhlaWdodD0iNjU3LjAiPjxkZWZzPgo8Y2xpcFBhdGggaWQ9Im1lbGJ1cy1saWdodEwiPjxyZWN0IHg9Ii02MCIgeT0iLTYwIiB3aWR0aD0iMzgwIiBoZWlnaHQ9IjkwMCIvPjwvY2xpcFBhdGg+CjxjbGlwUGF0aCBpZD0ibWVsYnVzLWxpZ2h0UiI+PHJlY3QgeD0iMzIwIiB5PSItNjAiIHdpZHRoPSI0MDAiIGhlaWdodD0iOTAwIi8+PC9jbGlwUGF0aD4KPG1hc2sgaWQ9Im1lbGJ1cy1saWdodG0wIiBtYXNrVW5pdHM9InVzZXJTcGFjZU9uVXNlIiB4PSItODAiIHk9Ii04MCIgd2lkdGg9IjgwMCIgaGVpZ2h0PSI5MDAiPjxyZWN0IHg9Ii04MCIgeT0iLTgwIiB3aWR0aD0iODAwIiBoZWlnaHQ9IjkwMCIgZmlsbD0iI2ZmZiIvPgo8cGF0aCBkPSJNMC4wLDE4NS4wIEwzMjAuMCwzNzAuMCBMNjQwLjAsMTg1LjAgTDY0MC4wLDI5MC4wIEwzMjAuMCw0NzUuMCBMMC4wLDI5MC4wIFoiIGZpbGw9IiMwMDAiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSI0NiIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8cGF0aCBkPSJNMC4wLDMzNS4wIEwzMjAuMCwxNTAuMCBMNjQwLjAsMzM1LjAgTDY0MC4wLDQ0MC4wIEwzMjAuMCwyNTUuMCBMMC4wLDQ0MC4wIFoiIGZpbGw9IiMwMDAiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSI0NiIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8cGF0aCBkPSJNMC4wLDE4NS4wIEwzMjAuMCwwLjAgTDY0MC4wLDE4NS4wIEw2NDAuMCwyOTAuMCBMMzIwLjAsMTA1LjAgTDAuMCwyOTAuMCBaIiBmaWxsPSIjMDAwIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iNDYiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPC9tYXNrPgo8bWFzayBpZD0ibWVsYnVzLWxpZ2h0bTEiIG1hc2tVbml0cz0idXNlclNwYWNlT25Vc2UiIHg9Ii04MCIgeT0iLTgwIiB3aWR0aD0iODAwIiBoZWlnaHQ9IjkwMCI+PHJlY3QgeD0iLTgwIiB5PSItODAiIHdpZHRoPSI4MDAiIGhlaWdodD0iOTAwIiBmaWxsPSIjZmZmIi8+CjxwYXRoIGQ9Ik0wLjAsMzM1LjAgTDMyMC4wLDE1MC4wIEw2NDAuMCwzMzUuMCBMNjQwLjAsNDQwLjAgTDMyMC4wLDI1NS4wIEwwLjAsNDQwLjAgWiIgZmlsbD0iIzAwMCIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utd2lkdGg9IjQ2IiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+CjxwYXRoIGQ9Ik0wLjAsMTg1LjAgTDMyMC4wLDAuMCBMNjQwLjAsMTg1LjAgTDY0MC4wLDI5MC4wIEwzMjAuMCwxMDUuMCBMMC4wLDI5MC4wIFoiIGZpbGw9IiMwMDAiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSI0NiIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8L21hc2s+CjxtYXNrIGlkPSJtZWxidXMtbGlnaHRtMiIgbWFza1VuaXRzPSJ1c2VyU3BhY2VPblVzZSIgeD0iLTgwIiB5PSItODAiIHdpZHRoPSI4MDAiIGhlaWdodD0iOTAwIj48cmVjdCB4PSItODAiIHk9Ii04MCIgd2lkdGg9IjgwMCIgaGVpZ2h0PSI5MDAiIGZpbGw9IiNmZmYiLz4KPHBhdGggZD0iTTAuMCwxODUuMCBMMzIwLjAsMC4wIEw2NDAuMCwxODUuMCBMNjQwLjAsMjkwLjAgTDMyMC4wLDEwNS4wIEwwLjAsMjkwLjAgWiIgZmlsbD0iIzAwMCIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utd2lkdGg9IjQ2IiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+CjwvbWFzaz4KPG1hc2sgaWQ9Im1lbGJ1cy1saWdodG0zIiBtYXNrVW5pdHM9InVzZXJTcGFjZU9uVXNlIiB4PSItODAiIHk9Ii04MCIgd2lkdGg9IjgwMCIgaGVpZ2h0PSI5MDAiPjxyZWN0IHg9Ii04MCIgeT0iLTgwIiB3aWR0aD0iODAwIiBoZWlnaHQ9IjkwMCIgZmlsbD0iI2ZmZiIvPgo8L21hc2s+CjwvZGVmcz4KPGcgbWFzaz0idXJsKCNtZWxidXMtbGlnaHRtMCkiPjxwYXRoIGQ9Ik0wLjAsMzM1LjAgTDMyMC4wLDUyMC4wIEw2NDAuMCwzMzUuMCBMNjQwLjAsNDQwLjAgTDMyMC4wLDYyNS4wIEwwLjAsNDQwLjAgWiIgZmlsbD0iIzBBOUM5NyIgc3Ryb2tlPSIjMEE5Qzk3IiBzdHJva2Utd2lkdGg9IjIwIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBjbGlwLXBhdGg9InVybCgjbWVsYnVzLWxpZ2h0TCkiLz48cGF0aCBkPSJNMC4wLDMzNS4wIEwzMjAuMCw1MjAuMCBMNjQwLjAsMzM1LjAgTDY0MC4wLDQ0MC4wIEwzMjAuMCw2MjUuMCBMMC4wLDQ0MC4wIFoiIGZpbGw9IiMzQTQ0NTAiIHN0cm9rZT0iIzNBNDQ1MCIgc3Ryb2tlLXdpZHRoPSIyMCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgY2xpcC1wYXRoPSJ1cmwoI21lbGJ1cy1saWdodFIpIi8+PC9nPgo8ZyBtYXNrPSJ1cmwoI21lbGJ1cy1saWdodG0xKSI+PHBhdGggZD0iTTAuMCwxODUuMCBMMzIwLjAsMzcwLjAgTDY0MC4wLDE4NS4wIEw2NDAuMCwyOTAuMCBMMzIwLjAsNDc1LjAgTDAuMCwyOTAuMCBaIiBmaWxsPSIjMEE5Qzk3IiBzdHJva2U9IiMwQTlDOTciIHN0cm9rZS13aWR0aD0iMjAiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsaXAtcGF0aD0idXJsKCNtZWxidXMtbGlnaHRMKSIvPjxwYXRoIGQ9Ik0wLjAsMTg1LjAgTDMyMC4wLDM3MC4wIEw2NDAuMCwxODUuMCBMNjQwLjAsMjkwLjAgTDMyMC4wLDQ3NS4wIEwwLjAsMjkwLjAgWiIgZmlsbD0iIzNBNDQ1MCIgc3Ryb2tlPSIjM0E0NDUwIiBzdHJva2Utd2lkdGg9IjIwIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBjbGlwLXBhdGg9InVybCgjbWVsYnVzLWxpZ2h0UikiLz48L2c+CjxnIG1hc2s9InVybCgjbWVsYnVzLWxpZ2h0bTIpIj48cGF0aCBkPSJNMC4wLDMzNS4wIEwzMjAuMCwxNTAuMCBMNjQwLjAsMzM1LjAgTDY0MC4wLDQ0MC4wIEwzMjAuMCwyNTUuMCBMMC4wLDQ0MC4wIFoiIGZpbGw9IiMwNzdFNzkiIHN0cm9rZT0iIzA3N0U3OSIgc3Ryb2tlLXdpZHRoPSIyMCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgY2xpcC1wYXRoPSJ1cmwoI21lbGJ1cy1saWdodEwpIi8+PHBhdGggZD0iTTAuMCwzMzUuMCBMMzIwLjAsMTUwLjAgTDY0MC4wLDMzNS4wIEw2NDAuMCw0NDAuMCBMMzIwLjAsMjU1LjAgTDAuMCw0NDAuMCBaIiBmaWxsPSIjMTAxNjFEIiBzdHJva2U9IiMxMDE2MUQiIHN0cm9rZS13aWR0aD0iMjAiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsaXAtcGF0aD0idXJsKCNtZWxidXMtbGlnaHRSKSIvPjwvZz4KPGcgbWFzaz0idXJsKCNtZWxidXMtbGlnaHRtMykiPjxwYXRoIGQ9Ik0wLjAsMTg1LjAgTDMyMC4wLDAuMCBMNjQwLjAsMTg1LjAgTDY0MC4wLDI5MC4wIEwzMjAuMCwxMDUuMCBMMC4wLDI5MC4wIFoiIGZpbGw9IiMwNzdFNzkiIHN0cm9rZT0iIzA3N0U3OSIgc3Ryb2tlLXdpZHRoPSIyMCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgY2xpcC1wYXRoPSJ1cmwoI21lbGJ1cy1saWdodEwpIi8+PHBhdGggZD0iTTAuMCwxODUuMCBMMzIwLjAsMC4wIEw2NDAuMCwxODUuMCBMNjQwLjAsMjkwLjAgTDMyMC4wLDEwNS4wIEwwLjAsMjkwLjAgWiIgZmlsbD0iIzEwMTYxRCIgc3Ryb2tlPSIjMTAxNjFEIiBzdHJva2Utd2lkdGg9IjIwIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBjbGlwLXBhdGg9InVybCgjbWVsYnVzLWxpZ2h0UikiLz48L2c+Cjwvc3ZnPjwvZz4KPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTMyLjI4MzEwNTAyMjgzMTA1LDcyKSBzY2FsZSgwLjAyODE1MDk5MTY4MjY2MTU1LC0wLjAyODE1MDk5MTY4MjY2MTU1KSI+CjxwYXRoIHRyYW5zZm9ybT0idHJhbnNsYXRlKDAsMCkiIGQ9Ik0yMjMgMTU2M0g1NDBMMTEwOCA5OTNMMTY3NiAxNTYzSDE5OTNWMEgxNjc2VjExMjRMMTEwOCA1NzdMNTQwIDExMjRWMEgyMjNaIiBmaWxsPSIjMTAxNjFEIi8+CjxwYXRoIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIyOTcuOTIsMCkiIGQ9Ik0yMjIgMTU2M0gxNTUzVjEyODVINTM5Vjk3M0gxNDM3VjcxMkg1MzlWMjc3SDE1NzRWMEgyMjJaIiBmaWxsPSIjMTAxNjFEIi8+CjxwYXRoIHRyYW5zZm9ybT0idHJhbnNsYXRlKDQwODMuODQsMCkiIGQ9Ik0yMjIgMTU2M0g1MzlWMjc4SDE0NDhWMEgyMjJaIiBmaWxsPSIjMTAxNjFEIi8+CjxwYXRoIHRyYW5zZm9ybT0idHJhbnNsYXRlKDU2OTguNzYsMCkiIGQ9Ik0yMjIgMTU2M0gxMDU3UTEyMTAgMTU2MyAxMzIzLjUgMTUzMC41UTE0MzcgMTQ5OCAxNTEyLjAgMTQ0MS4wUTE1ODcgMTM4NCAxNjIzLjUgMTMwNS41UTE2NjAgMTIyNyAxNjYwIDExMzZRMTY2MCA5ODcgMTU2NiA4NzVRMTY3NCA4MTEgMTcyNy4wIDcwOS4wUTE3ODAgNjA3IDE3ODAgNDc3UTE3ODAgMzY4IDE3NDMuNSAyODAuMFExNzA3IDE5MiAxNjMyLjUgMTI5LjVRMTU1OCA2NyAxNDQ0LjUgMzMuNVExMzMxIDAgMTE3NyAwSDIyMlpNMTE3OSA5NjNRMTIyMCA5NjMgMTI1OSA5NjBRMTMyNiAxMDI0IDEzMjYgMTEwNlExMzI2IDExOTEgMTI1OS41IDEyMzcuNVExMTkzIDEyODQgMTA2NSAxMjg0SDUzOVY5NjNaTTExODUgMjc2UTEzMTMgMjc2IDEzNzkuNSAzMzEuMFExNDQ2IDM4NiAxNDQ2IDQ4NlExNDQ2IDU4NiAxMzc5LjUgNjQyLjBRMTMxMyA2OTggMTE4NSA2OThINTM5VjI3NloiIGZpbGw9IiMwNzdFNzkiLz4KPHBhdGggdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNzY1OS42OCwwKSIgZD0iTTE2MyAxNTYzSDQ4MFY3MDJRNDgwIDU5NiA1MDkuMCA1MTMuNVE1MzggNDMxIDU5NS41IDM3NC4wUTY1MyAzMTcgNzM4LjAgMjg3LjVRODIzIDI1OCA5MzYgMjU4UTEwNDggMjU4IDExMzMuNSAyODcuNVExMjE5IDMxNyAxMjc2LjUgMzc0LjBRMTMzNCA0MzEgMTM2My4wIDUxMy41UTEzOTIgNTk2IDEzOTIgNzAyVjE1NjNIMTcwOVY2NjRRMTcwOSA1MTAgMTY1Ny4wIDM4NC4wUTE2MDUgMjU4IDE1MDYuMCAxNjguMFExNDA3IDc4IDEyNjMuNSAyOS4wUTExMjAgLTIwIDkzNiAtMjBRNzUyIC0yMCA2MDguNSAyOS4wUTQ2NSA3OCAzNjYuMCAxNjguMFEyNjcgMjU4IDIxNS4wIDM4NC4wUTE2MyA1MTAgMTYzIDY2NFoiIGZpbGw9IiMwNzdFNzkiLz4KPHBhdGggdHJhbnNmb3JtPSJ0cmFuc2xhdGUoOTYxNC42LDApIiBkPSJNMjk1IDQ2NVEzODAgNDE3IDQ2Ny41IDM3OC41UTU1NSAzNDAgNjQ5LjAgMzEzLjVRNzQzIDI4NyA4NDYuNSAyNzMuMFE5NTAgMjU5IDEwNjcgMjU5UTEyMDggMjU5IDEzMDcuMCAyNzcuNVExNDA2IDI5NiAxNDY4LjUgMzI4LjVRMTUzMSAzNjEgMTU1OS41IDQwNi4wUTE1ODggNDUxIDE1ODggNTA0UTE1ODggNTg5IDE1MTcuMCA2MzguNVExNDQ2IDY4OCAxMjk4IDY4OFExMjMzIDY4OCAxMTYxLjAgNjc5LjVRMTA4OSA2NzEgMTAxNS41IDY2MS4wUTk0MiA2NTEgODcwLjUgNjQyLjVRNzk5IDYzNCA3MzYgNjM0UTYzMSA2MzQgNTM0LjUgNjYxLjBRNDM4IDY4OCAzNjMuNSA3NDIuMFEyODkgNzk2IDI0NS4wIDg3Ny4wUTIwMSA5NTggMjAxIDEwNjZRMjAxIDExMzAgMjE4LjUgMTE5My4wUTIzNiAxMjU2IDI3NC41IDEzMTMuNVEzMTMgMTM3MSAzNzQuMCAxNDIwLjVRNDM1IDE0NzAgNTIxLjUgMTUwNi4wUTYwOCAxNTQyIDcyMS41IDE1NjIuNVE4MzUgMTU4MyA5ODAgMTU4M1ExMDg1IDE1ODMgMTE5MS4wIDE1NzEuNVExMjk3IDE1NjAgMTM5Ny41IDE1MzkuMFExNDk4IDE1MTggMTU5MS4wIDE0ODguNVExNjg0IDE0NTkgMTc2NCAxNDIzTDE2MjUgMTE2N1ExNTU5IDExOTYgMTQ4My4wIDEyMjAuNVExNDA3IDEyNDUgMTMyNC4wIDEyNjMuMFExMjQxIDEyODEgMTE1Mi41IDEyOTEuNVExMDY0IDEzMDIgOTcyIDEzMDJRODQxIDEzMDIgNzU2LjUgMTI4My4wUTY3MiAxMjY0IDYyMi4wIDEyMzQuNVE1NzIgMTIwNSA1NTIuNSAxMTY4LjVRNTMzIDExMzIgNTMzIDEwOTZRNTMzIDEwMjYgNTk2LjAgOTgxLjVRNjU5IDkzNyA3ODggOTM3UTg0MCA5MzcgOTA3LjUgOTQ0LjVROTc1IDk1MiAxMDQ5LjUgOTYxLjBRMTEyNCA5NzAgMTIwMS41IDk3Ny41UTEyNzkgOTg1IDEzNTIgOTg1UTE0OTAgOTg1IDE1OTYuNSA5NTQuMFExNzAzIDkyMyAxNzc1LjAgODY1LjVRMTg0NyA4MDggMTg4NC4wIDcyNi41UTE5MjEgNjQ1IDE5MjEgNTQ0UTE5MjEgNDA5IDE4NTguNSAzMDMuNVExNzk2IDE5OCAxNjgwLjUgMTI1LjVRMTU2NSA1MyAxNDAyLjAgMTUuNVExMjM5IC0yMiAxMDM5IC0yMlE5MDcgLTIyIDc4MS4wIC01LjVRNjU1IDExIDUzOS41IDQxLjVRNDI0IDcyIDMxOS41IDExNC41UTIxNSAxNTcgMTI2IDIwOFoiIGZpbGw9IiMwNzdFNzkiLz4KPC9nPgo8L3N2Zz4=';
+const vanSVG = (p) => `<svg viewBox="70 40 940 430" aria-hidden="true"><defs>
+  <linearGradient id="${p}g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".5" stop-color="#F2F5F8"/><stop offset=".85" stop-color="#DCE2E8"/><stop offset="1" stop-color="#C7CFD7"/></linearGradient>
+  <linearGradient id="${p}gl" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5D7183"/><stop offset=".45" stop-color="#26323D"/><stop offset="1" stop-color="#0E1419"/></linearGradient>
+  <radialGradient id="${p}t" cx=".5" cy=".5" r=".5"><stop offset=".55" stop-color="#2A333B"/><stop offset="1" stop-color="#0B0F13"/></radialGradient>
+  <radialGradient id="${p}r" cx=".38" cy=".32" r=".8"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".6" stop-color="#B9C2CB"/><stop offset="1" stop-color="#6F7B87"/></radialGradient>
+  <radialGradient id="${p}s" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#000" stop-opacity=".55"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+  <linearGradient id="${p}in" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E9EDF1"/><stop offset=".25" stop-color="#FFFFFF"/></linearGradient>
+  <clipPath id="${p}c"><path d="M126 118L634 108L638 322H124Z"/></clipPath></defs>
+  <ellipse cx="540" cy="446" rx="470" ry="18" fill="url(#${p}s)"/>
   <g class="vbody">
-    <path d="M20 124Q10 124 10 114V34Q10 22 22 21L212 16Q226 15 233 23L262 60Q266 65 276 68L284 71Q291 74 291 84V114Q291 124 281 124Z" fill="url(#${p}g)" stroke="#C3CCD5"/>
-    <rect x="22" y="30" width="180" height="72" rx="4" fill="#FFFFFF"/>
+    <path d="M118 378Q100 376 100 360L102 122Q104 96 130 93L640 82Q690 80 714 98L838 222Q846 230 860 234L936 257Q962 266 967 292L972 346Q972 372 950 376L914 378A62 62 0 0 0 790 378H324A62 62 0 0 0 200 378Z" fill="url(#${p}g)" stroke="#B9C2CB" stroke-width="1.5"/>
+    <path d="M132 100L638 89" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" opacity=".9"/>
+    <path d="M126 118L634 108L638 322H124Z" fill="url(#${p}in)"/>
     <g clip-path="url(#${p}c)"><g id="${p}-cells"></g></g>
-    <rect x="22" y="30" width="180" height="72" rx="4" fill="none" stroke="#B7C0CA" stroke-width="1.2"/>
-    <path d="M214 27L232 26Q236 26 238 29L256 56H214Z" fill="url(#${p}w)"/>
-    <path d="M236 25L265 62L259 63L232 28Z" fill="#2C3742" opacity=".55"/>
-    <path d="M208 26V112" stroke="#C3CCD5"/>
-    <rect x="229" y="62" width="12" height="3" rx="1.5" fill="#8F9AA7"/>
-    <path d="M258 50h8v12h-6z" fill="#2C3742"/>
-    <image href="${VLOGO}" x="213" y="77" width="44" height="9.6"/>
-    <rect x="10" y="105" width="281" height="4" fill="#14DCD5"/>
-    <rect x="279" y="77" width="11" height="8" rx="2.5" fill="#FFFFFF" stroke="#C3CCD5"/>
-    <rect x="7" y="115" width="287" height="10" rx="5" fill="#DCE1E7"/>
-    <circle cx="64" cy="125" r="19.5" fill="#10161D"/><circle cx="244" cy="125" r="19.5" fill="#10161D"/>
+    <path d="M126 118L634 108L638 322H124Z" fill="none" stroke="#AEB8C2" stroke-width="2"/>
+    <path d="M652 92V334" stroke="#C3CCD5" stroke-width="2"/>
+    <path d="M668 112L706 110Q714 110 720 116L812 236Q815 244 806 246H668Z" fill="url(#${p}gl)"/>
+    <path d="M690 118H724L700 196H678Z" fill="#FFFFFF" opacity=".13"/>
+    <path d="M716 100L842 226L834 231L709 106Z" fill="#1C252E" opacity=".85"/>
+    <path d="M822 232h20q6 0 6 6v14q0 4-4 4h-20z" fill="#2A3138"/>
+    <rect x="760" y="262" width="28" height="7" rx="3.5" fill="#AEB8C2"/>
+    <image href="${VLOGO}" x="672" y="280" width="128" height="27.8"/>
+    <path d="M912 262L958 275Q967 279 963 288L924 291Q912 289 910 278Z" fill="#EEF3F7" stroke="#AEB8C2" stroke-width="1.5"/>
+    <path d="M944 300H971V330H948Z" fill="#2A3138"/>
+    <rect x="100" y="226" width="11" height="78" rx="3" fill="#B43A2E"/>
+    <path d="M100 332H970V341H100Z" fill="#14DCD5"/>
+    <path d="M100 341H971Q972 372 950 376L914 378A62 62 0 0 0 790 378H324A62 62 0 0 0 200 378H118Q100 376 100 360Z" fill="#2A3138"/>
+    <path d="M196 380A66 66 0 0 1 328 380M786 380A66 66 0 0 1 918 380" fill="none" stroke="#12181E" stroke-width="8"/>
   </g>
-  ${[64, 244].map((x) => `<circle cx="${x}" cy="127" r="15" fill="#1C242C" stroke="#3A4652" stroke-width="2"/><circle cx="${x}" cy="127" r="7.5" fill="url(#${p}r)"/><circle cx="${x}" cy="127" r="2" fill="#56626E"/>`).join('')}
+  ${[262, 852].map((x) => `<g><circle cx="${x}" cy="390" r="54" fill="url(#${p}t)"/><circle cx="${x}" cy="390" r="31" fill="url(#${p}r)"/>${[0, 72, 144, 216, 288].map((a) => `<path d="M${x} 390L${(x + 27 * Math.cos((a - 90) * Math.PI / 180)).toFixed(1)} ${(390 + 27 * Math.sin((a - 90) * Math.PI / 180)).toFixed(1)}" stroke="#7D8995" stroke-width="7" stroke-linecap="round"/>`).join('')}<circle cx="${x}" cy="390" r="9" fill="#56626E"/></g>`).join('')}
 </svg>`;
 $('#vanA').innerHTML = vanSVG('va'); $('#vanB').innerHTML = vanSVG('vb');
 for (const p of ['va', 'vb']) document.getElementById(p + '-cells').innerHTML = Array.from({length: CELLS}, (_, i) => {
-  const col = 8 - Math.floor(i / 4), row = 3 - (i % 4);
-  return `<image class="cell" href="media/icons/box.webp" x="${22 + col * 20 + 1.5}" y="${30 + row * 18 + 0.5}" width="17" height="17"/>`;
+  const col = 11 - Math.floor(i / 5), row = 4 - (i % 5);
+  return `<image class="cell" href="media/icons/box.webp" x="${(126 + col * 42.5 + 1).toFixed(1)}" y="${(116 + row * 41.2 + 0.6).toFixed(1)}" width="40.5" height="40.5"/>`;
 }).join('');
 const onCount = {va: 0, vb: 0};
 let landDelay = 0;                                  // коробки «падают» в кузов, когда долетает летящая коробка
 function setVan(p, n) {
-  const cells = document.querySelectorAll(`#${p}-cells .cell`), from = onCount[p], step = reduce.matches ? 0 : 45;
+  const cells = document.querySelectorAll(`#${p}-cells .cell`), from = onCount[p], step = reduce.matches ? 0 : 30;
   cells.forEach((c, i) => {
     const on = i < n;
     c.style.transitionDelay = (on && i >= from ? landDelay + (i - from) * step : 0) + 'ms';
@@ -773,15 +851,16 @@ function setFill(vol, buses) {
 
 // ===== Коробка летит в бус =====
 function inView(el) { const r = el.getBoundingClientRect(); return r.width > 0 && r.bottom > 0 && r.top < innerHeight; }
-function fly(fromEl) {
-  if (reduce.matches || !fromEl) return;
+function fly(from) {
+  if (reduce.matches || !from) return;
+  const a = from.getBoundingClientRect ? from.getBoundingClientRect() : from;
   const box = $('#vans').classList.contains('two') ? $('#vanB') : $('#vanA');
   const toVan = inView($('#van')) && !$('#van').hidden;
   const tgt = toVan ? box.querySelector('svg') : !$('#bar').classList.contains('away') && getComputedStyle($('#bar')).display !== 'none' ? $('#barP') : null;
   if (!tgt) return;
   if (toVan) landDelay = 560;
-  const a = fromEl.getBoundingClientRect(), b = tgt.getBoundingClientRect();
-  const x0 = a.left + a.width / 2 - 15, y0 = a.top + a.height / 2 - 15, x1 = b.left + b.width * (toVan ? 0.38 : 0.55) - 15, y1 = b.top + b.height * (toVan ? 0.42 : 0.4) - 15;
+  const b = tgt.getBoundingClientRect();
+  const x0 = a.left + a.width / 2 - 15, y0 = a.top + a.height / 2 - 15, x1 = b.left + b.width * (toVan ? 0.36 : 0.55) - 15, y1 = b.top + b.height * (toVan ? 0.38 : 0.4) - 15;
   const el = document.createElement('div'); el.className = 'flybox'; el.innerHTML = '<img src="media/icons/box.webp" alt="" width="30" height="30">'; document.body.append(el);
   const mx = (x0 + x1) / 2, my = Math.min(y0, y1) - 90;
   el.animate([
@@ -811,48 +890,62 @@ document.querySelectorAll('.addr input').forEach((inp) => inp.addEventListener('
 // ===== Шаг 3: вещи =====
 $('#presets').insertAdjacentHTML('beforeend', Object.entries(PRESETS).map(([k, p]) => `<button type="button" class="chip" data-act="preset" data-v="${k}">${p.t}</button>`).join(''));
 function renderTabs() {
+  $('#tabs').hidden = !!S.q;
   $('#tabs').innerHTML = ROOMS.map(([k, t]) => {
-    const n = ITEMS.filter((i) => i.room === k).reduce((a, i) => a + (S.counts[i.id] || 0), 0);
+    const n = k === 'pop' ? 0 : S.list.filter((e) => ITEM[e.id].room === k).reduce((a, e) => a + e.n, 0);
     return `<button type="button" class="tab" role="tab" id="tab-${k}" aria-selected="${S.room === k}" aria-controls="grid" data-act="room" data-v="${k}">${t}${n ? `<small>${n}</small>` : ''}</button>`;
   }).join('');
   $('#grid').setAttribute('aria-labelledby', 'tab-' + S.room);
 }
-const hasOpts = (it) => !!it.asm || it.kind === 'tv' || it.kind === 'conn';
 function tileHTML(it) {
+  const many = !!it.p;
   return `<div class="tile" data-id="${it.id}">
-    <button type="button" class="tile__main" data-act="inc" aria-label="Добавить: ${it.name}">${pic(it.icon)}<span class="tile__n">${it.name}</span><span class="tile__s"></span></button>
+    <button type="button" class="tile__main" data-act="tile" aria-label="Добавить: ${it.name}">${pic(it.icon)}<span class="tile__n">${it.name}</span><span class="tile__s"></span></button>
     <span class="tape-badge" hidden></span><span class="tile__plus" aria-hidden="true">+</span>
-    <div class="tile__ctrl" hidden><button type="button" class="ib" data-act="dec" aria-label="Убрать: ${it.name}">−</button><button type="button" class="ib" data-act="inc" aria-label="Ещё: ${it.name}">+</button>${hasOpts(it) ? `<button type="button" class="ib ib--set" data-act="opts" aria-label="Настроить: ${it.name}">${ico('tune')}</button>` : ''}</div></div>`;
+    <div class="tile__ctrl" hidden><button type="button" class="ib" data-act="tminus" aria-label="Убрать: ${it.name}">−</button><button type="button" class="ib" data-act="tile" aria-label="Ещё: ${it.name}">+</button>${many ? '<span class="tile__hint">размер</span>' : ''}</div></div>`;
 }
-function renderGrid() { $('#grid').innerHTML = ITEMS.filter((i) => i.room === S.room).map(tileHTML).join(''); ITEMS.forEach((i) => updTile(i.id)); }
-function itemNote(it) {
-  if (it.kind === 'ward') {
-    const c = S.cond[it.id] || 'ok';
-    if (c === 'whole') return 'старый: везём целиком';
-    if (c === 'fix') return 'разберём и укрепим';
-    if (c === 'drop') return 'не везём: на утилизацию';
-  }
-  if (it.asm) return asmOn(S, it, S.level) ? 'разберём и соберём' : 'без разборки';
-  if (it.kind === 'tv') return [S.extras.tvOff ? 'снять' : '', S.extras.tvOn ? 'повесить' : ''].filter(Boolean).join(' и ') + (S.extras.tvOff || S.extras.tvOn ? ' со стены' : '');
-  if (it.kind === 'conn') return S.extras.conn ? 'отключим и подключим' : '';
-  return '';
+function gridItems() {
+  const q = S.q.trim().toLowerCase();
+  if (q) return ITEMS.filter((i) => (i.name + ' ' + i.alias).toLowerCase().includes(q));
+  return S.room === 'pop' ? ITEMS.filter((i) => i.pop) : ITEMS.filter((i) => i.room === S.room);
+}
+function renderGrid() {
+  const list = gridItems();
+  $('#grid').innerHTML = list.length ? list.map(tileHTML).join('') : `<p class="more">Не нашли «${S.q.replace(/</g, '&lt;')}». Снимите это на видео или опишите в заявке — посчитаем отдельно.</p>`;
+  list.forEach((i) => updTile(i.id));
 }
 function updTile(id) {
-  const el = document.querySelector(`.tile[data-id="${id}"]`);
+  const el = document.querySelector(`#grid .tile[data-id="${id}"], #extras .tile[data-id="${id}"]`);
   if (!el) return;
-  const x = EXTRA[id], n = x ? S.extras[id] || 0 : S.counts[id] || 0;
+  const x = EXTRA[id], n = x ? S.extras[id] || 0 : countOf(id);
   el.classList.toggle('on', n > 0);
   const b = el.querySelector('.tape-badge');
   if (b.textContent !== String(n)) { b.textContent = n; if (n > 0) { b.hidden = true; void b.offsetWidth; } }
   b.hidden = n === 0;
   el.querySelector('.tile__ctrl').hidden = n === 0;
-  if (!x) el.querySelector('.tile__s').textContent = n ? itemNote(ITEM[id]) : '';
+  if (!x) {
+    const es = S.list.filter((e) => e.id === id);
+    el.querySelector('.tile__s').textContent = !n ? '' : es.length > 1 ? 'несколько вариантов' : summary(es[0], false);
+  }
+}
+// ===== «В бусе»: всё, что добавлено, — можно поменять размер и количество =====
+function renderBlist() {
+  const n = totalItems();
+  $('#blistN').textContent = n ? things(n) : 'пока пусто';
+  $('#blistClear').hidden = !n;
+  $('#blist').innerHTML = S.list.length ? S.list.map((e) => {
+    const it = ITEM[e.id], s = summary(e);
+    return `<li class="brow" data-u="${e.u}">${pic(it.iconFor({...it.def, ...e.sel}), 'pic pic--s')}
+      <span class="brow__t"><b>${it.name}</b>${s ? `<small>${s}</small>` : ''}</span>
+      <span class="stepper stepper--s"><button type="button" data-act="lminus" aria-label="Меньше: ${it.name}">−</button><output>${e.n}</output><button type="button" data-act="lplus" aria-label="Больше: ${it.name}">+</button></span>
+      <button type="button" class="ib" data-act="ledit" aria-label="Изменить: ${it.name}">${ico('tune')}</button></li>`;
+  }).join('') : '<li class="more">Нажмите на вещь выше или начните с похожего дома.</li>';
 }
 // ===== Шаг 5: допы =====
 $('#extras').innerHTML = EXTRAS.map((e) => `<div class="tile tile--wide" data-id="${e.id}">
-  <button type="button" class="tile__main" data-act="inc" aria-label="Добавить: ${e.name}">${pic(e.icon)}<span class="tile__n">${e.name}</span><span class="tile__d">${e.d}</span><span class="tile__p">${zl(money(e.min))} ${e.unit || 'за шт.'}</span></button>
+  <button type="button" class="tile__main" data-act="xinc" aria-label="Добавить: ${e.name}">${pic(e.icon)}<span class="tile__n">${e.name}</span><span class="tile__d">${e.d}</span><span class="tile__p">${zl(money(e.min))} ${e.unit || 'за шт.'}</span></button>
   <span class="tape-badge" hidden></span><span class="tile__plus" aria-hidden="true">+</span>
-  <div class="tile__ctrl" hidden><button type="button" class="ib" data-act="dec" aria-label="Убрать: ${e.name}">−</button><button type="button" class="ib" data-act="inc" aria-label="Ещё: ${e.name}">+</button></div></div>`).join('');
+  <div class="tile__ctrl" hidden><button type="button" class="ib" data-act="xdec" aria-label="Убрать: ${e.name}">−</button><button type="button" class="ib" data-act="xinc" aria-label="Ещё: ${e.name}">+</button></div></div>`).join('');
 
 // ===== Шаг 6: дата =====
 const WD = ['вс', 'пн', 'вт', 'ср', 'чт', 'пт', 'сб'], MON = ['янв', 'фев', 'мар', 'апр', 'май', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
@@ -868,46 +961,61 @@ function dayK(d, ahead) {
   let html = '', lastM = -1;
   for (let i = 1; i <= 42; i++) {
     const d = new Date(t); d.setDate(t.getDate() + i);
-    const k = dayK(d, i), iso = d.toISOString().slice(0, 10);
+    const k = dayK(d, i), iso = `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
     if (d.getMonth() !== lastM) { html += `<span class="mon" aria-hidden="true">${MON[d.getMonth()]}</span>`; lastM = d.getMonth(); }
     html += `<button type="button" role="radio" class="day ${k < 0 ? 'g' : k > 0 ? 'p' : ''}" data-act="date" data-v="${iso}" data-k="${k}" data-l="${WD[d.getDay()]}, ${d.getDate()} ${MONG[d.getMonth()]}" aria-label="${WD[d.getDay()]}, ${d.getDate()} ${MONG[d.getMonth()]}${k ? (k > 0 ? ', плюс 10 %' : k <= -0.1 ? ', минус 10 %' : ', минус 5 %') : ''}"><span>${WD[d.getDay()]}</span><b>${d.getDate()}</b><small>${k ? (k > 0 ? '+10 %' : k <= -0.1 ? '−10 %' : '−5 %') : ''}</small></button>`;
   }
   $('#days').innerHTML = html;
 })();
 
-// ===== Окно настроек вещи =====
-let sheetId = null, lastFocus = null;
-function sheetHTML(it) {
-  const n = S.counts[it.id] || 0, per = (m) => zl(money(m));
-  let h = `<div class="sheet__h">${pic(it.icon)}<h3 id="sheetT">${it.name}</h3><button type="button" class="ib" data-act="close" aria-label="Закрыть">×</button></div>
-    <div class="end"><div class="row"><span>Сколько</span><div class="stepper"><button type="button" data-act="dec" aria-label="Меньше">−</button><output>${n}</output><button type="button" data-act="inc" aria-label="Больше">+</button></div></div></div>`;
+// ===== Окно вещи: выбор размера, работы и количества; на кнопке — сколько это добавит к цене =====
+let draft = null, lastFocus = null, sheetFrom = null;
+function openSheet(id, u) {
+  const e = u ? S.list.find((x) => x.u === u) : null;
+  draft = e ? {...e, sel: {...e.sel}} : {u: null, id, n: 1, sel: {...ITEM[id].def}, cond: 'ok'};
+  renderSheet(); $('#sheet').showModal();
+}
+const withDraft = (d) => ({...S, list: d.u ? S.list.map((e) => (e.u === d.u ? d : e)) : [...S.list, d]});
+function deltaText() {
+  const before = calc(S).raw || 0, after = calc(withDraft(draft)).raw || 0, d = Math.round((after - before) / 10) * 10;
+  return (d >= 0 ? '+' : '−') + fmt(Math.abs(d)) + ' zł';
+}
+function sheetHTML() {
+  const it = ITEM[draft.id], sel = {...it.def, ...draft.sel}, sp = it.spec(sel), per = (m) => zl(money(m));
+  let h = `<div class="sheet__h"><span id="sheetPic">${pic(it.iconFor(sel))}</span><h3 id="sheetT">${it.name}</h3><button type="button" class="ib" data-act="close" aria-label="Закрыть">×</button></div>`;
+  for (const k of it.p || []) {
+    h += `<div class="q"><span>${P[k].label}</span><div class="pchips" role="radiogroup" aria-label="${P[k].label}">${P[k].opts.map((o, i) => `<button type="button" class="pchip" role="radio" aria-checked="${sel[k] === i}" data-act="psel" data-k="${k}" data-v="${i}">${o.ic ? pic(o.ic, 'pic pic--xs') : o.h ? `<span class="hb"><i style="height:${o.h * 100}%"></i></span>` : ''}<span>${o.t}</span></button>`).join('')}</div></div>`;
+  }
   if (it.kind === 'ward') {
-    const c = S.cond[it.id] || 'ok';
+    const c = draft.cond || 'ok';
     const o = (v, b, s) => `<button type="button" class="opt" role="radio" aria-checked="${c === v}" data-act="cond" data-v="${v}"><b>${b}</b><span>${s}</span></button>`;
-    h += `<p>Шкаф из ДСП, который уже разбирали, может не собраться: шурупы держатся в раскрошенных отверстиях. Решите заранее — в день переезда сюрпризов не будет.</p>
+    h += `<details class="more-q"${c !== 'ok' ? ' open' : ''}><summary>Шкаф старый или уже разбирался?</summary>
+      <p>Шкаф из ДСП, который уже разбирали, может не собраться: шурупы держатся в раскрошенных отверстиях. Решите заранее — в день переезда сюрпризов не будет.</p>
       <div class="opts" role="radiogroup" aria-label="Состояние шкафа">
       ${o('ok', 'Обычный', 'Разбирается и собирается без проблем.')}
       ${o('whole', 'Везём целиком', 'Без разборки, если пройдёт в двери и лифт — проверим по видео.')}
       ${o('fix', 'Разобрать и укрепить', 'Новые шканты и металлические уголки: +' + per(60) + ' за шкаф.')}
-      ${o('drop', 'Не везём', 'Вынесем и отвезём в пункт приёма: ' + per(90) + ' за шкаф.')}</div>`;
+      ${o('drop', 'Не везём', 'Вынесем и отвезём в пункт приёма: ' + per(90) + ' за шкаф.')}</div></details>`;
   }
-  if (it.asm && (it.kind !== 'ward' || (S.cond[it.id] || 'ok') === 'ok')) {
-    h += `<div class="end"><button type="button" class="sw" role="switch" aria-checked="${asmOn(S, it, S.level)}" data-act="asm"><span class="sw__l">Разобрать и собрать<small>${per(it.asm)} за шт. · ${hrs(it.asm)} ч работы</small></span><span class="sw__k"></span></button></div>`;
+  if (sp.a > 0 && (it.kind !== 'ward' || (draft.cond || 'ok') === 'ok')) {
+    h += `<div class="end"><button type="button" class="sw" role="switch" aria-checked="${asmOn(draft, S.level)}" data-act="asm"><span class="sw__l">Разобрать и собрать<small>${per(sp.a)} за шт. · ${hrs(sp.a)} ч работы</small></span><span class="sw__k"></span></button></div>`;
   }
   if (it.kind === 'tv') {
-    h += `<p>Старые дюбели остаются в стене — их не переносят. На новом месте сверлим заново: ищем проводку, ставим дюбели под вашу стену (бетон, кирпич, гипсокартон). Кронштейн ваш.</p>
+    h += `<p>Старые дюбели остаются в стене — их не переносят. На новом месте сверлим заново: ищем проводку, ставим дюбели под вашу стену. Кронштейн ваш.</p>
       <div class="end"><button type="button" class="sw" role="switch" aria-checked="${!!S.extras.tvOff}" data-act="xsw" data-v="tvOff"><span class="sw__l">Снять со стены<small>${per(48)} за шт.</small></span><span class="sw__k"></span></button>
-      <button type="button" class="sw" role="switch" aria-checked="${!!S.extras.tvOn}" data-act="xsw" data-v="tvOn"><span class="sw__l">Повесить на новом месте<small>${per(150)} за шт., новые дюбели входят</small></span><span class="sw__k"></span></button>
-      <button type="button" class="sw" role="switch" aria-checked="${!!S.extras.holes}" data-act="xsw" data-v="holes"><span class="sw__l">Заделать отверстия на старом месте<small>${per(36)} за место, без покраски</small></span><span class="sw__k"></span></button></div>`;
+      <button type="button" class="sw" role="switch" aria-checked="${!!S.extras.tvOn}" data-act="xsw" data-v="tvOn"><span class="sw__l">Повесить на новом месте<small>${per(150)} за шт., новые дюбели входят</small></span><span class="sw__k"></span></button></div>`;
   }
   if (it.kind === 'conn') {
     h += `<div class="end"><button type="button" class="sw" role="switch" aria-checked="${!!S.extras.conn}" data-act="xsw" data-v="conn"><span class="sw__l">Отключить и подключить<small>${per(90)} за шт. Транспортные болты — если есть</small></span><span class="sw__k"></span></button></div>`;
   }
-  return h + `<button type="button" class="btn btn--dark" data-act="close">Готово</button>`;
+  h += `<div class="sheet__f"><div class="stepper"><button type="button" data-act="dn" data-d="-1" aria-label="Меньше">−</button><output>${draft.n}</output><button type="button" data-act="dn" data-d="1" aria-label="Больше">+</button></div>
+    <button type="button" class="btn btn--tape" data-act="save">${draft.u ? 'Сохранить' : 'Добавить'} <span class="delta">${deltaText()}</span></button></div>`;
+  if (draft.u) h += `<button type="button" class="linkbtn" data-act="del">Убрать из списка</button>`;
+  return h;
 }
 function renderSheet(focusAct) {
-  $('#sheetBody').innerHTML = sheetHTML(ITEM[sheetId]);
-  if (focusAct) ($('#sheetBody').querySelector(`[data-act="${focusAct.act}"]${focusAct.v ? `[data-v="${focusAct.v}"]` : ''}`) || $('#sheetBody .btn')).focus();
+  $('#sheetBody').innerHTML = sheetHTML();
+  if (focusAct) ($('#sheetBody').querySelector(`[data-act="${focusAct.act}"]${focusAct.v != null ? `[data-v="${focusAct.v}"]` : ''}${focusAct.k ? `[data-k="${focusAct.k}"]` : ''}`) || $('#sheetBody [data-act="save"]')).focus();
 }
 
 // ===== Табло =====
@@ -915,7 +1023,7 @@ function renderBoard() {
   const video = S.mode === 'video' && S.level !== 1;
   const r = calc(S);
   if (video) {
-    const xs = calc({...S, counts: {}, boxes: 0, kitchen: false, dateK: 0, from: {...S.from, floor: 0, lift: true, door: 0, house: 0}, to: {...S.to, floor: 0, lift: true, door: 0, house: 0}});
+    const xs = calc({...S, list: [], boxes: 0, kitchen: false, dateK: 0, from: {...S.from, floor: 0, lift: true, door: 0, house: 0}, to: {...S.to, floor: 0, lift: true, door: 0, house: 0}});
     const extra = xs.lines.filter((l) => !/^(Бус|Короб|Дорога)/.test(l[0]));
     const sum = extra.reduce((a, l) => a + l[2], 0);
     $('#bK').textContent = 'Цену за переезд посчитаем по видео';
@@ -932,10 +1040,9 @@ function renderBoard() {
   $('#bFix').textContent = r.hourly ? 'Платите за фактическое время, минимум 2 часа.' : r.empty ? 'Отметьте вещи, и цена появится здесь.' : 'Фиксированная: не изменится, даже если управимся дольше.';
   $('#van').hidden = !!r.hourly || !!r.empty;
   if (!r.hourly && !r.empty) {
-    const f = Math.min(1, r.fill);
     setFill(r.vol, r.buses);
     const m3 = String(r.vol.toFixed(1)).replace('.', ',') + ' м³';
-    $('#vanCap').textContent = r.buses > 1 ? `Едут ${r.buses} буса · ${m3}` : `Бус заполнен на ${Math.round(f * 100)} % · ${m3}`;
+    $('#vanCap').textContent = r.buses > 1 ? `Едут ${r.buses} буса · ${m3}` : `Бус заполнен на ${Math.round(Math.min(1, r.fill) * 100)} % · ${m3}`;
   }
   $('#facts').innerHTML = r.empty ? '' : r.hourly
     ? `<li><b>1</b><span>водитель</span></li><li><b>${Math.max(2, S.hours)} ч</b><span>с бусом</span></li><li><b>150</b><span>zł в час</span></li>`
@@ -944,7 +1051,7 @@ function renderBoard() {
   $('#bNote').textContent = r.hourly ? 'Нужны грузчики, разборка или упаковка — выберите «Перевозку» или «Под ключ».'
     : 'Итог округлён вверх до …90 zł. Больше вещей в день переезда — досчитаем по этому же списку и только с вашего согласия, до начала работ.';
   drums($('#barP'), r.empty ? null : r.total);
-  $('#barM').textContent = r.empty ? 'отметьте вещи' : r.hourly ? 'почасово, мин. 2 ч' : `${people(r.crew)} · ≈${hrs(r.dur * 60)} ч · фикс`;
+  $('#barM').textContent = r.empty ? 'отметьте вещи' : r.hourly ? 'почасово, мин. 2 ч' : `${things(totalItems())} · ${people(r.crew)} · ≈${hrs(r.dur * 60)} ч`;
 }
 
 // ===== Полоса шагов =====
@@ -993,7 +1100,7 @@ function render(full) {
   $('#items-video').hidden = l1 || !video;
   $('#h-items').textContent = l1 ? 'Сколько часов нужен бус' : video ? 'Снимите видео' : 'Что везём';
   $('#items-sub').textContent = l1 ? 'Водитель помогает, но грузите вы.' : video ? '2–3 минуты на телефон. Менеджер посчитает вещи и пришлёт фиксированную цену.'
-    : 'Начните с похожего дома — это только заготовка. Добавьте или уберите вещи: цена считается по ним, а не по комнатам или метрам.';
+    : 'Нажмите на вещь и выберите размер — от него зависят время работы и место в бусе. Комнаты — только для удобства, цена считается по вещам.';
   $('#hoursN').textContent = S.hours;
   $('#s-boxes').hidden = l1 || video;
   $('#s-extra').hidden = l1;
@@ -1004,47 +1111,70 @@ function render(full) {
   $('#sw-unpack').setAttribute('aria-checked', String(S.unpack));
   $('#boxN').textContent = S.boxes; $('#boxR').value = S.boxes;
   $('#boxVol').textContent = String((S.boxes * 0.1).toFixed(1)).replace('.', ',') + ' м³';
-  $('#bx').innerHTML = MINI.replace('width="100%" height="100%"', '').repeat(Math.ceil(S.boxes / 5));
+  $('#bx').innerHTML = MINI.repeat(Math.ceil(S.boxes / 5));
   document.querySelectorAll('[data-act="preset"]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === S.preset)));
   document.querySelectorAll('.day').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.v === S.date)));
   if (full) { renderTabs(); renderGrid(); } else { renderTabs(); ITEMS.forEach((i) => updTile(i.id)); }
   EXTRAS.forEach((e) => updTile(e.id));
+  renderBlist();
   renderBoard();
   renderProg();
-  if (sheetId && $('#sheet').open) renderSheet(lastFocus);
+  if (draft && $('#sheet').open) renderSheet(lastFocus);
 }
 
 // ===== События =====
+function addSimple(id, from) {
+  const e = S.list.find((x) => x.id === id && !ITEM[id].p);
+  if (e) e.n++; else S.list.push({u: ++uid, id, n: 1, sel: {...ITEM[id].def}, cond: 'ok'});
+  S.preset = ''; fly(from);
+}
+function removeLast(id) {
+  const es = S.list.filter((e) => e.id === id);
+  const e = es[es.length - 1]; if (!e) return;
+  e.n--; if (e.n <= 0) S.list = S.list.filter((x) => x !== e);
+  S.preset = '';
+}
 document.addEventListener('click', (ev) => {
   const b = ev.target.closest('[data-act], [data-mode]');
   if (!b) return;
   if (b.dataset.mode) { S.mode = b.dataset.mode; render(); if (b.closest('.hero')) $('#s-items').scrollIntoView({behavior: smooth()}); return; }
   const a = b.dataset.act, v = b.dataset.v, inSheet = !!b.closest('#sheet');
-  const id = inSheet ? sheetId : b.closest('.tile')?.dataset.id;
-  lastFocus = inSheet ? {act: a, v} : null;
+  const tile = b.closest('.tile'), id = tile?.dataset.id, row = b.closest('.brow'), e = row ? S.list.find((x) => x.u === +row.dataset.u) : null;
+  lastFocus = inSheet ? {act: a, v, k: b.dataset.k} : null;
   switch (a) {
-    case 'level': S.level = +v; S.asm = {}; break;
+    case 'level': S.level = +v; S.list.forEach((x) => delete x.asm); break;
     case 'floor': S[b.dataset.k].floor = Math.max(0, Math.min(20, S[b.dataset.k].floor + +b.dataset.d)); break;
     case 'lift': S[b.dataset.k].lift = !S[b.dataset.k].lift; break;
     case 'door': case 'house': S[b.dataset.k][a] = +v; break;
     case 'hours': S.hours = Math.max(2, Math.min(12, S.hours + +b.dataset.d)); break;
     case 'preset': applyPreset(v); render(true); return;
     case 'room': S.room = v; render(true); $('#tab-' + v).focus(); return;
-    case 'inc': case 'dec': {
-      const bag = EXTRA[id] ? S.extras : S.counts;
-      bag[id] = Math.max(0, (bag[id] || 0) + (a === 'inc' ? 1 : -1));
-      if (!EXTRA[id]) S.preset = '';
-      if (a === 'inc' && !inSheet) fly(b.closest('.tile').querySelector('.pic'));
-      break;
-    }
-    case 'opts': sheetId = id; renderSheet(); $('#sheet').showModal(); return;
+    case 'tile': if (ITEM[id].p) { sheetFrom = tile.querySelector('.pic'); openSheet(id); return; } addSimple(id, tile.querySelector('.pic')); break;
+    case 'tminus': removeLast(id); break;
+    case 'xinc': S.extras[id] = (S.extras[id] || 0) + 1; break;
+    case 'xdec': S.extras[id] = Math.max(0, (S.extras[id] || 0) - 1); break;
+    case 'lplus': e.n++; S.preset = ''; break;
+    case 'lminus': e.n--; if (e.n <= 0) S.list = S.list.filter((x) => x !== e); S.preset = ''; break;
+    case 'ledit': sheetFrom = null; openSheet(e.id, e.u); return;
+    case 'lclear': S.list = []; S.preset = 'empty'; break;
+    // окно вещи
     case 'close': $('#sheet').close(); return;
-    case 'cond': S.cond[sheetId] = v; break;
-    case 'asm': S.asm[sheetId] = !asmOn(S, ITEM[sheetId], S.level); break;
+    case 'psel': draft.sel[b.dataset.k] = +v; renderSheet(lastFocus); return;
+    case 'cond': draft.cond = v; renderSheet(lastFocus); return;
+    case 'asm': draft.asm = !asmOn(draft, S.level); renderSheet(lastFocus); return;
+    case 'dn': draft.n = Math.max(1, Math.min(20, draft.n + +b.dataset.d)); renderSheet(lastFocus); return;
     case 'xsw': {
-      const it = ITEM[sheetId], n = v === 'conn' ? (S.counts.washer || 0) + (S.counts.dishw || 0) : S.counts[it.id] || 1;
+      const n = v === 'conn' ? countOf('washer') + countOf('dishw') || 1 : countOf('tv') || draft.n;
       S.extras[v] = S.extras[v] ? 0 : Math.max(1, n); break;
     }
+    case 'save': {
+      const r = $('#sheetPic').getBoundingClientRect(), isNew = !draft.u;
+      if (isNew) { draft.u = ++uid; S.list.push(draft); } else S.list = S.list.map((x) => (x.u === draft.u ? draft : x));
+      S.preset = ''; draft = null; $('#sheet').close();
+      if (isNew) fly(sheetFrom && inView(sheetFrom) ? sheetFrom : r);
+      break;
+    }
+    case 'del': S.list = S.list.filter((x) => x.u !== draft.u); draft = null; $('#sheet').close(); break;
     case 'box': S.boxes = Math.max(0, Math.min(150, S.boxes + +b.dataset.d)); break;
     case 'date': if (S.date === v) { S.date = ''; S.dateK = 0; } else { S.date = v; S.dateK = +b.dataset.k; S.dateLabel = b.dataset.l; } break;
     case 'jump': $('#' + v).scrollIntoView({behavior: smooth()}); return;
@@ -1054,16 +1184,17 @@ document.addEventListener('click', (ev) => {
   }
   render();
 });
+$('#q').addEventListener('input', (e) => { S.q = e.target.value; renderTabs(); renderGrid(); });
 $('#sw-ahead').addEventListener('click', () => { S.ahead = !S.ahead; render(); });
 $('#sw-kitchen').addEventListener('click', () => { S.kitchen = !S.kitchen; render(); });
 $('#sw-unpack').addEventListener('click', () => { S.unpack = !S.unpack; render(); });
 $('#boxR').addEventListener('input', (e) => { S.boxes = +e.target.value; render(); });
-$('#sheet').addEventListener('close', () => { const t = document.querySelector(`.tile[data-id="${sheetId}"] [data-act="opts"]`); sheetId = null; t?.focus(); });
+$('#sheet').addEventListener('close', () => { draft = null; render(); });
 $('#sheet').addEventListener('click', (e) => { if (e.target === $('#sheet')) $('#sheet').close(); });
 $('#vfile').addEventListener('change', (e) => {
   $('#vlist').innerHTML = [...e.target.files].map((f) => `<li><span>${f.name.replace(/</g, '&lt;')}</span><span>${(f.size / 1048576).toFixed(0)} МБ</span></li>`).join('');
 });
 $('#sendBtn').addEventListener('click', () => { $('#sent').hidden = false; });
-if ('IntersectionObserver' in window) new IntersectionObserver(([e]) => $('#bar').classList.toggle('away', e.isIntersecting), {threshold: 0.25}).observe($('#board'));
+if ('IntersectionObserver' in window) new IntersectionObserver(([en]) => $('#bar').classList.toggle('away', en.isIntersecting), {threshold: 0.25}).observe($('#board'));
 render(true);
 </script>
