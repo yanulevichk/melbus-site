@@ -10,9 +10,9 @@ const l = (ru: string, pl: string, uk: string, en: string): L => ({ ru, pl, uk, 
 export const noHours = {
   h2: l('Мы не продаём часы', 'Nie sprzedajemy godzin', 'Ми не продаємо години', 'We don’t sell hours'),
   lead: l(
-    'У почасовой фирмы медленная работа — это больше денег. У нас цена назначена до начала, поэтому бригаде выгодно работать быстро и аккуратно.',
-    'W firmie liczącej za godzinę wolna praca to wyższy rachunek. U nas cena jest ustalona przed startem, więc ekipie opłaca się pracować szybko i starannie.',
-    'У погодинної фірми повільна робота — це більше грошей. У нас ціна визначена до початку, тому бригаді вигідно працювати швидко й акуратно.',
+    'У почасовой фирмы медленная работа — это больше денег. У нас цена согласована до начала работ, поэтому бригаде выгодно работать быстро и аккуратно.',
+    'W firmie liczącej za godzinę wolna praca to wyższy rachunek. U nas cena jest ustalona przed rozpoczęciem prac, więc ekipie opłaca się pracować szybko i starannie.',
+    'У погодинної фірми повільна робота — це більше грошей. У нас ціна погоджена до початку робіт, тому бригаді вигідно працювати швидко й акуратно.',
     'With hourly movers, slow work means a bigger bill. Our price is set before we start, so it pays for our crew to work fast and carefully.'),
   them: l('Почасовая оплата', 'Płatność za godzinę', 'Погодинна оплата', 'Hourly billing'),
   us: l('MELBUS', 'MELBUS', 'MELBUS', 'MELBUS'),
@@ -28,8 +28,8 @@ export const noHours = {
 
 export const pkgText = {
   h2: l('Три пакета', 'Trzy pakiety', 'Три пакети', 'Three packages'),
-  lead: l('Цена за весь переезд, а не за часы. Пример — 2 комнаты по Варшаве, с лифтом. Для вашей квартиры точную цену назовём по видео.', 'Cena za całą przeprowadzkę, a nie za godziny. Przykład — 2 pokoje w Warszawie, z windą. Dokładną cenę dla Twojego mieszkania podamy z wideo.', 'Ціна за весь переїзд, а не за години. Приклад — 2 кімнати Варшавою, з ліфтом. Для вашої квартири точну ціну назвемо за відео.', 'One price for the whole move, not by the hour. Example: 2 rooms within Warsaw, with a lift. We’ll give the exact price for your home from a video.'),
-  best: l('Выгоднее всего', 'Najkorzystniej', 'Найвигідніше', 'Best value'),
+  lead: l('Цена за весь переезд, а не за часы. Пример — 2 комнаты по Варшаве, с лифтом. Для вашей квартиры точную цену назовём по видео.', 'Cena za całą przeprowadzkę, a nie za godziny. Przykład — 2 pokoje w Warszawie, z windą. Dokładną cenę dla Twojego mieszkania podamy z wideo.', 'Ціна за весь переїзд, а не за години. Приклад — 2 кімнати в межах Варшави, з ліфтом. Для вашої квартири точну ціну назвемо за відео.', 'One price for the whole move, not by the hour. Example: a 2-room flat within Warsaw, with a lift. We’ll give the exact price for your home from a video.'),
+  best: l('Выгоднее всего', 'Najkorzystniejszy', 'Найвигідніше', 'Best value'),
   more: l('всего на {d} zł больше, чем «{n}»', 'tylko o {d} zł więcej niż „{n}”', 'усього на {d} zł більше за «{n}»', 'just {d} zł more than “{n}”'),
   calc: l('Рассчитать для своей квартиры', 'Oblicz dla swojego mieszkania', 'Розрахувати для своєї квартири', 'Calculate for your home'),
   choose: l('Выбрать', 'Wybieram', 'Обрати', 'Choose'),
@@ -40,7 +40,7 @@ export const priceTable = {
   caption: l('По Варшаве, с лифтом, обычное количество вещей. Мало вещей — дешевле, много — дороже. Точную цену назовём по видео — и она не изменится в день переезда.', 'W Warszawie, z windą, typowa ilość rzeczy. Mniej rzeczy — taniej, więcej — drożej. Dokładną cenę podamy z wideo — i nie zmieni się w dniu przeprowadzki.', 'Варшавою, з ліфтом, звичайна кількість речей. Мало речей — дешевше, багато — дорожче. Точну ціну назвемо за відео — і вона не зміниться в день переїзду.', 'Within Warsaw, with a lift, a typical amount of stuff. Less stuff costs less, more costs more. We’ll give the exact price from a video — and it won’t change on moving day.'),
   what: l('Что везём', 'Co przewozimy', 'Що веземо', 'What we move'),
   from: l('от', 'od', 'від', 'from'),
-  demo: l('Цены на утверждении.', 'Ceny w trakcie zatwierdzania.', 'Ціни на затвердженні.', 'Prices are being finalised.'),
+  demo: l('Цены ещё утверждаются.', 'Ceny są jeszcze ustalane.', 'Ціни ще затверджуються.', 'Prices are being finalised.'),
   incH2: l('Что входит', 'Co jest w cenie', 'Що входить', 'What’s included'),
   extrasH2: l('Дополнительно', 'Dodatkowo', 'Додатково', 'Extras'),
   extrasLead: l('Только если нужно. Часть услуг уже входит в «Стандарт» и «Под ключ».', 'Tylko jeśli potrzebujesz. Część usług jest już w pakietach „Standard” i „Pod klucz”.', 'Лише якщо потрібно. Частина послуг уже входить у «Стандарт» і «Під ключ».', 'Only if you need them. Some are already part of “Standard” and “Full service”.'),

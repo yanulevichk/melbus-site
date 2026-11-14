@@ -25,7 +25,7 @@ export const ui = {
     home: { ru: 'главная', pl: 'strona główna', uk: 'головна', en: 'home' },
     mainNav: { ru: 'Основное меню', pl: 'Menu główne', uk: 'Головне меню', en: 'Main menu' },
     quick: { ru: 'Быстрые действия', pl: 'Szybkie akcje', uk: 'Швидкі дії', en: 'Quick actions' },
-    skip: { ru: 'К содержанию', pl: 'Przejdź do treści', uk: 'До змісту', en: 'Skip to content' },
+    skip: { ru: 'Перейти к содержанию', pl: 'Przejdź do treści', uk: 'Перейти до вмісту', en: 'Skip to content' },
     langs: { ru: 'Язык', pl: 'Język', uk: 'Мова', en: 'Language' },
   },
   footer: {
@@ -42,13 +42,13 @@ export const ui = {
   sceneSoon: { ru: 'Здесь будет сцена', pl: 'Tu pojawi się scena', uk: 'Тут буде сцена', en: 'Scene coming soon' },
   ctaBand: {
     title: { ru: 'Ваш новый адрес<br>ждёт.', pl: 'Twój nowy adres<br>czeka.', uk: 'Ваша нова адреса<br>чекає.', en: 'Your new address<br>is waiting.' },
-    lead: { ru: 'Пришлите видео квартиры — в течение 2 часов днём получите цену, которая не изменится.', pl: 'Wyślij wideo mieszkania — w ciągu 2 godzin (w dzień) otrzymasz cenę, która się nie zmieni.', uk: 'Надішліть відео квартири — протягом 2 годин удень отримаєте ціну, яка не зміниться.', en: 'Send us a video of your flat — within 2 hours (daytime) you get a price that won’t change.' },
+    lead: { ru: 'Пришлите видео квартиры — в течение 2 часов днём получите цену, которая не изменится.', pl: 'Wyślij wideo mieszkania — w ciągu 2 godzin (w dzień) otrzymasz cenę, która się nie zmieni.', uk: 'Надішліть відео квартири — протягом 2 годин удень отримаєте ціну, яка не зміниться.', en: 'Send us a video of your flat — within 2 hours (daytime) you’ll get a price that won’t change.' },
   },
   notFound: {
     title: { ru: 'Страница не найдена', pl: 'Nie znaleziono strony', uk: 'Сторінку не знайдено', en: 'Page not found' },
     eyebrow: { ru: 'Ошибка 404', pl: 'Błąd 404', uk: 'Помилка 404', en: 'Error 404' },
     h1: { ru: 'Такого адреса<br />нет.', pl: 'Taki adres<br />nie istnieje.', uk: 'Такої адреси<br />немає.', en: 'This address<br />doesn’t exist.' },
-    lead: { ru: 'Но мы доставим вас куда нужно.', pl: 'Ale dowieziemy Cię tam, gdzie trzeba.', uk: 'Але ми доставимо вас куди треба.', en: 'But we’ll get you where you need to be.' },
-    home: { ru: 'На главную', pl: 'Na stronę główną', uk: 'На головну', en: 'Back to home' },
+    lead: { ru: 'Но мы доставим вас туда, куда нужно.', pl: 'Ale dowieziemy Cię tam, gdzie trzeba.', uk: 'Але ми доставимо вас туди, куди треба.', en: 'But we’ll get you where you need to be.' },
+    home: { ru: 'На главную', pl: 'Na stronę główną', uk: 'На головну', en: 'Back to homepage' },
   },
 } satisfies Record<string, L | Record<string, L>>;
