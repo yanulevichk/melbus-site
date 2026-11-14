@@ -35,7 +35,7 @@ export const PACKAGES = [
     note: l('Вы пакуете — мы перевозим', 'Ty pakujesz — my przewozimy', 'Ви пакуєте — ми перевозимо', 'You pack — we move'),
     items: [
       l('Бус и бригада в форме', 'Bus i ekipa w uniformach', 'Бус і бригада у формі', 'Van and uniformed crew'),
-      l('Защита мебели плёнкой и одеялами', 'Ochrona mebli folią i kocami', 'Захист меблів плівкою й ковдрами', 'Furniture wrapped in film and blankets'),
+      l('Защита мебели плёнкой и одеялами', 'Ochrona mebli folią i kocami', 'Захист меблів плівкою й ковдрами', 'Furniture protected with stretch wrap and blankets'),
       l('Защита пола и дверных косяков', 'Ochrona podłóg i futryn', 'Захист підлоги й одвірків', 'Floor and door-frame protection'),
       l('Разборка и сборка кровати', 'Demontaż i montaż łóżka', 'Розбирання та збирання ліжка', 'Bed disassembly and assembly'),
     ],
@@ -43,25 +43,25 @@ export const PACKAGES = [
   {
     id: 'standard', quote: 1, inc: ['boxes', 'assembly'],
     name: l('Стандарт', 'Standard', 'Стандарт', 'Standard'),
-    note: l('Хрупкое и мебель — на нас', 'Delikatne i meble — po naszej stronie', 'Крихке й меблі — на нас', 'Fragile items and furniture — on us'),
+    note: l('Хрупкое и мебель — на нас', 'Rzeczy delikatne i meble — na naszej głowie', 'Крихке й меблі — на нас', 'Fragile items and furniture — our job'),
     items: [
       l('Всё из «Перевозки»', 'Wszystko z pakietu „Transport”', 'Усе з «Перевезення»', 'Everything in “Transport”'),
-      l('Упаковка кухни и хрупкого, материалы в цене', 'Pakowanie kuchni i rzeczy delikatnych, materiały w cenie', 'Пакування кухні та крихкого, матеріали в ціні', 'Kitchen and fragile packing, materials included'),
-      l('Белые коробки MELBUS заранее', 'Białe kartony MELBUS wcześniej', 'Білі коробки MELBUS заздалегідь', 'White MELBUS boxes delivered in advance'),
+      l('Упаковка кухни и хрупкого, материалы в цене', 'Pakowanie kuchni i rzeczy delikatnych, materiały w cenie', 'Пакування кухні та крихкого, матеріали в ціні', 'Packing of the kitchen and fragile items, materials included'),
+      l('Белые коробки MELBUS заранее', 'Białe kartony MELBUS z wyprzedzeniem', 'Білі коробки MELBUS заздалегідь', 'White MELBUS boxes delivered in advance'),
       l('Разборка и сборка всей мебели', 'Demontaż i montaż wszystkich mebli', 'Розбирання та збирання всіх меблів', 'All furniture taken apart and reassembled'),
     ],
   },
   {
     id: 'full', quote: 2, inc: ['boxes', 'assembly', 'mount'],
     name: l('Под ключ', 'Pod klucz', 'Під ключ', 'Full service'),
-    note: l('Вы приезжаете в готовый дом', 'Przyjeżdżasz do gotowego domu', 'Ви приїжджаєте в готовий дім', 'You arrive at a ready home'),
+    note: l('Вы приезжаете в готовый дом', 'Przyjeżdżasz do gotowego domu', 'Ви приїжджаєте в готовий дім', 'You walk into a home that’s ready'),
     items: [
       l('Всё из «Стандарта»', 'Wszystko z pakietu „Standard”', 'Усе зі «Стандарту»', 'Everything in “Standard”'),
-      l('Упакуем всю квартиру — вы не трогаете ни одной коробки', 'Spakujemy całe mieszkanie — nie dotykasz żadnego kartonu', 'Запакуємо всю квартиру — ви не торкаєтеся жодної коробки', 'We pack the whole home — you don’t touch a single box'),
+      l('Упакуем всю квартиру — вам не придётся трогать ни одной коробки', 'Spakujemy całe mieszkanie — nie musisz dotykać ani jednego kartonu', 'Запакуємо всю квартиру — вам не доведеться торкатися жодної коробки', 'We pack the whole flat — you don’t lift a single box'),
       l('Распакуем и расставим по местам', 'Rozpakujemy i ustawimy wszystko na swoje miejsca', 'Розпакуємо й розставимо по місцях', 'We unpack and put everything in place'),
-      l('Повесим ТВ и до 5 картин или полок', 'Powiesimy TV i do 5 obrazów lub półek', 'Повісимо ТВ і до 5 картин або полиць', 'We mount the TV and up to 5 pictures or shelves'),
+      l('Повесим ТВ и до 5 картин или полок', 'Powiesimy telewizor i do 5 obrazów lub półek', 'Повісимо ТВ і до 5 картин або полиць', 'We mount the TV and hang up to 5 pictures or shelves'),
       l('Вывезем упаковку и мусор', 'Wywieziemy opakowania i śmieci', 'Вивеземо пакування й сміття', 'We take away packaging and rubbish'),
-      l('«Коробка первой ночи» — открываем первой', '„Karton pierwszej nocy” — otwieramy go pierwszy', '«Коробка першої ночі» — відкриваємо першою', 'A “first-night box” — opened first'),
+      l('«Коробка первой ночи» — её открываем первой', '„Karton pierwszej nocy” — otwieramy go pierwszy', '«Коробка першої ночі» — відкриваємо першою', 'A “first-night box” — opened first'),
     ],
   },
 ];
@@ -81,9 +81,9 @@ export const GRID: number[][] = [
 
 /** сколько вещей (видно на видео): множитель к цене пакета */
 export const AMOUNTS = [
-  { k: 0.85, label: l('Немного', 'Niewiele', 'Небагато', 'Not much'), hint: l('минимализм, без кладовки', 'minimalizm, bez komórki', 'мінімалізм, без комори', 'minimal, no storage room') },
-  { k: 1, label: l('Как у всех', 'Jak u większości', 'Як у всіх', 'Typical'), hint: l('обычная квартира', 'zwykłe mieszkanie', 'звичайна квартира', 'an ordinary home') },
-  { k: 1.2, label: l('Много', 'Dużo', 'Багато', 'A lot'), hint: l('полные шкафы, кладовка, балкон', 'pełne szafy, komórka, balkon', 'повні шафи, комора, балкон', 'full wardrobes, storage, balcony') },
+  { k: 0.85, label: l('Немного', 'Niewiele', 'Небагато', 'Not much'), hint: l('минимализм, без кладовки', 'minimalizm, bez komórki', 'мінімалізм, без комори', 'minimalist, no storage room') },
+  { k: 1, label: l('Как у всех', 'Jak u większości', 'Як у всіх', 'Typical'), hint: l('обычная квартира', 'zwykłe mieszkanie', 'звичайна квартира', 'an average flat') },
+  { k: 1.2, label: l('Много', 'Dużo', 'Багато', 'A lot'), hint: l('полные шкафы, кладовка, балкон', 'pełne szafy, komórka, balkon', 'повні шафи, комора, балкон', 'full wardrobes, a storage room, a balcony') },
 ];
 
 /** куда едем: доплата [размер] (zł) — больше вещей = больше машин */
@@ -99,9 +99,9 @@ export const FLOOR = [50, 80, 100, 120, 100];
 
 /** доп. услуги (если не входят в пакет); quote — номер в форме заявки; price — [размер] */
 export const EXTRAS = [
-  { id: 'boxes', quote: 2, price: [190, 290, 390, 690, 450], label: l('Белые коробки заранее', 'Białe kartony wcześniej', 'Білі коробки заздалегідь', 'White boxes in advance') },
-  { id: 'assembly', quote: 3, price: [190, 350, 490, 790, 590], label: l('Разборка и сборка всей мебели', 'Demontaż i montaż wszystkich mebli', 'Розбирання та збирання всіх меблів', 'All furniture disassembly and assembly') },
-  { id: 'mount', quote: 7, price: [390, 390, 390, 490, 490], label: l('ТВ на стену и до 5 картин', 'TV na ścianę i do 5 obrazów', 'ТВ на стіну й до 5 картин', 'TV on the wall and up to 5 pictures') },
+  { id: 'boxes', quote: 2, price: [190, 290, 390, 690, 450], label: l('Белые коробки заранее', 'Białe kartony z wyprzedzeniem', 'Білі коробки заздалегідь', 'White boxes delivered in advance') },
+  { id: 'assembly', quote: 3, price: [190, 350, 490, 790, 590], label: l('Разборка и сборка всей мебели', 'Demontaż i montaż wszystkich mebli', 'Розбирання та збирання всіх меблів', 'Disassembly and assembly of all furniture') },
+  { id: 'mount', quote: 7, price: [390, 390, 390, 490, 490], label: l('ТВ на стену и до 5 картин или полок', 'Telewizor na ścianę i do 5 obrazów lub półek', 'ТВ на стіну й до 5 картин або полиць', 'TV wall mounting and up to 5 pictures or shelves') },
   { id: 'removal', quote: 4, price: [390, 390, 490, 590, 490], label: l('Вывоз старой мебели', 'Wywóz starych mebli', 'Вивезення старих меблів', 'Old furniture removal') },
   { id: 'cleaning', quote: 5, price: [390, 590, 790, 1490, 1390], label: l('Уборка после переезда', 'Sprzątanie po przeprowadzce', 'Прибирання після переїзду', 'Cleaning after the move') },
 ];
@@ -143,8 +143,8 @@ export const boardOptions = SIZES.map((s, i) => ({ label: s.label, status: s.sta
 export const DATE_ADJ = [
   { k: 0, label: l('Обычная дата', 'Zwykły termin', 'Звичайна дата', 'Regular date') },
   { k: -0.1, label: l('«Зелёная» дата: вт–чт в середине месяца, −10 %', '„Zielony” termin: wt–czw w środku miesiąca, −10%', '«Зелена» дата: вт–чт у середині місяця, −10 %', '“Green” date: Tue–Thu mid-month, −10%') },
-  { k: -0.05, label: l('Ранняя бронь за 14+ дней, −5 %', 'Wczesna rezerwacja 14+ dni, −5%', 'Раннє бронювання за 14+ днів, −5 %', 'Early booking 14+ days ahead, −5%') },
-  { k: 0.1, label: l('Пиковая дата: конец/начало месяца, суббота летом, +10 %', 'Termin szczytowy: koniec/początek miesiąca, sobota latem, +10%', 'Пікова дата: кінець/початок місяця, субота влітку, +10 %', 'Peak date: end/start of month, summer Saturday, +10%') },
+  { k: -0.05, label: l('Ранняя бронь за 14+ дней, −5 %', 'Wczesna rezerwacja (14+ dni wcześniej), −5%', 'Раннє бронювання за 14+ днів, −5 %', 'Early booking 14+ days ahead, −5%') },
+  { k: 0.1, label: l('Пиковая дата: конец/начало месяца, суббота летом, +10 %', 'Termin w szczycie: koniec/początek miesiąca, sobota latem, +10%', 'Пікова дата: кінець/початок місяця, субота влітку, +10 %', 'Peak date: end/start of month, summer Saturday, +10%') },
 ];
 /** задаток (zadatek): закрепляет дату; доля от суммы, но не меньше минимума */
 export const DEPOSIT = { pct: 0.2, min: 200 };
