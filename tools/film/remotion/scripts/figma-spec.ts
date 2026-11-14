@@ -278,11 +278,21 @@ const chapters = [1, 2, 3, 4].map((n) => {
   return {n, name: `${CH[n]} (${f(a)}–${f(z)})`, days: [n * 7 - 6, n * 7]};
 });
 
+// 3D-иконки (GPT Image, 14.11.2026) — отдельная страница в Figma, картинками 512×512 (public/icons, tools/icons/cut-icons.py)
+const ICON_GROUPS: [string, [string, string][]][] = [["Мебель и вещи — форма «Что у вас дома»", [["bed2", "Кровать двуспальная"], ["bed1", "Кровать односпальная"], ["wardS", "Шкаф до 1 м"], ["wardM", "Шкаф 1,5–2 м"], ["wardL", "Шкаф-купе"], ["dresser", "Комод"], ["nights", "Тумбочка"], ["mirror", "Зеркало"], ["bunk", "Двухъярусная кровать"], ["sofa", "Диван"], ["sofaC", "Угловой диван"], ["armch", "Кресло"], ["tv", "Телевизор"], ["tvst", "Тумба под ТВ"], ["shelf", "Стеллаж"], ["ctable", "Журнальный столик"], ["rug", "Ковёр"], ["lamp", "Торшер"], ["plant", "Цветок"], ["fridge", "Холодильник"], ["washer", "Стиральная машина"], ["dishw", "Посудомойка"], ["dtable", "Обеденный стол"], ["chair", "Стул"], ["desk", "Письменный стол"], ["ochair", "Офисное кресло"], ["crib", "Детская кроватка"], ["pc", "Компьютер"], ["hall", "Прихожая"], ["bike", "Велосипед"], ["stroll", "Коляска"], ["balc", "Балконная мебель"], ["tires", "Колёса"], ["bags", "Чемодан"], ["box", "Коробка MELBUS"], ["drill", "Дрель"]]], ["Допы и упаковка", [["tvwall", "ТВ на стене"], ["putty", "Шпаклёвка"], ["rod", "Карниз"], ["frame", "Картина"], ["bin", "Мусорный бак"], ["unpack", "Открытая коробка"], ["tape", "Скотч"], ["boxes", "Стопка коробок"], ["blanket", "Одеяло для мебели"]]], ["Услуги, шаги и «Актуальное»", [["piano", "Пианино"], ["safe", "Сейф"], ["clean", "Уборка"], ["phone", "Видео на телефон"], ["tag", "Ценник"], ["calendar", "Календарь"], ["pin", "Точка на карте"], ["keys", "Ключи"], ["house", "Дом"], ["notebook", "Блокнот"], ["gloves", "Перчатки"], ["wheel", "Руль"], ["chat", "Вопросы"], ["globe", "Глобус (ЕС)"], ["road", "Дорога"], ["block", "Многоэтажка"], ["clapper", "Хлопушка"], ["shield", "Щит с галочкой"]]]];
+const icons = ICON_GROUPS.map(([name, list]) => ({name, items: list.map(([id, label]) => {
+  const key = `icon-${id}`, src = `${PUB}/icons/${id}.jpg`;
+  if (!existsSync(src)) throw new Error(src);
+  ff(['-i', src, '-q:v', '3', `${IMG}/${key}.jpg`]);
+  images[key] = {w: 512, h: 512, file: `${IMG}/${key}.jpg`, from: `icons/${id}.jpg`};
+  return {key, id, label};
+})}));
+
 const spec = {
   version: new Date().toISOString().slice(0, 10), W, H, PADX,
   colors: {graphite: GRAPHITE, tape: TAPE, line: LINE, steel: STEEL, glow: '#16303A'},
   langs: ORDER, langNames: {pl: 'PL — польский (основной)', ru: 'RU — русский', uk: 'UK — украинский', en: 'EN — английский'},
-  chapters, stories, highlights, posts: postSections,
+  chapters, stories, highlights, posts: postSections, icons,
   images: Object.fromEntries(Object.entries(images).map(([k, v]) => [k, {w: v.w, h: v.h, from: v.from}])),
   logo: {w: 190, h: 190 / 4.606}, mark: {svg: 'brand/mark-white.svg'},
 };

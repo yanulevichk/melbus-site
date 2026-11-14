@@ -19,6 +19,8 @@ const zl = (n: number) => `${fmt.format(n)} zł`;
 const min = (a: number[]) => Math.min(...a);
 const calc = href(L, 'calculator');
 const always = pg.blocks?.find((b) => b.type === 'list')?.items ?? [];
+/** 3D-иконки пакетов: Перевозка — дорога, Стандарт — коробка, Под ключ — ключи */
+const PKG_ICON = ['road', 'box', 'keys'];
 ---
 <PageHero eyebrow={pg.eyebrow[L]} title={pg.title[L]} lead={pg.lead?.[L]}>
   {pg.media && <Media locale={L} video={pg.media.video} poster={pg.media.poster} alt={pg.media.alt[L]} caption={pg.media.caption?.[L]} square={pg.media.square} />}
@@ -35,7 +37,7 @@ const always = pg.blocks?.find((b) => b.type === 'list')?.items ?? [];
         <thead>
           <tr>
             <th scope="col">{T.what[L]}</th>
-            {PACKAGES.map((p, i) => <th scope="col" class={i === 2 ? 'is-f' : ''}>{p.name[L]}{i === 2 && <span class="pt__badge">{pkgText.best[L]}</span>}</th>)}
+            {PACKAGES.map((p, i) => <th scope="col" class={i === 2 ? 'is-f' : ''}><img class="pt__pic" src={`/img/icons/${PKG_ICON[i]}.webp`} alt="" width="64" height="64" loading="lazy" decoding="async" />{p.name[L]}{i === 2 && <span class="pt__badge">{pkgText.best[L]}</span>}</th>)}
           </tr>
         </thead>
         <tbody>
@@ -104,6 +106,7 @@ const always = pg.blocks?.find((b) => b.type === 'list')?.items ?? [];
 <CtaBand locale={L} />
 
 <style>
+  .pt__pic { display: block; width: 56px; height: 56px; border-radius: 12px; background: #fff; margin-bottom: 8px; }
   .pt { padding-block: clamp(72px, 10vw, 150px); background: #FFFFFF; }
   .pt--inc { background: var(--paper); }
   .pt__in { display: grid; gap: clamp(28px, 4vw, 48px); justify-items: start; }

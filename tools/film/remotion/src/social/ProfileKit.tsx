@@ -41,6 +41,20 @@ export const HighlightV2: React.FC = () => {
     </AbsoluteFill>
   );
 };
+/** v3 (14.11): 3D-иконки (белая «глина» на белом круге, графитовое поле) — public/icons/<имя>.jpg (tools/icons/cut-icons.py).
+ *  Порядок тот же, что в v2: дневник, цена, пакеты, как работаем, коробки, аккуратность, бусы, районы, вопросы. */
+export const HIGHLIGHTS_V3 = ['notebook', 'tag', 'boxes', 'phone', 'box', 'gloves', 'wheel', 'pin', 'chat'];
+export const HighlightV3: React.FC = () => {
+  const i = useCurrentFrame();
+  const k = HIGHLIGHTS_V3[Math.min(i, HIGHLIGHTS_V3.length - 1)];
+  return (
+    <AbsoluteFill style={{background: C.graphite, justifyContent: 'center', alignItems: 'center'}}>
+      <div style={{width: 820, height: 820, borderRadius: '50%', background: '#fff', display: 'grid', placeItems: 'center', boxShadow: `0 0 0 10px ${C.graphite}, 0 0 0 16px ${C.tape}`}}>
+        <Img src={staticFile(`icons/${k}.jpg`)} style={{width: 560, height: 560}} />
+      </div>
+    </AbsoluteFill>
+  );
+};
 export const Highlight: React.FC = () => {
   const i = useCurrentFrame();
   return (

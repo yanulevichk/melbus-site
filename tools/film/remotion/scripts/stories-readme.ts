@@ -78,7 +78,7 @@ p(`**Потрачено всего: ${HF_DONE.spent} кр.**`);
 for (const x of HF_DONE.lines) p(`- ${x}`);
 p();
 p('## Актуальное (Highlights)');
-p('Обложки без текста — `marketing/stories/2026-11/highlights/` (9 шт., фирменные линии на графите). Названия задаются в Instagram:');
+p('Обложки без текста — `marketing/stories/2026-11/highlights/` (9 шт., белые 3D-иконки на белом круге с бирюзовым кантом, на графите). Названия задаются в Instagram:');
 p();
 p('| № | Файл | ' + LANGS.map((L) => L.toUpperCase()).join(' | ') + ' | Сторис из плана |');
 p('|---|---|' + LANGS.map(() => '---').join('|') + '|---|');

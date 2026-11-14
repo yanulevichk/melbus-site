@@ -10,6 +10,8 @@ export interface Service {
   id: string;
   slug: L;
   group: 'move' | 'extra';
+  /** 3D-иконка: public/img/icons/<icon>.webp (tools/icons/cut-icons.py) */
+  icon: string;
   title: L;
   short: L;
   lead: L;
@@ -27,7 +29,7 @@ const V = {
 
 export const services: Service[] = [
   {
-    id: 'pereezd-kvartiry', group: 'move', media: V.film,
+    id: 'pereezd-kvartiry', group: 'move', icon: 'block', media: V.film,
     slug: { ru: 'pereezd-kvartiry', pl: 'przeprowadzka-mieszkania', uk: 'pereyizd-kvartyry', en: 'flat-moving' },
     title: { ru: 'Переезд квартиры', pl: 'Przeprowadzka mieszkania', uk: 'Переїзд квартири', en: 'Flat move' },
     short: { ru: 'Студии, 2–4 комнаты', pl: 'Kawalerki, 2–4 pokoje', uk: 'Студії, 2–4 кімнати', en: 'Studios, 2–4 rooms' },
@@ -40,7 +42,7 @@ export const services: Service[] = [
     ],
   },
   {
-    id: 'pereezd-doma', group: 'move', media: V.pack,
+    id: 'pereezd-doma', group: 'move', icon: 'house', media: V.pack,
     slug: { ru: 'pereezd-doma', pl: 'przeprowadzka-domu', uk: 'pereyizd-budynku', en: 'house-moving' },
     title: { ru: 'Переезд дома', pl: 'Przeprowadzka domu', uk: 'Переїзд будинку', en: 'House move' },
     short: { ru: 'Дома и таунхаусы', pl: 'Domy i szeregowce', uk: 'Будинки й таунхауси', en: 'Houses and townhouses' },
@@ -53,7 +55,7 @@ export const services: Service[] = [
     ],
   },
   {
-    id: 'pereezd-ofisa', group: 'move', media: V.van,
+    id: 'pereezd-ofisa', group: 'move', icon: 'desk', media: V.van,
     slug: { ru: 'pereezd-ofisa', pl: 'przeprowadzka-biura', uk: 'pereyizd-ofisu', en: 'office-moving' },
     title: { ru: 'Переезд офиса', pl: 'Przeprowadzka biura', uk: 'Переїзд офісу', en: 'Office move' },
     short: { ru: 'Ночью и в выходные', pl: 'Nocą i w weekendy', uk: 'Уночі та у вихідні', en: 'Nights and weekends' },
@@ -66,7 +68,7 @@ export const services: Service[] = [
     ],
   },
   {
-    id: 'perevozka-mebeli', group: 'move', media: V.van,
+    id: 'perevozka-mebeli', group: 'move', icon: 'sofa', media: V.van,
     slug: { ru: 'perevozka-mebeli', pl: 'transport-mebli', uk: 'perevezennya-mebliv', en: 'furniture-transport' },
     title: { ru: 'Перевозка мебели и вещей', pl: 'Transport mebli i rzeczy', uk: 'Перевезення меблів і речей', en: 'Transporting furniture and other items' },
     short: { ru: 'Диван из магазина или с OLX', pl: 'Sofa ze sklepu lub z OLX', uk: 'Диван із магазину чи з OLX', en: 'A sofa from a shop or from OLX' },
@@ -79,7 +81,7 @@ export const services: Service[] = [
     ],
   },
   {
-    id: 'pianino-i-seyfy', group: 'move', media: V.gloves,
+    id: 'pianino-i-seyfy', group: 'move', icon: 'piano', media: V.gloves,
     slug: { ru: 'pianino-i-seyfy', pl: 'pianina-i-sejfy', uk: 'pianino-i-seyfy', en: 'pianos-and-safes' },
     title: { ru: 'Пианино и сейфы', pl: 'Pianina i sejfy', uk: 'Піаніно та сейфи', en: 'Pianos and safes' },
     short: { ru: 'Тяжёлое и ценное', pl: 'Ciężkie i cenne', uk: 'Важке й цінне', en: 'Heavy and valuable' },
@@ -92,7 +94,7 @@ export const services: Service[] = [
     ],
   },
   {
-    id: 'mezhdugorodnie', group: 'move', media: V.van,
+    id: 'mezhdugorodnie', group: 'move', icon: 'road', media: V.van,
     slug: { ru: 'mezhdugorodnie', pl: 'przeprowadzki-miedzymiastowe', uk: 'mizhmiski-pereyizdy', en: 'long-distance-moves' },
     title: { ru: 'Междугородние переезды', pl: 'Przeprowadzki międzymiastowe', uk: 'Міжміські переїзди', en: 'Long-distance moves' },
     short: { ru: 'По всей Польше', pl: 'Po całej Polsce', uk: 'По всій Польщі', en: 'Across Poland' },
@@ -105,7 +107,7 @@ export const services: Service[] = [
     ],
   },
   {
-    id: 'po-evrope', group: 'move', media: V.van,
+    id: 'po-evrope', group: 'move', icon: 'globe', media: V.van,
     slug: { ru: 'po-evrope', pl: 'przeprowadzki-zagraniczne', uk: 'pereyizdy-yevropoyu', en: 'moves-in-europe' },
     title: { ru: 'Переезды по Европе', pl: 'Przeprowadzki po Europie', uk: 'Переїзди Європою', en: 'Moves across Europe' },
     short: { ru: 'Германия, Нидерланды и другие страны ЕС', pl: 'Niemcy, Holandia i inne kraje UE', uk: 'Німеччина, Нідерланди та інші країни ЄС', en: 'Germany, the Netherlands and other EU countries' },
@@ -118,7 +120,7 @@ export const services: Service[] = [
     ],
   },
   {
-    id: 'upakovka', group: 'extra', media: V.gloves,
+    id: 'upakovka', group: 'extra', icon: 'tape', media: V.gloves,
     slug: { ru: 'upakovka', pl: 'pakowanie', uk: 'pakuvannya', en: 'packing' },
     title: { ru: 'Упаковка', pl: 'Pakowanie', uk: 'Пакування', en: 'Packing' },
     short: { ru: 'Всё или только хрупкое', pl: 'Wszystko albo tylko rzeczy delikatne', uk: 'Усе або лише крихке', en: 'Everything or just the fragile items' },
@@ -131,7 +133,7 @@ export const services: Service[] = [
     ],
   },
   {
-    id: 'korobki', group: 'extra', media: V.tape,
+    id: 'korobki', group: 'extra', icon: 'boxes', media: V.tape,
     slug: { ru: 'korobki', pl: 'kartony', uk: 'korobky', en: 'boxes' },
     title: { ru: 'Коробки и материалы', pl: 'Kartony i materiały', uk: 'Коробки й матеріали', en: 'Boxes and materials' },
     short: { ru: 'Доставим заранее', pl: 'Dostarczymy z wyprzedzeniem', uk: 'Доставимо заздалегідь', en: 'Delivered in advance' },
@@ -144,7 +146,7 @@ export const services: Service[] = [
     ],
   },
   {
-    id: 'sborka-mebeli', group: 'extra', media: V.pack,
+    id: 'sborka-mebeli', group: 'extra', icon: 'drill', media: V.pack,
     slug: { ru: 'sborka-mebeli', pl: 'montaz-mebli', uk: 'zbyrannya-mebliv', en: 'furniture-assembly' },
     title: { ru: 'Разборка и сборка мебели', pl: 'Demontaż i montaż mebli', uk: 'Розбирання та збирання меблів', en: 'Furniture disassembly and assembly' },
     short: { ru: 'Шкафы, кровати, кухни', pl: 'Szafy, łóżka, kuchnie', uk: 'Шафи, ліжка, кухні', en: 'Wardrobes, beds, kitchens' },
@@ -157,7 +159,7 @@ export const services: Service[] = [
     ],
   },
   {
-    id: 'vyvoz-mebeli', group: 'extra', media: V.van,
+    id: 'vyvoz-mebeli', group: 'extra', icon: 'bin', media: V.van,
     slug: { ru: 'vyvoz-mebeli', pl: 'wywoz-mebli', uk: 'vyviz-mebliv', en: 'furniture-removal' },
     title: { ru: 'Вывоз мебели и утилизация', pl: 'Wywóz mebli i utylizacja', uk: 'Вивезення меблів і утилізація', en: 'Furniture removal and disposal' },
     short: { ru: 'Старая мебель и техника', pl: 'Stare meble i sprzęt', uk: 'Старі меблі й техніка', en: 'Old furniture and appliances' },
@@ -170,7 +172,7 @@ export const services: Service[] = [
     ],
   },
   {
-    id: 'uborka', group: 'extra', media: V.pack,
+    id: 'uborka', group: 'extra', icon: 'clean', media: V.pack,
     slug: { ru: 'uborka', pl: 'sprzatanie', uk: 'prybyrannya', en: 'cleaning' },
     title: { ru: 'Уборка после переезда', pl: 'Sprzątanie po przeprowadzce', uk: 'Прибирання після переїзду', en: 'Move-out cleaning' },
     short: { ru: 'Сдача квартиры владельцу', pl: 'Oddanie mieszkania właścicielowi', uk: 'Передача квартири власникові', en: 'Handing the flat back to the landlord' },

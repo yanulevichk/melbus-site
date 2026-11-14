@@ -89,7 +89,7 @@ Photorealistic, premium commercial photography, soft natural daylight, calm and 
 - hf-van: выдуманный номер «MELBUS» и надпись-эмблема размыты монтажом (бесплатно, tools: OpenCV-трекинг).
 
 ## Актуальное (Highlights)
-Обложки без текста — `marketing/stories/2026-11/highlights/` (9 шт., фирменные линии на графите). Названия задаются в Instagram:
+Обложки без текста — `marketing/stories/2026-11/highlights/` (9 шт., белые 3D-иконки на белом круге с бирюзовым кантом, на графите). Названия задаются в Instagram:
 
 | № | Файл | RU | PL | UK | EN | Сторис из плана |
 |---|---|---|---|---|---|---|

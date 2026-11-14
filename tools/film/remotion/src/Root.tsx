@@ -6,7 +6,7 @@ import {ReelFilm, FILM_FRAMES, END_FRAMES} from './social/ReelFilm';
 import {ReelClip, CLIP_FRAMES, CLIP_END} from './social/ReelClip';
 import {Carousel, SLIDE_COUNT} from './social/Carousel';
 import {OgCard} from './social/OgCard';
-import {Avatar, CoverFB, Highlight, HIGHLIGHTS, HighlightV2, HIGHLIGHTS_V2} from './social/ProfileKit';
+import {Avatar, CoverFB, Highlight, HIGHLIGHTS, HighlightV2, HIGHLIGHTS_V2, HighlightV3, HIGHLIGHTS_V3} from './social/ProfileKit';
 import {StoryStills, StoryVideo, STORY_VIDEO} from './social/Story';
 import {CarouselHours, COVERS, HOURS_SLIDES, ReelCovers} from './social/PostKit';
 import {GPT_COUNT, GptPosts, GptStories} from './social/GptKit';
@@ -47,5 +47,6 @@ export const Root: React.FC = () => (
     <Composition id="Avatar" component={Avatar} durationInFrames={1} fps={1} width={1080} height={1080} />
     <Composition id="Highlights" component={Highlight} durationInFrames={HIGHLIGHTS.length} fps={1} width={1080} height={1920} />
     <Composition id="HighlightsV2" component={HighlightV2} durationInFrames={HIGHLIGHTS_V2.length} fps={1} width={1080} height={1920} />
+    <Composition id="HighlightsV3" component={HighlightV3} durationInFrames={HIGHLIGHTS_V3.length} fps={1} width={1080} height={1920} />
   </>
 );

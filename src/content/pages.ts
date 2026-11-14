@@ -8,7 +8,8 @@ import { brand } from '../config/brand';
 const l = (ru: string, pl: string, uk: string, en: string): L => ({ ru, pl, uk, en });
 const y = brand.facts.years;
 
-export interface LBlock { type: 'list' | 'text' | 'faq' | 'cards'; eyebrow?: L; title: L; lead?: L; items?: [L, L][] }
+/** icons — 3D-иконки к пунктам (public/img/icons/<имя>.webp), по одной на пункт */
+export interface LBlock { type: 'list' | 'text' | 'faq' | 'cards'; eyebrow?: L; title: L; lead?: L; items?: [L, L][]; icons?: string[] }
 export interface LMedia { video: string; poster: string; alt: L; caption?: L; square?: boolean }
 export interface LPage { eyebrow: L; title: L; lead?: L; media?: LMedia; blocks?: LBlock[] }
 
@@ -134,7 +135,7 @@ export const pages: Record<string, LPage> = {
       alt: l('Фильм MELBUS: вся квартира складывается в одну коробку и переезжает в новый дом', 'Film MELBUS: całe mieszkanie trafia do jednego kartonu i jedzie do nowego domu', 'Фільм MELBUS: уся квартира складається в одну коробку й переїжджає в новий дім', 'MELBUS film: the whole flat packs into one box and moves to a new home'),
       caption: l('Переезд от первого кадра до последней полки — за 23 секунды.', 'Przeprowadzka od pierwszego kadru po ostatnią półkę — w 23 sekundy.', 'Переїзд від першого кадру до останньої полиці — за 23 секунди.', 'A move from the first frame to the last shelf — in 23 seconds.') },
     blocks: [
-      { type: 'list', eyebrow: l('Шаги', 'Kroki', 'Кроки', 'Steps'), title: l('От видео<br>до нового адреса', 'Od wideo<br>do nowego adresu', 'Від відео<br>до нової адреси', 'From a video<br>to a new address'), items: [
+      { type: 'list', icons: ['phone', 'tag', 'calendar', 'box', 'pin', 'keys'], eyebrow: l('Шаги', 'Kroki', 'Кроки', 'Steps'), title: l('От видео<br>до нового адреса', 'Od wideo<br>do nowego adresu', 'Від відео<br>до нової адреси', 'From a video<br>to a new address'), items: [
         [l('Видео', 'Wideo', 'Відео', 'Video'), l('Снимаете квартиру на телефон.', 'Nagrywasz mieszkanie telefonem.', 'Знімаєте квартиру на телефон.', 'You film your flat on your phone.')],
         [l('Цена', 'Cena', 'Ціна', 'Price'), l('Фиксированная цена в течение 2 часов (днём).', 'Stała cena w ciągu 2 godzin (w dzień).', 'Фіксована ціна протягом 2 годин (удень).', 'A fixed price within 2 hours (daytime).')],
         [l('Бронь', 'Rezerwacja', 'Бронювання', 'Booking'), l('Задаток — BLIK или картой.', 'Zadatek BLIK-iem lub kartą.', 'Завдаток — BLIK або карткою.', 'A deposit by BLIK or card.')],

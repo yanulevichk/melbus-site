@@ -35,8 +35,8 @@ for L in $LANGS; do
   echo "stories-$L: $(ls $M/$L | wc -l) файлов"
 done
 
-# 3) обложки «Актуального» v2 (без текста — подходят для всех языков)
-H=out/stories/highlights; rm -rf $H; R HighlightsV2 $H --sequence --image-format=jpeg --jpeg-quality=92
+# 3) обложки «Актуального» v3 — 3D-иконки (без текста — подходят для всех языков)
+H=out/stories/highlights; rm -rf $H; R HighlightsV3 $H --sequence --image-format=jpeg --jpeg-quality=92
 mkdir -p $M/highlights; i=1; for f in $(ls $H | sort -V); do
   name=$(echo "diary price packages how boxes care vans areas faq" | cut -d' ' -f$i); cp $H/$f $M/highlights/$i-$name.jpg; i=$((i+1)); done
 echo STORIES_DONE

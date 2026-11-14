@@ -14,6 +14,7 @@ const groups = ['move', 'extra'] as const;
       <div class="svc">
         {services.filter((s) => s.group === g).map((s, i) => (
           <a href={href(locale, `service:${s.id}`)} class="svc__card" data-reveal>
+            <img class="svc__pic" src={`/img/icons/${s.icon}.webp`} alt="" width="96" height="96" loading="lazy" decoding="async" />
             <span class="svc__n">{String(i + 1).padStart(2, '0')}</span>
             <h3 class="t-h3">{s.title[locale]}</h3>
             <p class="t-muted">{s.short[locale]}</p>
@@ -33,6 +34,10 @@ const groups = ['move', 'extra'] as const;
   @media (min-width: 1024px) { .svc { grid-template-columns: repeat(3, 1fr); } }
   .svc__card { position: relative; display: grid; gap: 8px; align-content: start; min-height: 190px; padding: 24px; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--line); transition: background .4s var(--ease), color .4s var(--ease), transform .4s var(--ease); }
   .svc__card:hover { background: var(--ink); color: var(--bg); --muted: #A0A7B1; transform: translateY(-4px); }
+  .svc__pic { position: absolute; top: 16px; right: 16px; width: 84px; height: 84px; border-radius: 14px; background: #fff; transition: transform .4s var(--ease); }
+  .svc__card:hover .svc__pic { transform: translateY(-3px) rotate(-3deg); }
+  .svc__card h3, .svc__card p { padding-right: 92px; }
+  @media (max-width: 639px) { .svc__card p { padding-right: 0; } }
   .svc__n { font-size: .8rem; font-weight: 600; color: var(--accent-text); letter-spacing: .08em; }
   .svc__go { position: absolute; right: 22px; bottom: 18px; font-size: 1.6rem; transition: transform .4s var(--ease); }
   .svc__card:hover .svc__go { transform: translateX(6px); }

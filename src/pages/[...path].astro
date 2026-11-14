@@ -62,7 +62,7 @@ const faqSchema = key === 'faq' || key === 'home' || key === 'lux' ? [{ '@contex
 
 // тексты страницы на нужном языке
 const pg = pages[key];
-const blk = (b: LBlock): Block => ({ type: b.type, eyebrow: b.eyebrow?.[L], title: b.title[L], lead: b.lead?.[L], items: b.items?.map(([a, d]) => [a[L], d[L]] as [string, string]) });
+const blk = (b: LBlock): Block => ({ type: b.type, eyebrow: b.eyebrow?.[L], title: b.title[L], lead: b.lead?.[L], items: b.items?.map(([a, d]) => [a[L], d[L]] as [string, string]), icons: b.icons });
 const med = (x?: LMedia): MediaProps | undefined => x && { video: x.video, poster: x.poster, alt: x.alt[L], caption: x.caption?.[L], square: x.square };
 const simple = pg && { eyebrow: pg.eyebrow[L], title: pg.title[L], lead: pg.lead?.[L], media: med(pg.media), blocks: (pg.blocks ?? []).map(blk) };
 ---

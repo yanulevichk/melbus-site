@@ -357,6 +357,32 @@ async function highlightsPage(page) {
   note.x = 0; note.y = -200;
 }
 
+// ---------- 3D-иконки: по разделу на группу, сетка 9 в ряд, подпись под каждой ----------
+async function iconsPage(page) {
+  await figma.setCurrentPageAsync(page);
+  const S = 512, GAP = 96, CAP = 120, COLS = 9, PADI = 120;
+  const note = await text({t: 'text', name: 'Как пользоваться', font: 'O400', size: 40, lh: 140, color: '#FFFFFF',
+    text: '3D-иконки MELBUS: белая «глина», бирюзовые детали, белый фон. Имя слоя = имя файла на сайте (public/img/icons/<имя>.webp). Экспорт: выделить → Export PNG/JPG.'}, 3600);
+  note.x = 0; note.y = -220;
+  let y0 = 0;
+  for (const g of SPEC.icons) {
+    const rows = Math.ceil(g.items.length / COLS);
+    const sec = figma.createSection();
+    sec.name = g.name;
+    sec.resizeWithoutConstraints(PADI * 2 + COLS * (S + GAP) - GAP, PADI * 2 + rows * (S + CAP + GAP) - GAP);
+    sec.x = 0; sec.y = y0;
+    for (let i = 0; i < g.items.length; i++) {
+      const it = g.items[i], x = PADI + (i % COLS) * (S + GAP), y = PADI + Math.floor(i / COLS) * (S + CAP + GAP);
+      const f = figma.createFrame();
+      f.name = it.id; f.resize(S, S); f.fills = [imageFill(it.key)]; f.cornerRadius = 48;
+      sec.appendChild(f); f.x = x; f.y = y;
+      const t = await text({t: 'text', name: 'Подпись', font: 'O500', size: 34, color: C.graphite, text: `${it.label} · ${it.id}`}, S);
+      sec.appendChild(t); t.x = x; t.y = y + S + 24;
+    }
+    y0 += PADI * 2 + rows * (S + CAP + GAP) + 300;
+  }
+}
+
 // ---------- запуск ----------
 async function main() {
   figma.notify('MELBUS: собираю сторис… это займёт 1–3 минуты', {timeout: 5000});
@@ -374,6 +400,7 @@ async function main() {
   };
   const langPages = SPEC.langs.map((l) => newPage(`${l.toUpperCase()} · сторис и посты`));
   const hlPage = newPage('Профиль: аватар и «Актуальное»');
+  const iconPage = newPage('3D-иконки');
   const compPage = newPage('⚙︎ Компоненты');
 
   await figma.setCurrentPageAsync(compPage);
@@ -386,6 +413,7 @@ async function main() {
 
   for (let i = 0; i < SPEC.langs.length; i++) await langPage(langPages[i], SPEC.langs[i]);
   await highlightsPage(hlPage);
+  await iconsPage(iconPage);
 
   await figma.setCurrentPageAsync(langPages[0]);
   figma.viewport.scrollAndZoomIntoView(langPages[0].children);

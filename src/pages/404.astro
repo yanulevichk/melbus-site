@@ -8,6 +8,7 @@ const T = ui.notFound;
 ---
 <Base locale={L} pageKey="home" title={T.title[L]} description={T.lead[L]} noindex theme="lux">
   <section class="nf container">
+    <img class="nf__pic" src="/img/icons/unpack.webp" alt="" width="160" height="160" />
     <span class="nf__eyebrow">{T.eyebrow[L]}</span>
     <h1 class="nf__h" set:html={T.h1[L]} />
     <p class="nf__lead">{T.lead[L]}</p>
@@ -22,6 +23,7 @@ const T = ui.notFound;
 
 <style>
   .nf { display: grid; gap: 24px; justify-items: start; min-height: 80svh; align-content: center; padding-top: calc(var(--header-h) + 64px); padding-bottom: 96px; }
+  .nf__pic { width: 140px; height: 140px; border-radius: 24px; background: #fff; }
   .nf__eyebrow { color: var(--muted); }
   .nf__h { font-family: var(--font-display); font-weight: 200; font-size: var(--fs-xl); letter-spacing: -0.045em; line-height: .98; }
   .nf__lead { font-size: 1.15rem; color: var(--muted); }
