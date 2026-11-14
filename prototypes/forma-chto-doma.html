@@ -237,12 +237,17 @@ h2 { font: 300 clamp(23px, 3.4vw, 30px)/1.15 var(--display); letter-spacing: -0.
 .drum__s span, .drum-sep { height: 1em; line-height: 1 }
 .drum-sep { display: inline-block; width: .28em }
 .board__fix { margin: 0; font-size: 14px; color: var(--soft) }
-.van svg { width: 100%; height: auto; display: block; overflow: visible }
-.van .cell { opacity: 0; transform: translateY(-14px); transform-box: fill-box; transition: opacity .25s, transform .45s cubic-bezier(.3, 1.4, .5, 1) }
-.van .cell.on { opacity: 1; transform: none }
+.vans { display: flex; align-items: flex-end; gap: 4px }
+.vanbox { flex: 1 1 100%; min-width: 0; transition: flex-basis .7s cubic-bezier(.2, .8, .2, 1), opacity .5s, transform .7s cubic-bezier(.2, .8, .2, 1) }
+.vanbox--b { flex-basis: 0%; opacity: 0; transform: translateX(40px) }
+.vans.two .vanbox--b { flex-basis: 100%; opacity: 1; transform: none }
+.vanbox svg { width: 100%; height: auto; display: block; overflow: visible }
+.vanbox .vbody { transform-box: view-box; transform-origin: 50% 85% }
+.vanbox.bump .vbody { animation: squash .5s cubic-bezier(.3, 1.5, .5, 1) }
+@keyframes squash { 30% { transform: translateY(3px) scaleY(.98) } 65% { transform: translateY(-1.5px) } }
+.vanbox .cell { opacity: 0; transform: translateY(-26px) scale(.6) rotate(-10deg); transform-box: fill-box; transform-origin: 50% 100%; transition: opacity .2s, transform .55s cubic-bezier(.3, 1.6, .5, 1) }
+.vanbox .cell.on { opacity: 1; transform: none }
 .van__cap { margin: 6px 0 0; font-size: 13px; color: var(--steel); font-variant-numeric: tabular-nums }
-.van.bump svg { animation: bump .35s }
-@keyframes bump { 40% { transform: translateY(2px) } }
 .facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 0; padding: 12px 0; list-style: none; border-block: 1px solid var(--line-dark) }
 .facts b { display: block; font: 300 22px/1.2 var(--display); font-variant-numeric: tabular-nums; letter-spacing: -0.03em }
 .facts span { font-size: 13px; color: var(--steel) }
@@ -301,7 +306,7 @@ dialog::backdrop { background: rgba(16, 22, 29, .6) }
   .tape-badge { animation: stick .35s cubic-bezier(.2, .9, .3, 1.3) }
   @keyframes stick { from { transform: rotate(-12deg) scale(.6); opacity: 0 } to { transform: rotate(-4deg) scale(1); opacity: 1 } }
 }
-@media (prefers-reduced-motion: reduce) { .drum__s, .van .cell, .bar, .prog__bar { transition: none } }
+@media (prefers-reduced-motion: reduce) { .drum__s, .vanbox, .vanbox .cell, .bar, .prog__bar { transition: none } .vanbox.bump .vbody { animation: none } }
 </style>
 
 <header class="hero">
@@ -421,17 +426,7 @@ dialog::backdrop { background: rgba(16, 22, 29, .6) }
     <p class="board__price"><span class="drums" id="bP" aria-hidden="true"></span><small>zł</small><span class="vh" id="bPtext" aria-live="polite"></span></p>
     <p class="board__fix" id="bFix"></p>
     <div class="van" id="van">
-      <svg viewBox="0 0 264 118" aria-hidden="true">
-        <rect x="12" y="22" width="170" height="72" rx="3" fill="#18212A"/>
-        <g id="cells"></g>
-        <rect x="12" y="22" width="170" height="72" rx="3" fill="none" stroke="#8F9AA7" stroke-width="1.5"/>
-        <path d="M182 40h34c4 0 7 2 9 5l17 24c1.5 2 2 4 2 6v19h-62z" fill="#10161D" stroke="#8F9AA7" stroke-width="1.5"/>
-        <path d="M190 47h26l14 20h-40z" fill="none" stroke="#56626E" stroke-width="1.5"/>
-        <path d="M12 86h232" stroke="#14DCD5" stroke-width="2"/>
-        <circle cx="56" cy="100" r="11" fill="#10161D" stroke="#8F9AA7" stroke-width="1.5"/><circle cx="56" cy="100" r="3.5" fill="#56626E"/>
-        <circle cx="212" cy="100" r="11" fill="#10161D" stroke="#8F9AA7" stroke-width="1.5"/><circle cx="212" cy="100" r="3.5" fill="#56626E"/>
-        <path d="M0 112h264" stroke="#2C3742"/>
-      </svg>
+      <div class="vans" id="vans"><div class="vanbox" id="vanA"></div><div class="vanbox vanbox--b" id="vanB"></div></div>
       <p class="van__cap" id="vanCap"></p>
     </div>
     <ul class="facts" id="facts"></ul>
@@ -726,31 +721,67 @@ function drums(el, value) {
   for (const ch of str) if (/\d/.test(ch)) cols[i++].style.transform = `translateY(-${ch}em)`;
 }
 
-// ===== Бус: 40 ячеек-коробок, грузим от кабины =====
-const CELLS = 40;
-$('#cells').innerHTML = Array.from({length: CELLS}, (_, i) => {
-  const col = 9 - Math.floor(i / 4), row = 3 - (i % 4), x = 12 + col * 17, y = 22 + row * 18;
-  return `<g class="cell" data-i="${i}"><rect x="${x + 1.5}" y="${y + 1.5}" width="14" height="15" rx="1" fill="#F4F6F8"/><rect x="${x + 1.5}" y="${y + 7.5}" width="14" height="3" fill="#14DCD5"/></g>`;
+// ===== Бусы: белый «глиняный» бус в разрезе, внутри наши коробки; грузим от кабины к задним дверям =====
+const CELLS = 36, VLOGO = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0NjAuNiAxMDAiPgo8ZyB0cmFuc2Zvcm09InNjYWxlKDAuMTUyMjA3MDAxNTIyMDcpIj48c3ZnIHZpZXdCb3g9Ii0xNi4wIC0xNi4wIDY3Mi4wIDY1Ny4wIiB3aWR0aD0iNjcyLjAiIGhlaWdodD0iNjU3LjAiPjxkZWZzPgo8Y2xpcFBhdGggaWQ9Im1lbGJ1cy1saWdodEwiPjxyZWN0IHg9Ii02MCIgeT0iLTYwIiB3aWR0aD0iMzgwIiBoZWlnaHQ9IjkwMCIvPjwvY2xpcFBhdGg+CjxjbGlwUGF0aCBpZD0ibWVsYnVzLWxpZ2h0UiI+PHJlY3QgeD0iMzIwIiB5PSItNjAiIHdpZHRoPSI0MDAiIGhlaWdodD0iOTAwIi8+PC9jbGlwUGF0aD4KPG1hc2sgaWQ9Im1lbGJ1cy1saWdodG0wIiBtYXNrVW5pdHM9InVzZXJTcGFjZU9uVXNlIiB4PSItODAiIHk9Ii04MCIgd2lkdGg9IjgwMCIgaGVpZ2h0PSI5MDAiPjxyZWN0IHg9Ii04MCIgeT0iLTgwIiB3aWR0aD0iODAwIiBoZWlnaHQ9IjkwMCIgZmlsbD0iI2ZmZiIvPgo8cGF0aCBkPSJNMC4wLDE4NS4wIEwzMjAuMCwzNzAuMCBMNjQwLjAsMTg1LjAgTDY0MC4wLDI5MC4wIEwzMjAuMCw0NzUuMCBMMC4wLDI5MC4wIFoiIGZpbGw9IiMwMDAiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSI0NiIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8cGF0aCBkPSJNMC4wLDMzNS4wIEwzMjAuMCwxNTAuMCBMNjQwLjAsMzM1LjAgTDY0MC4wLDQ0MC4wIEwzMjAuMCwyNTUuMCBMMC4wLDQ0MC4wIFoiIGZpbGw9IiMwMDAiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSI0NiIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8cGF0aCBkPSJNMC4wLDE4NS4wIEwzMjAuMCwwLjAgTDY0MC4wLDE4NS4wIEw2NDAuMCwyOTAuMCBMMzIwLjAsMTA1LjAgTDAuMCwyOTAuMCBaIiBmaWxsPSIjMDAwIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iNDYiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPC9tYXNrPgo8bWFzayBpZD0ibWVsYnVzLWxpZ2h0bTEiIG1hc2tVbml0cz0idXNlclNwYWNlT25Vc2UiIHg9Ii04MCIgeT0iLTgwIiB3aWR0aD0iODAwIiBoZWlnaHQ9IjkwMCI+PHJlY3QgeD0iLTgwIiB5PSItODAiIHdpZHRoPSI4MDAiIGhlaWdodD0iOTAwIiBmaWxsPSIjZmZmIi8+CjxwYXRoIGQ9Ik0wLjAsMzM1LjAgTDMyMC4wLDE1MC4wIEw2NDAuMCwzMzUuMCBMNjQwLjAsNDQwLjAgTDMyMC4wLDI1NS4wIEwwLjAsNDQwLjAgWiIgZmlsbD0iIzAwMCIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utd2lkdGg9IjQ2IiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+CjxwYXRoIGQ9Ik0wLjAsMTg1LjAgTDMyMC4wLDAuMCBMNjQwLjAsMTg1LjAgTDY0MC4wLDI5MC4wIEwzMjAuMCwxMDUuMCBMMC4wLDI5MC4wIFoiIGZpbGw9IiMwMDAiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSI0NiIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8L21hc2s+CjxtYXNrIGlkPSJtZWxidXMtbGlnaHRtMiIgbWFza1VuaXRzPSJ1c2VyU3BhY2VPblVzZSIgeD0iLTgwIiB5PSItODAiIHdpZHRoPSI4MDAiIGhlaWdodD0iOTAwIj48cmVjdCB4PSItODAiIHk9Ii04MCIgd2lkdGg9IjgwMCIgaGVpZ2h0PSI5MDAiIGZpbGw9IiNmZmYiLz4KPHBhdGggZD0iTTAuMCwxODUuMCBMMzIwLjAsMC4wIEw2NDAuMCwxODUuMCBMNjQwLjAsMjkwLjAgTDMyMC4wLDEwNS4wIEwwLjAsMjkwLjAgWiIgZmlsbD0iIzAwMCIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utd2lkdGg9IjQ2IiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+CjwvbWFzaz4KPG1hc2sgaWQ9Im1lbGJ1cy1saWdodG0zIiBtYXNrVW5pdHM9InVzZXJTcGFjZU9uVXNlIiB4PSItODAiIHk9Ii04MCIgd2lkdGg9IjgwMCIgaGVpZ2h0PSI5MDAiPjxyZWN0IHg9Ii04MCIgeT0iLTgwIiB3aWR0aD0iODAwIiBoZWlnaHQ9IjkwMCIgZmlsbD0iI2ZmZiIvPgo8L21hc2s+CjwvZGVmcz4KPGcgbWFzaz0idXJsKCNtZWxidXMtbGlnaHRtMCkiPjxwYXRoIGQ9Ik0wLjAsMzM1LjAgTDMyMC4wLDUyMC4wIEw2NDAuMCwzMzUuMCBMNjQwLjAsNDQwLjAgTDMyMC4wLDYyNS4wIEwwLjAsNDQwLjAgWiIgZmlsbD0iIzBBOUM5NyIgc3Ryb2tlPSIjMEE5Qzk3IiBzdHJva2Utd2lkdGg9IjIwIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBjbGlwLXBhdGg9InVybCgjbWVsYnVzLWxpZ2h0TCkiLz48cGF0aCBkPSJNMC4wLDMzNS4wIEwzMjAuMCw1MjAuMCBMNjQwLjAsMzM1LjAgTDY0MC4wLDQ0MC4wIEwzMjAuMCw2MjUuMCBMMC4wLDQ0MC4wIFoiIGZpbGw9IiMzQTQ0NTAiIHN0cm9rZT0iIzNBNDQ1MCIgc3Ryb2tlLXdpZHRoPSIyMCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgY2xpcC1wYXRoPSJ1cmwoI21lbGJ1cy1saWdodFIpIi8+PC9nPgo8ZyBtYXNrPSJ1cmwoI21lbGJ1cy1saWdodG0xKSI+PHBhdGggZD0iTTAuMCwxODUuMCBMMzIwLjAsMzcwLjAgTDY0MC4wLDE4NS4wIEw2NDAuMCwyOTAuMCBMMzIwLjAsNDc1LjAgTDAuMCwyOTAuMCBaIiBmaWxsPSIjMEE5Qzk3IiBzdHJva2U9IiMwQTlDOTciIHN0cm9rZS13aWR0aD0iMjAiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsaXAtcGF0aD0idXJsKCNtZWxidXMtbGlnaHRMKSIvPjxwYXRoIGQ9Ik0wLjAsMTg1LjAgTDMyMC4wLDM3MC4wIEw2NDAuMCwxODUuMCBMNjQwLjAsMjkwLjAgTDMyMC4wLDQ3NS4wIEwwLjAsMjkwLjAgWiIgZmlsbD0iIzNBNDQ1MCIgc3Ryb2tlPSIjM0E0NDUwIiBzdHJva2Utd2lkdGg9IjIwIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBjbGlwLXBhdGg9InVybCgjbWVsYnVzLWxpZ2h0UikiLz48L2c+CjxnIG1hc2s9InVybCgjbWVsYnVzLWxpZ2h0bTIpIj48cGF0aCBkPSJNMC4wLDMzNS4wIEwzMjAuMCwxNTAuMCBMNjQwLjAsMzM1LjAgTDY0MC4wLDQ0MC4wIEwzMjAuMCwyNTUuMCBMMC4wLDQ0MC4wIFoiIGZpbGw9IiMwNzdFNzkiIHN0cm9rZT0iIzA3N0U3OSIgc3Ryb2tlLXdpZHRoPSIyMCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgY2xpcC1wYXRoPSJ1cmwoI21lbGJ1cy1saWdodEwpIi8+PHBhdGggZD0iTTAuMCwzMzUuMCBMMzIwLjAsMTUwLjAgTDY0MC4wLDMzNS4wIEw2NDAuMCw0NDAuMCBMMzIwLjAsMjU1LjAgTDAuMCw0NDAuMCBaIiBmaWxsPSIjMTAxNjFEIiBzdHJva2U9IiMxMDE2MUQiIHN0cm9rZS13aWR0aD0iMjAiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsaXAtcGF0aD0idXJsKCNtZWxidXMtbGlnaHRSKSIvPjwvZz4KPGcgbWFzaz0idXJsKCNtZWxidXMtbGlnaHRtMykiPjxwYXRoIGQ9Ik0wLjAsMTg1LjAgTDMyMC4wLDAuMCBMNjQwLjAsMTg1LjAgTDY0MC4wLDI5MC4wIEwzMjAuMCwxMDUuMCBMMC4wLDI5MC4wIFoiIGZpbGw9IiMwNzdFNzkiIHN0cm9rZT0iIzA3N0U3OSIgc3Ryb2tlLXdpZHRoPSIyMCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgY2xpcC1wYXRoPSJ1cmwoI21lbGJ1cy1saWdodEwpIi8+PHBhdGggZD0iTTAuMCwxODUuMCBMMzIwLjAsMC4wIEw2NDAuMCwxODUuMCBMNjQwLjAsMjkwLjAgTDMyMC4wLDEwNS4wIEwwLjAsMjkwLjAgWiIgZmlsbD0iIzEwMTYxRCIgc3Ryb2tlPSIjMTAxNjFEIiBzdHJva2Utd2lkdGg9IjIwIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBjbGlwLXBhdGg9InVybCgjbWVsYnVzLWxpZ2h0UikiLz48L2c+Cjwvc3ZnPjwvZz4KPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTMyLjI4MzEwNTAyMjgzMTA1LDcyKSBzY2FsZSgwLjAyODE1MDk5MTY4MjY2MTU1LC0wLjAyODE1MDk5MTY4MjY2MTU1KSI+CjxwYXRoIHRyYW5zZm9ybT0idHJhbnNsYXRlKDAsMCkiIGQ9Ik0yMjMgMTU2M0g1NDBMMTEwOCA5OTNMMTY3NiAxNTYzSDE5OTNWMEgxNjc2VjExMjRMMTEwOCA1NzdMNTQwIDExMjRWMEgyMjNaIiBmaWxsPSIjMTAxNjFEIi8+CjxwYXRoIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIyOTcuOTIsMCkiIGQ9Ik0yMjIgMTU2M0gxNTUzVjEyODVINTM5Vjk3M0gxNDM3VjcxMkg1MzlWMjc3SDE1NzRWMEgyMjJaIiBmaWxsPSIjMTAxNjFEIi8+CjxwYXRoIHRyYW5zZm9ybT0idHJhbnNsYXRlKDQwODMuODQsMCkiIGQ9Ik0yMjIgMTU2M0g1MzlWMjc4SDE0NDhWMEgyMjJaIiBmaWxsPSIjMTAxNjFEIi8+CjxwYXRoIHRyYW5zZm9ybT0idHJhbnNsYXRlKDU2OTguNzYsMCkiIGQ9Ik0yMjIgMTU2M0gxMDU3UTEyMTAgMTU2MyAxMzIzLjUgMTUzMC41UTE0MzcgMTQ5OCAxNTEyLjAgMTQ0MS4wUTE1ODcgMTM4NCAxNjIzLjUgMTMwNS41UTE2NjAgMTIyNyAxNjYwIDExMzZRMTY2MCA5ODcgMTU2NiA4NzVRMTY3NCA4MTEgMTcyNy4wIDcwOS4wUTE3ODAgNjA3IDE3ODAgNDc3UTE3ODAgMzY4IDE3NDMuNSAyODAuMFExNzA3IDE5MiAxNjMyLjUgMTI5LjVRMTU1OCA2NyAxNDQ0LjUgMzMuNVExMzMxIDAgMTE3NyAwSDIyMlpNMTE3OSA5NjNRMTIyMCA5NjMgMTI1OSA5NjBRMTMyNiAxMDI0IDEzMjYgMTEwNlExMzI2IDExOTEgMTI1OS41IDEyMzcuNVExMTkzIDEyODQgMTA2NSAxMjg0SDUzOVY5NjNaTTExODUgMjc2UTEzMTMgMjc2IDEzNzkuNSAzMzEuMFExNDQ2IDM4NiAxNDQ2IDQ4NlExNDQ2IDU4NiAxMzc5LjUgNjQyLjBRMTMxMyA2OTggMTE4NSA2OThINTM5VjI3NloiIGZpbGw9IiMwNzdFNzkiLz4KPHBhdGggdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNzY1OS42OCwwKSIgZD0iTTE2MyAxNTYzSDQ4MFY3MDJRNDgwIDU5NiA1MDkuMCA1MTMuNVE1MzggNDMxIDU5NS41IDM3NC4wUTY1MyAzMTcgNzM4LjAgMjg3LjVRODIzIDI1OCA5MzYgMjU4UTEwNDggMjU4IDExMzMuNSAyODcuNVExMjE5IDMxNyAxMjc2LjUgMzc0LjBRMTMzNCA0MzEgMTM2My4wIDUxMy41UTEzOTIgNTk2IDEzOTIgNzAyVjE1NjNIMTcwOVY2NjRRMTcwOSA1MTAgMTY1Ny4wIDM4NC4wUTE2MDUgMjU4IDE1MDYuMCAxNjguMFExNDA3IDc4IDEyNjMuNSAyOS4wUTExMjAgLTIwIDkzNiAtMjBRNzUyIC0yMCA2MDguNSAyOS4wUTQ2NSA3OCAzNjYuMCAxNjguMFEyNjcgMjU4IDIxNS4wIDM4NC4wUTE2MyA1MTAgMTYzIDY2NFoiIGZpbGw9IiMwNzdFNzkiLz4KPHBhdGggdHJhbnNmb3JtPSJ0cmFuc2xhdGUoOTYxNC42LDApIiBkPSJNMjk1IDQ2NVEzODAgNDE3IDQ2Ny41IDM3OC41UTU1NSAzNDAgNjQ5LjAgMzEzLjVRNzQzIDI4NyA4NDYuNSAyNzMuMFE5NTAgMjU5IDEwNjcgMjU5UTEyMDggMjU5IDEzMDcuMCAyNzcuNVExNDA2IDI5NiAxNDY4LjUgMzI4LjVRMTUzMSAzNjEgMTU1OS41IDQwNi4wUTE1ODggNDUxIDE1ODggNTA0UTE1ODggNTg5IDE1MTcuMCA2MzguNVExNDQ2IDY4OCAxMjk4IDY4OFExMjMzIDY4OCAxMTYxLjAgNjc5LjVRMTA4OSA2NzEgMTAxNS41IDY2MS4wUTk0MiA2NTEgODcwLjUgNjQyLjVRNzk5IDYzNCA3MzYgNjM0UTYzMSA2MzQgNTM0LjUgNjYxLjBRNDM4IDY4OCAzNjMuNSA3NDIuMFEyODkgNzk2IDI0NS4wIDg3Ny4wUTIwMSA5NTggMjAxIDEwNjZRMjAxIDExMzAgMjE4LjUgMTE5My4wUTIzNiAxMjU2IDI3NC41IDEzMTMuNVEzMTMgMTM3MSAzNzQuMCAxNDIwLjVRNDM1IDE0NzAgNTIxLjUgMTUwNi4wUTYwOCAxNTQyIDcyMS41IDE1NjIuNVE4MzUgMTU4MyA5ODAgMTU4M1ExMDg1IDE1ODMgMTE5MS4wIDE1NzEuNVExMjk3IDE1NjAgMTM5Ny41IDE1MzkuMFExNDk4IDE1MTggMTU5MS4wIDE0ODguNVExNjg0IDE0NTkgMTc2NCAxNDIzTDE2MjUgMTE2N1ExNTU5IDExOTYgMTQ4My4wIDEyMjAuNVExNDA3IDEyNDUgMTMyNC4wIDEyNjMuMFExMjQxIDEyODEgMTE1Mi41IDEyOTEuNVExMDY0IDEzMDIgOTcyIDEzMDJRODQxIDEzMDIgNzU2LjUgMTI4My4wUTY3MiAxMjY0IDYyMi4wIDEyMzQuNVE1NzIgMTIwNSA1NTIuNSAxMTY4LjVRNTMzIDExMzIgNTMzIDEwOTZRNTMzIDEwMjYgNTk2LjAgOTgxLjVRNjU5IDkzNyA3ODggOTM3UTg0MCA5MzcgOTA3LjUgOTQ0LjVROTc1IDk1MiAxMDQ5LjUgOTYxLjBRMTEyNCA5NzAgMTIwMS41IDk3Ny41UTEyNzkgOTg1IDEzNTIgOTg1UTE0OTAgOTg1IDE1OTYuNSA5NTQuMFExNzAzIDkyMyAxNzc1LjAgODY1LjVRMTg0NyA4MDggMTg4NC4wIDcyNi41UTE5MjEgNjQ1IDE5MjEgNTQ0UTE5MjEgNDA5IDE4NTguNSAzMDMuNVExNzk2IDE5OCAxNjgwLjUgMTI1LjVRMTU2NSA1MyAxNDAyLjAgMTUuNVExMjM5IC0yMiAxMDM5IC0yMlE5MDcgLTIyIDc4MS4wIC01LjVRNjU1IDExIDUzOS41IDQxLjVRNDI0IDcyIDMxOS41IDExNC41UTIxNSAxNTcgMTI2IDIwOFoiIGZpbGw9IiMwNzdFNzkiLz4KPC9nPgo8L3N2Zz4=';
+const vanSVG = (p) => `<svg viewBox="0 0 300 150" aria-hidden="true"><defs>
+  <linearGradient id="${p}g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".72" stop-color="#E8ECF0"/><stop offset="1" stop-color="#C9D1D9"/></linearGradient>
+  <linearGradient id="${p}w" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#45576A"/><stop offset="1" stop-color="#10161D"/></linearGradient>
+  <radialGradient id="${p}r" cx=".38" cy=".34" r=".75"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#8F9AA7"/></radialGradient>
+  <radialGradient id="${p}s" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#000" stop-opacity=".5"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+  <clipPath id="${p}c"><rect x="22" y="30" width="180" height="72" rx="4"/></clipPath></defs>
+  <ellipse cx="152" cy="138" rx="142" ry="8" fill="url(#${p}s)"/>
+  <g class="vbody">
+    <path d="M20 124Q10 124 10 114V34Q10 22 22 21L212 16Q226 15 233 23L262 60Q266 65 276 68L284 71Q291 74 291 84V114Q291 124 281 124Z" fill="url(#${p}g)" stroke="#C3CCD5"/>
+    <rect x="22" y="30" width="180" height="72" rx="4" fill="#FFFFFF"/>
+    <g clip-path="url(#${p}c)"><g id="${p}-cells"></g></g>
+    <rect x="22" y="30" width="180" height="72" rx="4" fill="none" stroke="#B7C0CA" stroke-width="1.2"/>
+    <path d="M214 27L232 26Q236 26 238 29L256 56H214Z" fill="url(#${p}w)"/>
+    <path d="M236 25L265 62L259 63L232 28Z" fill="#2C3742" opacity=".55"/>
+    <path d="M208 26V112" stroke="#C3CCD5"/>
+    <rect x="229" y="62" width="12" height="3" rx="1.5" fill="#8F9AA7"/>
+    <path d="M258 50h8v12h-6z" fill="#2C3742"/>
+    <image href="${VLOGO}" x="213" y="77" width="44" height="9.6"/>
+    <rect x="10" y="105" width="281" height="4" fill="#14DCD5"/>
+    <rect x="279" y="77" width="11" height="8" rx="2.5" fill="#FFFFFF" stroke="#C3CCD5"/>
+    <rect x="7" y="115" width="287" height="10" rx="5" fill="#DCE1E7"/>
+    <circle cx="64" cy="125" r="19.5" fill="#10161D"/><circle cx="244" cy="125" r="19.5" fill="#10161D"/>
+  </g>
+  ${[64, 244].map((x) => `<circle cx="${x}" cy="127" r="15" fill="#1C242C" stroke="#3A4652" stroke-width="2"/><circle cx="${x}" cy="127" r="7.5" fill="url(#${p}r)"/><circle cx="${x}" cy="127" r="2" fill="#56626E"/>`).join('')}
+</svg>`;
+$('#vanA').innerHTML = vanSVG('va'); $('#vanB').innerHTML = vanSVG('vb');
+for (const p of ['va', 'vb']) document.getElementById(p + '-cells').innerHTML = Array.from({length: CELLS}, (_, i) => {
+  const col = 8 - Math.floor(i / 4), row = 3 - (i % 4);
+  return `<image class="cell" href="media/icons/box.webp" x="${22 + col * 20 + 1.5}" y="${30 + row * 18 + 0.5}" width="17" height="17"/>`;
 }).join('');
-let cellsOn = 0;
-function setCells(n) {
-  const cells = document.querySelectorAll('#cells .cell'), from = cellsOn, step = reduce.matches ? 0 : 35;
+const onCount = {va: 0, vb: 0};
+let landDelay = 0;                                  // коробки «падают» в кузов, когда долетает летящая коробка
+function setVan(p, n) {
+  const cells = document.querySelectorAll(`#${p}-cells .cell`), from = onCount[p], step = reduce.matches ? 0 : 45;
   cells.forEach((c, i) => {
     const on = i < n;
-    c.style.transitionDelay = (on && i >= from ? (i - from) * step : !on && i < from ? (from - 1 - i) * step / 2 : 0) + 'ms';
+    c.style.transitionDelay = (on && i >= from ? landDelay + (i - from) * step : 0) + 'ms';
     c.classList.toggle('on', on);
   });
-  cellsOn = n;
+  onCount[p] = n;
+}
+function setFill(vol, buses) {
+  const part = (v) => Math.min(CELLS, Math.max(1, Math.round(Math.min(1, v / CAP) * CELLS)));
+  $('#vans').classList.toggle('two', buses > 1);
+  setVan('va', part(vol)); setVan('vb', buses > 1 ? part(vol - CAP) : 0);
+  landDelay = 0;
 }
 
 // ===== Коробка летит в бус =====
 function inView(el) { const r = el.getBoundingClientRect(); return r.width > 0 && r.bottom > 0 && r.top < innerHeight; }
 function fly(fromEl) {
   if (reduce.matches || !fromEl) return;
-  const tgt = inView($('#van')) && !$('#van').hidden ? $('#van svg') : !$('#bar').classList.contains('away') && getComputedStyle($('#bar')).display !== 'none' ? $('#barP') : null;
+  const box = $('#vans').classList.contains('two') ? $('#vanB') : $('#vanA');
+  const toVan = inView($('#van')) && !$('#van').hidden;
+  const tgt = toVan ? box.querySelector('svg') : !$('#bar').classList.contains('away') && getComputedStyle($('#bar')).display !== 'none' ? $('#barP') : null;
   if (!tgt) return;
+  if (toVan) landDelay = 560;
   const a = fromEl.getBoundingClientRect(), b = tgt.getBoundingClientRect();
-  const x0 = a.left + a.width / 2 - 15, y0 = a.top + a.height / 2 - 15, x1 = b.left + b.width * 0.55 - 15, y1 = b.top + b.height * 0.4 - 15;
+  const x0 = a.left + a.width / 2 - 15, y0 = a.top + a.height / 2 - 15, x1 = b.left + b.width * (toVan ? 0.38 : 0.55) - 15, y1 = b.top + b.height * (toVan ? 0.42 : 0.4) - 15;
   const el = document.createElement('div'); el.className = 'flybox'; el.innerHTML = '<img src="media/icons/box.webp" alt="" width="30" height="30">'; document.body.append(el);
   const mx = (x0 + x1) / 2, my = Math.min(y0, y1) - 90;
   el.animate([
@@ -759,7 +790,7 @@ function fly(fromEl) {
     {transform: `translate(${x1}px, ${y1}px) scale(.45) rotate(-24deg)`, opacity: 0.3},
   ], {duration: 700, easing: 'cubic-bezier(.3,.6,.35,1)'}).onfinish = () => {
     el.remove();
-    const v = $('#van'); v.classList.remove('bump'); void v.offsetWidth; v.classList.add('bump');
+    if (toVan) { box.classList.remove('bump'); void box.offsetWidth; box.classList.add('bump'); }
   };
 }
 
@@ -902,8 +933,9 @@ function renderBoard() {
   $('#van').hidden = !!r.hourly || !!r.empty;
   if (!r.hourly && !r.empty) {
     const f = Math.min(1, r.fill);
-    setCells(Math.max(1, Math.round(f * CELLS)));
-    $('#vanCap').textContent = (r.buses > 1 ? `Нужно ${r.buses} буса, загрузка ` : 'Бус заполнен на ') + Math.round(f * 100) + ' % · ' + String(r.vol.toFixed(1)).replace('.', ',') + ' м³';
+    setFill(r.vol, r.buses);
+    const m3 = String(r.vol.toFixed(1)).replace('.', ',') + ' м³';
+    $('#vanCap').textContent = r.buses > 1 ? `Едут ${r.buses} буса · ${m3}` : `Бус заполнен на ${Math.round(f * 100)} % · ${m3}`;
   }
   $('#facts').innerHTML = r.empty ? '' : r.hourly
     ? `<li><b>1</b><span>водитель</span></li><li><b>${Math.max(2, S.hours)} ч</b><span>с бусом</span></li><li><b>150</b><span>zł в час</span></li>`
