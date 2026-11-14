@@ -1,0 +1,846 @@
+<title>Форма «Что у вас дома»</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600&family=Unbounded:wght@200;300;400&display=swap">
+<style>
+/* Макет: тёмный первый экран + светлая рабочая зона (как на сайте MELBUS). Телефон — одна колонка и нижняя панель цены;
+   компьютер — шаги слева, графитовое табло справа (липкое). Бирюза — только «скотч»: счётчики, линии, главная кнопка. */
+:root {
+  --graphite: #10161D; --graphite-2: #18212A; --tape: #14DCD5; --deep: #077E79; --silver: #DCE1E7; --steel: #8F9AA7;
+  --paper: #F4F6F8; --white: #FFFFFF; --ink: #10161D; --muted: #56626E; --line: #DCE1E7; --line-dark: #2C3742; --soft: #C3CCD5;
+  --display: "Unbounded", "Arial Black", system-ui, sans-serif;
+  --text: "Onest", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme: light;
+}
+* { box-sizing: border-box }
+[hidden] { display: none !important }
+.stack { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; min-width: 0 }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.5 var(--text) }
+button { font: inherit; color: inherit }
+button:focus-visible, .drop:focus-within { outline: 3px solid var(--deep); outline-offset: 2px }
+.hero button:focus-visible, .board button:focus-visible, .bar button:focus-visible { outline-color: var(--tape) }
+.gut { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)) }
+.vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap }
+svg.i { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; flex: none }
+
+/* Первый экран */
+.hero { position: relative; color: #fff; color-scheme: dark;
+  background: radial-gradient(80% 90% at 95% 0%, rgba(20, 220, 213, .15) 0%, rgba(20, 220, 213, 0) 60%), var(--graphite) }
+.hero::after { content: ""; position: absolute; left: 0; bottom: -2px; width: min(280px, 46vw); height: 4px; background: var(--tape) }
+.hero__in { max-width: 1180px; margin: 0 auto; padding-block: 20px 48px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px }
+.hero__top { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap }
+.hero__logo { height: 24px; width: auto; display: block }
+.proto { font-size: 13px; color: var(--steel); border: 1px solid var(--line-dark); border-radius: 99px; padding: 3px 11px }
+h1 { font: 200 clamp(44px, 11vw, 88px)/0.98 var(--display); letter-spacing: -0.05em; margin: 18px 0 0; text-wrap: balance }
+.lead { font-size: clamp(17px, 2.3vw, 20px); color: var(--soft); max-width: 34ch; margin: 0 }
+.hero__cta { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); gap: 10px; max-width: 640px }
+.mode-btn { display: flex; align-items: center; gap: 14px; text-align: left; padding: 15px 18px; border-radius: 3px; border: 1px solid var(--line-dark); background: transparent; color: #fff; cursor: pointer }
+.mode-btn svg.i { width: 28px; height: 28px }
+.mode-btn b { display: block; font-weight: 600; font-size: 17px }
+.mode-btn small { display: block; font-size: 14px; color: var(--steel) }
+.mode-btn[aria-pressed="true"] { background: var(--tape); border-color: var(--tape); color: var(--graphite) }
+.mode-btn[aria-pressed="true"] small { color: #0B4F4C }
+.hero__note { font-size: 14px; color: var(--steel); margin: 0; max-width: 58ch }
+
+/* Раскладка */
+.layout { max-width: 1180px; margin: 0 auto; padding-block: 34px 128px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 40px; counter-reset: step }
+.steps { display: grid; grid-template-columns: minmax(0, 1fr); gap: 46px; min-width: 0 }
+.step { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; min-width: 0 }
+.step:not([hidden]) { counter-increment: step }
+.step__head { display: grid; gap: 6px; border-top: 1px solid var(--line); padding-top: 18px }
+.step__head h2::before { content: counter(step); font: 300 14px var(--display); color: var(--deep); margin-right: 14px; vertical-align: 0.35em }
+h2 { font: 300 clamp(23px, 3.4vw, 30px)/1.15 var(--display); letter-spacing: -0.035em; margin: 0; text-wrap: balance }
+.sub { margin: 0; color: var(--muted); max-width: 62ch; font-size: 15px }
+@media (min-width: 980px) {
+  .layout { grid-template-columns: minmax(0, 1fr) 380px; column-gap: 48px; align-items: start; padding-block: 44px 72px }
+  .steps { grid-column: 1; grid-row: 1 }
+  .layout .board { grid-column: 2; grid-row: 1 / span 2; position: sticky; top: max(20px, env(safe-area-inset-top, 0px)) }
+  .send { grid-column: 1; grid-row: 2 }
+  .bar { display: none !important }
+}
+
+/* Переключатели */
+.seg { display: flex; flex-wrap: wrap; border: 1px solid var(--line); border-radius: 4px; padding: 3px; background: var(--white); gap: 3px; width: fit-content; max-width: 100% }
+.seg button { flex: 1 1 auto; font-weight: 500; font-size: 15px; padding: 9px 14px; border: 0; border-radius: 2px; background: transparent; color: var(--muted); cursor: pointer; text-align: center }
+.addr { display: grid; gap: 6px }
+.addr label { font-size: 14px; color: var(--muted) }
+.addr input { font: 16px var(--text); padding: 12px 14px; border: 1px solid var(--steel); border-radius: 3px; background: var(--white); color: var(--ink); width: 100%; min-width: 0 }
+.addr input:focus-visible { outline: 3px solid var(--deep); outline-offset: 1px }
+.addr__ok { font-size: 13px; color: var(--deep); min-height: 1.3em; margin: 0 }
+.addr__ok.bad { color: #9A4A00 }
+.end .seg { width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) }
+.end .seg button { padding: 8px 4px; font-size: 14px }
+.q { display: grid; gap: 6px }
+.q > span { font-size: 15px }
+.route { background: var(--graphite); color: #fff; border-radius: 4px; padding: 16px; display: grid; gap: 10px; color-scheme: dark }
+.route__line { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 10px }
+.pin { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font: 400 13px var(--display); background: var(--tape); color: var(--graphite) }
+.route__bar { height: 3px; background: repeating-linear-gradient(90deg, var(--tape) 0 10px, transparent 10px 16px) }
+.route__main { margin: 0; font: 300 22px/1.2 var(--display); letter-spacing: -0.03em; font-variant-numeric: tabular-nums }
+.route__sub { margin: 0; font-size: 14px; color: var(--soft) }
+.seg button small { display: block; font-size: 12px; font-weight: 400; color: inherit; opacity: .8 }
+.seg button[aria-checked="true"], .seg button[aria-pressed="true"] { background: var(--graphite); color: #fff }
+
+.levels { display: grid; gap: 10px }
+@media (min-width: 760px) { .levels { grid-template-columns: repeat(3, minmax(0, 1fr)) } }
+.lvl { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6px 14px; align-content: start; text-align: left; padding: 16px; border: 1px solid var(--line); border-radius: 4px; background: var(--white); cursor: pointer }
+.lvl svg.i { grid-row: span 3; width: 30px; height: 30px; color: var(--deep) }
+.lvl__t { font: 400 17px/1.2 var(--display); letter-spacing: -0.02em }
+.lvl__d { font-size: 14px; color: var(--muted); line-height: 1.4 }
+.lvl__p { font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums }
+.lvl[aria-checked="true"] { background: var(--graphite); border-color: var(--graphite); color: #fff }
+.lvl[aria-checked="true"] svg.i { color: var(--tape) }
+.lvl[aria-checked="true"] .lvl__d { color: var(--soft) }
+
+.ends { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)) }
+.end { background: var(--white); border: 1px solid var(--line); border-radius: 4px; padding: 14px 16px; display: grid; gap: 12px }
+.end__t { font: 400 15px var(--display); letter-spacing: -0.02em; margin: 0 }
+.row { display: flex; align-items: center; justify-content: space-between; gap: 12px }
+.stepper { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 3px; background: var(--white) }
+.stepper button { width: 42px; height: 42px; border: 0; background: transparent; font-size: 20px; cursor: pointer; color: var(--ink) }
+.stepper output { min-width: 2.6em; text-align: center; font: 400 16px var(--display); font-variant-numeric: tabular-nums }
+.sw { display: flex; align-items: center; justify-content: space-between; gap: 14px; width: 100%; padding: 0; border: 0; background: none; text-align: left; cursor: pointer }
+.sw__l { min-width: 0 }
+.sw__l small { display: block; font-size: 13px; color: var(--muted) }
+.sw__k { flex: none; width: 46px; height: 28px; border-radius: 14px; background: var(--silver); position: relative }
+.sw__k::after { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(16, 22, 29, .3) }
+.sw[aria-checked="true"] .sw__k { background: var(--deep) }
+.sw[aria-checked="true"] .sw__k::after { transform: translateX(18px) }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; align-items: center }
+.chips__k { font-size: 14px; color: var(--muted); margin-right: 4px }
+.chip { font-weight: 500; font-size: 15px; padding: 8px 15px; border: 1px solid var(--line); border-radius: 99px; background: var(--white); cursor: pointer }
+.chip[aria-pressed="true"] { border-color: var(--graphite); box-shadow: inset 0 0 0 1px var(--graphite) }
+.tabs { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px }
+.tabs::-webkit-scrollbar { display: none }
+.tab { flex: none; font-weight: 500; font-size: 15px; padding: 9px 14px; border-radius: 3px; border: 1px solid var(--line); background: var(--white); cursor: pointer; display: flex; gap: 8px; align-items: baseline }
+.tab small { font: 400 12px var(--display); color: var(--deep); font-variant-numeric: tabular-nums }
+.tab[aria-selected="true"] { background: var(--graphite); border-color: var(--graphite); color: #fff }
+.tab[aria-selected="true"] small { color: var(--tape) }
+
+/* Плитки вещей */
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr)); gap: 10px }
+.grid--wide { grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)) }
+.tile { position: relative; background: var(--white); border: 1px solid var(--line); border-radius: 4px; display: grid; grid-template-rows: 1fr auto; min-width: 0 }
+.tile.on { border-color: var(--graphite) }
+.tile__main { display: grid; align-content: start; gap: 10px; padding: 14px 14px 12px; border: 0; background: none; text-align: left; cursor: pointer; border-radius: 4px; min-height: 128px }
+.tile__main svg.i { width: 38px; height: 38px; color: #4A5561; stroke-width: 1.3 }
+.tile.on .tile__main svg.i { color: var(--ink) }
+.tile__n { font-weight: 500; font-size: 15px; line-height: 1.25; padding-right: 18px }
+.tile--wide .tile__main { padding-right: 54px }
+.tile__s { font-size: 13px; color: var(--deep); line-height: 1.3 }
+.tile__s:empty { display: none }
+.tile__d { font-size: 13px; color: var(--muted); line-height: 1.4 }
+.tile__p { font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums }
+.tile--wide .tile__main { grid-template-columns: 38px minmax(0, 1fr); column-gap: 14px; min-height: 0 }
+.tile--wide .tile__main svg.i { grid-row: span 4 }
+.tile__plus { position: absolute; top: 12px; right: 12px; width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--line); display: grid; place-items: center; font-size: 17px; line-height: 1; color: var(--muted); pointer-events: none }
+.tile.on .tile__plus { display: none }
+.tile__ctrl { display: flex; align-items: center; gap: 6px; padding: 0 10px 10px }
+.ib { width: 38px; height: 38px; border: 1px solid var(--line); border-radius: 3px; background: var(--white); font-size: 19px; cursor: pointer; display: grid; place-items: center; flex: none }
+.ib svg.i { width: 19px; height: 19px }
+.ib--set { margin-left: auto }
+.tape-badge { position: absolute; top: 10px; right: -5px; background: var(--tape); color: var(--graphite); font: 400 15px/1 var(--display); padding: 6px 12px 6px 10px; transform: rotate(-4deg); font-variant-numeric: tabular-nums; pointer-events: none }
+.more { margin: 0; font-size: 14px; color: var(--muted) }
+
+/* Коробки */
+.boxes { background: var(--white); border: 1px solid var(--line); border-radius: 4px; padding: 16px; display: grid; gap: 16px }
+.boxes__top { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 22px }
+.boxes__n { font: 200 46px/1 var(--display); letter-spacing: -0.04em; font-variant-numeric: tabular-nums; min-width: 2.2em }
+.boxes__n small { font: 400 14px var(--text); letter-spacing: 0; color: var(--muted); display: block; margin-top: 6px }
+.boxes input[type="range"] { width: 100%; accent-color: var(--deep) }
+.bx { display: flex; flex-wrap: wrap; gap: 3px; min-height: 26px }
+.bx svg { width: 24px; height: 24px }
+.boxes .sw { padding-top: 12px; border-top: 1px solid var(--line) }
+
+/* Видео */
+.tips { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)) }
+.tips li { display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 12px; align-items: start; font-size: 15px }
+.tips svg.i { width: 30px; height: 30px; color: var(--deep) }
+.drop { display: grid; justify-items: center; gap: 6px; padding: 30px 16px; border: 1.5px dashed var(--steel); border-radius: 6px; background: var(--white); text-align: center; cursor: pointer }
+.drop svg.i { width: 42px; height: 42px; color: var(--deep) }
+.drop b { font-size: 17px }
+.drop span { font-size: 14px; color: var(--muted) }
+.vlist { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 14px }
+.vlist li { display: flex; justify-content: space-between; gap: 10px; background: var(--white); border: 1px solid var(--line); border-radius: 3px; padding: 8px 12px; min-width: 0 }
+.vlist li span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+
+/* Табло цены */
+.board { background: var(--graphite); color: #fff; border-radius: 6px; padding: 22px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; color-scheme: dark; min-width: 0; position: relative; overflow: hidden }
+.board::before { content: ""; position: absolute; left: 22px; top: 0; width: 72px; height: 4px; background: var(--tape) }
+.board__k { margin: 0; font-size: 14px; color: var(--steel) }
+.board__price { margin: 0; font: 200 clamp(44px, 12vw, 56px)/1 var(--display); letter-spacing: -0.045em; font-variant-numeric: tabular-nums; white-space: nowrap }
+.board__price small { font-size: 22px; font-weight: 300; margin-left: 8px; color: var(--soft); letter-spacing: 0 }
+.board__fix { margin: 0; font-size: 14px; color: var(--soft) }
+.van svg { width: 100%; height: auto; display: block }
+.van__cover { transform-box: fill-box; transform-origin: left center; transition: transform .6s cubic-bezier(.2, .8, .2, 1) }
+.van__cap { margin: 6px 0 0; font-size: 13px; color: var(--steel); font-variant-numeric: tabular-nums }
+.facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 0; padding: 12px 0; list-style: none; border-block: 1px solid var(--line-dark) }
+.facts b { display: block; font: 300 22px/1.2 var(--display); font-variant-numeric: tabular-nums; letter-spacing: -0.03em }
+.facts span { font-size: 13px; color: var(--steel) }
+.lines { list-style: none; margin: 0; padding: 0; display: grid; gap: 11px }
+.lines li { display: flex; justify-content: space-between; gap: 12px; font-size: 15px; line-height: 1.35 }
+.lines small { display: block; color: var(--steel); font-size: 13px }
+.lines b { font-weight: 500; white-space: nowrap; font-variant-numeric: tabular-nums }
+.board__note { margin: 0; font-size: 13px; color: var(--steel); line-height: 1.45 }
+.btn { font-weight: 600; font-size: 16px; padding: 14px 18px; border-radius: 3px; border: 1px solid transparent; cursor: pointer; text-align: center }
+.btn--tape { background: var(--tape); color: var(--graphite) }
+.btn--dark { background: var(--graphite); color: #fff }
+
+.send { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; min-width: 0 }
+.send__box { display: grid; gap: 14px; max-width: 640px }
+.sent { background: var(--white); border: 1px solid var(--line); border-radius: 4px; padding: 14px 16px; font-size: 15px; margin: 0 }
+
+/* Нижняя панель (телефон) */
+.bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; background: var(--graphite); color: #fff; display: flex; align-items: center; gap: 12px;
+  padding: 12px max(16px, env(safe-area-inset-right, 0px)) calc(12px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); box-shadow: 0 -10px 30px rgba(16, 22, 29, .2); transition: transform .3s }
+.bar::before { content: ""; position: absolute; left: max(16px, env(safe-area-inset-left, 0px)); top: 0; width: 72px; height: 3px; background: var(--tape) }
+.bar.away { transform: translateY(110%) }
+.bar__price { font: 300 25px/1.05 var(--display); letter-spacing: -0.035em; white-space: nowrap; font-variant-numeric: tabular-nums }
+.bar__meta { font-size: 13px; color: var(--steel); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.bar__l { min-width: 0 }
+.bar .btn { margin-left: auto; padding: 11px 16px; background: transparent; border-color: #3A4652; color: #fff; flex: none }
+
+/* Окно настроек вещи */
+dialog { border: 0; padding: 0; background: var(--paper); color: var(--ink); width: 100%; max-width: min(560px, 100%); max-height: 90vh; border-radius: 12px 12px 0 0; margin: auto auto 0 }
+@media (min-width: 720px) { dialog { margin: auto; border-radius: 8px } }
+dialog::backdrop { background: rgba(16, 22, 29, .6) }
+.sheet { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; padding: 20px max(20px, env(safe-area-inset-right, 0px)) calc(20px + env(safe-area-inset-bottom, 0px)) max(20px, env(safe-area-inset-left, 0px)) }
+.sheet__h { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; gap: 12px; align-items: center }
+.sheet__h svg.i { width: 40px; height: 40px; stroke-width: 1.3 }
+.sheet__h h3 { font: 300 21px/1.2 var(--display); letter-spacing: -0.03em; margin: 0 }
+.sheet p { margin: 0; font-size: 15px; color: var(--muted) }
+.sheet .end { gap: 14px }
+.opts { display: grid; gap: 8px }
+.opt { display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 2px 12px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 4px; background: var(--white); text-align: left; cursor: pointer }
+.opt::before { content: ""; width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid var(--steel); grid-row: span 2; margin-top: 3px; box-sizing: border-box }
+.opt[aria-checked="true"] { border-color: var(--graphite) }
+.opt[aria-checked="true"]::before { border: 6px solid var(--deep) }
+.opt b { font-weight: 500 }
+.opt span { font-size: 14px; color: var(--muted) }
+
+@media (prefers-reduced-motion: no-preference) {
+  .sw__k, .sw__k::after, .tile, .chip, .lvl { transition: background .2s, transform .2s, border-color .15s, box-shadow .15s }
+  .tape-badge { animation: stick .35s cubic-bezier(.2, .9, .3, 1.3) }
+  @keyframes stick { from { transform: rotate(-12deg) scale(.6); opacity: 0 } to { transform: rotate(-4deg) scale(1); opacity: 1 } }
+}
+@media (prefers-reduced-motion: reduce) { .van__cover, .bar { transition: none } }
+</style>
+
+<header class="hero">
+  <div class="hero__in gut">
+    <div class="hero__top">
+      <img class="hero__logo" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0NjAuNiAxMDAiPgo8ZyB0cmFuc2Zvcm09InNjYWxlKDAuMTUyMjA3MDAxNTIyMDcpIj48c3ZnIHZpZXdCb3g9Ii0xNi4wIC0xNi4wIDY3Mi4wIDY1Ny4wIiB3aWR0aD0iNjcyLjAiIGhlaWdodD0iNjU3LjAiPjxkZWZzPgo8Y2xpcFBhdGggaWQ9Im1lbGJ1cy13aGl0ZUwiPjxyZWN0IHg9Ii02MCIgeT0iLTYwIiB3aWR0aD0iMzgwIiBoZWlnaHQ9IjkwMCIvPjwvY2xpcFBhdGg+CjxjbGlwUGF0aCBpZD0ibWVsYnVzLXdoaXRlUiI+PHJlY3QgeD0iMzIwIiB5PSItNjAiIHdpZHRoPSI0MDAiIGhlaWdodD0iOTAwIi8+PC9jbGlwUGF0aD4KPG1hc2sgaWQ9Im1lbGJ1cy13aGl0ZW0wIiBtYXNrVW5pdHM9InVzZXJTcGFjZU9uVXNlIiB4PSItODAiIHk9Ii04MCIgd2lkdGg9IjgwMCIgaGVpZ2h0PSI5MDAiPjxyZWN0IHg9Ii04MCIgeT0iLTgwIiB3aWR0aD0iODAwIiBoZWlnaHQ9IjkwMCIgZmlsbD0iI2ZmZiIvPgo8cGF0aCBkPSJNMC4wLDE4NS4wIEwzMjAuMCwzNzAuMCBMNjQwLjAsMTg1LjAgTDY0MC4wLDI5MC4wIEwzMjAuMCw0NzUuMCBMMC4wLDI5MC4wIFoiIGZpbGw9IiMwMDAiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSI0NiIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8cGF0aCBkPSJNMC4wLDMzNS4wIEwzMjAuMCwxNTAuMCBMNjQwLjAsMzM1LjAgTDY0MC4wLDQ0MC4wIEwzMjAuMCwyNTUuMCBMMC4wLDQ0MC4wIFoiIGZpbGw9IiMwMDAiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSI0NiIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8cGF0aCBkPSJNMC4wLDE4NS4wIEwzMjAuMCwwLjAgTDY0MC4wLDE4NS4wIEw2NDAuMCwyOTAuMCBMMzIwLjAsMTA1LjAgTDAuMCwyOTAuMCBaIiBmaWxsPSIjMDAwIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iNDYiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPC9tYXNrPgo8bWFzayBpZD0ibWVsYnVzLXdoaXRlbTEiIG1hc2tVbml0cz0idXNlclNwYWNlT25Vc2UiIHg9Ii04MCIgeT0iLTgwIiB3aWR0aD0iODAwIiBoZWlnaHQ9IjkwMCI+PHJlY3QgeD0iLTgwIiB5PSItODAiIHdpZHRoPSI4MDAiIGhlaWdodD0iOTAwIiBmaWxsPSIjZmZmIi8+CjxwYXRoIGQ9Ik0wLjAsMzM1LjAgTDMyMC4wLDE1MC4wIEw2NDAuMCwzMzUuMCBMNjQwLjAsNDQwLjAgTDMyMC4wLDI1NS4wIEwwLjAsNDQwLjAgWiIgZmlsbD0iIzAwMCIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utd2lkdGg9IjQ2IiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+CjxwYXRoIGQ9Ik0wLjAsMTg1LjAgTDMyMC4wLDAuMCBMNjQwLjAsMTg1LjAgTDY0MC4wLDI5MC4wIEwzMjAuMCwxMDUuMCBMMC4wLDI5MC4wIFoiIGZpbGw9IiMwMDAiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSI0NiIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8L21hc2s+CjxtYXNrIGlkPSJtZWxidXMtd2hpdGVtMiIgbWFza1VuaXRzPSJ1c2VyU3BhY2VPblVzZSIgeD0iLTgwIiB5PSItODAiIHdpZHRoPSI4MDAiIGhlaWdodD0iOTAwIj48cmVjdCB4PSItODAiIHk9Ii04MCIgd2lkdGg9IjgwMCIgaGVpZ2h0PSI5MDAiIGZpbGw9IiNmZmYiLz4KPHBhdGggZD0iTTAuMCwxODUuMCBMMzIwLjAsMC4wIEw2NDAuMCwxODUuMCBMNjQwLjAsMjkwLjAgTDMyMC4wLDEwNS4wIEwwLjAsMjkwLjAgWiIgZmlsbD0iIzAwMCIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utd2lkdGg9IjQ2IiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+CjwvbWFzaz4KPG1hc2sgaWQ9Im1lbGJ1cy13aGl0ZW0zIiBtYXNrVW5pdHM9InVzZXJTcGFjZU9uVXNlIiB4PSItODAiIHk9Ii04MCIgd2lkdGg9IjgwMCIgaGVpZ2h0PSI5MDAiPjxyZWN0IHg9Ii04MCIgeT0iLTgwIiB3aWR0aD0iODAwIiBoZWlnaHQ9IjkwMCIgZmlsbD0iI2ZmZiIvPgo8L21hc2s+CjwvZGVmcz4KPGcgbWFzaz0idXJsKCNtZWxidXMtd2hpdGVtMCkiPjxwYXRoIGQ9Ik0wLjAsMzM1LjAgTDMyMC4wLDUyMC4wIEw2NDAuMCwzMzUuMCBMNjQwLjAsNDQwLjAgTDMyMC4wLDYyNS4wIEwwLjAsNDQwLjAgWiIgZmlsbD0iI0ZGRkZGRiIgc3Ryb2tlPSIjRkZGRkZGIiBzdHJva2Utd2lkdGg9IjIwIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBjbGlwLXBhdGg9InVybCgjbWVsYnVzLXdoaXRlTCkiLz48cGF0aCBkPSJNMC4wLDMzNS4wIEwzMjAuMCw1MjAuMCBMNjQwLjAsMzM1LjAgTDY0MC4wLDQ0MC4wIEwzMjAuMCw2MjUuMCBMMC4wLDQ0MC4wIFoiIGZpbGw9IiNGRkZGRkYiIHN0cm9rZT0iI0ZGRkZGRiIgc3Ryb2tlLXdpZHRoPSIyMCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgY2xpcC1wYXRoPSJ1cmwoI21lbGJ1cy13aGl0ZVIpIi8+PC9nPgo8ZyBtYXNrPSJ1cmwoI21lbGJ1cy13aGl0ZW0xKSI+PHBhdGggZD0iTTAuMCwxODUuMCBMMzIwLjAsMzcwLjAgTDY0MC4wLDE4NS4wIEw2NDAuMCwyOTAuMCBMMzIwLjAsNDc1LjAgTDAuMCwyOTAuMCBaIiBmaWxsPSIjRkZGRkZGIiBzdHJva2U9IiNGRkZGRkYiIHN0cm9rZS13aWR0aD0iMjAiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsaXAtcGF0aD0idXJsKCNtZWxidXMtd2hpdGVMKSIvPjxwYXRoIGQ9Ik0wLjAsMTg1LjAgTDMyMC4wLDM3MC4wIEw2NDAuMCwxODUuMCBMNjQwLjAsMjkwLjAgTDMyMC4wLDQ3NS4wIEwwLjAsMjkwLjAgWiIgZmlsbD0iI0ZGRkZGRiIgc3Ryb2tlPSIjRkZGRkZGIiBzdHJva2Utd2lkdGg9IjIwIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBjbGlwLXBhdGg9InVybCgjbWVsYnVzLXdoaXRlUikiLz48L2c+CjxnIG1hc2s9InVybCgjbWVsYnVzLXdoaXRlbTIpIj48cGF0aCBkPSJNMC4wLDMzNS4wIEwzMjAuMCwxNTAuMCBMNjQwLjAsMzM1LjAgTDY0MC4wLDQ0MC4wIEwzMjAuMCwyNTUuMCBMMC4wLDQ0MC4wIFoiIGZpbGw9IiNGRkZGRkYiIHN0cm9rZT0iI0ZGRkZGRiIgc3Ryb2tlLXdpZHRoPSIyMCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgY2xpcC1wYXRoPSJ1cmwoI21lbGJ1cy13aGl0ZUwpIi8+PHBhdGggZD0iTTAuMCwzMzUuMCBMMzIwLjAsMTUwLjAgTDY0MC4wLDMzNS4wIEw2NDAuMCw0NDAuMCBMMzIwLjAsMjU1LjAgTDAuMCw0NDAuMCBaIiBmaWxsPSIjRkZGRkZGIiBzdHJva2U9IiNGRkZGRkYiIHN0cm9rZS13aWR0aD0iMjAiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsaXAtcGF0aD0idXJsKCNtZWxidXMtd2hpdGVSKSIvPjwvZz4KPGcgbWFzaz0idXJsKCNtZWxidXMtd2hpdGVtMykiPjxwYXRoIGQ9Ik0wLjAsMTg1LjAgTDMyMC4wLDAuMCBMNjQwLjAsMTg1LjAgTDY0MC4wLDI5MC4wIEwzMjAuMCwxMDUuMCBMMC4wLDI5MC4wIFoiIGZpbGw9IiNGRkZGRkYiIHN0cm9rZT0iI0ZGRkZGRiIgc3Ryb2tlLXdpZHRoPSIyMCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgY2xpcC1wYXRoPSJ1cmwoI21lbGJ1cy13aGl0ZUwpIi8+PHBhdGggZD0iTTAuMCwxODUuMCBMMzIwLjAsMC4wIEw2NDAuMCwxODUuMCBMNjQwLjAsMjkwLjAgTDMyMC4wLDEwNS4wIEwwLjAsMjkwLjAgWiIgZmlsbD0iI0ZGRkZGRiIgc3Ryb2tlPSIjRkZGRkZGIiBzdHJva2Utd2lkdGg9IjIwIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBjbGlwLXBhdGg9InVybCgjbWVsYnVzLXdoaXRlUikiLz48L2c+Cjwvc3ZnPjwvZz4KPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTMyLjI4MzEwNTAyMjgzMTA1LDcyKSBzY2FsZSgwLjAyODE1MDk5MTY4MjY2MTU1LC0wLjAyODE1MDk5MTY4MjY2MTU1KSI+CjxwYXRoIHRyYW5zZm9ybT0idHJhbnNsYXRlKDAsMCkiIGQ9Ik0yMjMgMTU2M0g1NDBMMTEwOCA5OTNMMTY3NiAxNTYzSDE5OTNWMEgxNjc2VjExMjRMMTEwOCA1NzdMNTQwIDExMjRWMEgyMjNaIiBmaWxsPSIjRkZGRkZGIi8+CjxwYXRoIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIyOTcuOTIsMCkiIGQ9Ik0yMjIgMTU2M0gxNTUzVjEyODVINTM5Vjk3M0gxNDM3VjcxMkg1MzlWMjc3SDE1NzRWMEgyMjJaIiBmaWxsPSIjRkZGRkZGIi8+CjxwYXRoIHRyYW5zZm9ybT0idHJhbnNsYXRlKDQwODMuODQsMCkiIGQ9Ik0yMjIgMTU2M0g1MzlWMjc4SDE0NDhWMEgyMjJaIiBmaWxsPSIjRkZGRkZGIi8+CjxwYXRoIHRyYW5zZm9ybT0idHJhbnNsYXRlKDU2OTguNzYsMCkiIGQ9Ik0yMjIgMTU2M0gxMDU3UTEyMTAgMTU2MyAxMzIzLjUgMTUzMC41UTE0MzcgMTQ5OCAxNTEyLjAgMTQ0MS4wUTE1ODcgMTM4NCAxNjIzLjUgMTMwNS41UTE2NjAgMTIyNyAxNjYwIDExMzZRMTY2MCA5ODcgMTU2NiA4NzVRMTY3NCA4MTEgMTcyNy4wIDcwOS4wUTE3ODAgNjA3IDE3ODAgNDc3UTE3ODAgMzY4IDE3NDMuNSAyODAuMFExNzA3IDE5MiAxNjMyLjUgMTI5LjVRMTU1OCA2NyAxNDQ0LjUgMzMuNVExMzMxIDAgMTE3NyAwSDIyMlpNMTE3OSA5NjNRMTIyMCA5NjMgMTI1OSA5NjBRMTMyNiAxMDI0IDEzMjYgMTEwNlExMzI2IDExOTEgMTI1OS41IDEyMzcuNVExMTkzIDEyODQgMTA2NSAxMjg0SDUzOVY5NjNaTTExODUgMjc2UTEzMTMgMjc2IDEzNzkuNSAzMzEuMFExNDQ2IDM4NiAxNDQ2IDQ4NlExNDQ2IDU4NiAxMzc5LjUgNjQyLjBRMTMxMyA2OTggMTE4NSA2OThINTM5VjI3NloiIGZpbGw9IiNGRkZGRkYiLz4KPHBhdGggdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNzY1OS42OCwwKSIgZD0iTTE2MyAxNTYzSDQ4MFY3MDJRNDgwIDU5NiA1MDkuMCA1MTMuNVE1MzggNDMxIDU5NS41IDM3NC4wUTY1MyAzMTcgNzM4LjAgMjg3LjVRODIzIDI1OCA5MzYgMjU4UTEwNDggMjU4IDExMzMuNSAyODcuNVExMjE5IDMxNyAxMjc2LjUgMzc0LjBRMTMzNCA0MzEgMTM2My4wIDUxMy41UTEzOTIgNTk2IDEzOTIgNzAyVjE1NjNIMTcwOVY2NjRRMTcwOSA1MTAgMTY1Ny4wIDM4NC4wUTE2MDUgMjU4IDE1MDYuMCAxNjguMFExNDA3IDc4IDEyNjMuNSAyOS4wUTExMjAgLTIwIDkzNiAtMjBRNzUyIC0yMCA2MDguNSAyOS4wUTQ2NSA3OCAzNjYuMCAxNjguMFEyNjcgMjU4IDIxNS4wIDM4NC4wUTE2MyA1MTAgMTYzIDY2NFoiIGZpbGw9IiNGRkZGRkYiLz4KPHBhdGggdHJhbnNmb3JtPSJ0cmFuc2xhdGUoOTYxNC42LDApIiBkPSJNMjk1IDQ2NVEzODAgNDE3IDQ2Ny41IDM3OC41UTU1NSAzNDAgNjQ5LjAgMzEzLjVRNzQzIDI4NyA4NDYuNSAyNzMuMFE5NTAgMjU5IDEwNjcgMjU5UTEyMDggMjU5IDEzMDcuMCAyNzcuNVExNDA2IDI5NiAxNDY4LjUgMzI4LjVRMTUzMSAzNjEgMTU1OS41IDQwNi4wUTE1ODggNDUxIDE1ODggNTA0UTE1ODggNTg5IDE1MTcuMCA2MzguNVExNDQ2IDY4OCAxMjk4IDY4OFExMjMzIDY4OCAxMTYxLjAgNjc5LjVRMTA4OSA2NzEgMTAxNS41IDY2MS4wUTk0MiA2NTEgODcwLjUgNjQyLjVRNzk5IDYzNCA3MzYgNjM0UTYzMSA2MzQgNTM0LjUgNjYxLjBRNDM4IDY4OCAzNjMuNSA3NDIuMFEyODkgNzk2IDI0NS4wIDg3Ny4wUTIwMSA5NTggMjAxIDEwNjZRMjAxIDExMzAgMjE4LjUgMTE5My4wUTIzNiAxMjU2IDI3NC41IDEzMTMuNVEzMTMgMTM3MSAzNzQuMCAxNDIwLjVRNDM1IDE0NzAgNTIxLjUgMTUwNi4wUTYwOCAxNTQyIDcyMS41IDE1NjIuNVE4MzUgMTU4MyA5ODAgMTU4M1ExMDg1IDE1ODMgMTE5MS4wIDE1NzEuNVExMjk3IDE1NjAgMTM5Ny41IDE1MzkuMFExNDk4IDE1MTggMTU5MS4wIDE0ODguNVExNjg0IDE0NTkgMTc2NCAxNDIzTDE2MjUgMTE2N1ExNTU5IDExOTYgMTQ4My4wIDEyMjAuNVExNDA3IDEyNDUgMTMyNC4wIDEyNjMuMFExMjQxIDEyODEgMTE1Mi41IDEyOTEuNVExMDY0IDEzMDIgOTcyIDEzMDJRODQxIDEzMDIgNzU2LjUgMTI4My4wUTY3MiAxMjY0IDYyMi4wIDEyMzQuNVE1NzIgMTIwNSA1NTIuNSAxMTY4LjVRNTMzIDExMzIgNTMzIDEwOTZRNTMzIDEwMjYgNTk2LjAgOTgxLjVRNjU5IDkzNyA3ODggOTM3UTg0MCA5MzcgOTA3LjUgOTQ0LjVROTc1IDk1MiAxMDQ5LjUgOTYxLjBRMTEyNCA5NzAgMTIwMS41IDk3Ny41UTEyNzkgOTg1IDEzNTIgOTg1UTE0OTAgOTg1IDE1OTYuNSA5NTQuMFExNzAzIDkyMyAxNzc1LjAgODY1LjVRMTg0NyA4MDggMTg4NC4wIDcyNi41UTE5MjEgNjQ1IDE5MjEgNTQ0UTE5MjEgNDA5IDE4NTguNSAzMDMuNVExNzk2IDE5OCAxNjgwLjUgMTI1LjVRMTU2NSA1MyAxNDAyLjAgMTUuNVExMjM5IC0yMiAxMDM5IC0yMlE5MDcgLTIyIDc4MS4wIC01LjVRNjU1IDExIDUzOS41IDQxLjVRNDI0IDcyIDMxOS41IDExNC41UTIxNSAxNTcgMTI2IDIwOFoiIGZpbGw9IiNGRkZGRkYiLz4KPC9nPgo8L3N2Zz4=" alt="MELBUS">
+      <span class="proto">Прототип · цены — предложение, не утверждены</span>
+    </div>
+    <h1>Что у вас дома?</h1>
+    <p class="lead">Отметьте вещи — и сразу увидите цену. В день переезда она не изменится, даже если мы провозимся дольше.</p>
+    <div class="hero__cta">
+      <button type="button" class="mode-btn" data-mode="list" aria-pressed="true"><svg class="i" viewBox="0 0 24 24" data-ico="list"></svg><span><b>Отметить вещи</b><small>около 3 минут</small></span></button>
+      <button type="button" class="mode-btn" data-mode="video" aria-pressed="false"><svg class="i" viewBox="0 0 24 24" data-ico="camera"></svg><span><b>Снять видео</b><small>вещи посчитаем мы</small></span></button>
+    </div>
+    <p class="hero__note">Считаем не по комнатам и метрам, а по вашим вещам: у каждой своё время работы. Цены с VAT.</p>
+  </div>
+</header>
+
+<main class="layout gut">
+  <div class="steps">
+    <section class="step" id="s-level" aria-labelledby="h-level">
+      <div class="step__head"><h2 id="h-level">Что делаем мы</h2>
+        <p class="sub">Чем больше делаем мы, тем меньше забот у вас. Платите за работу людей — каждая вещь занимает своё время.</p></div>
+      <div class="levels" role="radiogroup" aria-labelledby="h-level" id="levels"></div>
+    </section>
+
+    <section class="step" id="s-route" aria-labelledby="h-route">
+      <div class="step__head"><h2 id="h-route">Откуда и куда</h2>
+        <p class="sub">Дорогу считаем по вашим адресам: километры и время в пути. Этаж без лифта и далёкая парковка добавляют время на переноску.</p></div>
+      <div class="ends" id="ends"></div>
+      <div class="route" id="route" aria-live="polite"></div>
+      <p class="more">В прототипе в подсказках районы Варшавы и города. На сайте будет поиск точного адреса, как в Google Maps.</p>
+    </section>
+
+    <section class="step" id="s-items" aria-labelledby="h-items">
+      <div class="step__head"><h2 id="h-items">Что везём</h2><p class="sub" id="items-sub"></p></div>
+      <div class="seg" role="group" aria-label="Как рассказать о вещах" id="mode2">
+        <button type="button" data-mode="list" aria-pressed="true">Список вещей</button>
+        <button type="button" data-mode="video" aria-pressed="false">Видео</button>
+      </div>
+      <div id="items-list" class="stack">
+        <div class="chips" id="presets"><span class="chips__k">Начать с:</span></div>
+        <div class="tabs" role="tablist" aria-label="Комнаты" id="tabs"></div>
+        <div class="grid" id="grid" role="tabpanel"></div>
+        <p class="more">Пианино, сейф, аквариум, встроенная мебель — снимите на видео или опишите в заявке, посчитаем отдельно.</p>
+      </div>
+      <div id="items-video" class="stack" hidden>
+        <ul class="tips">
+          <li><svg class="i" viewBox="0 0 24 24" data-ico="door"></svg><span><b>Пройдите по всем комнатам</b> медленно, слева направо.</span></li>
+          <li><svg class="i" viewBox="0 0 24 24" data-ico="wardOpen"></svg><span><b>Откройте шкафы и кладовку</b> — нам важно, сколько там вещей.</span></li>
+          <li><svg class="i" viewBox="0 0 24 24" data-ico="stairs"></svg><span><b>Покажите подъезд и лифт</b> — лестницу, двери, где встанет бус.</span></li>
+          <li><svg class="i" viewBox="0 0 24 24" data-ico="mic"></svg><span><b>Скажите голосом</b>, что не везём и что разобрать.</span></li>
+        </ul>
+        <label class="drop" for="vfile"><svg class="i" viewBox="0 0 24 24" data-ico="camera"></svg><b>Выбрать видео</b><span>Можно несколько роликов с телефона</span>
+          <input class="vh" type="file" id="vfile" accept="video/*" multiple></label>
+        <ul class="vlist" id="vlist"></ul>
+      </div>
+      <div id="items-hours" class="stack" hidden>
+        <div class="end">
+          <div class="row"><span>Часов с бусом</span>
+            <div class="stepper"><button type="button" data-act="hours" data-d="-1" aria-label="Меньше часов">−</button><output id="hoursN">2</output><button type="button" data-act="hours" data-d="1" aria-label="Больше часов">+</button></div></div>
+          <p class="sub">Платите за фактическое время, минимум 2 часа. Нужны грузчики — выберите «Перевозку».</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="step" id="s-boxes" aria-labelledby="h-boxes">
+      <div class="step__head"><h2 id="h-boxes">Коробки</h2><p class="sub" id="boxes-sub"></p></div>
+      <div class="boxes">
+        <div class="boxes__top">
+          <div class="boxes__n"><output id="boxN">0</output><small id="boxVol">0 м³</small></div>
+          <div class="stepper"><button type="button" data-act="box" data-d="-5" aria-label="Минус 5 коробок">−</button><output aria-hidden="true">5</output><button type="button" data-act="box" data-d="5" aria-label="Плюс 5 коробок">+</button></div>
+          <div class="bx" id="bx" aria-hidden="true" style="flex:1 1 200px"></div>
+        </div>
+        <label class="vh" for="boxR">Сколько коробок</label>
+        <input type="range" id="boxR" min="0" max="150" step="5" value="0">
+        <button type="button" class="sw" role="switch" aria-checked="false" id="sw-ahead"><span class="sw__l">Привезти наши коробки заранее<small>8 zł за коробку с бумагой и скотчем, доставка бесплатно</small></span><span class="sw__k"></span></button>
+        <button type="button" class="sw" role="switch" aria-checked="false" id="sw-unpack"><span class="sw__l">Распаковать на новом месте<small>15 zł за коробку: разложим по шкафам, коробки заберём</small></span><span class="sw__k"></span></button>
+      </div>
+    </section>
+
+    <section class="step" id="s-extra" aria-labelledby="h-extra">
+      <div class="step__head"><h2 id="h-extra">Что ещё сделать</h2>
+        <p class="sub">Цена каждой услуги известна заранее и сразу входит в итог.</p></div>
+      <div class="grid grid--wide" id="extras"></div>
+    </section>
+  </div>
+
+  <aside class="board" id="board" aria-label="Ваша цена">
+    <p class="board__k" id="bK">Ваша цена · с VAT</p>
+    <p class="board__price" aria-live="polite"><span id="bP">0</span><small>zł</small></p>
+    <p class="board__fix" id="bFix"></p>
+    <div class="van" id="van">
+      <svg viewBox="0 0 264 118" aria-hidden="true">
+        <defs>
+          <pattern id="boxPat" width="18" height="18" patternUnits="userSpaceOnUse" x="12" y="22">
+            <rect x="1" y="1" width="16" height="16" rx="1" fill="#F4F6F8"/><rect x="1" y="7.5" width="16" height="3" fill="#14DCD5"/>
+          </pattern>
+        </defs>
+        <rect x="12" y="22" width="170" height="72" fill="url(#boxPat)"/>
+        <rect class="van__cover" id="vanCover" x="11" y="21" width="172" height="74" fill="#10161D"/>
+        <rect x="12" y="22" width="170" height="72" rx="3" fill="none" stroke="#8F9AA7" stroke-width="1.5"/>
+        <path d="M182 40h34c4 0 7 2 9 5l17 24c1.5 2 2 4 2 6v19h-62z" fill="none" stroke="#8F9AA7" stroke-width="1.5"/>
+        <path d="M190 47h26l14 20h-40z" fill="none" stroke="#56626E" stroke-width="1.5"/>
+        <path d="M12 86h232" stroke="#14DCD5" stroke-width="2"/>
+        <circle cx="56" cy="100" r="11" fill="#10161D" stroke="#8F9AA7" stroke-width="1.5"/><circle cx="56" cy="100" r="3.5" fill="#56626E"/>
+        <circle cx="212" cy="100" r="11" fill="#10161D" stroke="#8F9AA7" stroke-width="1.5"/><circle cx="212" cy="100" r="3.5" fill="#56626E"/>
+        <path d="M0 112h264" stroke="#2C3742"/>
+      </svg>
+      <p class="van__cap" id="vanCap"></p>
+    </div>
+    <ul class="facts" id="facts"></ul>
+    <ol class="lines" id="lines"></ol>
+    <p class="board__note" id="bNote"></p>
+    <button type="button" class="btn btn--tape" data-act="go-send">Получить фиксированную цену</button>
+  </aside>
+
+  <section class="send step" id="s-send" aria-labelledby="h-send">
+    <div class="step__head"><h2 id="h-send">Готово</h2></div>
+    <div class="send__box">
+      <p class="sub">Дальше — имя, телефон и дата. Менеджер проверит список и пришлёт оферту по ссылке: фиксированная цена, состав работ, задаток 20 %.</p>
+      <button type="button" class="btn btn--dark" id="sendBtn" style="width:fit-content">Получить фиксированную цену</button>
+      <p class="sent" id="sent" hidden>Это прототип, заявка никуда не ушла. На сайте здесь будут поля «Имя», «Телефон», «Дата», а список вещей, видео и цена придут менеджеру в Telegram.</p>
+    </div>
+  </section>
+</main>
+
+<div class="bar" id="bar">
+  <div class="bar__l"><div class="bar__price" id="barP">0 zł</div><div class="bar__meta" id="barM"></div></div>
+  <button type="button" class="btn" data-act="to-board">Из чего цена</button>
+</div>
+
+<dialog id="sheet" aria-labelledby="sheetT"><div class="sheet" id="sheetBody"></div></dialog>
+
+<script id="model">
+// ===== Модель цены (та же формула, что в документе «Цена переезда MELBUS») =====
+const RATE = 100;      // zł за час работы одного человека, с VAT
+const BUS = 150;       // бус по Варшаве за рейс
+const CAP = 18;        // м³ в одном бусе (уточнить по вашим машинам)
+const BOX_MAT = 8;     // коробка + бумага + скотч, zł
+const FILM = 30;       // плёнка и скотч для мебели
+const KM_FREE = 30;    // км всего маршрута буса (база → откуда → куда → база), входят в BUS
+const KM_RATE = 2.5;   // zł за каждый км сверх KM_FREE (покрывает и пустой обратный путь)
+const BASE = {n: 'База MELBUS', lat: 52.2297, lon: 20.985};   // уточнить адрес базы
+// Адреса-примеры для прототипа. На сайте — поиск точного адреса и маршрут по дорогам (Google Maps или OpenStreetMap).
+const PLACES = [
+  ['Warszawa, Mokotów', 52.1935, 21.035], ['Warszawa, Śródmieście', 52.2297, 21.0122], ['Warszawa, Wola', 52.2366, 20.958],
+  ['Warszawa, Ochota', 52.212, 20.972], ['Warszawa, Praga-Południe', 52.239, 21.085], ['Warszawa, Praga-Północ', 52.258, 21.033],
+  ['Warszawa, Żoliborz', 52.269, 20.985], ['Warszawa, Bielany', 52.293, 20.942], ['Warszawa, Bemowo', 52.254, 20.911],
+  ['Warszawa, Ursus', 52.195, 20.883], ['Warszawa, Włochy', 52.194, 20.943], ['Warszawa, Ursynów', 52.15, 21.05],
+  ['Warszawa, Wilanów', 52.165, 21.088], ['Warszawa, Wawer', 52.196, 21.178], ['Warszawa, Białołęka', 52.319, 20.996],
+  ['Warszawa, Targówek', 52.29, 21.048], ['Warszawa, Rembertów', 52.26, 21.15], ['Warszawa, Wesoła', 52.24, 21.22],
+  ['Piaseczno', 52.073, 21.026], ['Pruszków', 52.17, 20.812], ['Legionowo', 52.401, 20.926], ['Marki', 52.327, 21.105],
+  ['Ząbki', 52.292, 21.106], ['Łomianki', 52.334, 20.886], ['Otwock', 52.105, 21.261], ['Józefów', 52.137, 21.235],
+  ['Konstancin-Jeziorna', 52.094, 21.117], ['Grodzisk Mazowiecki', 52.109, 20.625],
+  ['Łódź', 51.7592, 19.456], ['Radom', 51.4027, 21.1471], ['Płock', 52.5468, 19.7064], ['Lublin', 51.2465, 22.5684],
+  ['Białystok', 53.1325, 23.1688], ['Kraków', 50.0647, 19.945], ['Poznań', 52.4064, 16.9252], ['Wrocław', 51.1079, 17.0385],
+  ['Gdańsk', 54.352, 18.6466], ['Berlin', 52.52, 13.405],
+].map(([n, lat, lon]) => ({n, lat, lon}));
+const PLACE = Object.fromEntries(PLACES.map((p) => [p.n, p]));
+function roadKm(a, b) {                          // по прямой × коэффициент извилистости дорог
+  const r = Math.PI / 180, dLat = (b.lat - a.lat) * r, dLon = (b.lon - a.lon) * r;
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(a.lat * r) * Math.cos(b.lat * r) * Math.sin(dLon / 2) ** 2;
+  const km = 12742 * Math.asin(Math.sqrt(h));
+  return km * (km < 25 ? 1.35 : 1.2);
+}
+function driveMin(km) {                          // город ~22 км/ч, пригород ~50, трасса ~75 + 10 мин на парковку
+  const t = Math.min(km, 15) / 22 + Math.max(0, Math.min(km, 60) - 15) / 50 + Math.max(0, km - 60) / 75;
+  return t * 60 + 10;
+}
+function route(S) {
+  const A = PLACE[S.from.place], B = PLACE[S.to.place];
+  if (!A || !B) return null;
+  const ab = Math.max(3, roadKm(A, B)), total = roadKm(BASE, A) + ab + roadKm(B, BASE);
+  return {ab, total, min: driveMin(ab), extraKm: Math.max(0, total - KM_FREE)};
+}
+const DOOR = [0, 0.15, 0.3];                   // у подъезда / до 50 м / дальше
+const HOUSE = [0, 0.1, 0];                     // блок / каменица (узкие лестницы, двор) / дом
+const LEVELS = [
+  {id: 1, t: 'Бус с водителем', d: 'Вы грузите, мы везём. Почасово, минимум 2 часа.', icon: 'wheel'},
+  {id: 2, t: 'Перевозка', d: 'Вы пакуете и разбираете шкафы. Мы выносим, везём, заносим и собираем кровати.', icon: 'carry'},
+  {id: 3, t: 'Под ключ', d: 'Разбираем мебель, пакуем в наши белые коробки, везём и собираем на новом месте.', icon: 'key'},
+];
+const ROOMS = [['bed', 'Спальня'], ['live', 'Гостиная'], ['kit', 'Кухня'], ['kid', 'Детская, кабинет'], ['hall', 'Прихожая, балкон']];
+// id, комната, название, иконка, вынести+занести (чел.-мин), объём м³, разобрать+собрать (чел.-мин), тип
+const ITEMS = [
+  ['bed2', 'bed', 'Кровать двуспальная', 'bed2', 45, 1.4, 90, 'bed'],
+  ['bed1', 'bed', 'Кровать односпальная', 'bed1', 30, 0.8, 60, 'bed'],
+  ['wardS', 'bed', 'Шкаф до 1\u00A0м', 'wardS', 25, 0.7, 150, 'ward'],
+  ['wardM', 'bed', 'Шкаф 1,5–2\u00A0м', 'wardM', 60, 1.6, 270, 'ward'],
+  ['wardL', 'bed', 'Шкаф-купе от 2\u00A0м', 'wardL', 80, 2.2, 420, 'ward'],
+  ['dresser', 'bed', 'Комод', 'dresser', 25, 0.6, 0],
+  ['nights', 'bed', 'Тумбочка', 'nights', 6, 0.15, 0],
+  ['mirror', 'bed', 'Большое зеркало', 'mirror', 10, 0.1, 0],
+  ['sofa', 'live', 'Диван', 'sofa', 40, 1.5, 0],
+  ['sofaC', 'live', 'Угловой диван', 'sofaC', 60, 2.5, 30],
+  ['armch', 'live', 'Кресло', 'armch', 15, 0.6, 0],
+  ['tv', 'live', 'Телевизор', 'tv', 15, 0.2, 0, 'tv'],
+  ['tvst', 'live', 'Тумба под ТВ', 'tvst', 15, 0.4, 0],
+  ['shelf', 'live', 'Стеллаж, книжный шкаф', 'shelf', 25, 0.8, 60],
+  ['ctable', 'live', 'Журнальный столик', 'ctable', 8, 0.3, 0],
+  ['rug', 'live', 'Ковёр', 'rug', 8, 0.2, 0],
+  ['lamp', 'live', 'Торшер', 'lamp', 5, 0.15, 0],
+  ['plant', 'live', 'Большой цветок', 'plant', 6, 0.3, 0],
+  ['fridge', 'kit', 'Холодильник', 'fridge', 40, 0.9, 0],
+  ['washer', 'kit', 'Стиральная машина', 'washer', 40, 0.4, 0, 'conn'],
+  ['dishw', 'kit', 'Посудомойка (не встроенная)', 'dishw', 30, 0.4, 0, 'conn'],
+  ['dtable', 'kit', 'Обеденный стол', 'dtable', 15, 0.6, 24],
+  ['chair', 'kit', 'Стул', 'chair', 5, 0.15, 0],
+  ['desk', 'kid', 'Письменный стол', 'desk', 15, 0.5, 60],
+  ['ochair', 'kid', 'Офисное кресло', 'ochair', 5, 0.3, 0],
+  ['bunk', 'kid', 'Двухъярусная кровать', 'bunk', 40, 1.2, 180, 'bed'],
+  ['crib', 'kid', 'Детская кроватка', 'crib', 15, 0.5, 40, 'bed'],
+  ['pc', 'kid', 'Компьютер с монитором', 'pc', 10, 0.2, 0],
+  ['hallw', 'hall', 'Шкаф в прихожей, обувница', 'hall', 20, 0.6, 0],
+  ['bike', 'hall', 'Велосипед', 'bike', 8, 0.5, 0],
+  ['stroll', 'hall', 'Коляска', 'stroll', 5, 0.4, 0],
+  ['balc', 'hall', 'Балконная мебель', 'balc', 10, 0.5, 0],
+  ['tires', 'hall', 'Колёса, комплект', 'tires', 10, 0.4, 0],
+  ['bags', 'hall', 'Сумка, чемодан', 'bags', 3, 0.1, 0],
+].map(([id, room, name, icon, carry, vol, asm, kind]) => ({id, room, name, icon, carry, vol, asm, kind: kind || ''}));
+// Допы: минуты работы → цена (минуты × 100 zł/ч). Цены сверены с рынком Польши 2026.
+const EXTRAS = [
+  {id: 'tvOff', name: 'Снять телевизор со стены', icon: 'tv', min: 48, d: 'Вместе с кронштейном. Старые дюбели остаются в стене.'},
+  {id: 'tvOn', name: 'Повесить телевизор на новом месте', icon: 'drill', min: 150, d: 'Ищем проводку, ставим новые дюбели под вашу стену. Кронштейн ваш.'},
+  {id: 'holes', name: 'Заделать отверстия', icon: 'putty', min: 36, unit: 'за место', d: 'После телевизора, карниза или полки, без покраски. Пригодится, чтобы вернуть залог за съёмную квартиру.'},
+  {id: 'rodOff', name: 'Снять карниз', icon: 'rod', min: 18, d: 'Шторы снимем и упакуем.'},
+  {id: 'rodOn', name: 'Повесить карниз', icon: 'rod', min: 84, d: 'С новыми дюбелями, по уровню.'},
+  {id: 'hang', name: 'Повесить картину, зеркало, полку', icon: 'frame', min: 24, d: 'До 10 кг, с новыми дюбелями.'},
+  {id: 'conn', name: 'Отключить и подключить стиральную или посудомоечную машину', icon: 'washer', min: 90, d: 'Воду и слив. Транспортные болты поставим, если они у вас есть.'},
+  {id: 'junk', name: 'Вывезти старую мебель', icon: 'bin', min: 90, d: 'Вынесем и отвезём в пункт приёма отходов.'},
+];
+const PRESETS = {
+  studio: {t: 'Кавалерка', c: {bed2: 1, wardM: 1, dresser: 1, armch: 1, tv: 1, tvst: 1, dtable: 1, chair: 2, fridge: 1, washer: 1, rug: 1, plant: 1, bags: 3}, boxes: 20},
+  two: {t: '2 комнаты', c: {bed2: 1, nights: 2, wardM: 2, dresser: 1, sofa: 1, armch: 1, tv: 1, tvst: 1, ctable: 1, rug: 1, lamp: 1, plant: 2, fridge: 1, washer: 1, dtable: 1, chair: 4, bags: 4}, boxes: 40},
+  three: {t: '3 комнаты', c: {bed2: 1, bed1: 1, nights: 2, wardM: 2, wardS: 1, dresser: 1, sofa: 1, armch: 2, tv: 1, tvst: 1, shelf: 1, ctable: 1, rug: 2, lamp: 1, plant: 3, fridge: 1, washer: 1, dishw: 1, dtable: 1, chair: 4, desk: 1, ochair: 1, pc: 1, hallw: 1, bike: 1, bags: 6}, boxes: 60},
+  house: {t: 'Дом', c: {bed2: 2, bed1: 1, nights: 4, wardM: 3, wardL: 1, dresser: 2, sofaC: 1, armch: 2, tv: 2, tvst: 1, shelf: 2, ctable: 1, rug: 3, lamp: 2, plant: 4, fridge: 1, washer: 1, dishw: 1, dtable: 1, chair: 6, desk: 1, ochair: 1, pc: 1, hallw: 1, bike: 2, balc: 1, tires: 1, bags: 8}, boxes: 90},
+  empty: {t: 'С нуля', c: {}, boxes: 0},
+};
+const up90 = (x) => Math.max(90, Math.ceil((x - 90) / 100) * 100 + 90);   // вверх до …90
+const asmDefault = (it, lvl) => !!it.asm && (lvl === 3 || (lvl === 2 && it.kind === 'bed'));
+const asmOn = (S, it, lvl) => !!it.asm && (S.asm[it.id] ?? asmDefault(it, lvl));
+const money = (min) => min / 60 * RATE;
+
+function calc(S, lvl = S.level) {
+  const RT = route(S) || {ab: 10, total: 25, min: 40, extraKm: 0};
+  const kmCost = RT.extraKm * KM_RATE;
+  if (lvl === 1) {
+    const h = Math.max(2, S.hours);
+    const lines = [['Бус с водителем', h + ' ч × 150 zł', h * 150]];
+    if (kmCost) lines.push(['Километры', Math.round(RT.extraKm) + ' км × ' + String(KM_RATE).replace('.', ',') + ' zł', kmCost]);
+    return {lvl, total: h * 150 + Math.round(kmCost / 10) * 10, hourly: true, crew: 1, dur: h, vol: 0, buses: 1, fill: 0, lines, rt: RT};
+  }
+  let carry = 0, asm = 0, junk = 0, mount = 0, vol = 0, n = 0;
+  for (const it of ITEMS) {
+    const c = S.counts[it.id] || 0;
+    if (!c) continue;
+    const cond = it.kind === 'ward' ? (S.cond[it.id] || 'ok') : 'ok';
+    if (cond === 'drop') { junk += 90 * c; continue; }
+    n += c;
+    carry += it.carry * c * (cond === 'whole' ? 1.5 : 1);
+    vol += it.vol * c;
+    if (cond === 'fix') asm += (it.asm + 60) * c;
+    else if (cond === 'ok' && asmOn(S, it, lvl)) asm += it.asm * c;
+  }
+  const B = S.boxes || 0;
+  carry += B * 4; vol += B * 0.1;
+  const pack = lvl === 3 ? B * 10 : 0;
+  const unpack = S.unpack ? B * 9 : 0;
+  const small = n + B > 0 ? Math.max(30, carry * 0.1) : 0;
+  const end = (e) => (e.lift ? 0 : e.floor) * 0.1 + DOOR[e.door || 0] + HOUSE[e.house || 0];
+  const floors = carry / 2 * (end(S.from) + end(S.to));      // этажи без лифта, далёкая парковка, каменица
+  for (const e of EXTRAS) {
+    const k = S.extras[e.id] || 0;
+    if (e.id === 'junk') junk += e.min * k; else mount += e.min * k;
+  }
+  const work = carry + small + floors + asm + pack + unpack + mount + junk;
+  if (work <= 0) return {lvl, total: 0, crew: 0, dur: 0, vol: 0, buses: 0, fill: 0, lines: [], empty: true};
+  const buses = Math.max(1, Math.ceil(vol / CAP - 1e-9));
+  const crew = Math.max(work / 60 <= 6 ? 2 : work / 60 <= 16 ? 3 : 4, 2 * buses);
+  const travel = n + B > 0 ? RT.min * crew : 0;
+  const busCost = buses * (BUS + kmCost);
+  const mat = (lvl === 3 || S.ahead ? B * BOX_MAT : 0) + (n > 0 ? FILM : 0);
+  const raw = money(work + travel) + busCost + mat;
+  const L = (t, m, sub) => [t, sub ?? hrs(m) + ' ч работы людей', money(m)];
+  const km = (x) => Math.round(x) + ' км';
+  const lines = [
+    L('Вынести и занести', carry + small + floors),
+    L('Дорога между адресами', travel, km(RT.ab) + ' · ≈ ' + tdur(RT.min) + ' · ' + crew + ' чел.'),
+    L('Разобрать и собрать мебель', asm),
+    L('Упаковать в коробки', pack),
+    L('Распаковать', unpack),
+    L('Телевизор, карнизы, техника', mount),
+    L('Вывоз старой мебели', junk),
+    ['Бус' + (buses > 1 ? ' × ' + buses : ''), km(RT.total) + ' с базы и обратно' + (RT.extraKm ? ', ' + KM_FREE + ' км входят' : ''), busCost],
+    ['Коробки, бумага, плёнка', B ? B + ' коробок' : 'плёнка для мебели', mat],
+  ].filter((l) => l[2] > 0);
+  return {lvl, total: up90(raw), raw, crew, dur: work / crew / 60 + (travel ? RT.min / 60 : 0), vol, buses, fill: vol / (buses * CAP), peopleH: (work + travel) / 60, lines, rt: RT};
+}
+function hrs(m) { return String(Math.round(m / 30) / 2).replace('.', ','); }
+function tdur(m) { return m < 90 ? Math.round(m) + ' мин' : hrs(m) + ' ч'; }
+</script>
+
+<script>
+// ===== Иконки (свой набор, линия 1,5 на сетке 24) =====
+const ICO = {
+  list: '<path d="M9 6h11M9 12h11M9 18h11M4 6h1M4 12h1M4 18h1"/>',
+  camera: '<rect x="2.5" y="6" width="13" height="12" rx="2"/><path d="m15.5 10.5 6-3.5v10l-6-3.5z"/>',
+  wheel: '<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="2.2"/><path d="M3.6 11h6.2M14.2 11h6.2M12 14.2v6.3"/>',
+  carry: '<path d="M3.5 10 11 6.3l7.5 3.7v7.5L11 21.2l-7.5-3.7z"/><path d="M3.5 10 11 13.7l7.5-3.7M11 13.7v7.5"/><path d="M16.5 3.5h4v4M20.5 3.5l-4.5 4.5"/>',
+  key: '<circle cx="8" cy="15.5" r="4.5"/><path d="M11.3 12.3 20 3.5M16.2 7.5l2.6 2.6M18.6 5 21 7.4"/>',
+  bed2: '<rect x="4" y="3" width="16" height="18" rx="1.5"/><rect x="6.5" y="5.5" width="4.5" height="3" rx="1"/><rect x="13" y="5.5" width="4.5" height="3" rx="1"/><path d="M4 11h16"/>',
+  bed1: '<rect x="7" y="3" width="10" height="18" rx="1.5"/><rect x="9.5" y="5.5" width="5" height="3" rx="1"/><path d="M7 11h10"/>',
+  bunk: '<path d="M4 3v18M20 3v18M4 7h16v2.5H4M4 15h16v2.5H4M16 9.5V15"/>',
+  crib: '<path d="M4 5v16M20 5v16M4 8.5h16M4 17h16M8 8.5V17M12 8.5V17M16 8.5V17"/>',
+  wardS: '<rect x="7" y="3" width="10" height="17" rx="1"/><path d="M12 3v17M10.5 10.5v3M13.5 10.5v3M8.5 20v1.5M15.5 20v1.5"/>',
+  wardM: '<rect x="3.5" y="3" width="17" height="17" rx="1"/><path d="M9.2 3v17M14.8 3v17M7.8 10.5v3M10.6 10.5v3M16.2 10.5v3M5 20v1.5M19 20v1.5"/>',
+  wardL: '<rect x="2.5" y="3" width="19" height="18" rx="1"/><path d="M12 3v18M2.5 6h19M15.5 10.5l3-2M15.5 14.5l4-3M5.5 10.5l3-2"/>',
+  wardOpen: '<path d="M4 3.5h9v17H4z"/><path d="m13 3.5 6 2v17l-6-2M6.5 7.5h4M6.5 11h4"/>',
+  dresser: '<rect x="4" y="5" width="16" height="14" rx="1"/><path d="M4 9.7h16M4 14.3h16M11 7.3h2M11 12h2M11 16.6h2M5.5 19v2M18.5 19v2"/>',
+  nights: '<rect x="6" y="8" width="12" height="11" rx="1"/><path d="M6 13.5h12M11 10.7h2M11 16.2h2M7.5 19v2M16.5 19v2"/>',
+  mirror: '<rect x="7" y="2.5" width="10" height="19" rx="5"/><path d="m10 8 3-2M10 12l5-3.5"/>',
+  sofa: '<path d="M5 11V8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v3M12 6v8"/><path d="M3 12a2 2 0 0 1 4 0v2h10v-2a2 2 0 0 1 4 0v5H3zM5 17v2M19 17v2"/>',
+  sofaC: '<path d="M3 4h6.5v9H21v7H3z"/><path d="M5.8 4v13.2H21"/>',
+  armch: '<path d="M7 11V8a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v3"/><path d="M4 12a1.8 1.8 0 0 1 3.5 0v2h9v-2a1.8 1.8 0 0 1 3.5 0v5H4zM6 17v2M18 17v2"/>',
+  tv: '<rect x="2.5" y="4" width="19" height="12.5" rx="1.2"/><path d="M8 20h8M12 16.5V20"/>',
+  tvst: '<rect x="3" y="12" width="18" height="6" rx="1"/><path d="M12 12v6M5 18v2M19 18v2"/><rect x="7" y="4" width="10" height="6" rx=".8"/>',
+  shelf: '<rect x="5" y="3" width="14" height="18" rx="1"/><path d="M5 9h14M5 15h14M8 9V5.5M10 9V6M13.5 15v-4M15.5 15v-3"/>',
+  ctable: '<path d="M3 10.5h18M6 10.5V17M18 10.5V17M4 10.5 5.5 8h13l1.5 2.5"/>',
+  rug: '<rect x="4" y="5" width="16" height="14" rx="1"/><rect x="7" y="8" width="10" height="8" rx=".5"/><path d="M5 3.5V5M9 3.5V5M12 3.5V5M15 3.5V5M19 3.5V5M5 19v1.5M9 19v1.5M12 19v1.5M15 19v1.5M19 19v1.5"/>',
+  lamp: '<path d="M8 3h8l2 6H6z"/><path d="M12 9v11M8.5 21h7"/>',
+  plant: '<path d="M8 15h8l-1 6H9z"/><path d="M12 15V9.5M12 11.5c-3 0-5-2-5-5 3 0 5 2 5 5zM12 9.5c0-3 2-5 5-5 0 3-2 5-5 5z"/>',
+  fridge: '<rect x="6" y="2.5" width="12" height="19" rx="1.5"/><path d="M6 9.5h12M9 5v2.5M9 12v3"/>',
+  washer: '<rect x="4.5" y="3" width="15" height="18" rx="1.5"/><path d="M4.5 7h15M7 5h1M10 5h1"/><circle cx="12" cy="13.5" r="4.5"/><path d="M9.5 14c1.2-1 2.5 1 5 0"/>',
+  dishw: '<rect x="4.5" y="3" width="15" height="18" rx="1.5"/><path d="M4.5 7.5h15M8 5.2h8M8 11h8M8 14h8M8 17h8"/>',
+  dtable: '<path d="M2.5 9.5h19M5 9.5V20M19 9.5V20M5 13h14"/>',
+  chair: '<path d="M7.5 3v18M7.5 12h10v9M7.5 3h2"/>',
+  desk: '<path d="M2.5 8h19M4 8v12M20 8v12M13 8v8h7M13 12h7M15.5 10h2M15.5 14h2"/>',
+  ochair: '<rect x="7.5" y="3" width="9" height="8" rx="2"/><path d="M6 13h12M12 13v5M7.5 21l4.5-3 4.5 3"/>',
+  pc: '<rect x="3" y="4" width="13" height="10" rx="1"/><path d="M7 18h5M9.5 14v4"/><rect x="18" y="6" width="3.5" height="13" rx=".8"/>',
+  hall: '<path d="M4 5h16M7 5v3M12 5v3M17 5v3"/><rect x="5" y="12" width="14" height="8" rx="1"/><path d="M5 16h14"/>',
+  bike: '<circle cx="6" cy="16" r="3.5"/><circle cx="18" cy="16" r="3.5"/><path d="m6 16 4-7h5l3 7M10 9l3 7H6M14 6.5h2.5M9 7.5h2"/>',
+  stroll: '<path d="M5 6h11a4 4 0 0 1 4 4v1H5z"/><path d="M5 11a6 6 0 0 0 6 4h3a6 6 0 0 0 6-4M3 4h2v2"/><circle cx="8" cy="19" r="1.8"/><circle cx="17" cy="19" r="1.8"/>',
+  balc: '<path d="M4 9.5 12 5l8 4.5zM12 9.5V21M8.5 21h7M5 14h3.5v7M19 14h-3.5v7"/>',
+  tires: '<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.5"/><path d="M12 3.5v5M12 15.5v5M3.5 12h5M15.5 12h5"/>',
+  bags: '<rect x="5" y="7" width="14" height="13" rx="2"/><path d="M9 7V4.5h6V7M9 7v13M15 7v13"/>',
+  drill: '<path d="M3 7.5h10v6H3zM13 9h3M16 10.5h5M6.5 13.5V20h4l-1-6.5"/>',
+  putty: '<path d="M10 13h10l1.5 5.5H8.5z"/><path d="M15 13V7a1.5 1.5 0 0 0-3 0v6"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="11" r="1"/>',
+  rod: '<path d="M2.5 4h19"/><path d="M5 4c0 6 2 11 4 16H4.5V4M19 4c0 6-2 11-4 16h4.5V4"/>',
+  frame: '<rect x="3.5" y="6" width="17" height="14" rx="1"/><path d="M12 2.5 8 6M12 2.5 16 6M3.5 16.5l5-4.5 4 3.5 3-2.5 5 4"/>',
+  bin: '<path d="M4 6.5h16M9 6.5V4h6v2.5M6 6.5l1 14h10l1-14M10 10v7M14 10v7"/>',
+  door: '<path d="M5 21h14M7 21V3.5h10V21M13.5 12.5v.01"/>',
+  stairs: '<path d="M3 20h5v-4.5h4.5V11H17V6.5h4"/>',
+  mic: '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/>',
+  tune: '<path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/>',
+};
+const ico = (k) => `<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${ICO[k] || ''}</svg>`;
+document.querySelectorAll('[data-ico]').forEach((s) => { s.setAttribute('aria-hidden', 'true'); s.innerHTML = ICO[s.dataset.ico]; });
+
+// ===== Состояние (пример: типичные 2 комнаты, «Под ключ») =====
+const ITEM = Object.fromEntries(ITEMS.map((i) => [i.id, i]));
+const EXTRA = Object.fromEntries(EXTRAS.map((e) => [e.id, e]));
+const S = {mode: 'list', level: 3, from: {place: 'Warszawa, Mokotów', floor: 4, lift: true, door: 0, house: 0}, to: {place: 'Warszawa, Bemowo', floor: 2, lift: false, door: 1, house: 0}, hours: 2,
+  counts: {}, asm: {}, cond: {}, boxes: 0, extras: {}, unpack: false, ahead: false, preset: 'two', room: 'bed'};
+const $ = (s) => document.querySelector(s);
+const fmt = (n) => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+const zl = (n) => fmt(Math.round(n / 10) * 10) + ' zł';
+const people = (n) => n + (n === 1 ? ' человек' : n < 5 ? ' человека' : ' человек');
+const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+
+function applyPreset(k) {
+  const p = PRESETS[k];
+  S.preset = k; S.counts = {...p.c}; S.boxes = p.boxes; S.asm = {}; S.cond = {}; S.extras = {};
+}
+applyPreset('two');
+
+// ===== Шаг 1: уровни =====
+$('#levels').innerHTML = LEVELS.map((l) => `<button type="button" class="lvl" role="radio" data-act="level" data-v="${l.id}">${ico(l.icon)}<span class="lvl__t">${l.t}</span><span class="lvl__d">${l.d}</span><span class="lvl__p" data-lp="${l.id}"></span></button>`).join('');
+// ===== Шаг 2: маршрут =====
+const segQ = (k, act, label, opts) => `<div class="q"><span>${label}</span><div class="seg" role="radiogroup" aria-label="${label}">${opts.map((o, i) => `<button type="button" role="radio" data-act="${act}" data-k="${k}" data-v="${i}">${o}</button>`).join('')}</div></div>`;
+$('#ends').innerHTML = '<datalist id="places">' + PLACES.map((p) => `<option value="${p.n}"></option>`).join('') + '</datalist>' +
+  [['from', 'Откуда', 'A'], ['to', 'Куда', 'B']].map(([k, t, pin]) => `<div class="end"><p class="end__t"><span class="pin" style="display:inline-grid;width:24px;height:24px;font-size:11px;margin-right:8px">${pin}</span>${t}</p>
+  <div class="addr"><label for="addr-${k}">Адрес</label><input id="addr-${k}" data-k="${k}" list="places" autocomplete="off" placeholder="Начните вводить: Mokotów, Piaseczno…" value="${S[k].place}"><p class="addr__ok" id="ok-${k}"></p></div>
+  <div class="row"><span>Этаж <small style="color:var(--muted)">(0 — партер)</small></span><div class="stepper"><button type="button" data-act="floor" data-k="${k}" data-d="-1" aria-label="${t}: этаж ниже">−</button><output id="fl-${k}"></output><button type="button" data-act="floor" data-k="${k}" data-d="1" aria-label="${t}: этаж выше">+</button></div></div>
+  <button type="button" class="sw" role="switch" data-act="lift" data-k="${k}" id="lift-${k}"><span class="sw__l">Есть лифт<small>в котором помещается шкаф</small></span><span class="sw__k"></span></button>
+  ${segQ(k, 'door', 'Где встанет бус', ['У подъезда', 'До 50 м', 'Дальше'])}
+  ${segQ(k, 'house', 'Дом', ['Блок', 'Каменица', 'Частный дом'])}</div>`).join('');
+document.querySelectorAll('.addr input').forEach((inp) => inp.addEventListener('input', () => { S[inp.dataset.k].place = inp.value.trim(); render(); }));
+// ===== Шаг 3: вещи =====
+$('#presets').insertAdjacentHTML('beforeend', Object.entries(PRESETS).map(([k, p]) => `<button type="button" class="chip" data-act="preset" data-v="${k}">${p.t}</button>`).join(''));
+function renderTabs() {
+  $('#tabs').innerHTML = ROOMS.map(([k, t]) => {
+    const n = ITEMS.filter((i) => i.room === k).reduce((a, i) => a + (S.counts[i.id] || 0), 0);
+    return `<button type="button" class="tab" role="tab" id="tab-${k}" aria-selected="${S.room === k}" aria-controls="grid" data-act="room" data-v="${k}">${t}${n ? `<small>${n}</small>` : ''}</button>`;
+  }).join('');
+  $('#grid').setAttribute('aria-labelledby', 'tab-' + S.room);
+}
+const hasOpts = (it) => !!it.asm || it.kind === 'tv' || it.kind === 'conn';
+function tileHTML(it) {
+  return `<div class="tile" data-id="${it.id}">
+    <button type="button" class="tile__main" data-act="inc" aria-label="Добавить: ${it.name}">${ico(it.icon)}<span class="tile__n">${it.name}</span><span class="tile__s"></span></button>
+    <span class="tape-badge" hidden></span><span class="tile__plus" aria-hidden="true">+</span>
+    <div class="tile__ctrl" hidden><button type="button" class="ib" data-act="dec" aria-label="Убрать: ${it.name}">−</button><button type="button" class="ib" data-act="inc" aria-label="Ещё: ${it.name}">+</button>${hasOpts(it) ? `<button type="button" class="ib ib--set" data-act="opts" aria-label="Настроить: ${it.name}">${ico('tune')}</button>` : ''}</div></div>`;
+}
+function renderGrid() { $('#grid').innerHTML = ITEMS.filter((i) => i.room === S.room).map(tileHTML).join(''); ITEMS.forEach((i) => updTile(i.id)); }
+function itemNote(it) {
+  if (it.kind === 'ward') {
+    const c = S.cond[it.id] || 'ok';
+    if (c === 'whole') return 'старый: везём целиком';
+    if (c === 'fix') return 'разберём и укрепим';
+    if (c === 'drop') return 'не везём: на утилизацию';
+  }
+  if (it.asm) return asmOn(S, it, S.level) ? 'разберём и соберём' : 'без разборки';
+  if (it.kind === 'tv') return [S.extras.tvOff ? 'снять' : '', S.extras.tvOn ? 'повесить' : ''].filter(Boolean).join(' и ') + (S.extras.tvOff || S.extras.tvOn ? ' со стены' : '');
+  if (it.kind === 'conn') return S.extras.conn ? 'отключим и подключим' : '';
+  return '';
+}
+function updTile(id) {
+  const el = document.querySelector(`.tile[data-id="${id}"]`);
+  if (!el) return;
+  const x = EXTRA[id], n = x ? S.extras[id] || 0 : S.counts[id] || 0;
+  el.classList.toggle('on', n > 0);
+  const b = el.querySelector('.tape-badge');
+  if (b.textContent !== String(n)) { b.textContent = n; if (n > 0) { b.hidden = true; void b.offsetWidth; } }
+  b.hidden = n === 0;
+  el.querySelector('.tile__ctrl').hidden = n === 0;
+  if (!x) el.querySelector('.tile__s').textContent = n ? itemNote(ITEM[id]) : '';
+}
+// ===== Шаг 5: допы =====
+$('#extras').innerHTML = EXTRAS.map((e) => `<div class="tile tile--wide" data-id="${e.id}">
+  <button type="button" class="tile__main" data-act="inc" aria-label="Добавить: ${e.name}">${ico(e.icon)}<span class="tile__n">${e.name}</span><span class="tile__d">${e.d}</span><span class="tile__p">${zl(money(e.min))} ${e.unit || 'за шт.'}</span></button>
+  <span class="tape-badge" hidden></span><span class="tile__plus" aria-hidden="true">+</span>
+  <div class="tile__ctrl" hidden><button type="button" class="ib" data-act="dec" aria-label="Убрать: ${e.name}">−</button><button type="button" class="ib" data-act="inc" aria-label="Ещё: ${e.name}">+</button></div></div>`).join('');
+
+// ===== Окно настроек вещи =====
+let sheetId = null;
+function sheetHTML(it) {
+  const n = S.counts[it.id] || 0, per = (m) => zl(money(m));
+  let h = `<div class="sheet__h">${ico(it.icon)}<h3 id="sheetT">${it.name}</h3><button type="button" class="ib" data-act="close" aria-label="Закрыть">×</button></div>
+    <div class="end"><div class="row"><span>Сколько</span><div class="stepper"><button type="button" data-act="dec" aria-label="Меньше">−</button><output>${n}</output><button type="button" data-act="inc" aria-label="Больше">+</button></div></div></div>`;
+  if (it.kind === 'ward') {
+    const c = S.cond[it.id] || 'ok';
+    const o = (v, b, s) => `<button type="button" class="opt" role="radio" aria-checked="${c === v}" data-act="cond" data-v="${v}"><b>${b}</b><span>${s}</span></button>`;
+    h += `<p>Шкаф из ДСП, который уже разбирали, может не собраться: шурупы держатся в раскрошенных отверстиях. Решите заранее — в день переезда сюрпризов не будет.</p>
+      <div class="opts" role="radiogroup" aria-label="Состояние шкафа">
+      ${o('ok', 'Обычный', 'Разбирается и собирается без проблем.')}
+      ${o('whole', 'Везём целиком', 'Без разборки, если пройдёт в двери и лифт — проверим по видео.')}
+      ${o('fix', 'Разобрать и укрепить', 'Новые шканты и металлические уголки: +' + per(60) + ' за шкаф.')}
+      ${o('drop', 'Не везём', 'Вынесем и отвезём в пункт приёма: ' + per(90) + ' за шкаф.')}</div>`;
+  }
+  if (it.asm && (it.kind !== 'ward' || (S.cond[it.id] || 'ok') === 'ok')) {
+    h += `<div class="end"><button type="button" class="sw" role="switch" aria-checked="${asmOn(S, it, S.level)}" data-act="asm"><span class="sw__l">Разобрать и собрать<small>${per(it.asm)} за шт. · ${hrs(it.asm)} ч работы</small></span><span class="sw__k"></span></button></div>`;
+  }
+  if (it.kind === 'tv') {
+    h += `<p>Старые дюбели остаются в стене — их не переносят. На новом месте сверлим заново: ищем проводку, ставим дюбели под вашу стену (бетон, кирпич, гипсокартон). Кронштейн ваш.</p>
+      <div class="end"><button type="button" class="sw" role="switch" aria-checked="${!!S.extras.tvOff}" data-act="xsw" data-v="tvOff"><span class="sw__l">Снять со стены<small>${per(48)} за шт.</small></span><span class="sw__k"></span></button>
+      <button type="button" class="sw" role="switch" aria-checked="${!!S.extras.tvOn}" data-act="xsw" data-v="tvOn"><span class="sw__l">Повесить на новом месте<small>${per(150)} за шт., новые дюбели входят</small></span><span class="sw__k"></span></button>
+      <button type="button" class="sw" role="switch" aria-checked="${!!S.extras.holes}" data-act="xsw" data-v="holes"><span class="sw__l">Заделать отверстия на старом месте<small>${per(36)} за место, без покраски</small></span><span class="sw__k"></span></button></div>`;
+  }
+  if (it.kind === 'conn') {
+    h += `<div class="end"><button type="button" class="sw" role="switch" aria-checked="${!!S.extras.conn}" data-act="xsw" data-v="conn"><span class="sw__l">Отключить и подключить<small>${per(90)} за шт. Транспортные болты — если есть</small></span><span class="sw__k"></span></button></div>`;
+  }
+  return h + `<button type="button" class="btn btn--dark" data-act="close">Готово</button>`;
+}
+function renderSheet(focusAct) {
+  const it = ITEM[sheetId];
+  $('#sheetBody').innerHTML = sheetHTML(it);
+  if (focusAct) ($('#sheetBody').querySelector(`[data-act="${focusAct.act}"]${focusAct.v ? `[data-v="${focusAct.v}"]` : ''}`) || $('#sheetBody .btn')).focus();
+}
+
+// ===== Табло =====
+let shown = 0, raf = 0;
+function animatePrice(to) {
+  cancelAnimationFrame(raf);
+  const from = shown, t0 = performance.now(), D = reduce.matches ? 0 : 450;
+  const step = (t) => {
+    const k = D ? Math.min(1, (t - t0) / D) : 1, v = from + (to - from) * (1 - Math.pow(1 - k, 3));
+    $('#bP').textContent = fmt(Math.round(v / 10) * 10);
+    shown = v; if (k < 1) raf = requestAnimationFrame(step); else shown = to;
+  };
+  raf = requestAnimationFrame(step);
+}
+function renderBoard() {
+  const video = S.mode === 'video' && S.level !== 1;
+  const r = calc(S);
+  if (video) {
+    const xs = calc({...S, counts: {}, boxes: 0, from: {floor: 0, lift: true}, to: {floor: 0, lift: true}});
+    const extra = xs.lines.filter((l) => !/^Бус/.test(l[0]) && !/^Короб/.test(l[0]));
+    const sum = extra.reduce((a, l) => a + l[2], 0);
+    $('#bK').textContent = 'Цену за переезд посчитаем по видео';
+    animatePrice(sum);
+    $('#bFix').textContent = sum ? 'Это допы, которые вы отметили. Переезд добавим после просмотра видео.' : 'Менеджер посмотрит видео и пришлёт фиксированную цену.';
+    $('#van').hidden = true; $('#facts').innerHTML = '';
+    $('#lines').innerHTML = extra.map((l) => `<li><span>${l[0]}</span><b>${zl(l[2])}</b></li>`).join('');
+    $('#bNote').textContent = 'Цена после видео тоже фиксированная: сколько в оферте, столько и платите.';
+    $('#barP').textContent = 'По видео'; $('#barM').textContent = sum ? 'допы ' + zl(sum) : 'пришлём цену';
+  } else {
+    $('#bK').textContent = r.hourly ? 'Ориентир · почасово, с VAT' : 'Ваша цена · с VAT';
+    animatePrice(r.total);
+    $('#bFix').textContent = r.hourly ? 'Платите за фактическое время, минимум 2 часа.' : r.empty ? 'Отметьте вещи, и цена появится здесь.' : 'Фиксированная: не изменится, даже если управимся дольше.';
+    $('#van').hidden = !!r.hourly || !!r.empty;
+    if (!r.hourly && !r.empty) {
+      const f = Math.min(1, r.fill);
+      $('#vanCover').style.transform = `scaleX(${(1 - f).toFixed(3)})`;
+      $('#vanCap').textContent = (r.buses > 1 ? `Нужно ${r.buses} буса · ` : 'Бус заполнен на ') + Math.round(f * 100) + ' % · ' + String(r.vol.toFixed(1)).replace('.', ',') + ' м³';
+    }
+    $('#facts').innerHTML = r.empty ? '' : r.hourly
+      ? `<li><b>1</b><span>водитель</span></li><li><b>${Math.max(2, S.hours)} ч</b><span>с бусом</span></li><li><b>150</b><span>zł в час</span></li>`
+      : `<li><b>${r.crew}</b><span>${people(r.crew).replace(/^\d+ /, '')}</span></li><li><b>≈${hrs(r.dur * 60)} ч</b><span>на месте и в пути</span></li><li><b>${hrs(r.peopleH * 60)}</b><span>часов работы людей</span></li>`;
+    $('#lines').innerHTML = r.lines.map((l) => `<li><span>${l[0]}<small>${l[1]}</small></span><b>${zl(l[2])}</b></li>`).join('');
+    $('#bNote').textContent = r.hourly ? 'Нужны грузчики, разборка или упаковка — выберите «Перевозку» или «Под ключ».'
+      : 'Итог округлён вверх до …90 zł. Больше вещей в день переезда — досчитаем по этому же списку и только с вашего согласия, до начала работ.';
+    $('#barP').textContent = r.empty ? '— zł' : fmt(r.total) + ' zł';
+    $('#barM').textContent = r.empty ? 'отметьте вещи' : r.hourly ? 'почасово, мин. 2 ч' : `${people(r.crew)} · ≈${hrs(r.dur * 60)} ч · фикс`;
+  }
+}
+
+// ===== Общая отрисовка =====
+function render(full) {
+  document.querySelectorAll('[data-mode]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.mode === S.mode)));
+  document.querySelectorAll('[data-act="level"]').forEach((b) => b.setAttribute('aria-checked', String(+b.dataset.v === S.level)));
+  for (const l of LEVELS) {
+    const el = document.querySelector(`[data-lp="${l.id}"]`);
+    if (l.id === 1) { el.textContent = '150 zł в час'; continue; }
+    const r = calc(S, l.id);
+    el.textContent = S.mode === 'video' ? 'по видео' : r.empty ? 'по списку вещей' : '≈ ' + fmt(r.total) + ' zł за ваш список';
+  }
+  for (const a of ['door', 'house']) document.querySelectorAll(`[data-act="${a}"]`).forEach((b) => b.setAttribute('aria-checked', String(+b.dataset.v === (S[b.dataset.k][a] || 0))));
+  for (const k of ['from', 'to']) {
+    const p = PLACE[S[k].place], ok = $('#ok-' + k);
+    ok.classList.toggle('bad', !p);
+    ok.textContent = p ? '✓ ' + Math.round(roadKm(BASE, p)) + ' км от нашей базы' : S[k].place ? 'Выберите адрес из подсказок' : '';
+  }
+  const rt = route(S);
+  $('#route').innerHTML = rt ? `<div class="route__line"><span class="pin">A</span><span class="route__bar"></span><span class="pin">B</span></div>
+    <p class="route__main">${Math.round(rt.ab)} км · ≈ ${tdur(rt.min)} в пути</p>
+    <p class="route__sub">Весь путь буса с базы и обратно — ${Math.round(rt.total)} км. ${rt.extraKm ? `${KM_FREE} км входят в цену буса, ещё ${Math.round(rt.extraKm)} км × ${String(KM_RATE).replace('.', ',')} zł = ${fmt(Math.round(rt.extraKm * KM_RATE / 10) * 10)} zł.` : 'Входит в цену буса.'}</p>`
+    : '<p class="route__sub">Укажите оба адреса — посчитаем километры и время в пути.</p>';
+  for (const k of ['from', 'to']) {
+    $('#fl-' + k).textContent = S[k].floor;
+    $('#lift-' + k).setAttribute('aria-checked', String(S[k].lift));
+  }
+  const l1 = S.level === 1, video = S.mode === 'video';
+  $('#mode2').hidden = l1;
+  $('#items-hours').hidden = !l1;
+  $('#items-list').hidden = l1 || video;
+  $('#items-video').hidden = l1 || !video;
+  $('#h-items').textContent = l1 ? 'Сколько часов нужен бус' : video ? 'Снимите видео' : 'Что везём';
+  $('#items-sub').textContent = l1 ? 'Водитель помогает, но грузите вы.' : video ? '2–3 минуты на телефон. Менеджер посчитает вещи и пришлёт фиксированную цену.'
+    : 'Начните с похожего дома — это только заготовка. Добавьте или уберите вещи: цена считается по ним, а не по комнатам или метрам.';
+  $('#hoursN').textContent = S.hours;
+  $('#s-boxes').hidden = l1 || video;
+  $('#s-extra').hidden = l1;
+  $('#boxes-sub').textContent = S.level === 3 ? 'Пакуем мы — в наши белые коробки с наклейками комнат. Обычно 15–20 коробок на комнату.' : 'Пакуете вы. Сколько примерно будет коробок? Обычно 15–20 на комнату.';
+  $('#sw-ahead').hidden = S.level !== 2;
+  $('#sw-ahead').setAttribute('aria-checked', String(S.ahead));
+  $('#sw-unpack').setAttribute('aria-checked', String(S.unpack));
+  $('#boxN').textContent = S.boxes; $('#boxR').value = S.boxes;
+  $('#boxVol').textContent = String((S.boxes * 0.1).toFixed(1)).replace('.', ',') + ' м³';
+  const mini = '<svg viewBox="0 0 26 26"><path d="M3 8 13 3l10 5v11l-10 5-10-5z" fill="#fff" stroke="#8F9AA7"/><path d="m3 8 10 5 10-5M13 13v11" fill="none" stroke="#8F9AA7"/><path d="m8 5.5 10 5v11" fill="none" stroke="#14DCD5" stroke-width="2.4"/></svg>';
+  $('#bx').innerHTML = mini.repeat(Math.ceil(S.boxes / 5));
+  document.querySelectorAll('[data-act="preset"]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === S.preset)));
+  if (full) { renderTabs(); renderGrid(); } else { renderTabs(); ITEMS.forEach((i) => updTile(i.id)); }
+  EXTRAS.forEach((e) => updTile(e.id));
+  renderBoard();
+  if (sheetId && $('#sheet').open) renderSheet(lastFocus);
+}
+let lastFocus = null;
+
+// ===== События =====
+document.addEventListener('click', (ev) => {
+  const b = ev.target.closest('[data-act], [data-mode]');
+  if (!b) return;
+  if (b.dataset.mode) { S.mode = b.dataset.mode; render(); if (b.closest('.hero')) $('#s-items').scrollIntoView({behavior: reduce.matches ? 'auto' : 'smooth'}); return; }
+  const a = b.dataset.act, v = b.dataset.v, inSheet = !!b.closest('#sheet');
+  const id = inSheet ? sheetId : b.closest('.tile')?.dataset.id;
+  lastFocus = inSheet ? {act: a, v} : null;
+  switch (a) {
+    case 'level': S.level = +v; S.asm = {}; break;
+    case 'door': case 'house': S[b.dataset.k][a] = +v; break;
+    case 'floor': S[b.dataset.k].floor = Math.max(0, Math.min(20, S[b.dataset.k].floor + +b.dataset.d)); break;
+    case 'lift': S[b.dataset.k].lift = !S[b.dataset.k].lift; break;
+    case 'hours': S.hours = Math.max(2, Math.min(12, S.hours + +b.dataset.d)); break;
+    case 'preset': applyPreset(v); render(true); return;
+    case 'room': S.room = v; render(true); $('#tab-' + v).focus(); return;
+    case 'inc': case 'dec': {
+      const bag = EXTRA[id] ? S.extras : S.counts;
+      bag[id] = Math.max(0, (bag[id] || 0) + (a === 'inc' ? 1 : -1));
+      if (!EXTRA[id]) S.preset = '';
+      break;
+    }
+    case 'opts': sheetId = id; renderSheet(); $('#sheet').showModal(); return;
+    case 'close': $('#sheet').close(); return;
+    case 'cond': S.cond[sheetId] = v; break;
+    case 'asm': S.asm[sheetId] = !asmOn(S, ITEM[sheetId], S.level); break;
+    case 'xsw': {
+      const it = ITEM[sheetId], n = v === 'conn' ? (S.counts.washer || 0) + (S.counts.dishw || 0) : S.counts[it.id] || 1;
+      S.extras[v] = S.extras[v] ? 0 : Math.max(1, n); break;
+    }
+    case 'box': S.boxes = Math.max(0, Math.min(150, S.boxes + +b.dataset.d)); break;
+    case 'go-send': $('#s-send').scrollIntoView({behavior: reduce.matches ? 'auto' : 'smooth'}); $('#sendBtn').focus({preventScroll: true}); return;
+    case 'to-board': $('#board').scrollIntoView({behavior: reduce.matches ? 'auto' : 'smooth', block: 'start'}); return;
+    default: return;
+  }
+  render();
+});
+$('#sw-ahead').addEventListener('click', () => { S.ahead = !S.ahead; render(); });
+$('#sw-unpack').addEventListener('click', () => { S.unpack = !S.unpack; render(); });
+$('#boxR').addEventListener('input', (e) => { S.boxes = +e.target.value; render(); });
+$('#sheet').addEventListener('close', () => { const t = document.querySelector(`.tile[data-id="${sheetId}"] [data-act="opts"]`); sheetId = null; t?.focus(); });
+$('#sheet').addEventListener('click', (e) => { if (e.target === $('#sheet')) $('#sheet').close(); });
+$('#vfile').addEventListener('change', (e) => {
+  $('#vlist').innerHTML = [...e.target.files].map((f) => `<li><span>${f.name.replace(/</g, '&lt;')}</span><span>${(f.size / 1048576).toFixed(0)} МБ</span></li>`).join('');
+});
+$('#sendBtn').addEventListener('click', () => { $('#sent').hidden = false; });
+// Нижняя панель прячется, когда табло на экране
+if ('IntersectionObserver' in window) new IntersectionObserver(([e]) => $('#bar').classList.toggle('away', e.isIntersecting), {threshold: 0.25}).observe($('#board'));
+render(true);
+</script>
