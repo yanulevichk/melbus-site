@@ -3,58 +3,83 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600&family=Unbounded:wght@200;300;400&display=swap">
 <style>
-/* Макет: тёмный первый экран + светлая рабочая зона (как на сайте MELBUS). Телефон — одна колонка и нижняя панель цены;
-   компьютер — шаги слева, графитовое табло справа (липкое). Бирюза — только «скотч»: счётчики, линии, главная кнопка. */
+/* Макет: тёмный первый экран с двумя «кино»-карточками выбора + светлая рабочая зона (как на сайте MELBUS).
+   Телефон — одна колонка, сверху липкая полоса шагов, снизу панель цены; компьютер — шаги слева, графитовое табло справа.
+   Бирюза — только «скотч»: прогресс, счётчики, главная кнопка. Три движения: коробка летит в бус, барабаны цены, полоса шагов. */
 :root {
   --graphite: #10161D; --graphite-2: #18212A; --tape: #14DCD5; --deep: #077E79; --silver: #DCE1E7; --steel: #8F9AA7;
   --paper: #F4F6F8; --white: #FFFFFF; --ink: #10161D; --muted: #56626E; --line: #DCE1E7; --line-dark: #2C3742; --soft: #C3CCD5;
+  --amber: #9A5B00; --amber-bg: #FFF2DC;
   --display: "Unbounded", "Arial Black", system-ui, sans-serif;
   --text: "Onest", system-ui, -apple-system, "Segoe UI", sans-serif;
   color-scheme: light;
 }
 * { box-sizing: border-box }
 [hidden] { display: none !important }
-.stack { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; min-width: 0 }
 body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.5 var(--text) }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 40; background: var(--paper) }
 button { font: inherit; color: inherit }
-button:focus-visible, .drop:focus-within { outline: 3px solid var(--deep); outline-offset: 2px }
+button:focus-visible, summary:focus-visible, .drop:focus-within { outline: 3px solid var(--deep); outline-offset: 2px }
 .hero button:focus-visible, .board button:focus-visible, .bar button:focus-visible { outline-color: var(--tape) }
 .gut { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)) }
 .vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap }
 svg.i { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; flex: none }
+.ai { position: absolute; right: 8px; bottom: 6px; font-size: 11px; color: rgba(255, 255, 255, .75); text-shadow: 0 1px 4px rgba(0, 0, 0, .6); pointer-events: none }
+video { display: block; width: 100%; height: 100%; object-fit: cover; background: var(--graphite-2) }
 
 /* Первый экран */
 .hero { position: relative; color: #fff; color-scheme: dark;
   background: radial-gradient(80% 90% at 95% 0%, rgba(20, 220, 213, .15) 0%, rgba(20, 220, 213, 0) 60%), var(--graphite) }
 .hero::after { content: ""; position: absolute; left: 0; bottom: -2px; width: min(280px, 46vw); height: 4px; background: var(--tape) }
-.hero__in { max-width: 1180px; margin: 0 auto; padding-block: 20px 48px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px }
+.hero__in { max-width: 1180px; margin: 0 auto; padding-block: 20px 44px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px }
 .hero__top { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap }
 .hero__logo { height: 24px; width: auto; display: block }
 .proto { font-size: 13px; color: var(--steel); border: 1px solid var(--line-dark); border-radius: 99px; padding: 3px 11px }
-h1 { font: 200 clamp(44px, 11vw, 88px)/0.98 var(--display); letter-spacing: -0.05em; margin: 18px 0 0; text-wrap: balance }
+.hero__text { display: grid; gap: 18px; align-content: center }
+h1 { font: 200 clamp(44px, 11vw, 84px)/0.98 var(--display); letter-spacing: -0.05em; margin: 8px 0 0; text-wrap: balance }
 .lead { font-size: clamp(17px, 2.3vw, 20px); color: var(--soft); max-width: 34ch; margin: 0 }
-.hero__cta { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); gap: 10px; max-width: 640px }
-.mode-btn { display: flex; align-items: center; gap: 14px; text-align: left; padding: 15px 18px; border-radius: 3px; border: 1px solid var(--line-dark); background: transparent; color: #fff; cursor: pointer }
-.mode-btn svg.i { width: 28px; height: 28px }
-.mode-btn b { display: block; font-weight: 600; font-size: 17px }
-.mode-btn small { display: block; font-size: 14px; color: var(--steel) }
-.mode-btn[aria-pressed="true"] { background: var(--tape); border-color: var(--tape); color: var(--graphite) }
-.mode-btn[aria-pressed="true"] small { color: #0B4F4C }
-.hero__note { font-size: 14px; color: var(--steel); margin: 0; max-width: 58ch }
+.hero__note { font-size: 14px; color: var(--steel); margin: 0; max-width: 46ch }
+.hero__cta { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px }
+.mode-card { display: grid; grid-template-rows: auto auto; padding: 0; text-align: left; border: 1px solid var(--line-dark); border-radius: 6px; background: var(--graphite-2); color: #fff; cursor: pointer; overflow: hidden }
+.mode-card__media { position: relative; aspect-ratio: 1 / 1; overflow: hidden }
+.mode-card__t { display: grid; gap: 2px; padding: 12px 14px 14px }
+.mode-card b { font: 400 clamp(15px, 3.6vw, 19px)/1.2 var(--display); letter-spacing: -0.03em }
+.mode-card small { font-size: 13px; color: var(--steel) }
+.mode-card[aria-pressed="true"] { border-color: var(--tape); box-shadow: inset 0 0 0 1px var(--tape) }
+.mode-card[aria-pressed="true"] .mode-card__t { background: var(--tape); color: var(--graphite) }
+.mode-card[aria-pressed="true"] small { color: #0B4F4C }
+@media (min-width: 900px) {
+  .hero__in { grid-template-columns: minmax(0, 1fr) minmax(0, 520px); column-gap: 48px; padding-block: 24px 56px }
+  .hero__top { grid-column: 1 / -1 }
+}
+
+/* Липкая полоса шагов */
+.prog { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 25; background: var(--paper); border-bottom: 1px solid var(--line) }
+.prog__in { max-width: 1180px; margin: 0 auto; display: flex; align-items: center; gap: 14px; padding-block: 10px; position: relative }
+.prog__n { font: 400 13px var(--display); color: var(--deep); font-variant-numeric: tabular-nums; flex: none }
+.prog__cur { font-weight: 500; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.prog ol { display: none; list-style: none; margin: 0; padding: 0; gap: 4px; flex-wrap: wrap }
+.prog ol button { border: 0; background: none; padding: 6px 10px; border-radius: 3px; font-size: 14px; color: var(--muted); cursor: pointer }
+.prog ol button[aria-current="step"] { color: var(--ink); font-weight: 600; background: var(--white); box-shadow: inset 0 0 0 1px var(--line) }
+.prog ol button.done { color: var(--ink) }
+.prog__bar { position: absolute; left: 0; bottom: -1px; height: 3px; width: 100%; background: var(--tape); transform-origin: left; transform: scaleX(var(--p, 0)); transition: transform .5s cubic-bezier(.2, .8, .2, 1) }
+@media (min-width: 900px) { .prog ol { display: flex } .prog__cur { display: none } }
 
 /* Раскладка */
-.layout { max-width: 1180px; margin: 0 auto; padding-block: 34px 128px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 40px; counter-reset: step }
+.layout { max-width: 1180px; margin: 0 auto; padding-block: 30px 128px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 40px; counter-reset: step }
 .steps { display: grid; grid-template-columns: minmax(0, 1fr); gap: 46px; min-width: 0 }
-.step { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; min-width: 0 }
+.step { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; min-width: 0; scroll-margin-top: calc(70px + env(safe-area-inset-top, 0px)) }
 .step:not([hidden]) { counter-increment: step }
+.stack { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; min-width: 0 }
 .step__head { display: grid; gap: 6px; border-top: 1px solid var(--line); padding-top: 18px }
 .step__head h2::before { content: counter(step); font: 300 14px var(--display); color: var(--deep); margin-right: 14px; vertical-align: 0.35em }
 h2 { font: 300 clamp(23px, 3.4vw, 30px)/1.15 var(--display); letter-spacing: -0.035em; margin: 0; text-wrap: balance }
 .sub { margin: 0; color: var(--muted); max-width: 62ch; font-size: 15px }
+.more { margin: 0; font-size: 14px; color: var(--muted) }
 @media (min-width: 980px) {
-  .layout { grid-template-columns: minmax(0, 1fr) 380px; column-gap: 48px; align-items: start; padding-block: 44px 72px }
+  .layout { grid-template-columns: minmax(0, 1fr) 380px; column-gap: 48px; align-items: start; padding-block: 40px 72px }
   .steps { grid-column: 1; grid-row: 1 }
-  .layout .board { grid-column: 2; grid-row: 1 / span 2; position: sticky; top: max(20px, env(safe-area-inset-top, 0px)) }
+  .layout .board { grid-column: 2; grid-row: 1 / span 2; position: sticky; top: calc(70px + env(safe-area-inset-top, 0px)) }
   .send { grid-column: 1; grid-row: 2 }
   .bar { display: none !important }
 }
@@ -62,25 +87,7 @@ h2 { font: 300 clamp(23px, 3.4vw, 30px)/1.15 var(--display); letter-spacing: -0.
 /* Переключатели */
 .seg { display: flex; flex-wrap: wrap; border: 1px solid var(--line); border-radius: 4px; padding: 3px; background: var(--white); gap: 3px; width: fit-content; max-width: 100% }
 .seg button { flex: 1 1 auto; font-weight: 500; font-size: 15px; padding: 9px 14px; border: 0; border-radius: 2px; background: transparent; color: var(--muted); cursor: pointer; text-align: center }
-.addr { display: grid; gap: 6px }
-.addr label { font-size: 14px; color: var(--muted) }
-.addr input { font: 16px var(--text); padding: 12px 14px; border: 1px solid var(--steel); border-radius: 3px; background: var(--white); color: var(--ink); width: 100%; min-width: 0 }
-.addr input:focus-visible { outline: 3px solid var(--deep); outline-offset: 1px }
-.addr__ok { font-size: 13px; color: var(--deep); min-height: 1.3em; margin: 0 }
-.addr__ok.bad { color: #9A4A00 }
-.end .seg { width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) }
-.end .seg button { padding: 8px 4px; font-size: 14px }
-.q { display: grid; gap: 6px }
-.q > span { font-size: 15px }
-.route { background: var(--graphite); color: #fff; border-radius: 4px; padding: 16px; display: grid; gap: 10px; color-scheme: dark }
-.route__line { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 10px }
-.pin { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font: 400 13px var(--display); background: var(--tape); color: var(--graphite) }
-.route__bar { height: 3px; background: repeating-linear-gradient(90deg, var(--tape) 0 10px, transparent 10px 16px) }
-.route__main { margin: 0; font: 300 22px/1.2 var(--display); letter-spacing: -0.03em; font-variant-numeric: tabular-nums }
-.route__sub { margin: 0; font-size: 14px; color: var(--soft) }
-.seg button small { display: block; font-size: 12px; font-weight: 400; color: inherit; opacity: .8 }
 .seg button[aria-checked="true"], .seg button[aria-pressed="true"] { background: var(--graphite); color: #fff }
-
 .levels { display: grid; gap: 10px }
 @media (min-width: 760px) { .levels { grid-template-columns: repeat(3, minmax(0, 1fr)) } }
 .lvl { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6px 14px; align-content: start; text-align: left; padding: 16px; border: 1px solid var(--line); border-radius: 4px; background: var(--white); cursor: pointer }
@@ -92,9 +99,9 @@ h2 { font: 300 clamp(23px, 3.4vw, 30px)/1.15 var(--display); letter-spacing: -0.
 .lvl[aria-checked="true"] svg.i { color: var(--tape) }
 .lvl[aria-checked="true"] .lvl__d { color: var(--soft) }
 
-.ends { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)) }
-.end { background: var(--white); border: 1px solid var(--line); border-radius: 4px; padding: 14px 16px; display: grid; gap: 12px }
-.end__t { font: 400 15px var(--display); letter-spacing: -0.02em; margin: 0 }
+.ends { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)) }
+.end { background: var(--white); border: 1px solid var(--line); border-radius: 4px; padding: 14px 16px; display: grid; gap: 12px; align-content: start }
+.end__t { font: 400 15px var(--display); letter-spacing: -0.02em; margin: 0; display: flex; align-items: center; gap: 8px }
 .row { display: flex; align-items: center; justify-content: space-between; gap: 12px }
 .stepper { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 3px; background: var(--white) }
 .stepper button { width: 42px; height: 42px; border: 0; background: transparent; font-size: 20px; cursor: pointer; color: var(--ink) }
@@ -106,6 +113,38 @@ h2 { font: 300 clamp(23px, 3.4vw, 30px)/1.15 var(--display); letter-spacing: -0.
 .sw__k::after { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(16, 22, 29, .3) }
 .sw[aria-checked="true"] .sw__k { background: var(--deep) }
 .sw[aria-checked="true"] .sw__k::after { transform: translateX(18px) }
+.addr { display: grid; gap: 6px }
+.addr label { font-size: 14px; color: var(--muted) }
+.addr input { font: 16px var(--text); padding: 12px 14px; border: 1px solid var(--steel); border-radius: 3px; background: var(--white); color: var(--ink); width: 100%; min-width: 0 }
+.addr input:focus-visible { outline: 3px solid var(--deep); outline-offset: 1px }
+.addr__ok { font-size: 13px; color: var(--deep); min-height: 1.3em; margin: 0 }
+.addr__ok.bad { color: var(--amber) }
+.end details { border-top: 1px solid var(--line); padding-top: 10px }
+.end summary { cursor: pointer; font-size: 15px; display: flex; justify-content: space-between; gap: 10px; list-style: none }
+.end summary::-webkit-details-marker { display: none }
+.end summary span { color: var(--deep); font-size: 14px; text-align: right }
+.end details[open] summary { margin-bottom: 12px }
+.end details .q + .q { margin-top: 12px }
+.q { display: grid; gap: 6px }
+.q > span { font-size: 14px; color: var(--muted) }
+.end .seg { width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) }
+.end .seg button { padding: 8px 4px; font-size: 14px }
+.pin { width: 30px; height: 30px; border-radius: 50%; display: inline-grid; place-items: center; font: 400 13px var(--display); background: var(--tape); color: var(--graphite); flex: none }
+.end .pin { width: 24px; height: 24px; font-size: 11px }
+.route { position: relative; background: var(--graphite); color: #fff; border-radius: 6px; overflow: hidden; display: grid; color-scheme: dark }
+.route__media { position: relative; aspect-ratio: 16 / 7 }
+.route__media::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(16, 22, 29, 0) 40%, var(--graphite) 100%) }
+.route__body { display: grid; gap: 10px; padding: 0 16px 16px; margin-top: -26px; position: relative }
+.route__line { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 10px }
+.route__bar { height: 3px; background: repeating-linear-gradient(90deg, var(--tape) 0 10px, transparent 10px 16px) }
+.route__main { margin: 0; font: 300 22px/1.2 var(--display); letter-spacing: -0.03em; font-variant-numeric: tabular-nums }
+.route__sub { margin: 0; font-size: 14px; color: var(--soft) }
+@media (min-width: 760px) {
+  .route { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) }
+  .route__media { order: 2; aspect-ratio: auto; min-height: 190px }
+  .route__media::after { background: linear-gradient(90deg, var(--graphite) 0%, rgba(16, 22, 29, 0) 45%) }
+  .route__body { margin: 0; padding: 20px; align-content: center }
+}
 
 .chips { display: flex; flex-wrap: wrap; gap: 8px; align-items: center }
 .chips__k { font-size: 14px; color: var(--muted); margin-right: 4px }
@@ -118,7 +157,7 @@ h2 { font: 300 clamp(23px, 3.4vw, 30px)/1.15 var(--display); letter-spacing: -0.
 .tab[aria-selected="true"] { background: var(--graphite); border-color: var(--graphite); color: #fff }
 .tab[aria-selected="true"] small { color: var(--tape) }
 
-/* Плитки вещей */
+/* Плитки */
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr)); gap: 10px }
 .grid--wide { grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)) }
 .tile { position: relative; background: var(--white); border: 1px solid var(--line); border-radius: 4px; display: grid; grid-template-rows: 1fr auto; min-width: 0 }
@@ -127,12 +166,11 @@ h2 { font: 300 clamp(23px, 3.4vw, 30px)/1.15 var(--display); letter-spacing: -0.
 .tile__main svg.i { width: 38px; height: 38px; color: #4A5561; stroke-width: 1.3 }
 .tile.on .tile__main svg.i { color: var(--ink) }
 .tile__n { font-weight: 500; font-size: 15px; line-height: 1.25; padding-right: 18px }
-.tile--wide .tile__main { padding-right: 54px }
 .tile__s { font-size: 13px; color: var(--deep); line-height: 1.3 }
 .tile__s:empty { display: none }
 .tile__d { font-size: 13px; color: var(--muted); line-height: 1.4 }
 .tile__p { font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums }
-.tile--wide .tile__main { grid-template-columns: 38px minmax(0, 1fr); column-gap: 14px; min-height: 0 }
+.tile--wide .tile__main { grid-template-columns: 38px minmax(0, 1fr); column-gap: 14px; min-height: 0; padding-right: 54px }
 .tile--wide .tile__main svg.i { grid-row: span 4 }
 .tile__plus { position: absolute; top: 12px; right: 12px; width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--line); display: grid; place-items: center; font-size: 17px; line-height: 1; color: var(--muted); pointer-events: none }
 .tile.on .tile__plus { display: none }
@@ -141,7 +179,6 @@ h2 { font: 300 clamp(23px, 3.4vw, 30px)/1.15 var(--display); letter-spacing: -0.
 .ib svg.i { width: 19px; height: 19px }
 .ib--set { margin-left: auto }
 .tape-badge { position: absolute; top: 10px; right: -5px; background: var(--tape); color: var(--graphite); font: 400 15px/1 var(--display); padding: 6px 12px 6px 10px; transform: rotate(-4deg); font-variant-numeric: tabular-nums; pointer-events: none }
-.more { margin: 0; font-size: 14px; color: var(--muted) }
 
 /* Коробки */
 .boxes { background: var(--white); border: 1px solid var(--line); border-radius: 4px; padding: 16px; display: grid; gap: 16px }
@@ -149,15 +186,37 @@ h2 { font: 300 clamp(23px, 3.4vw, 30px)/1.15 var(--display); letter-spacing: -0.
 .boxes__n { font: 200 46px/1 var(--display); letter-spacing: -0.04em; font-variant-numeric: tabular-nums; min-width: 2.2em }
 .boxes__n small { font: 400 14px var(--text); letter-spacing: 0; color: var(--muted); display: block; margin-top: 6px }
 .boxes input[type="range"] { width: 100%; accent-color: var(--deep) }
-.bx { display: flex; flex-wrap: wrap; gap: 3px; min-height: 26px }
+.bx { display: flex; flex-wrap: wrap; gap: 3px; min-height: 26px; flex: 1 1 200px }
 .bx svg { width: 24px; height: 24px }
 .boxes .sw { padding-top: 12px; border-top: 1px solid var(--line) }
+
+/* Дата */
+.days { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: thin; padding: 2px 2px 8px; scroll-snap-type: x proximity }
+.mon { flex: none; writing-mode: vertical-rl; transform: rotate(180deg); font: 400 12px var(--display); color: var(--muted); text-transform: uppercase; letter-spacing: .08em; padding: 4px 0 }
+.day { flex: none; width: 58px; display: grid; justify-items: center; gap: 2px; padding: 8px 4px; border: 1px solid var(--line); border-radius: 4px; background: var(--white); cursor: pointer; scroll-snap-align: start }
+.day span { font-size: 12px; color: var(--muted) }
+.day b { font: 300 20px/1.1 var(--display); font-variant-numeric: tabular-nums }
+.day small { font-size: 12px; font-weight: 600; min-height: 1.3em; font-variant-numeric: tabular-nums }
+.day.g small { color: var(--deep) }
+.day.p small { color: var(--amber) }
+.day.p { background: var(--amber-bg); border-color: #F1DDB8 }
+.day[aria-checked="true"] { background: var(--graphite); border-color: var(--graphite); color: #fff }
+.day[aria-checked="true"] span { color: var(--soft) }
+.day[aria-checked="true"].g small { color: var(--tape) }
+.day[aria-checked="true"].p small { color: #F6C770 }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 0; padding: 0; list-style: none; font-size: 14px; color: var(--muted) }
+.legend b { font-weight: 600 }
+.legend .g { color: var(--deep) }
+.legend .p { color: var(--amber) }
 
 /* Видео */
 .tips { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)) }
 .tips li { display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 12px; align-items: start; font-size: 15px }
 .tips svg.i { width: 30px; height: 30px; color: var(--deep) }
-.drop { display: grid; justify-items: center; gap: 6px; padding: 30px 16px; border: 1.5px dashed var(--steel); border-radius: 6px; background: var(--white); text-align: center; cursor: pointer }
+.vwrap { display: grid; gap: 14px; grid-template-columns: minmax(0, 1fr) }
+@media (min-width: 640px) { .vwrap { grid-template-columns: 200px minmax(0, 1fr); align-items: stretch } }
+.vdemo { position: relative; border-radius: 6px; overflow: hidden; aspect-ratio: 1 / 1; max-width: 260px }
+.drop { display: grid; justify-items: center; align-content: center; gap: 6px; padding: 30px 16px; border: 1.5px dashed var(--steel); border-radius: 6px; background: var(--white); text-align: center; cursor: pointer }
 .drop svg.i { width: 42px; height: 42px; color: var(--deep) }
 .drop b { font-size: 17px }
 .drop span { font-size: 14px; color: var(--muted) }
@@ -169,12 +228,20 @@ h2 { font: 300 clamp(23px, 3.4vw, 30px)/1.15 var(--display); letter-spacing: -0.
 .board { background: var(--graphite); color: #fff; border-radius: 6px; padding: 22px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; color-scheme: dark; min-width: 0; position: relative; overflow: hidden }
 .board::before { content: ""; position: absolute; left: 22px; top: 0; width: 72px; height: 4px; background: var(--tape) }
 .board__k { margin: 0; font-size: 14px; color: var(--steel) }
-.board__price { margin: 0; font: 200 clamp(44px, 12vw, 56px)/1 var(--display); letter-spacing: -0.045em; font-variant-numeric: tabular-nums; white-space: nowrap }
-.board__price small { font-size: 22px; font-weight: 300; margin-left: 8px; color: var(--soft); letter-spacing: 0 }
+.board__price { margin: 0; font: 200 clamp(44px, 12vw, 56px)/1 var(--display); letter-spacing: -0.045em; font-variant-numeric: tabular-nums; white-space: nowrap; display: flex; align-items: baseline }
+.board__price small { font-size: 22px; font-weight: 300; margin-left: 10px; color: var(--soft); letter-spacing: 0 }
+.drums { display: inline-flex; line-height: 1; height: 1em }
+.drum { display: inline-block; height: 1em; overflow: hidden }
+.drum__s { display: flex; flex-direction: column; transition: transform .8s cubic-bezier(.2, .8, .2, 1) }
+.drum__s span, .drum-sep { height: 1em; line-height: 1 }
+.drum-sep { display: inline-block; width: .28em }
 .board__fix { margin: 0; font-size: 14px; color: var(--soft) }
-.van svg { width: 100%; height: auto; display: block }
-.van__cover { transform-box: fill-box; transform-origin: left center; transition: transform .6s cubic-bezier(.2, .8, .2, 1) }
+.van svg { width: 100%; height: auto; display: block; overflow: visible }
+.van .cell { opacity: 0; transform: translateY(-14px); transform-box: fill-box; transition: opacity .25s, transform .45s cubic-bezier(.3, 1.4, .5, 1) }
+.van .cell.on { opacity: 1; transform: none }
 .van__cap { margin: 6px 0 0; font-size: 13px; color: var(--steel); font-variant-numeric: tabular-nums }
+.van.bump svg { animation: bump .35s }
+@keyframes bump { 40% { transform: translateY(2px) } }
 .facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 0; padding: 12px 0; list-style: none; border-block: 1px solid var(--line-dark) }
 .facts b { display: block; font: 300 22px/1.2 var(--display); font-variant-numeric: tabular-nums; letter-spacing: -0.03em }
 .facts span { font-size: 13px; color: var(--steel) }
@@ -182,13 +249,19 @@ h2 { font: 300 clamp(23px, 3.4vw, 30px)/1.15 var(--display); letter-spacing: -0.
 .lines li { display: flex; justify-content: space-between; gap: 12px; font-size: 15px; line-height: 1.35 }
 .lines small { display: block; color: var(--steel); font-size: 13px }
 .lines b { font-weight: 500; white-space: nowrap; font-variant-numeric: tabular-nums }
+.lines li.minus b { color: var(--tape) }
+.incl { list-style: none; margin: 0; padding: 12px 0 0; border-top: 1px solid var(--line-dark); display: grid; gap: 6px; font-size: 14px; color: var(--soft) }
+.incl li { display: flex; gap: 10px; align-items: baseline }
+.incl li::before { content: ""; flex: none; width: 14px; height: 3px; background: var(--tape); transform: translateY(-4px) }
 .board__note { margin: 0; font-size: 13px; color: var(--steel); line-height: 1.45 }
 .btn { font-weight: 600; font-size: 16px; padding: 14px 18px; border-radius: 3px; border: 1px solid transparent; cursor: pointer; text-align: center }
 .btn--tape { background: var(--tape); color: var(--graphite) }
 .btn--dark { background: var(--graphite); color: #fff }
 
-.send { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; min-width: 0 }
-.send__box { display: grid; gap: 14px; max-width: 640px }
+.send__box { display: grid; gap: 18px; grid-template-columns: minmax(0, 1fr) }
+@media (min-width: 640px) { .send__box { grid-template-columns: 220px minmax(0, 1fr); align-items: center } }
+.send__vid { position: relative; aspect-ratio: 1 / 1; border-radius: 6px; overflow: hidden; max-width: 260px }
+.send__t { display: grid; gap: 14px; align-content: start }
 .sent { background: var(--white); border: 1px solid var(--line); border-radius: 4px; padding: 14px 16px; font-size: 15px; margin: 0 }
 
 /* Нижняя панель (телефон) */
@@ -196,10 +269,12 @@ h2 { font: 300 clamp(23px, 3.4vw, 30px)/1.15 var(--display); letter-spacing: -0.
   padding: 12px max(16px, env(safe-area-inset-right, 0px)) calc(12px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); box-shadow: 0 -10px 30px rgba(16, 22, 29, .2); transition: transform .3s }
 .bar::before { content: ""; position: absolute; left: max(16px, env(safe-area-inset-left, 0px)); top: 0; width: 72px; height: 3px; background: var(--tape) }
 .bar.away { transform: translateY(110%) }
-.bar__price { font: 300 25px/1.05 var(--display); letter-spacing: -0.035em; white-space: nowrap; font-variant-numeric: tabular-nums }
-.bar__meta { font-size: 13px; color: var(--steel); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.bar__price { font: 300 25px/1 var(--display); letter-spacing: -0.035em; white-space: nowrap; font-variant-numeric: tabular-nums; display: flex; align-items: baseline; gap: 6px }
+.bar__price small { font-size: 15px; color: var(--soft) }
+.bar__meta { font-size: 13px; color: var(--steel); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 3px }
 .bar__l { min-width: 0 }
 .bar .btn { margin-left: auto; padding: 11px 16px; background: transparent; border-color: #3A4652; color: #fff; flex: none }
+.flybox { position: fixed; left: 0; top: 0; width: 30px; height: 30px; z-index: 60; pointer-events: none }
 
 /* Окно настроек вещи */
 dialog { border: 0; padding: 0; background: var(--paper); color: var(--ink); width: 100%; max-width: min(560px, 100%); max-height: 90vh; border-radius: 12px 12px 0 0; margin: auto auto 0 }
@@ -220,11 +295,11 @@ dialog::backdrop { background: rgba(16, 22, 29, .6) }
 .opt span { font-size: 14px; color: var(--muted) }
 
 @media (prefers-reduced-motion: no-preference) {
-  .sw__k, .sw__k::after, .tile, .chip, .lvl { transition: background .2s, transform .2s, border-color .15s, box-shadow .15s }
+  .sw__k, .sw__k::after, .tile, .chip, .lvl, .day { transition: background .2s, transform .2s, border-color .15s, box-shadow .15s }
   .tape-badge { animation: stick .35s cubic-bezier(.2, .9, .3, 1.3) }
   @keyframes stick { from { transform: rotate(-12deg) scale(.6); opacity: 0 } to { transform: rotate(-4deg) scale(1); opacity: 1 } }
 }
-@media (prefers-reduced-motion: reduce) { .van__cover, .bar { transition: none } }
+@media (prefers-reduced-motion: reduce) { .drum__s, .van .cell, .bar, .prog__bar { transition: none } }
 </style>
 
 <header class="hero">
@@ -233,33 +308,48 @@ dialog::backdrop { background: rgba(16, 22, 29, .6) }
       <img class="hero__logo" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0NjAuNiAxMDAiPgo8ZyB0cmFuc2Zvcm09InNjYWxlKDAuMTUyMjA3MDAxNTIyMDcpIj48c3ZnIHZpZXdCb3g9Ii0xNi4wIC0xNi4wIDY3Mi4wIDY1Ny4wIiB3aWR0aD0iNjcyLjAiIGhlaWdodD0iNjU3LjAiPjxkZWZzPgo8Y2xpcFBhdGggaWQ9Im1lbGJ1cy13aGl0ZUwiPjxyZWN0IHg9Ii02MCIgeT0iLTYwIiB3aWR0aD0iMzgwIiBoZWlnaHQ9IjkwMCIvPjwvY2xpcFBhdGg+CjxjbGlwUGF0aCBpZD0ibWVsYnVzLXdoaXRlUiI+PHJlY3QgeD0iMzIwIiB5PSItNjAiIHdpZHRoPSI0MDAiIGhlaWdodD0iOTAwIi8+PC9jbGlwUGF0aD4KPG1hc2sgaWQ9Im1lbGJ1cy13aGl0ZW0wIiBtYXNrVW5pdHM9InVzZXJTcGFjZU9uVXNlIiB4PSItODAiIHk9Ii04MCIgd2lkdGg9IjgwMCIgaGVpZ2h0PSI5MDAiPjxyZWN0IHg9Ii04MCIgeT0iLTgwIiB3aWR0aD0iODAwIiBoZWlnaHQ9IjkwMCIgZmlsbD0iI2ZmZiIvPgo8cGF0aCBkPSJNMC4wLDE4NS4wIEwzMjAuMCwzNzAuMCBMNjQwLjAsMTg1LjAgTDY0MC4wLDI5MC4wIEwzMjAuMCw0NzUuMCBMMC4wLDI5MC4wIFoiIGZpbGw9IiMwMDAiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSI0NiIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8cGF0aCBkPSJNMC4wLDMzNS4wIEwzMjAuMCwxNTAuMCBMNjQwLjAsMzM1LjAgTDY0MC4wLDQ0MC4wIEwzMjAuMCwyNTUuMCBMMC4wLDQ0MC4wIFoiIGZpbGw9IiMwMDAiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSI0NiIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8cGF0aCBkPSJNMC4wLDE4NS4wIEwzMjAuMCwwLjAgTDY0MC4wLDE4NS4wIEw2NDAuMCwyOTAuMCBMMzIwLjAsMTA1LjAgTDAuMCwyOTAuMCBaIiBmaWxsPSIjMDAwIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iNDYiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPC9tYXNrPgo8bWFzayBpZD0ibWVsYnVzLXdoaXRlbTEiIG1hc2tVbml0cz0idXNlclNwYWNlT25Vc2UiIHg9Ii04MCIgeT0iLTgwIiB3aWR0aD0iODAwIiBoZWlnaHQ9IjkwMCI+PHJlY3QgeD0iLTgwIiB5PSItODAiIHdpZHRoPSI4MDAiIGhlaWdodD0iOTAwIiBmaWxsPSIjZmZmIi8+CjxwYXRoIGQ9Ik0wLjAsMzM1LjAgTDMyMC4wLDE1MC4wIEw2NDAuMCwzMzUuMCBMNjQwLjAsNDQwLjAgTDMyMC4wLDI1NS4wIEwwLjAsNDQwLjAgWiIgZmlsbD0iIzAwMCIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utd2lkdGg9IjQ2IiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+CjxwYXRoIGQ9Ik0wLjAsMTg1LjAgTDMyMC4wLDAuMCBMNjQwLjAsMTg1LjAgTDY0MC4wLDI5MC4wIEwzMjAuMCwxMDUuMCBMMC4wLDI5MC4wIFoiIGZpbGw9IiMwMDAiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSI0NiIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8L21hc2s+CjxtYXNrIGlkPSJtZWxidXMtd2hpdGVtMiIgbWFza1VuaXRzPSJ1c2VyU3BhY2VPblVzZSIgeD0iLTgwIiB5PSItODAiIHdpZHRoPSI4MDAiIGhlaWdodD0iOTAwIj48cmVjdCB4PSItODAiIHk9Ii04MCIgd2lkdGg9IjgwMCIgaGVpZ2h0PSI5MDAiIGZpbGw9IiNmZmYiLz4KPHBhdGggZD0iTTAuMCwxODUuMCBMMzIwLjAsMC4wIEw2NDAuMCwxODUuMCBMNjQwLjAsMjkwLjAgTDMyMC4wLDEwNS4wIEwwLjAsMjkwLjAgWiIgZmlsbD0iIzAwMCIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utd2lkdGg9IjQ2IiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+CjwvbWFzaz4KPG1hc2sgaWQ9Im1lbGJ1cy13aGl0ZW0zIiBtYXNrVW5pdHM9InVzZXJTcGFjZU9uVXNlIiB4PSItODAiIHk9Ii04MCIgd2lkdGg9IjgwMCIgaGVpZ2h0PSI5MDAiPjxyZWN0IHg9Ii04MCIgeT0iLTgwIiB3aWR0aD0iODAwIiBoZWlnaHQ9IjkwMCIgZmlsbD0iI2ZmZiIvPgo8L21hc2s+CjwvZGVmcz4KPGcgbWFzaz0idXJsKCNtZWxidXMtd2hpdGVtMCkiPjxwYXRoIGQ9Ik0wLjAsMzM1LjAgTDMyMC4wLDUyMC4wIEw2NDAuMCwzMzUuMCBMNjQwLjAsNDQwLjAgTDMyMC4wLDYyNS4wIEwwLjAsNDQwLjAgWiIgZmlsbD0iI0ZGRkZGRiIgc3Ryb2tlPSIjRkZGRkZGIiBzdHJva2Utd2lkdGg9IjIwIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBjbGlwLXBhdGg9InVybCgjbWVsYnVzLXdoaXRlTCkiLz48cGF0aCBkPSJNMC4wLDMzNS4wIEwzMjAuMCw1MjAuMCBMNjQwLjAsMzM1LjAgTDY0MC4wLDQ0MC4wIEwzMjAuMCw2MjUuMCBMMC4wLDQ0MC4wIFoiIGZpbGw9IiNGRkZGRkYiIHN0cm9rZT0iI0ZGRkZGRiIgc3Ryb2tlLXdpZHRoPSIyMCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgY2xpcC1wYXRoPSJ1cmwoI21lbGJ1cy13aGl0ZVIpIi8+PC9nPgo8ZyBtYXNrPSJ1cmwoI21lbGJ1cy13aGl0ZW0xKSI+PHBhdGggZD0iTTAuMCwxODUuMCBMMzIwLjAsMzcwLjAgTDY0MC4wLDE4NS4wIEw2NDAuMCwyOTAuMCBMMzIwLjAsNDc1LjAgTDAuMCwyOTAuMCBaIiBmaWxsPSIjRkZGRkZGIiBzdHJva2U9IiNGRkZGRkYiIHN0cm9rZS13aWR0aD0iMjAiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsaXAtcGF0aD0idXJsKCNtZWxidXMtd2hpdGVMKSIvPjxwYXRoIGQ9Ik0wLjAsMTg1LjAgTDMyMC4wLDM3MC4wIEw2NDAuMCwxODUuMCBMNjQwLjAsMjkwLjAgTDMyMC4wLDQ3NS4wIEwwLjAsMjkwLjAgWiIgZmlsbD0iI0ZGRkZGRiIgc3Ryb2tlPSIjRkZGRkZGIiBzdHJva2Utd2lkdGg9IjIwIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBjbGlwLXBhdGg9InVybCgjbWVsYnVzLXdoaXRlUikiLz48L2c+CjxnIG1hc2s9InVybCgjbWVsYnVzLXdoaXRlbTIpIj48cGF0aCBkPSJNMC4wLDMzNS4wIEwzMjAuMCwxNTAuMCBMNjQwLjAsMzM1LjAgTDY0MC4wLDQ0MC4wIEwzMjAuMCwyNTUuMCBMMC4wLDQ0MC4wIFoiIGZpbGw9IiNGRkZGRkYiIHN0cm9rZT0iI0ZGRkZGRiIgc3Ryb2tlLXdpZHRoPSIyMCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgY2xpcC1wYXRoPSJ1cmwoI21lbGJ1cy13aGl0ZUwpIi8+PHBhdGggZD0iTTAuMCwzMzUuMCBMMzIwLjAsMTUwLjAgTDY0MC4wLDMzNS4wIEw2NDAuMCw0NDAuMCBMMzIwLjAsMjU1LjAgTDAuMCw0NDAuMCBaIiBmaWxsPSIjRkZGRkZGIiBzdHJva2U9IiNGRkZGRkYiIHN0cm9rZS13aWR0aD0iMjAiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsaXAtcGF0aD0idXJsKCNtZWxidXMtd2hpdGVSKSIvPjwvZz4KPGcgbWFzaz0idXJsKCNtZWxidXMtd2hpdGVtMykiPjxwYXRoIGQ9Ik0wLjAsMTg1LjAgTDMyMC4wLDAuMCBMNjQwLjAsMTg1LjAgTDY0MC4wLDI5MC4wIEwzMjAuMCwxMDUuMCBMMC4wLDI5MC4wIFoiIGZpbGw9IiNGRkZGRkYiIHN0cm9rZT0iI0ZGRkZGRiIgc3Ryb2tlLXdpZHRoPSIyMCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgY2xpcC1wYXRoPSJ1cmwoI21lbGJ1cy13aGl0ZUwpIi8+PHBhdGggZD0iTTAuMCwxODUuMCBMMzIwLjAsMC4wIEw2NDAuMCwxODUuMCBMNjQwLjAsMjkwLjAgTDMyMC4wLDEwNS4wIEwwLjAsMjkwLjAgWiIgZmlsbD0iI0ZGRkZGRiIgc3Ryb2tlPSIjRkZGRkZGIiBzdHJva2Utd2lkdGg9IjIwIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBjbGlwLXBhdGg9InVybCgjbWVsYnVzLXdoaXRlUikiLz48L2c+Cjwvc3ZnPjwvZz4KPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTMyLjI4MzEwNTAyMjgzMTA1LDcyKSBzY2FsZSgwLjAyODE1MDk5MTY4MjY2MTU1LC0wLjAyODE1MDk5MTY4MjY2MTU1KSI+CjxwYXRoIHRyYW5zZm9ybT0idHJhbnNsYXRlKDAsMCkiIGQ9Ik0yMjMgMTU2M0g1NDBMMTEwOCA5OTNMMTY3NiAxNTYzSDE5OTNWMEgxNjc2VjExMjRMMTEwOCA1NzdMNTQwIDExMjRWMEgyMjNaIiBmaWxsPSIjRkZGRkZGIi8+CjxwYXRoIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIyOTcuOTIsMCkiIGQ9Ik0yMjIgMTU2M0gxNTUzVjEyODVINTM5Vjk3M0gxNDM3VjcxMkg1MzlWMjc3SDE1NzRWMEgyMjJaIiBmaWxsPSIjRkZGRkZGIi8+CjxwYXRoIHRyYW5zZm9ybT0idHJhbnNsYXRlKDQwODMuODQsMCkiIGQ9Ik0yMjIgMTU2M0g1MzlWMjc4SDE0NDhWMEgyMjJaIiBmaWxsPSIjRkZGRkZGIi8+CjxwYXRoIHRyYW5zZm9ybT0idHJhbnNsYXRlKDU2OTguNzYsMCkiIGQ9Ik0yMjIgMTU2M0gxMDU3UTEyMTAgMTU2MyAxMzIzLjUgMTUzMC41UTE0MzcgMTQ5OCAxNTEyLjAgMTQ0MS4wUTE1ODcgMTM4NCAxNjIzLjUgMTMwNS41UTE2NjAgMTIyNyAxNjYwIDExMzZRMTY2MCA5ODcgMTU2NiA4NzVRMTY3NCA4MTEgMTcyNy4wIDcwOS4wUTE3ODAgNjA3IDE3ODAgNDc3UTE3ODAgMzY4IDE3NDMuNSAyODAuMFExNzA3IDE5MiAxNjMyLjUgMTI5LjVRMTU1OCA2NyAxNDQ0LjUgMzMuNVExMzMxIDAgMTE3NyAwSDIyMlpNMTE3OSA5NjNRMTIyMCA5NjMgMTI1OSA5NjBRMTMyNiAxMDI0IDEzMjYgMTEwNlExMzI2IDExOTEgMTI1OS41IDEyMzcuNVExMTkzIDEyODQgMTA2NSAxMjg0SDUzOVY5NjNaTTExODUgMjc2UTEzMTMgMjc2IDEzNzkuNSAzMzEuMFExNDQ2IDM4NiAxNDQ2IDQ4NlExNDQ2IDU4NiAxMzc5LjUgNjQyLjBRMTMxMyA2OTggMTE4NSA2OThINTM5VjI3NloiIGZpbGw9IiNGRkZGRkYiLz4KPHBhdGggdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNzY1OS42OCwwKSIgZD0iTTE2MyAxNTYzSDQ4MFY3MDJRNDgwIDU5NiA1MDkuMCA1MTMuNVE1MzggNDMxIDU5NS41IDM3NC4wUTY1MyAzMTcgNzM4LjAgMjg3LjVRODIzIDI1OCA5MzYgMjU4UTEwNDggMjU4IDExMzMuNSAyODcuNVExMjE5IDMxNyAxMjc2LjUgMzc0LjBRMTMzNCA0MzEgMTM2My4wIDUxMy41UTEzOTIgNTk2IDEzOTIgNzAyVjE1NjNIMTcwOVY2NjRRMTcwOSA1MTAgMTY1Ny4wIDM4NC4wUTE2MDUgMjU4IDE1MDYuMCAxNjguMFExNDA3IDc4IDEyNjMuNSAyOS4wUTExMjAgLTIwIDkzNiAtMjBRNzUyIC0yMCA2MDguNSAyOS4wUTQ2NSA3OCAzNjYuMCAxNjguMFEyNjcgMjU4IDIxNS4wIDM4NC4wUTE2MyA1MTAgMTYzIDY2NFoiIGZpbGw9IiNGRkZGRkYiLz4KPHBhdGggdHJhbnNmb3JtPSJ0cmFuc2xhdGUoOTYxNC42LDApIiBkPSJNMjk1IDQ2NVEzODAgNDE3IDQ2Ny41IDM3OC41UTU1NSAzNDAgNjQ5LjAgMzEzLjVRNzQzIDI4NyA4NDYuNSAyNzMuMFE5NTAgMjU5IDEwNjcgMjU5UTEyMDggMjU5IDEzMDcuMCAyNzcuNVExNDA2IDI5NiAxNDY4LjUgMzI4LjVRMTUzMSAzNjEgMTU1OS41IDQwNi4wUTE1ODggNDUxIDE1ODggNTA0UTE1ODggNTg5IDE1MTcuMCA2MzguNVExNDQ2IDY4OCAxMjk4IDY4OFExMjMzIDY4OCAxMTYxLjAgNjc5LjVRMTA4OSA2NzEgMTAxNS41IDY2MS4wUTk0MiA2NTEgODcwLjUgNjQyLjVRNzk5IDYzNCA3MzYgNjM0UTYzMSA2MzQgNTM0LjUgNjYxLjBRNDM4IDY4OCAzNjMuNSA3NDIuMFEyODkgNzk2IDI0NS4wIDg3Ny4wUTIwMSA5NTggMjAxIDEwNjZRMjAxIDExMzAgMjE4LjUgMTE5My4wUTIzNiAxMjU2IDI3NC41IDEzMTMuNVEzMTMgMTM3MSAzNzQuMCAxNDIwLjVRNDM1IDE0NzAgNTIxLjUgMTUwNi4wUTYwOCAxNTQyIDcyMS41IDE1NjIuNVE4MzUgMTU4MyA5ODAgMTU4M1ExMDg1IDE1ODMgMTE5MS4wIDE1NzEuNVExMjk3IDE1NjAgMTM5Ny41IDE1MzkuMFExNDk4IDE1MTggMTU5MS4wIDE0ODguNVExNjg0IDE0NTkgMTc2NCAxNDIzTDE2MjUgMTE2N1ExNTU5IDExOTYgMTQ4My4wIDEyMjAuNVExNDA3IDEyNDUgMTMyNC4wIDEyNjMuMFExMjQxIDEyODEgMTE1Mi41IDEyOTEuNVExMDY0IDEzMDIgOTcyIDEzMDJRODQxIDEzMDIgNzU2LjUgMTI4My4wUTY3MiAxMjY0IDYyMi4wIDEyMzQuNVE1NzIgMTIwNSA1NTIuNSAxMTY4LjVRNTMzIDExMzIgNTMzIDEwOTZRNTMzIDEwMjYgNTk2LjAgOTgxLjVRNjU5IDkzNyA3ODggOTM3UTg0MCA5MzcgOTA3LjUgOTQ0LjVROTc1IDk1MiAxMDQ5LjUgOTYxLjBRMTEyNCA5NzAgMTIwMS41IDk3Ny41UTEyNzkgOTg1IDEzNTIgOTg1UTE0OTAgOTg1IDE1OTYuNSA5NTQuMFExNzAzIDkyMyAxNzc1LjAgODY1LjVRMTg0NyA4MDggMTg4NC4wIDcyNi41UTE5MjEgNjQ1IDE5MjEgNTQ0UTE5MjEgNDA5IDE4NTguNSAzMDMuNVExNzk2IDE5OCAxNjgwLjUgMTI1LjVRMTU2NSA1MyAxNDAyLjAgMTUuNVExMjM5IC0yMiAxMDM5IC0yMlE5MDcgLTIyIDc4MS4wIC01LjVRNjU1IDExIDUzOS41IDQxLjVRNDI0IDcyIDMxOS41IDExNC41UTIxNSAxNTcgMTI2IDIwOFoiIGZpbGw9IiNGRkZGRkYiLz4KPC9nPgo8L3N2Zz4=" alt="MELBUS">
       <span class="proto">Прототип · цены — предложение, не утверждены</span>
     </div>
-    <h1>Что у вас дома?</h1>
-    <p class="lead">Отметьте вещи — и сразу увидите цену. В день переезда она не изменится, даже если мы провозимся дольше.</p>
-    <div class="hero__cta">
-      <button type="button" class="mode-btn" data-mode="list" aria-pressed="true"><svg class="i" viewBox="0 0 24 24" data-ico="list"></svg><span><b>Отметить вещи</b><small>около 3 минут</small></span></button>
-      <button type="button" class="mode-btn" data-mode="video" aria-pressed="false"><svg class="i" viewBox="0 0 24 24" data-ico="camera"></svg><span><b>Снять видео</b><small>вещи посчитаем мы</small></span></button>
+    <div class="hero__text">
+      <h1>Что у вас дома?</h1>
+      <p class="lead">Отметьте вещи или снимите видео — и получите цену, которая не изменится в день переезда.</p>
+      <p class="hero__note">Считаем по вашим вещам и адресам, а не по комнатам и метрам. Все цены с VAT.</p>
     </div>
-    <p class="hero__note">Считаем не по комнатам и метрам, а по вашим вещам: у каждой своё время работы. Цены с VAT.</p>
+    <div class="hero__cta">
+      <button type="button" class="mode-card" data-mode="list" aria-pressed="true">
+        <span class="mode-card__media"><video src="media/pack.mp4" poster="media/pack.jpg" muted loop playsinline autoplay preload="metadata" aria-hidden="true"></video><span class="ai">Визуализация</span></span>
+        <span class="mode-card__t"><b>Отметить вещи</b><small>3 минуты, цена сразу</small></span>
+      </button>
+      <button type="button" class="mode-card" data-mode="video" aria-pressed="false">
+        <span class="mode-card__media"><video src="media/phone.mp4" poster="media/phone.jpg" muted loop playsinline autoplay preload="metadata" aria-hidden="true"></video><span class="ai">Визуализация</span></span>
+        <span class="mode-card__t"><b>Снять видео</b><small>2 минуты, посчитаем мы</small></span>
+      </button>
+    </div>
   </div>
 </header>
 
+<nav class="prog" aria-label="Шаги">
+  <div class="prog__in gut"><span class="prog__n" id="progN"></span><span class="prog__cur" id="progCur"></span><ol id="progList"></ol><span class="prog__bar" id="progBar"></span></div>
+</nav>
+
 <main class="layout gut">
   <div class="steps">
-    <section class="step" id="s-level" aria-labelledby="h-level">
+    <section class="step" id="s-level" data-short="Что делаем" aria-labelledby="h-level">
       <div class="step__head"><h2 id="h-level">Что делаем мы</h2>
-        <p class="sub">Чем больше делаем мы, тем меньше забот у вас. Платите за работу людей — каждая вещь занимает своё время.</p></div>
+        <p class="sub">Чем больше делаем мы, тем меньше забот у вас. Платите за работу людей: у каждой вещи своё время.</p></div>
       <div class="levels" role="radiogroup" aria-labelledby="h-level" id="levels"></div>
     </section>
 
-    <section class="step" id="s-route" aria-labelledby="h-route">
+    <section class="step" id="s-route" data-short="Адреса" aria-labelledby="h-route">
       <div class="step__head"><h2 id="h-route">Откуда и куда</h2>
-        <p class="sub">Дорогу считаем по вашим адресам: километры и время в пути. Этаж без лифта и далёкая парковка добавляют время на переноску.</p></div>
+        <p class="sub">Дорогу считаем по вашим адресам. Этаж без лифта и далёкая парковка добавляют время на переноску.</p></div>
       <div class="ends" id="ends"></div>
-      <div class="route" id="route" aria-live="polite"></div>
+      <div class="route">
+        <div class="route__media"><video src="media/van.mp4" poster="media/van.jpg" muted loop playsinline autoplay preload="metadata" aria-hidden="true"></video><span class="ai">Визуализация</span></div>
+        <div class="route__body" id="route" aria-live="polite"></div>
+      </div>
       <p class="more">В прототипе в подсказках районы Варшавы и города. На сайте будет поиск точного адреса, как в Google Maps.</p>
     </section>
 
-    <section class="step" id="s-items" aria-labelledby="h-items">
+    <section class="step" id="s-items" data-short="Вещи" aria-labelledby="h-items">
       <div class="step__head"><h2 id="h-items">Что везём</h2><p class="sub" id="items-sub"></p></div>
       <div class="seg" role="group" aria-label="Как рассказать о вещах" id="mode2">
         <button type="button" data-mode="list" aria-pressed="true">Список вещей</button>
@@ -278,8 +368,11 @@ dialog::backdrop { background: rgba(16, 22, 29, .6) }
           <li><svg class="i" viewBox="0 0 24 24" data-ico="stairs"></svg><span><b>Покажите подъезд и лифт</b> — лестницу, двери, где встанет бус.</span></li>
           <li><svg class="i" viewBox="0 0 24 24" data-ico="mic"></svg><span><b>Скажите голосом</b>, что не везём и что разобрать.</span></li>
         </ul>
-        <label class="drop" for="vfile"><svg class="i" viewBox="0 0 24 24" data-ico="camera"></svg><b>Выбрать видео</b><span>Можно несколько роликов с телефона</span>
-          <input class="vh" type="file" id="vfile" accept="video/*" multiple></label>
+        <div class="vwrap">
+          <div class="vdemo"><video src="media/phone.mp4" poster="media/phone.jpg" muted loop playsinline autoplay preload="metadata" aria-hidden="true"></video><span class="ai">Визуализация</span></div>
+          <label class="drop" for="vfile"><svg class="i" viewBox="0 0 24 24" data-ico="camera"></svg><b>Выбрать видео</b><span>Можно несколько роликов с телефона</span>
+            <input class="vh" type="file" id="vfile" accept="video/*" multiple></label>
+        </div>
         <ul class="vlist" id="vlist"></ul>
       </div>
       <div id="items-hours" class="stack" hidden>
@@ -291,43 +384,46 @@ dialog::backdrop { background: rgba(16, 22, 29, .6) }
       </div>
     </section>
 
-    <section class="step" id="s-boxes" aria-labelledby="h-boxes">
+    <section class="step" id="s-boxes" data-short="Коробки" aria-labelledby="h-boxes">
       <div class="step__head"><h2 id="h-boxes">Коробки</h2><p class="sub" id="boxes-sub"></p></div>
       <div class="boxes">
         <div class="boxes__top">
           <div class="boxes__n"><output id="boxN">0</output><small id="boxVol">0 м³</small></div>
           <div class="stepper"><button type="button" data-act="box" data-d="-5" aria-label="Минус 5 коробок">−</button><output aria-hidden="true">5</output><button type="button" data-act="box" data-d="5" aria-label="Плюс 5 коробок">+</button></div>
-          <div class="bx" id="bx" aria-hidden="true" style="flex:1 1 200px"></div>
+          <div class="bx" id="bx" aria-hidden="true"></div>
         </div>
         <label class="vh" for="boxR">Сколько коробок</label>
         <input type="range" id="boxR" min="0" max="150" step="5" value="0">
+        <button type="button" class="sw" role="switch" aria-checked="false" id="sw-kitchen"><span class="sw__l">Упаковать кухню и хрупкое<small>Посуда, стекло, техника — около 10 коробок, 250 zł</small></span><span class="sw__k"></span></button>
         <button type="button" class="sw" role="switch" aria-checked="false" id="sw-ahead"><span class="sw__l">Привезти наши коробки заранее<small>8 zł за коробку с бумагой и скотчем, доставка бесплатно</small></span><span class="sw__k"></span></button>
         <button type="button" class="sw" role="switch" aria-checked="false" id="sw-unpack"><span class="sw__l">Распаковать на новом месте<small>15 zł за коробку: разложим по шкафам, коробки заберём</small></span><span class="sw__k"></span></button>
       </div>
     </section>
 
-    <section class="step" id="s-extra" aria-labelledby="h-extra">
+    <section class="step" id="s-extra" data-short="Допы" aria-labelledby="h-extra">
       <div class="step__head"><h2 id="h-extra">Что ещё сделать</h2>
         <p class="sub">Цена каждой услуги известна заранее и сразу входит в итог.</p></div>
       <div class="grid grid--wide" id="extras"></div>
+    </section>
+
+    <section class="step" id="s-date" data-short="Дата" aria-labelledby="h-date">
+      <div class="step__head"><h2 id="h-date">Когда</h2>
+        <p class="sub">Если дата гибкая, выберите «зелёный» день — переезд выйдет дешевле.</p></div>
+      <div class="days" role="radiogroup" aria-labelledby="h-date" id="days"></div>
+      <ul class="legend"><li><b class="g">−10 %</b> вт–чт в середине месяца</li><li><b class="g">−5 %</b> бронь за 14 дней и раньше</li><li><b class="p">+10 %</b> конец и начало месяца, летние субботы</li></ul>
     </section>
   </div>
 
   <aside class="board" id="board" aria-label="Ваша цена">
     <p class="board__k" id="bK">Ваша цена · с VAT</p>
-    <p class="board__price" aria-live="polite"><span id="bP">0</span><small>zł</small></p>
+    <p class="board__price"><span class="drums" id="bP" aria-hidden="true"></span><small>zł</small><span class="vh" id="bPtext" aria-live="polite"></span></p>
     <p class="board__fix" id="bFix"></p>
     <div class="van" id="van">
       <svg viewBox="0 0 264 118" aria-hidden="true">
-        <defs>
-          <pattern id="boxPat" width="18" height="18" patternUnits="userSpaceOnUse" x="12" y="22">
-            <rect x="1" y="1" width="16" height="16" rx="1" fill="#F4F6F8"/><rect x="1" y="7.5" width="16" height="3" fill="#14DCD5"/>
-          </pattern>
-        </defs>
-        <rect x="12" y="22" width="170" height="72" fill="url(#boxPat)"/>
-        <rect class="van__cover" id="vanCover" x="11" y="21" width="172" height="74" fill="#10161D"/>
+        <rect x="12" y="22" width="170" height="72" rx="3" fill="#18212A"/>
+        <g id="cells"></g>
         <rect x="12" y="22" width="170" height="72" rx="3" fill="none" stroke="#8F9AA7" stroke-width="1.5"/>
-        <path d="M182 40h34c4 0 7 2 9 5l17 24c1.5 2 2 4 2 6v19h-62z" fill="none" stroke="#8F9AA7" stroke-width="1.5"/>
+        <path d="M182 40h34c4 0 7 2 9 5l17 24c1.5 2 2 4 2 6v19h-62z" fill="#10161D" stroke="#8F9AA7" stroke-width="1.5"/>
         <path d="M190 47h26l14 20h-40z" fill="none" stroke="#56626E" stroke-width="1.5"/>
         <path d="M12 86h232" stroke="#14DCD5" stroke-width="2"/>
         <circle cx="56" cy="100" r="11" fill="#10161D" stroke="#8F9AA7" stroke-width="1.5"/><circle cx="56" cy="100" r="3.5" fill="#56626E"/>
@@ -338,22 +434,26 @@ dialog::backdrop { background: rgba(16, 22, 29, .6) }
     </div>
     <ul class="facts" id="facts"></ul>
     <ol class="lines" id="lines"></ol>
+    <ul class="incl"><li>Плёнка и одеяла для мебели</li><li>Бахилы и защита пола</li><li>Фактура VAT, оплата BLIK или картой</li></ul>
     <p class="board__note" id="bNote"></p>
     <button type="button" class="btn btn--tape" data-act="go-send">Получить фиксированную цену</button>
   </aside>
 
-  <section class="send step" id="s-send" aria-labelledby="h-send">
-    <div class="step__head"><h2 id="h-send">Готово</h2></div>
+  <section class="send step" id="s-send" data-short="Готово" aria-labelledby="h-send">
+    <div class="step__head"><h2 id="h-send">Цену запечатываем</h2></div>
     <div class="send__box">
-      <p class="sub">Дальше — имя, телефон и дата. Менеджер проверит список и пришлёт оферту по ссылке: фиксированная цена, состав работ, задаток 20 %.</p>
-      <button type="button" class="btn btn--dark" id="sendBtn" style="width:fit-content">Получить фиксированную цену</button>
-      <p class="sent" id="sent" hidden>Это прототип, заявка никуда не ушла. На сайте здесь будут поля «Имя», «Телефон», «Дата», а список вещей, видео и цена придут менеджеру в Telegram.</p>
+      <div class="send__vid"><video src="media/tape.mp4" poster="media/tape.jpg" muted loop playsinline autoplay preload="metadata" aria-hidden="true"></video><span class="ai">Визуализация</span></div>
+      <div class="send__t">
+        <p class="sub">Как коробку — скотчем. Дальше имя, телефон и удобное время для звонка. Менеджер проверит список и пришлёт оферту по ссылке: фиксированная цена, состав работ, задаток 20 %.</p>
+        <button type="button" class="btn btn--dark" id="sendBtn" style="width:fit-content">Получить фиксированную цену</button>
+        <p class="sent" id="sent" hidden>Это прототип, заявка никуда не ушла. На сайте здесь будут поля «Имя» и «Телефон», а список вещей, адреса, видео и цена придут менеджеру в Telegram.</p>
+      </div>
     </div>
   </section>
 </main>
 
 <div class="bar" id="bar">
-  <div class="bar__l"><div class="bar__price" id="barP">0 zł</div><div class="bar__meta" id="barM"></div></div>
+  <div class="bar__l"><div class="bar__price"><span class="drums" id="barP" aria-hidden="true"></span><small>zł</small></div><div class="bar__meta" id="barM"></div></div>
   <button type="button" class="btn" data-act="to-board">Из чего цена</button>
 </div>
 
@@ -361,48 +461,14 @@ dialog::backdrop { background: rgba(16, 22, 29, .6) }
 
 <script id="model">
 // ===== Модель цены (та же формула, что в документе «Цена переезда MELBUS») =====
-const RATE = 100;      // zł за час работы одного человека, с VAT
-const BUS = 150;       // бус по Варшаве за рейс
-const CAP = 18;        // м³ в одном бусе (уточнить по вашим машинам)
+const RATE = 100;      // zł за час работы одного человека для клиента, с VAT (вам человек стоит 40 zł/ч со всем)
+const BUS = 150;       // бус за переезд: топливо, износ; входит KM_FREE км от адреса до адреса
+const CAP = 13;        // м³ в одном бусе: Fiat Ducato L3H2
+const FLAT = 0.45;     // разобранная мебель занимает меньше места
 const BOX_MAT = 8;     // коробка + бумага + скотч, zł
 const FILM = 30;       // плёнка и скотч для мебели
-const KM_FREE = 30;    // км всего маршрута буса (база → откуда → куда → база), входят в BUS
-const KM_RATE = 2.5;   // zł за каждый км сверх KM_FREE (покрывает и пустой обратный путь)
-const BASE = {n: 'База MELBUS', lat: 52.2297, lon: 20.985};   // уточнить адрес базы
-// Адреса-примеры для прототипа. На сайте — поиск точного адреса и маршрут по дорогам (Google Maps или OpenStreetMap).
-const PLACES = [
-  ['Warszawa, Mokotów', 52.1935, 21.035], ['Warszawa, Śródmieście', 52.2297, 21.0122], ['Warszawa, Wola', 52.2366, 20.958],
-  ['Warszawa, Ochota', 52.212, 20.972], ['Warszawa, Praga-Południe', 52.239, 21.085], ['Warszawa, Praga-Północ', 52.258, 21.033],
-  ['Warszawa, Żoliborz', 52.269, 20.985], ['Warszawa, Bielany', 52.293, 20.942], ['Warszawa, Bemowo', 52.254, 20.911],
-  ['Warszawa, Ursus', 52.195, 20.883], ['Warszawa, Włochy', 52.194, 20.943], ['Warszawa, Ursynów', 52.15, 21.05],
-  ['Warszawa, Wilanów', 52.165, 21.088], ['Warszawa, Wawer', 52.196, 21.178], ['Warszawa, Białołęka', 52.319, 20.996],
-  ['Warszawa, Targówek', 52.29, 21.048], ['Warszawa, Rembertów', 52.26, 21.15], ['Warszawa, Wesoła', 52.24, 21.22],
-  ['Piaseczno', 52.073, 21.026], ['Pruszków', 52.17, 20.812], ['Legionowo', 52.401, 20.926], ['Marki', 52.327, 21.105],
-  ['Ząbki', 52.292, 21.106], ['Łomianki', 52.334, 20.886], ['Otwock', 52.105, 21.261], ['Józefów', 52.137, 21.235],
-  ['Konstancin-Jeziorna', 52.094, 21.117], ['Grodzisk Mazowiecki', 52.109, 20.625],
-  ['Łódź', 51.7592, 19.456], ['Radom', 51.4027, 21.1471], ['Płock', 52.5468, 19.7064], ['Lublin', 51.2465, 22.5684],
-  ['Białystok', 53.1325, 23.1688], ['Kraków', 50.0647, 19.945], ['Poznań', 52.4064, 16.9252], ['Wrocław', 51.1079, 17.0385],
-  ['Gdańsk', 54.352, 18.6466], ['Berlin', 52.52, 13.405],
-].map(([n, lat, lon]) => ({n, lat, lon}));
-const PLACE = Object.fromEntries(PLACES.map((p) => [p.n, p]));
-function roadKm(a, b) {                          // по прямой × коэффициент извилистости дорог
-  const r = Math.PI / 180, dLat = (b.lat - a.lat) * r, dLon = (b.lon - a.lon) * r;
-  const h = Math.sin(dLat / 2) ** 2 + Math.cos(a.lat * r) * Math.cos(b.lat * r) * Math.sin(dLon / 2) ** 2;
-  const km = 12742 * Math.asin(Math.sqrt(h));
-  return km * (km < 25 ? 1.35 : 1.2);
-}
-function driveMin(km) {                          // город ~22 км/ч, пригород ~50, трасса ~75 + 10 мин на парковку
-  const t = Math.min(km, 15) / 22 + Math.max(0, Math.min(km, 60) - 15) / 50 + Math.max(0, km - 60) / 75;
-  return t * 60 + 10;
-}
-function route(S) {
-  const A = PLACE[S.from.place], B = PLACE[S.to.place];
-  if (!A || !B) return null;
-  const ab = Math.max(3, roadKm(A, B)), total = roadKm(BASE, A) + ab + roadKm(B, BASE);
-  return {ab, total, min: driveMin(ab), extraKm: Math.max(0, total - KM_FREE)};
-}
-const DOOR = [0, 0.15, 0.3];                   // у подъезда / до 50 м / дальше
-const HOUSE = [0, 0.1, 0];                     // блок / каменица (узкие лестницы, двор) / дом
+const KM_FREE = 30;    // км от адреса до адреса, которые входят в BUS
+const KM_RATE = 2.5;   // zł за каждый км сверх KM_FREE (покрывает и обратный путь)
 const LEVELS = [
   {id: 1, t: 'Бус с водителем', d: 'Вы грузите, мы везём. Почасово, минимум 2 часа.', icon: 'wheel'},
   {id: 2, t: 'Перевозка', d: 'Вы пакуете и разбираете шкафы. Мы выносим, везём, заносим и собираем кровати.', icon: 'carry'},
@@ -413,9 +479,9 @@ const ROOMS = [['bed', 'Спальня'], ['live', 'Гостиная'], ['kit', 
 const ITEMS = [
   ['bed2', 'bed', 'Кровать двуспальная', 'bed2', 45, 1.4, 90, 'bed'],
   ['bed1', 'bed', 'Кровать односпальная', 'bed1', 30, 0.8, 60, 'bed'],
-  ['wardS', 'bed', 'Шкаф до 1\u00A0м', 'wardS', 25, 0.7, 150, 'ward'],
-  ['wardM', 'bed', 'Шкаф 1,5–2\u00A0м', 'wardM', 60, 1.6, 270, 'ward'],
-  ['wardL', 'bed', 'Шкаф-купе от 2\u00A0м', 'wardL', 80, 2.2, 420, 'ward'],
+  ['wardS', 'bed', 'Шкаф до 1 м', 'wardS', 25, 0.7, 150, 'ward'],
+  ['wardM', 'bed', 'Шкаф 1,5–2 м', 'wardM', 60, 1.6, 270, 'ward'],
+  ['wardL', 'bed', 'Шкаф-купе от 2 м', 'wardL', 80, 2.2, 420, 'ward'],
   ['dresser', 'bed', 'Комод', 'dresser', 25, 0.6, 0],
   ['nights', 'bed', 'Тумбочка', 'nights', 6, 0.15, 0],
   ['mirror', 'bed', 'Большое зеркало', 'mirror', 10, 0.1, 0],
@@ -464,19 +530,56 @@ const PRESETS = {
   house: {t: 'Дом', c: {bed2: 2, bed1: 1, nights: 4, wardM: 3, wardL: 1, dresser: 2, sofaC: 1, armch: 2, tv: 2, tvst: 1, shelf: 2, ctable: 1, rug: 3, lamp: 2, plant: 4, fridge: 1, washer: 1, dishw: 1, dtable: 1, chair: 6, desk: 1, ochair: 1, pc: 1, hallw: 1, bike: 2, balc: 1, tires: 1, bags: 8}, boxes: 90},
   empty: {t: 'С нуля', c: {}, boxes: 0},
 };
+// Адреса-примеры для прототипа. На сайте — поиск точного адреса и маршрут по дорогам (Google Maps или OpenStreetMap).
+const PLACES = [
+  ['Warszawa, Mokotów', 52.1935, 21.035], ['Warszawa, Śródmieście', 52.2297, 21.0122], ['Warszawa, Wola', 52.2366, 20.958],
+  ['Warszawa, Ochota', 52.212, 20.972], ['Warszawa, Praga-Południe', 52.239, 21.085], ['Warszawa, Praga-Północ', 52.258, 21.033],
+  ['Warszawa, Żoliborz', 52.269, 20.985], ['Warszawa, Bielany', 52.293, 20.942], ['Warszawa, Bemowo', 52.254, 20.911],
+  ['Warszawa, Ursus', 52.195, 20.883], ['Warszawa, Włochy', 52.194, 20.943], ['Warszawa, Ursynów', 52.15, 21.05],
+  ['Warszawa, Wilanów', 52.165, 21.088], ['Warszawa, Wawer', 52.196, 21.178], ['Warszawa, Białołęka', 52.319, 20.996],
+  ['Warszawa, Targówek', 52.29, 21.048], ['Warszawa, Rembertów', 52.26, 21.15], ['Warszawa, Wesoła', 52.24, 21.22],
+  ['Piaseczno', 52.073, 21.026], ['Pruszków', 52.17, 20.812], ['Legionowo', 52.401, 20.926], ['Marki', 52.327, 21.105],
+  ['Ząbki', 52.292, 21.106], ['Łomianki', 52.334, 20.886], ['Otwock', 52.105, 21.261], ['Józefów', 52.137, 21.235],
+  ['Konstancin-Jeziorna', 52.094, 21.117], ['Grodzisk Mazowiecki', 52.109, 20.625],
+  ['Łódź', 51.7592, 19.456], ['Radom', 51.4027, 21.1471], ['Płock', 52.5468, 19.7064], ['Lublin', 51.2465, 22.5684],
+  ['Białystok', 53.1325, 23.1688], ['Kraków', 50.0647, 19.945], ['Poznań', 52.4064, 16.9252], ['Wrocław', 51.1079, 17.0385],
+  ['Gdańsk', 54.352, 18.6466], ['Berlin', 52.52, 13.405],
+].map(([n, lat, lon]) => ({n, lat, lon}));
+const PLACE = Object.fromEntries(PLACES.map((p) => [p.n, p]));
+function roadKm(a, b) {                          // по прямой × коэффициент извилистости дорог
+  const r = Math.PI / 180, dLat = (b.lat - a.lat) * r, dLon = (b.lon - a.lon) * r;
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(a.lat * r) * Math.cos(b.lat * r) * Math.sin(dLon / 2) ** 2;
+  const km = 12742 * Math.asin(Math.sqrt(h));
+  return km * (km < 25 ? 1.35 : 1.2);
+}
+function driveMin(km) {                          // город ~22 км/ч, пригород ~50, трасса ~75 + 10 мин на парковку
+  const t = Math.min(km, 15) / 22 + Math.max(0, Math.min(km, 60) - 15) / 50 + Math.max(0, km - 60) / 75;
+  return t * 60 + 10;
+}
+function route(S) {                              // только от адреса до адреса: где наша база — не забота клиента
+  const A = PLACE[S.from.place], B = PLACE[S.to.place];
+  if (!A || !B) return null;
+  const ab = Math.max(3, roadKm(A, B));
+  return {ab, min: driveMin(ab), extraKm: Math.max(0, ab - KM_FREE)};
+}
+const DOOR = [0, 0.15, 0.3];                   // у подъезда / до 50 м / дальше
+const HOUSE = [0, 0.1, 0];                     // блок / каменица (узкие лестницы, двор) / дом
 const up90 = (x) => Math.max(90, Math.ceil((x - 90) / 100) * 100 + 90);   // вверх до …90
 const asmDefault = (it, lvl) => !!it.asm && (lvl === 3 || (lvl === 2 && it.kind === 'bed'));
 const asmOn = (S, it, lvl) => !!it.asm && (S.asm[it.id] ?? asmDefault(it, lvl));
 const money = (min) => min / 60 * RATE;
+function hrs(m) { return String(Math.round(m / 30) / 2).replace('.', ','); }
+function tdur(m) { return m < 90 ? Math.round(m) + ' мин' : hrs(m) + ' ч'; }
 
 function calc(S, lvl = S.level) {
-  const RT = route(S) || {ab: 10, total: 25, min: 40, extraKm: 0};
-  const kmCost = RT.extraKm * KM_RATE;
+  const RT = route(S) || {ab: 10, min: 40, extraKm: 0};
+  const kmCost = RT.extraKm * KM_RATE, dk = S.dateK || 0;
+  const dateLine = (sum) => (dk ? [['Дата: ' + S.dateLabel, dk > 0 ? '+10 %, пиковый день' : dk <= -0.1 ? '−10 %, «зелёный» день' : '−5 %, ранняя бронь', sum * dk]] : []);
   if (lvl === 1) {
-    const h = Math.max(2, S.hours);
+    const h = Math.max(2, S.hours), base = h * 150 + kmCost;
     const lines = [['Бус с водителем', h + ' ч × 150 zł', h * 150]];
     if (kmCost) lines.push(['Километры', Math.round(RT.extraKm) + ' км × ' + String(KM_RATE).replace('.', ',') + ' zł', kmCost]);
-    return {lvl, total: h * 150 + Math.round(kmCost / 10) * 10, hourly: true, crew: 1, dur: h, vol: 0, buses: 1, fill: 0, lines, rt: RT};
+    return {lvl, total: Math.round(base * (1 + dk) / 10) * 10, hourly: true, crew: 1, dur: h, vol: 0, buses: 1, fill: 0, lines: lines.concat(dateLine(base)), rt: RT};
   }
   let carry = 0, asm = 0, junk = 0, mount = 0, vol = 0, n = 0;
   for (const it of ITEMS) {
@@ -486,13 +589,15 @@ function calc(S, lvl = S.level) {
     if (cond === 'drop') { junk += 90 * c; continue; }
     n += c;
     carry += it.carry * c * (cond === 'whole' ? 1.5 : 1);
-    vol += it.vol * c;
-    if (cond === 'fix') asm += (it.asm + 60) * c;
-    else if (cond === 'ok' && asmOn(S, it, lvl)) asm += it.asm * c;
+    const on = cond === 'ok' && asmOn(S, it, lvl);
+    const flat = cond === 'fix' || on || (lvl === 2 && it.kind === 'ward' && cond === 'ok');
+    vol += it.vol * c * (flat && it.asm ? FLAT : 1);
+    if (cond === 'fix') asm += (it.asm + 60) * c; else if (on) asm += it.asm * c;
   }
   const B = S.boxes || 0;
   carry += B * 4; vol += B * 0.1;
-  const pack = lvl === 3 ? B * 10 : 0;
+  const kitchen = lvl === 2 && S.kitchen ? 10 : 0;            // «упаковать кухню и хрупкое» в «Перевозке»
+  const pack = lvl === 3 ? B * 10 : kitchen * 10;
   const unpack = S.unpack ? B * 9 : 0;
   const small = n + B > 0 ? Math.max(30, carry * 0.1) : 0;
   const end = (e) => (e.lift ? 0 : e.floor) * 0.1 + DOOR[e.door || 0] + HOUSE[e.house || 0];
@@ -502,12 +607,12 @@ function calc(S, lvl = S.level) {
     if (e.id === 'junk') junk += e.min * k; else mount += e.min * k;
   }
   const work = carry + small + floors + asm + pack + unpack + mount + junk;
-  if (work <= 0) return {lvl, total: 0, crew: 0, dur: 0, vol: 0, buses: 0, fill: 0, lines: [], empty: true};
+  if (work <= 0) return {lvl, total: 0, crew: 0, dur: 0, vol: 0, buses: 0, fill: 0, lines: [], empty: true, rt: RT};
   const buses = Math.max(1, Math.ceil(vol / CAP - 1e-9));
-  const crew = Math.max(work / 60 <= 6 ? 2 : work / 60 <= 16 ? 3 : 4, 2 * buses);
+  const crew = Math.max(work / 60 <= 6 ? 2 : work / 60 <= 16 ? 3 : 4, buses + 1);   // за рулём второго буса — один из бригады
   const travel = n + B > 0 ? RT.min * crew : 0;
   const busCost = buses * (BUS + kmCost);
-  const mat = (lvl === 3 || S.ahead ? B * BOX_MAT : 0) + (n > 0 ? FILM : 0);
+  const mat = (lvl === 3 || S.ahead ? B * BOX_MAT : kitchen * BOX_MAT) + (n > 0 ? FILM : 0);
   const raw = money(work + travel) + busCost + mat;
   const L = (t, m, sub) => [t, sub ?? hrs(m) + ' ч работы людей', money(m)];
   const km = (x) => Math.round(x) + ' км';
@@ -515,17 +620,15 @@ function calc(S, lvl = S.level) {
     L('Вынести и занести', carry + small + floors),
     L('Дорога между адресами', travel, km(RT.ab) + ' · ≈ ' + tdur(RT.min) + ' · ' + crew + ' чел.'),
     L('Разобрать и собрать мебель', asm),
-    L('Упаковать в коробки', pack),
+    L(lvl === 3 ? 'Упаковать в коробки' : 'Упаковать кухню и хрупкое', pack),
     L('Распаковать', unpack),
     L('Телевизор, карнизы, техника', mount),
     L('Вывоз старой мебели', junk),
-    ['Бус' + (buses > 1 ? ' × ' + buses : ''), km(RT.total) + ' с базы и обратно' + (RT.extraKm ? ', ' + KM_FREE + ' км входят' : ''), busCost],
+    ['Бус' + (buses > 1 ? ' × ' + buses : ''), RT.extraKm ? KM_FREE + ' км входят, ещё ' + km(RT.extraKm) + ' × ' + String(KM_RATE).replace('.', ',') + ' zł' : 'до ' + KM_FREE + ' км', busCost],
     ['Коробки, бумага, плёнка', B ? B + ' коробок' : 'плёнка для мебели', mat],
-  ].filter((l) => l[2] > 0);
-  return {lvl, total: up90(raw), raw, crew, dur: work / crew / 60 + (travel ? RT.min / 60 : 0), vol, buses, fill: vol / (buses * CAP), peopleH: (work + travel) / 60, lines, rt: RT};
+  ].filter((l) => l[2] > 0).concat(dateLine(raw));
+  return {lvl, total: up90(raw * (1 + dk)), raw, crew, dur: work / crew / 60 + (travel ? RT.min / 60 : 0), vol, buses, fill: vol / (buses * CAP), peopleH: (work + travel) / 60, lines, rt: RT};
 }
-function hrs(m) { return String(Math.round(m / 30) / 2).replace('.', ','); }
-function tdur(m) { return m < 90 ? Math.round(m) + ' мин' : hrs(m) + ' ч'; }
 </script>
 
 <script>
@@ -583,17 +686,21 @@ const ICO = {
 };
 const ico = (k) => `<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${ICO[k] || ''}</svg>`;
 document.querySelectorAll('[data-ico]').forEach((s) => { s.setAttribute('aria-hidden', 'true'); s.innerHTML = ICO[s.dataset.ico]; });
+const MINI = '<svg viewBox="0 0 26 26" width="100%" height="100%"><path d="M3 8 13 3l10 5v11l-10 5-10-5z" fill="#fff" stroke="#8F9AA7"/><path d="m3 8 10 5 10-5M13 13v11" fill="none" stroke="#8F9AA7"/><path d="m8 5.5 10 5v11" fill="none" stroke="#14DCD5" stroke-width="2.4"/></svg>';
 
-// ===== Состояние (пример: типичные 2 комнаты, «Под ключ») =====
+// ===== Состояние (пример: типичные 2 комнаты, «Под ключ», Мокотув → Бемово) =====
 const ITEM = Object.fromEntries(ITEMS.map((i) => [i.id, i]));
 const EXTRA = Object.fromEntries(EXTRAS.map((e) => [e.id, e]));
-const S = {mode: 'list', level: 3, from: {place: 'Warszawa, Mokotów', floor: 4, lift: true, door: 0, house: 0}, to: {place: 'Warszawa, Bemowo', floor: 2, lift: false, door: 1, house: 0}, hours: 2,
-  counts: {}, asm: {}, cond: {}, boxes: 0, extras: {}, unpack: false, ahead: false, preset: 'two', room: 'bed'};
+const S = {mode: 'list', level: 3, hours: 2,
+  from: {place: 'Warszawa, Mokotów', floor: 4, lift: true, door: 0, house: 0}, to: {place: 'Warszawa, Bemowo', floor: 2, lift: false, door: 1, house: 0},
+  counts: {}, asm: {}, cond: {}, boxes: 0, extras: {}, unpack: false, ahead: false, kitchen: false, preset: 'two', room: 'bed', date: '', dateK: 0, dateLabel: ''};
 const $ = (s) => document.querySelector(s);
 const fmt = (n) => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
 const zl = (n) => fmt(Math.round(n / 10) * 10) + ' zł';
 const people = (n) => n + (n === 1 ? ' человек' : n < 5 ? ' человека' : ' человек');
 const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+const smooth = () => (reduce.matches ? 'auto' : 'smooth');
+if (reduce.matches) document.querySelectorAll('video').forEach((v) => { v.removeAttribute('autoplay'); v.pause(); });
 
 function applyPreset(k) {
   const p = PRESETS[k];
@@ -601,18 +708,71 @@ function applyPreset(k) {
 }
 applyPreset('two');
 
+// ===== Барабаны цены =====
+function drums(el, value) {
+  const str = value == null ? '—' : fmt(value);
+  if (el.dataset.len !== String(str.length)) {
+    el.innerHTML = [...str].map((ch) => /\d/.test(ch)
+      ? `<span class="drum"><span class="drum__s">${[...'0123456789'].map((d) => `<span>${d}</span>`).join('')}</span></span>`
+      : `<span class="drum-sep">${ch === ' ' ? '' : ch}</span>`).join('');
+    el.dataset.len = str.length;
+    void el.offsetWidth;
+  }
+  const cols = el.querySelectorAll('.drum__s'); let i = 0;
+  for (const ch of str) if (/\d/.test(ch)) cols[i++].style.transform = `translateY(-${ch}em)`;
+}
+
+// ===== Бус: 40 ячеек-коробок, грузим от кабины =====
+const CELLS = 40;
+$('#cells').innerHTML = Array.from({length: CELLS}, (_, i) => {
+  const col = 9 - Math.floor(i / 4), row = 3 - (i % 4), x = 12 + col * 17, y = 22 + row * 18;
+  return `<g class="cell" data-i="${i}"><rect x="${x + 1.5}" y="${y + 1.5}" width="14" height="15" rx="1" fill="#F4F6F8"/><rect x="${x + 1.5}" y="${y + 7.5}" width="14" height="3" fill="#14DCD5"/></g>`;
+}).join('');
+let cellsOn = 0;
+function setCells(n) {
+  const cells = document.querySelectorAll('#cells .cell'), from = cellsOn, step = reduce.matches ? 0 : 35;
+  cells.forEach((c, i) => {
+    const on = i < n;
+    c.style.transitionDelay = (on && i >= from ? (i - from) * step : !on && i < from ? (from - 1 - i) * step / 2 : 0) + 'ms';
+    c.classList.toggle('on', on);
+  });
+  cellsOn = n;
+}
+
+// ===== Коробка летит в бус =====
+function inView(el) { const r = el.getBoundingClientRect(); return r.width > 0 && r.bottom > 0 && r.top < innerHeight; }
+function fly(fromEl) {
+  if (reduce.matches || !fromEl) return;
+  const tgt = inView($('#van')) && !$('#van').hidden ? $('#van svg') : !$('#bar').classList.contains('away') && getComputedStyle($('#bar')).display !== 'none' ? $('#barP') : null;
+  if (!tgt) return;
+  const a = fromEl.getBoundingClientRect(), b = tgt.getBoundingClientRect();
+  const x0 = a.left + a.width / 2 - 15, y0 = a.top + a.height / 2 - 15, x1 = b.left + b.width * 0.55 - 15, y1 = b.top + b.height * 0.4 - 15;
+  const el = document.createElement('div'); el.className = 'flybox'; el.innerHTML = MINI; document.body.append(el);
+  const mx = (x0 + x1) / 2, my = Math.min(y0, y1) - 90;
+  el.animate([
+    {transform: `translate(${x0}px, ${y0}px) scale(1) rotate(0deg)`, opacity: 1},
+    {transform: `translate(${mx}px, ${my}px) scale(1.1) rotate(-14deg)`, opacity: 1, offset: 0.45},
+    {transform: `translate(${x1}px, ${y1}px) scale(.45) rotate(-24deg)`, opacity: 0.3},
+  ], {duration: 700, easing: 'cubic-bezier(.3,.6,.35,1)'}).onfinish = () => {
+    el.remove();
+    const v = $('#van'); v.classList.remove('bump'); void v.offsetWidth; v.classList.add('bump');
+  };
+}
+
 // ===== Шаг 1: уровни =====
 $('#levels').innerHTML = LEVELS.map((l) => `<button type="button" class="lvl" role="radio" data-act="level" data-v="${l.id}">${ico(l.icon)}<span class="lvl__t">${l.t}</span><span class="lvl__d">${l.d}</span><span class="lvl__p" data-lp="${l.id}"></span></button>`).join('');
-// ===== Шаг 2: маршрут =====
+
+// ===== Шаг 2: адреса =====
 const segQ = (k, act, label, opts) => `<div class="q"><span>${label}</span><div class="seg" role="radiogroup" aria-label="${label}">${opts.map((o, i) => `<button type="button" role="radio" data-act="${act}" data-k="${k}" data-v="${i}">${o}</button>`).join('')}</div></div>`;
+const DOOR_T = ['У подъезда', 'До 50 м', 'Дальше'], HOUSE_T = ['Блок', 'Каменица', 'Частный дом'];
 $('#ends').innerHTML = '<datalist id="places">' + PLACES.map((p) => `<option value="${p.n}"></option>`).join('') + '</datalist>' +
-  [['from', 'Откуда', 'A'], ['to', 'Куда', 'B']].map(([k, t, pin]) => `<div class="end"><p class="end__t"><span class="pin" style="display:inline-grid;width:24px;height:24px;font-size:11px;margin-right:8px">${pin}</span>${t}</p>
+  [['from', 'Откуда', 'A'], ['to', 'Куда', 'B']].map(([k, t, pin]) => `<div class="end"><p class="end__t"><span class="pin">${pin}</span>${t}</p>
   <div class="addr"><label for="addr-${k}">Адрес</label><input id="addr-${k}" data-k="${k}" list="places" autocomplete="off" placeholder="Начните вводить: Mokotów, Piaseczno…" value="${S[k].place}"><p class="addr__ok" id="ok-${k}"></p></div>
   <div class="row"><span>Этаж <small style="color:var(--muted)">(0 — партер)</small></span><div class="stepper"><button type="button" data-act="floor" data-k="${k}" data-d="-1" aria-label="${t}: этаж ниже">−</button><output id="fl-${k}"></output><button type="button" data-act="floor" data-k="${k}" data-d="1" aria-label="${t}: этаж выше">+</button></div></div>
   <button type="button" class="sw" role="switch" data-act="lift" data-k="${k}" id="lift-${k}"><span class="sw__l">Есть лифт<small>в котором помещается шкаф</small></span><span class="sw__k"></span></button>
-  ${segQ(k, 'door', 'Где встанет бус', ['У подъезда', 'До 50 м', 'Дальше'])}
-  ${segQ(k, 'house', 'Дом', ['Блок', 'Каменица', 'Частный дом'])}</div>`).join('');
+  <details><summary>Парковка и дом <span id="sum-${k}"></span></summary>${segQ(k, 'door', 'Где встанет бус', DOOR_T)}${segQ(k, 'house', 'Дом', HOUSE_T)}</details></div>`).join('');
 document.querySelectorAll('.addr input').forEach((inp) => inp.addEventListener('input', () => { S[inp.dataset.k].place = inp.value.trim(); render(); }));
+
 // ===== Шаг 3: вещи =====
 $('#presets').insertAdjacentHTML('beforeend', Object.entries(PRESETS).map(([k, p]) => `<button type="button" class="chip" data-act="preset" data-v="${k}">${p.t}</button>`).join(''));
 function renderTabs() {
@@ -659,8 +819,29 @@ $('#extras').innerHTML = EXTRAS.map((e) => `<div class="tile tile--wide" data-id
   <span class="tape-badge" hidden></span><span class="tile__plus" aria-hidden="true">+</span>
   <div class="tile__ctrl" hidden><button type="button" class="ib" data-act="dec" aria-label="Убрать: ${e.name}">−</button><button type="button" class="ib" data-act="inc" aria-label="Ещё: ${e.name}">+</button></div></div>`).join('');
 
+// ===== Шаг 6: дата =====
+const WD = ['вс', 'пн', 'вт', 'ср', 'чт', 'пт', 'сб'], MON = ['янв', 'фев', 'мар', 'апр', 'май', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
+const MONG = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
+function dayK(d, ahead) {
+  const dd = d.getDate(), wd = d.getDay(), m = d.getMonth() + 1, last = new Date(d.getFullYear(), m, 0).getDate();
+  if (dd >= last - 2 || dd <= 3 || (wd === 6 && m >= 5 && m <= 9)) return 0.1;
+  if (wd >= 2 && wd <= 4 && dd >= 8 && dd <= 22) return -0.1;
+  return ahead >= 14 ? -0.05 : 0;
+}
+(function renderDays() {
+  const t = new Date(); t.setHours(0, 0, 0, 0);
+  let html = '', lastM = -1;
+  for (let i = 1; i <= 42; i++) {
+    const d = new Date(t); d.setDate(t.getDate() + i);
+    const k = dayK(d, i), iso = d.toISOString().slice(0, 10);
+    if (d.getMonth() !== lastM) { html += `<span class="mon" aria-hidden="true">${MON[d.getMonth()]}</span>`; lastM = d.getMonth(); }
+    html += `<button type="button" role="radio" class="day ${k < 0 ? 'g' : k > 0 ? 'p' : ''}" data-act="date" data-v="${iso}" data-k="${k}" data-l="${WD[d.getDay()]}, ${d.getDate()} ${MONG[d.getMonth()]}" aria-label="${WD[d.getDay()]}, ${d.getDate()} ${MONG[d.getMonth()]}${k ? (k > 0 ? ', плюс 10 %' : k <= -0.1 ? ', минус 10 %' : ', минус 5 %') : ''}"><span>${WD[d.getDay()]}</span><b>${d.getDate()}</b><small>${k ? (k > 0 ? '+10 %' : k <= -0.1 ? '−10 %' : '−5 %') : ''}</small></button>`;
+  }
+  $('#days').innerHTML = html;
+})();
+
 // ===== Окно настроек вещи =====
-let sheetId = null;
+let sheetId = null, lastFocus = null;
 function sheetHTML(it) {
   const n = S.counts[it.id] || 0, per = (m) => zl(money(m));
   let h = `<div class="sheet__h">${ico(it.icon)}<h3 id="sheetT">${it.name}</h3><button type="button" class="ib" data-act="close" aria-label="Закрыть">×</button></div>
@@ -690,56 +871,59 @@ function sheetHTML(it) {
   return h + `<button type="button" class="btn btn--dark" data-act="close">Готово</button>`;
 }
 function renderSheet(focusAct) {
-  const it = ITEM[sheetId];
-  $('#sheetBody').innerHTML = sheetHTML(it);
+  $('#sheetBody').innerHTML = sheetHTML(ITEM[sheetId]);
   if (focusAct) ($('#sheetBody').querySelector(`[data-act="${focusAct.act}"]${focusAct.v ? `[data-v="${focusAct.v}"]` : ''}`) || $('#sheetBody .btn')).focus();
 }
 
 // ===== Табло =====
-let shown = 0, raf = 0;
-function animatePrice(to) {
-  cancelAnimationFrame(raf);
-  const from = shown, t0 = performance.now(), D = reduce.matches ? 0 : 450;
-  const step = (t) => {
-    const k = D ? Math.min(1, (t - t0) / D) : 1, v = from + (to - from) * (1 - Math.pow(1 - k, 3));
-    $('#bP').textContent = fmt(Math.round(v / 10) * 10);
-    shown = v; if (k < 1) raf = requestAnimationFrame(step); else shown = to;
-  };
-  raf = requestAnimationFrame(step);
-}
 function renderBoard() {
   const video = S.mode === 'video' && S.level !== 1;
   const r = calc(S);
   if (video) {
-    const xs = calc({...S, counts: {}, boxes: 0, from: {floor: 0, lift: true}, to: {floor: 0, lift: true}});
-    const extra = xs.lines.filter((l) => !/^Бус/.test(l[0]) && !/^Короб/.test(l[0]));
+    const xs = calc({...S, counts: {}, boxes: 0, kitchen: false, dateK: 0, from: {...S.from, floor: 0, lift: true, door: 0, house: 0}, to: {...S.to, floor: 0, lift: true, door: 0, house: 0}});
+    const extra = xs.lines.filter((l) => !/^(Бус|Короб|Дорога)/.test(l[0]));
     const sum = extra.reduce((a, l) => a + l[2], 0);
     $('#bK').textContent = 'Цену за переезд посчитаем по видео';
-    animatePrice(sum);
+    drums($('#bP'), Math.round(sum / 10) * 10); $('#bPtext').textContent = sum ? zl(sum) : '';
     $('#bFix').textContent = sum ? 'Это допы, которые вы отметили. Переезд добавим после просмотра видео.' : 'Менеджер посмотрит видео и пришлёт фиксированную цену.';
     $('#van').hidden = true; $('#facts').innerHTML = '';
     $('#lines').innerHTML = extra.map((l) => `<li><span>${l[0]}</span><b>${zl(l[2])}</b></li>`).join('');
     $('#bNote').textContent = 'Цена после видео тоже фиксированная: сколько в оферте, столько и платите.';
-    $('#barP').textContent = 'По видео'; $('#barM').textContent = sum ? 'допы ' + zl(sum) : 'пришлём цену';
-  } else {
-    $('#bK').textContent = r.hourly ? 'Ориентир · почасово, с VAT' : 'Ваша цена · с VAT';
-    animatePrice(r.total);
-    $('#bFix').textContent = r.hourly ? 'Платите за фактическое время, минимум 2 часа.' : r.empty ? 'Отметьте вещи, и цена появится здесь.' : 'Фиксированная: не изменится, даже если управимся дольше.';
-    $('#van').hidden = !!r.hourly || !!r.empty;
-    if (!r.hourly && !r.empty) {
-      const f = Math.min(1, r.fill);
-      $('#vanCover').style.transform = `scaleX(${(1 - f).toFixed(3)})`;
-      $('#vanCap').textContent = (r.buses > 1 ? `Нужно ${r.buses} буса · ` : 'Бус заполнен на ') + Math.round(f * 100) + ' % · ' + String(r.vol.toFixed(1)).replace('.', ',') + ' м³';
-    }
-    $('#facts').innerHTML = r.empty ? '' : r.hourly
-      ? `<li><b>1</b><span>водитель</span></li><li><b>${Math.max(2, S.hours)} ч</b><span>с бусом</span></li><li><b>150</b><span>zł в час</span></li>`
-      : `<li><b>${r.crew}</b><span>${people(r.crew).replace(/^\d+ /, '')}</span></li><li><b>≈${hrs(r.dur * 60)} ч</b><span>на месте и в пути</span></li><li><b>${hrs(r.peopleH * 60)}</b><span>часов работы людей</span></li>`;
-    $('#lines').innerHTML = r.lines.map((l) => `<li><span>${l[0]}<small>${l[1]}</small></span><b>${zl(l[2])}</b></li>`).join('');
-    $('#bNote').textContent = r.hourly ? 'Нужны грузчики, разборка или упаковка — выберите «Перевозку» или «Под ключ».'
-      : 'Итог округлён вверх до …90 zł. Больше вещей в день переезда — досчитаем по этому же списку и только с вашего согласия, до начала работ.';
-    $('#barP').textContent = r.empty ? '— zł' : fmt(r.total) + ' zł';
-    $('#barM').textContent = r.empty ? 'отметьте вещи' : r.hourly ? 'почасово, мин. 2 ч' : `${people(r.crew)} · ≈${hrs(r.dur * 60)} ч · фикс`;
+    drums($('#barP'), sum ? Math.round(sum / 10) * 10 : null); $('#barM').textContent = 'переезд — по видео';
+    return;
   }
+  $('#bK').textContent = r.hourly ? 'Ориентир · почасово, с VAT' : 'Ваша цена · с VAT';
+  drums($('#bP'), r.empty ? 0 : r.total); $('#bPtext').textContent = r.empty ? '' : zl(r.total);
+  $('#bFix').textContent = r.hourly ? 'Платите за фактическое время, минимум 2 часа.' : r.empty ? 'Отметьте вещи, и цена появится здесь.' : 'Фиксированная: не изменится, даже если управимся дольше.';
+  $('#van').hidden = !!r.hourly || !!r.empty;
+  if (!r.hourly && !r.empty) {
+    const f = Math.min(1, r.fill);
+    setCells(Math.max(1, Math.round(f * CELLS)));
+    $('#vanCap').textContent = (r.buses > 1 ? `Нужно ${r.buses} буса Ducato, загрузка ` : 'Бус Ducato заполнен на ') + Math.round(f * 100) + ' % · ' + String(r.vol.toFixed(1)).replace('.', ',') + ' м³';
+  }
+  $('#facts').innerHTML = r.empty ? '' : r.hourly
+    ? `<li><b>1</b><span>водитель</span></li><li><b>${Math.max(2, S.hours)} ч</b><span>с бусом</span></li><li><b>150</b><span>zł в час</span></li>`
+    : `<li><b>${r.crew}</b><span>${people(r.crew).replace(/^\d+ /, '')}</span></li><li><b>≈${hrs(r.dur * 60)} ч</b><span>на месте и в пути</span></li><li><b>${hrs(r.peopleH * 60)}</b><span>часов работы людей</span></li>`;
+  $('#lines').innerHTML = r.lines.map((l) => `<li class="${l[2] < 0 ? 'minus' : ''}"><span>${l[0]}<small>${l[1]}</small></span><b>${l[2] < 0 ? '−' + zl(-l[2]) : zl(l[2])}</b></li>`).join('');
+  $('#bNote').textContent = r.hourly ? 'Нужны грузчики, разборка или упаковка — выберите «Перевозку» или «Под ключ».'
+    : 'Итог округлён вверх до …90 zł. Больше вещей в день переезда — досчитаем по этому же списку и только с вашего согласия, до начала работ.';
+  drums($('#barP'), r.empty ? null : r.total);
+  $('#barM').textContent = r.empty ? 'отметьте вещи' : r.hourly ? 'почасово, мин. 2 ч' : `${people(r.crew)} · ≈${hrs(r.dur * 60)} ч · фикс`;
+}
+
+// ===== Полоса шагов =====
+let curStep = 's-level';
+function renderProg() {
+  const secs = [...document.querySelectorAll('section.step')].filter((s) => !s.hidden);
+  const idx = Math.max(0, secs.findIndex((s) => s.id === curStep));
+  $('#progN').textContent = (idx + 1) + '/' + secs.length;
+  $('#progCur').textContent = secs[idx]?.dataset.short || '';
+  $('#progBar').style.setProperty('--p', ((idx + 1) / secs.length).toFixed(3));
+  $('#progList').innerHTML = secs.map((s, i) => `<li><button type="button" data-act="jump" data-v="${s.id}" class="${i < idx ? 'done' : ''}"${i === idx ? ' aria-current="step"' : ''}>${s.dataset.short}</button></li>`).join('');
+}
+if ('IntersectionObserver' in window) {
+  const io = new IntersectionObserver((es) => { for (const e of es) if (e.isIntersecting) { curStep = e.target.id; renderProg(); } }, {rootMargin: '-35% 0px -60% 0px'});
+  document.querySelectorAll('section.step').forEach((s) => io.observe(s));
 }
 
 // ===== Общая отрисовка =====
@@ -752,21 +936,20 @@ function render(full) {
     const r = calc(S, l.id);
     el.textContent = S.mode === 'video' ? 'по видео' : r.empty ? 'по списку вещей' : '≈ ' + fmt(r.total) + ' zł за ваш список';
   }
-  for (const a of ['door', 'house']) document.querySelectorAll(`[data-act="${a}"]`).forEach((b) => b.setAttribute('aria-checked', String(+b.dataset.v === (S[b.dataset.k][a] || 0))));
-  for (const k of ['from', 'to']) {
-    const p = PLACE[S[k].place], ok = $('#ok-' + k);
-    ok.classList.toggle('bad', !p);
-    ok.textContent = p ? '✓ ' + Math.round(roadKm(BASE, p)) + ' км от нашей базы' : S[k].place ? 'Выберите адрес из подсказок' : '';
-  }
-  const rt = route(S);
-  $('#route').innerHTML = rt ? `<div class="route__line"><span class="pin">A</span><span class="route__bar"></span><span class="pin">B</span></div>
-    <p class="route__main">${Math.round(rt.ab)} км · ≈ ${tdur(rt.min)} в пути</p>
-    <p class="route__sub">Весь путь буса с базы и обратно — ${Math.round(rt.total)} км. ${rt.extraKm ? `${KM_FREE} км входят в цену буса, ещё ${Math.round(rt.extraKm)} км × ${String(KM_RATE).replace('.', ',')} zł = ${fmt(Math.round(rt.extraKm * KM_RATE / 10) * 10)} zł.` : 'Входит в цену буса.'}</p>`
-    : '<p class="route__sub">Укажите оба адреса — посчитаем километры и время в пути.</p>';
   for (const k of ['from', 'to']) {
     $('#fl-' + k).textContent = S[k].floor;
     $('#lift-' + k).setAttribute('aria-checked', String(S[k].lift));
+    const p = PLACE[S[k].place], ok = $('#ok-' + k);
+    ok.classList.toggle('bad', !p);
+    ok.textContent = p ? '✓ Адрес найден' : S[k].place ? 'Выберите адрес из подсказок' : '';
+    $('#sum-' + k).textContent = DOOR_T[S[k].door].toLowerCase() + ' · ' + HOUSE_T[S[k].house].toLowerCase();
   }
+  for (const a of ['door', 'house']) document.querySelectorAll(`[data-act="${a}"]`).forEach((b) => b.setAttribute('aria-checked', String(+b.dataset.v === (S[b.dataset.k][a] || 0))));
+  const rt = route(S);
+  $('#route').innerHTML = rt ? `<div class="route__line"><span class="pin">A</span><span class="route__bar"></span><span class="pin">B</span></div>
+    <p class="route__main">${Math.round(rt.ab)} км · ≈ ${tdur(rt.min)} в пути</p>
+    <p class="route__sub">${rt.extraKm ? `${KM_FREE} км входят в цену буса, ещё ${Math.round(rt.extraKm)} км × ${String(KM_RATE).replace('.', ',')} zł = ${fmt(Math.round(rt.extraKm * KM_RATE / 10) * 10)} zł.` : `До ${KM_FREE} км — входит в цену буса.`}</p>`
+    : '<p class="route__sub">Укажите оба адреса — посчитаем километры и время в пути.</p>';
   const l1 = S.level === 1, video = S.mode === 'video';
   $('#mode2').hidden = l1;
   $('#items-hours').hidden = !l1;
@@ -779,34 +962,35 @@ function render(full) {
   $('#s-boxes').hidden = l1 || video;
   $('#s-extra').hidden = l1;
   $('#boxes-sub').textContent = S.level === 3 ? 'Пакуем мы — в наши белые коробки с наклейками комнат. Обычно 15–20 коробок на комнату.' : 'Пакуете вы. Сколько примерно будет коробок? Обычно 15–20 на комнату.';
-  $('#sw-ahead').hidden = S.level !== 2;
+  $('#sw-ahead').hidden = S.level !== 2; $('#sw-kitchen').hidden = S.level !== 2;
   $('#sw-ahead').setAttribute('aria-checked', String(S.ahead));
+  $('#sw-kitchen').setAttribute('aria-checked', String(S.kitchen));
   $('#sw-unpack').setAttribute('aria-checked', String(S.unpack));
   $('#boxN').textContent = S.boxes; $('#boxR').value = S.boxes;
   $('#boxVol').textContent = String((S.boxes * 0.1).toFixed(1)).replace('.', ',') + ' м³';
-  const mini = '<svg viewBox="0 0 26 26"><path d="M3 8 13 3l10 5v11l-10 5-10-5z" fill="#fff" stroke="#8F9AA7"/><path d="m3 8 10 5 10-5M13 13v11" fill="none" stroke="#8F9AA7"/><path d="m8 5.5 10 5v11" fill="none" stroke="#14DCD5" stroke-width="2.4"/></svg>';
-  $('#bx').innerHTML = mini.repeat(Math.ceil(S.boxes / 5));
+  $('#bx').innerHTML = MINI.replace('width="100%" height="100%"', '').repeat(Math.ceil(S.boxes / 5));
   document.querySelectorAll('[data-act="preset"]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === S.preset)));
+  document.querySelectorAll('.day').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.v === S.date)));
   if (full) { renderTabs(); renderGrid(); } else { renderTabs(); ITEMS.forEach((i) => updTile(i.id)); }
   EXTRAS.forEach((e) => updTile(e.id));
   renderBoard();
+  renderProg();
   if (sheetId && $('#sheet').open) renderSheet(lastFocus);
 }
-let lastFocus = null;
 
 // ===== События =====
 document.addEventListener('click', (ev) => {
   const b = ev.target.closest('[data-act], [data-mode]');
   if (!b) return;
-  if (b.dataset.mode) { S.mode = b.dataset.mode; render(); if (b.closest('.hero')) $('#s-items').scrollIntoView({behavior: reduce.matches ? 'auto' : 'smooth'}); return; }
+  if (b.dataset.mode) { S.mode = b.dataset.mode; render(); if (b.closest('.hero')) $('#s-items').scrollIntoView({behavior: smooth()}); return; }
   const a = b.dataset.act, v = b.dataset.v, inSheet = !!b.closest('#sheet');
   const id = inSheet ? sheetId : b.closest('.tile')?.dataset.id;
   lastFocus = inSheet ? {act: a, v} : null;
   switch (a) {
     case 'level': S.level = +v; S.asm = {}; break;
-    case 'door': case 'house': S[b.dataset.k][a] = +v; break;
     case 'floor': S[b.dataset.k].floor = Math.max(0, Math.min(20, S[b.dataset.k].floor + +b.dataset.d)); break;
     case 'lift': S[b.dataset.k].lift = !S[b.dataset.k].lift; break;
+    case 'door': case 'house': S[b.dataset.k][a] = +v; break;
     case 'hours': S.hours = Math.max(2, Math.min(12, S.hours + +b.dataset.d)); break;
     case 'preset': applyPreset(v); render(true); return;
     case 'room': S.room = v; render(true); $('#tab-' + v).focus(); return;
@@ -814,6 +998,7 @@ document.addEventListener('click', (ev) => {
       const bag = EXTRA[id] ? S.extras : S.counts;
       bag[id] = Math.max(0, (bag[id] || 0) + (a === 'inc' ? 1 : -1));
       if (!EXTRA[id]) S.preset = '';
+      if (a === 'inc' && !inSheet) fly(b.closest('.tile').querySelector('svg.i'));
       break;
     }
     case 'opts': sheetId = id; renderSheet(); $('#sheet').showModal(); return;
@@ -825,13 +1010,16 @@ document.addEventListener('click', (ev) => {
       S.extras[v] = S.extras[v] ? 0 : Math.max(1, n); break;
     }
     case 'box': S.boxes = Math.max(0, Math.min(150, S.boxes + +b.dataset.d)); break;
-    case 'go-send': $('#s-send').scrollIntoView({behavior: reduce.matches ? 'auto' : 'smooth'}); $('#sendBtn').focus({preventScroll: true}); return;
-    case 'to-board': $('#board').scrollIntoView({behavior: reduce.matches ? 'auto' : 'smooth', block: 'start'}); return;
+    case 'date': if (S.date === v) { S.date = ''; S.dateK = 0; } else { S.date = v; S.dateK = +b.dataset.k; S.dateLabel = b.dataset.l; } break;
+    case 'jump': $('#' + v).scrollIntoView({behavior: smooth()}); return;
+    case 'go-send': $('#s-send').scrollIntoView({behavior: smooth()}); $('#sendBtn').focus({preventScroll: true}); return;
+    case 'to-board': $('#board').scrollIntoView({behavior: smooth(), block: 'start'}); return;
     default: return;
   }
   render();
 });
 $('#sw-ahead').addEventListener('click', () => { S.ahead = !S.ahead; render(); });
+$('#sw-kitchen').addEventListener('click', () => { S.kitchen = !S.kitchen; render(); });
 $('#sw-unpack').addEventListener('click', () => { S.unpack = !S.unpack; render(); });
 $('#boxR').addEventListener('input', (e) => { S.boxes = +e.target.value; render(); });
 $('#sheet').addEventListener('close', () => { const t = document.querySelector(`.tile[data-id="${sheetId}"] [data-act="opts"]`); sheetId = null; t?.focus(); });
@@ -840,7 +1028,6 @@ $('#vfile').addEventListener('change', (e) => {
   $('#vlist').innerHTML = [...e.target.files].map((f) => `<li><span>${f.name.replace(/</g, '&lt;')}</span><span>${(f.size / 1048576).toFixed(0)} МБ</span></li>`).join('');
 });
 $('#sendBtn').addEventListener('click', () => { $('#sent').hidden = false; });
-// Нижняя панель прячется, когда табло на экране
 if ('IntersectionObserver' in window) new IntersectionObserver(([e]) => $('#bar').classList.toggle('away', e.isIntersecting), {threshold: 0.25}).observe($('#board'));
 render(true);
 </script>

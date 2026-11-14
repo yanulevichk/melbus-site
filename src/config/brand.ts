@@ -5,13 +5,11 @@
  */
 export const brand = {
   name: 'MELBUS',
-  // TODO: заменить на настоящие данные из KRS/CEIDG
+  // Реквизиты (JDG, CEIDG) — от владельца 14.11.2026. TODO: miejscowość для индекса 05-090
   legal: {
-    company: 'MELBUS [forma prawna]',
-    address: '[adres rejestrowy]',
-    nip: '[NIP]',
-    krs: '[KRS]',
-    capital: '[kapitał zakładowy]',
+    company: 'MELBUS Edhar Lekh',
+    address: 'ul. Źródlana 40, 05-090 [miejscowość]',
+    nip: '1133069416',
   },
   // TODO: настоящие номера
   contact: {
