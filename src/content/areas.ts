@@ -16,10 +16,10 @@ export const areaText = {
   /** title для Google — с именительным падежом, как ищут: «Przeprowadzki Mokotów» */
   title: { ru: (n) => `Переезды ${n}, Варшава — фиксированная цена`, pl: (n) => `Przeprowadzki ${n} — stała cena z wideo`, uk: (n) => `Переїзди ${n}, Варшава — фіксована ціна`, en: (n) => `Movers ${n}, Warsaw — fixed price` } as F,
   description: {
-    ru: (x) => `Переезды ${x}: упаковка, перевозка, сборка мебели. Фиксированная цена по видео без доплат, фактура VAT, BLIK и карта, 7 дней в неделю.`,
-    pl: (x) => `Przeprowadzki ${x}: pakowanie, transport, montaż mebli. Stała cena z wideo bez dopłat, faktura VAT, BLIK i karta, 7 dni w tygodniu.`,
-    uk: (x) => `Переїзди ${x}: пакування, перевезення, збирання меблів. Фіксована ціна за відео без доплат, фактура VAT, BLIK і картка, 7 днів на тиждень.`,
-    en: (x) => `Moving ${x}: packing, transport, furniture assembly. A fixed price from a video with no extra fees, VAT invoice, BLIK and card, 7 days a week.`,
+    ru: (x) => `Переезды ${x}: упаковка, перевозка, сборка мебели. Фиксированная цена по видео без доплат, фактура VAT, BLIK, карта, наличные, 7 дней в неделю.`,
+    pl: (x) => `Przeprowadzki ${x}: pakowanie, transport, montaż mebli. Stała cena z wideo bez dopłat, faktura VAT, BLIK, karta, gotówka, 7 dni w tygodniu.`,
+    uk: (x) => `Переїзди ${x}: пакування, перевезення, збирання меблів. Фіксована ціна за відео без доплат, фактура VAT, BLIK, картка, готівка, 7 днів на тиждень.`,
+    en: (x) => `Moving ${x}: packing, transport, furniture assembly. A fixed price from a video with no extra fees, VAT invoice, BLIK, card or cash, 7 days a week.`,
   } as F,
   lead: {
     ru: (x) => `Квартира, дом или офис ${x}: цена по видео, которая не изменится в день переезда, и бригада MELBUS 7 дней в неделю.`,

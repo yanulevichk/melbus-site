@@ -25,7 +25,7 @@ export const home = {
   watch: l('Смотреть ролик · 0:23', 'Zobacz film · 0:23', 'Дивитися ролик · 0:23', 'Watch the film · 0:23'),
   band: [
     [l('Цена по видео', 'Cena z wideo', 'Ціна за відео', 'Price from a video'), l('окончательная, без доплат на месте', 'ostateczna, bez dopłat na miejscu', 'остаточна, без доплат на місці', 'final, no extra fees on the day')],
-    [l('Фактура VAT', 'Faktura VAT', 'Фактура VAT', 'VAT invoice'), l('BLIK, карта или перевод', 'BLIK, karta lub przelew', 'BLIK, картка або переказ', 'BLIK, card or bank transfer')],
+    [l('Фактура VAT', 'Faktura VAT', 'Фактура VAT', 'VAT invoice'), l('BLIK, карта или наличные', 'BLIK, karta lub gotówka', 'BLIK, картка або готівка', 'BLIK, card or cash')],
     [l('7 дней в неделю', '7 dni w tygodniu', '7 днів на тиждень', '7 days a week'), l('Варшава и 150 км вокруг', 'Warszawa i okolice do 150 km', 'Варшава і 150 км довкола', 'Within 150 km of Warsaw')],
   ] as [L, L][],
   statement: l('Цена, которую вы приняли, — это цена, которую вы заплатите. Никаких «а тут ещё этаж» и «шкаф оказался тяжелее». Если что-то меняется — только с вашего согласия и до начала работ.', 'Cena, którą zaakceptujesz, to cena, którą zapłacisz. Żadnych „a tu jeszcze piętro” ani „szafa okazała się cięższa”. Jeśli coś się zmienia — tylko za Twoją zgodą i przed rozpoczęciem prac.', 'Ціна, яку ви прийняли, — це ціна, яку ви заплатите. Жодних «а тут ще поверх» чи «шафа виявилася важчою». Якщо щось змінюється — лише з вашої згоди й до початку робіт.', 'The price you accept is the price you pay. No “oh, there’s another floor” or “the wardrobe turned out to be heavier”. If anything changes, it’s only with your consent and before work begins.'),
@@ -81,14 +81,14 @@ export const home = {
     h2: l('Цена из оферты —<br />окончательная.', 'Cena z oferty —<br />ostateczna.', 'Ціна з оферти —<br />остаточна.', 'The price in the offer<br />is final.'),
     cols: [
       [l('Фиксированная цена', 'Stała cena', 'Фіксована ціна', 'Fixed price'), l('Риск «не уложились по времени» — наш. Сумма из принятой оферты не меняется.', 'Ryzyko „nie zmieściliśmy się w czasie” jest nasze. Kwota z przyjętej oferty się nie zmienia.', 'Ризик «не встигли вчасно» — наш. Сума з прийнятої оферти не змінюється.', 'The risk of running over time is ours. The amount in the accepted offer doesn’t change.')],
-      [l('Пунктуальность', 'Punktualność', 'Пунктуальність', 'Punctuality'), l('Окно прибытия — 30 минут. Опоздали по своей вине — скидка за каждые 30 минут.', 'Okno przyjazdu to 30 minut. Jeśli spóźnimy się z naszej winy — rabat za każde 30 minut.', 'Вікно прибуття — 30 хвилин. Запізнилися з нашої вини — знижка за кожні 30 хвилин.', 'A 30-minute arrival window. If we’re late through our own fault, you get a discount for every 30 minutes.')],
+      [l('Пунктуальность', 'Punktualność', 'Пунктуальність', 'Punctuality'), l('Окно прибытия — 30 минут. Опоздаем по своей вине — скидка 100 zł за каждые 30 минут.', 'Okno przyjazdu to 30 minut. Jeśli spóźnimy się z naszej winy — 100 zł rabatu za każde 30 minut.', 'Вікно прибуття — 30 хвилин. Запізнимося з нашої вини — знижка 100 zł за кожні 30 хвилин.', 'A 30-minute arrival window. If we’re late through our own fault, you get 100 zł off for every 30 minutes.')],
       [l('Сохранность', 'Bezpieczeństwo mienia', 'Безпека речей', 'Protection'), l('Защищаем мебель и дом. Если мы что-то повредим — возместим ущерб по процедуре рекламации.', 'Chronimy meble i dom. Jeśli coś uszkodzimy — pokryjemy szkodę zgodnie z procedurą reklamacyjną.', 'Захищаємо меблі й дім. Якщо ми щось пошкодимо — відшкодуємо збитки за процедурою рекламації.', 'We protect your furniture and home. If we damage anything, we’ll compensate you under our complaints procedure.')],
     ] as [L, L][],
     link: l('Условия гарантии', 'Warunki gwarancji', 'Умови гарантії', 'Guarantee terms'),
   },
   facts: [
     [l('5+', '5+', '5+', '5+'), l('лет в логистике', 'lat w logistyce', 'років у логістиці', 'years in logistics')],
-    [l('≈30 000', '≈30 000', '≈30 000', '≈30,000'), l('доставок в месяц', 'dostaw miesięcznie', 'доставок на місяць', 'deliveries a month')],
+    [l('150 км', '150 km', '150 км', '150 km'), l('вокруг Варшавы', 'wokół Warszawy', 'навколо Варшави', 'around Warsaw')],
     [l('≈20', '≈20', '≈20', '≈20'), l('бусов в собственном парке', 'busów we własnej flocie', 'бусів у власному парку', 'vans in our own fleet')],
     [l('7/7', '7/7', '7/7', '7/7'), l('работаем без выходных', 'pracujemy bez dni wolnych', 'працюємо без вихідних', 'no days off')],
   ] as [L, L][],

@@ -25,7 +25,7 @@ export const faqHome: [L, L][] = [
   ],
   [
     { ru: 'Как можно оплатить?', pl: 'Jak można zapłacić?', uk: 'Як можна оплатити?', en: 'How can I pay?' },
-    { ru: 'BLIK, карта (в том числе на месте, у бригады), Przelewy24 или банковский перевод.', pl: 'BLIK, karta (także na miejscu, u ekipy), Przelewy24 lub przelew bankowy.', uk: 'BLIK, картка (зокрема на місці, у бригади), Przelewy24 або банківський переказ.', en: 'BLIK, card (including on the spot with the crew), Przelewy24 or bank transfer.' },
+    { ru: 'BLIK, картой или наличными — у бригады есть платёжный терминал. Задаток можно внести онлайн через BLIK или картой.', pl: 'BLIK-iem, kartą lub gotówką — ekipa ma terminal płatniczy. Zadatek możesz wpłacić online BLIK-iem lub kartą.', uk: 'BLIK, карткою або готівкою — у бригади є платіжний термінал. Завдаток можна внести онлайн через BLIK або карткою.', en: 'BLIK, card or cash — the crew carries a card terminal. You can pay the deposit online with BLIK or a card.' },
   ],
   [
     { ru: 'Вы работаете в выходные?', pl: 'Pracujecie w weekendy?', uk: 'Ви працюєте у вихідні?', en: 'Do you work at weekends?' },
