@@ -163,15 +163,16 @@ h2 { font: 300 clamp(23px, 3.4vw, 30px)/1.15 var(--display); letter-spacing: -0.
 .tile { position: relative; background: var(--white); border: 1px solid var(--line); border-radius: 4px; display: grid; grid-template-rows: 1fr auto; min-width: 0 }
 .tile.on { border-color: var(--graphite) }
 .tile__main { display: grid; align-content: start; gap: 10px; padding: 14px 14px 12px; border: 0; background: none; text-align: left; cursor: pointer; border-radius: 4px; min-height: 128px }
-.tile__main svg.i { width: 38px; height: 38px; color: #4A5561; stroke-width: 1.3 }
-.tile.on .tile__main svg.i { color: var(--ink) }
+.pic { display: block; width: 78px; height: 78px; object-fit: contain; margin: -8px 0 -6px -8px; transition: transform .25s }
+.tile:not(.on) .pic { opacity: .92 }
+.tile.on .pic { transform: scale(1.04) }
 .tile__n { font-weight: 500; font-size: 15px; line-height: 1.25; padding-right: 18px }
 .tile__s { font-size: 13px; color: var(--deep); line-height: 1.3 }
 .tile__s:empty { display: none }
 .tile__d { font-size: 13px; color: var(--muted); line-height: 1.4 }
 .tile__p { font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums }
-.tile--wide .tile__main { grid-template-columns: 38px minmax(0, 1fr); column-gap: 14px; min-height: 0; padding-right: 54px }
-.tile--wide .tile__main svg.i { grid-row: span 4 }
+.tile--wide .tile__main { grid-template-columns: 58px minmax(0, 1fr); column-gap: 12px; min-height: 0; padding-right: 54px }
+.tile--wide .pic { grid-row: span 4; width: 62px; height: 62px; margin: -4px 0 0 -6px }
 .tile__plus { position: absolute; top: 12px; right: 12px; width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--line); display: grid; place-items: center; font-size: 17px; line-height: 1; color: var(--muted); pointer-events: none }
 .tile.on .tile__plus { display: none }
 .tile__ctrl { display: flex; align-items: center; gap: 6px; padding: 0 10px 10px }
@@ -275,14 +276,15 @@ h2 { font: 300 clamp(23px, 3.4vw, 30px)/1.15 var(--display); letter-spacing: -0.
 .bar__l { min-width: 0 }
 .bar .btn { margin-left: auto; padding: 11px 16px; background: transparent; border-color: #3A4652; color: #fff; flex: none }
 .flybox { position: fixed; left: 0; top: 0; width: 30px; height: 30px; z-index: 60; pointer-events: none }
+.flybox img { width: 30px; height: 30px; display: block; mix-blend-mode: multiply }
 
 /* Окно настроек вещи */
 dialog { border: 0; padding: 0; background: var(--paper); color: var(--ink); width: 100%; max-width: min(560px, 100%); max-height: 90vh; border-radius: 12px 12px 0 0; margin: auto auto 0 }
 @media (min-width: 720px) { dialog { margin: auto; border-radius: 8px } }
 dialog::backdrop { background: rgba(16, 22, 29, .6) }
 .sheet { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; padding: 20px max(20px, env(safe-area-inset-right, 0px)) calc(20px + env(safe-area-inset-bottom, 0px)) max(20px, env(safe-area-inset-left, 0px)) }
-.sheet__h { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; gap: 12px; align-items: center }
-.sheet__h svg.i { width: 40px; height: 40px; stroke-width: 1.3 }
+.sheet__h { display: grid; grid-template-columns: 60px minmax(0, 1fr) auto; gap: 12px; align-items: center }
+.sheet__h .pic { width: 64px; height: 64px; margin: -6px }
 .sheet__h h3 { font: 300 21px/1.2 var(--display); letter-spacing: -0.03em; margin: 0 }
 .sheet p { margin: 0; font-size: 15px; color: var(--muted) }
 .sheet .end { gap: 14px }
@@ -463,7 +465,7 @@ dialog::backdrop { background: rgba(16, 22, 29, .6) }
 // ===== Модель цены (та же формула, что в документе «Цена переезда MELBUS») =====
 const RATE = 100;      // zł за час работы одного человека для клиента, с VAT (вам человек стоит 40 zł/ч со всем)
 const BUS = 150;       // бус за переезд: топливо, износ; входит KM_FREE км от адреса до адреса
-const CAP = 13;        // м³ в одном бусе: Fiat Ducato L3H2
+const CAP = 13;        // м³ в одном бусе (класс Fiat Ducato L3H2; модель может быть другой)
 const FLAT = 0.45;     // разобранная мебель занимает меньше места
 const BOX_MAT = 8;     // коробка + бумага + скотч, zł
 const FILM = 30;       // плёнка и скотч для мебели
@@ -514,7 +516,7 @@ const ITEMS = [
 ].map(([id, room, name, icon, carry, vol, asm, kind]) => ({id, room, name, icon, carry, vol, asm, kind: kind || ''}));
 // Допы: минуты работы → цена (минуты × 100 zł/ч). Цены сверены с рынком Польши 2026.
 const EXTRAS = [
-  {id: 'tvOff', name: 'Снять телевизор со стены', icon: 'tv', min: 48, d: 'Вместе с кронштейном. Старые дюбели остаются в стене.'},
+  {id: 'tvOff', name: 'Снять телевизор со стены', icon: 'tvwall', min: 48, d: 'Вместе с кронштейном. Старые дюбели остаются в стене.'},
   {id: 'tvOn', name: 'Повесить телевизор на новом месте', icon: 'drill', min: 150, d: 'Ищем проводку, ставим новые дюбели под вашу стену. Кронштейн ваш.'},
   {id: 'holes', name: 'Заделать отверстия', icon: 'putty', min: 36, unit: 'за место', d: 'После телевизора, карниза или полки, без покраски. Пригодится, чтобы вернуть залог за съёмную квартиру.'},
   {id: 'rodOff', name: 'Снять карниз', icon: 'rod', min: 18, d: 'Шторы снимем и упакуем.'},
@@ -685,6 +687,8 @@ const ICO = {
   tune: '<path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/>',
 };
 const ico = (k) => `<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${ICO[k] || ''}</svg>`;
+// 3D-иконки (GPT Image, 14.11.2026): media/icons/<ключ>.webp, 192×192 на белом
+const pic = (k) => `<img class="pic" src="media/icons/${k}.webp" alt="" width="192" height="192" loading="lazy" decoding="async">`;
 document.querySelectorAll('[data-ico]').forEach((s) => { s.setAttribute('aria-hidden', 'true'); s.innerHTML = ICO[s.dataset.ico]; });
 const MINI = '<svg viewBox="0 0 26 26" width="100%" height="100%"><path d="M3 8 13 3l10 5v11l-10 5-10-5z" fill="#fff" stroke="#8F9AA7"/><path d="m3 8 10 5 10-5M13 13v11" fill="none" stroke="#8F9AA7"/><path d="m8 5.5 10 5v11" fill="none" stroke="#14DCD5" stroke-width="2.4"/></svg>';
 
@@ -747,7 +751,7 @@ function fly(fromEl) {
   if (!tgt) return;
   const a = fromEl.getBoundingClientRect(), b = tgt.getBoundingClientRect();
   const x0 = a.left + a.width / 2 - 15, y0 = a.top + a.height / 2 - 15, x1 = b.left + b.width * 0.55 - 15, y1 = b.top + b.height * 0.4 - 15;
-  const el = document.createElement('div'); el.className = 'flybox'; el.innerHTML = MINI; document.body.append(el);
+  const el = document.createElement('div'); el.className = 'flybox'; el.innerHTML = '<img src="media/icons/box.webp" alt="" width="30" height="30">'; document.body.append(el);
   const mx = (x0 + x1) / 2, my = Math.min(y0, y1) - 90;
   el.animate([
     {transform: `translate(${x0}px, ${y0}px) scale(1) rotate(0deg)`, opacity: 1},
@@ -785,7 +789,7 @@ function renderTabs() {
 const hasOpts = (it) => !!it.asm || it.kind === 'tv' || it.kind === 'conn';
 function tileHTML(it) {
   return `<div class="tile" data-id="${it.id}">
-    <button type="button" class="tile__main" data-act="inc" aria-label="Добавить: ${it.name}">${ico(it.icon)}<span class="tile__n">${it.name}</span><span class="tile__s"></span></button>
+    <button type="button" class="tile__main" data-act="inc" aria-label="Добавить: ${it.name}">${pic(it.icon)}<span class="tile__n">${it.name}</span><span class="tile__s"></span></button>
     <span class="tape-badge" hidden></span><span class="tile__plus" aria-hidden="true">+</span>
     <div class="tile__ctrl" hidden><button type="button" class="ib" data-act="dec" aria-label="Убрать: ${it.name}">−</button><button type="button" class="ib" data-act="inc" aria-label="Ещё: ${it.name}">+</button>${hasOpts(it) ? `<button type="button" class="ib ib--set" data-act="opts" aria-label="Настроить: ${it.name}">${ico('tune')}</button>` : ''}</div></div>`;
 }
@@ -815,7 +819,7 @@ function updTile(id) {
 }
 // ===== Шаг 5: допы =====
 $('#extras').innerHTML = EXTRAS.map((e) => `<div class="tile tile--wide" data-id="${e.id}">
-  <button type="button" class="tile__main" data-act="inc" aria-label="Добавить: ${e.name}">${ico(e.icon)}<span class="tile__n">${e.name}</span><span class="tile__d">${e.d}</span><span class="tile__p">${zl(money(e.min))} ${e.unit || 'за шт.'}</span></button>
+  <button type="button" class="tile__main" data-act="inc" aria-label="Добавить: ${e.name}">${pic(e.icon)}<span class="tile__n">${e.name}</span><span class="tile__d">${e.d}</span><span class="tile__p">${zl(money(e.min))} ${e.unit || 'за шт.'}</span></button>
   <span class="tape-badge" hidden></span><span class="tile__plus" aria-hidden="true">+</span>
   <div class="tile__ctrl" hidden><button type="button" class="ib" data-act="dec" aria-label="Убрать: ${e.name}">−</button><button type="button" class="ib" data-act="inc" aria-label="Ещё: ${e.name}">+</button></div></div>`).join('');
 
@@ -844,7 +848,7 @@ function dayK(d, ahead) {
 let sheetId = null, lastFocus = null;
 function sheetHTML(it) {
   const n = S.counts[it.id] || 0, per = (m) => zl(money(m));
-  let h = `<div class="sheet__h">${ico(it.icon)}<h3 id="sheetT">${it.name}</h3><button type="button" class="ib" data-act="close" aria-label="Закрыть">×</button></div>
+  let h = `<div class="sheet__h">${pic(it.icon)}<h3 id="sheetT">${it.name}</h3><button type="button" class="ib" data-act="close" aria-label="Закрыть">×</button></div>
     <div class="end"><div class="row"><span>Сколько</span><div class="stepper"><button type="button" data-act="dec" aria-label="Меньше">−</button><output>${n}</output><button type="button" data-act="inc" aria-label="Больше">+</button></div></div></div>`;
   if (it.kind === 'ward') {
     const c = S.cond[it.id] || 'ok';
@@ -899,7 +903,7 @@ function renderBoard() {
   if (!r.hourly && !r.empty) {
     const f = Math.min(1, r.fill);
     setCells(Math.max(1, Math.round(f * CELLS)));
-    $('#vanCap').textContent = (r.buses > 1 ? `Нужно ${r.buses} буса Ducato, загрузка ` : 'Бус Ducato заполнен на ') + Math.round(f * 100) + ' % · ' + String(r.vol.toFixed(1)).replace('.', ',') + ' м³';
+    $('#vanCap').textContent = (r.buses > 1 ? `Нужно ${r.buses} буса, загрузка ` : 'Бус заполнен на ') + Math.round(f * 100) + ' % · ' + String(r.vol.toFixed(1)).replace('.', ',') + ' м³';
   }
   $('#facts').innerHTML = r.empty ? '' : r.hourly
     ? `<li><b>1</b><span>водитель</span></li><li><b>${Math.max(2, S.hours)} ч</b><span>с бусом</span></li><li><b>150</b><span>zł в час</span></li>`
@@ -998,7 +1002,7 @@ document.addEventListener('click', (ev) => {
       const bag = EXTRA[id] ? S.extras : S.counts;
       bag[id] = Math.max(0, (bag[id] || 0) + (a === 'inc' ? 1 : -1));
       if (!EXTRA[id]) S.preset = '';
-      if (a === 'inc' && !inSheet) fly(b.closest('.tile').querySelector('svg.i'));
+      if (a === 'inc' && !inSheet) fly(b.closest('.tile').querySelector('.pic'));
       break;
     }
     case 'opts': sheetId = id; renderSheet(); $('#sheet').showModal(); return;

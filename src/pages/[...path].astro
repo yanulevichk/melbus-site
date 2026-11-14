@@ -15,6 +15,7 @@ import Area from '../views/Area.astro';
 import Areas from '../views/Areas.astro';
 import Offer from '../views/Offer.astro';
 import { offerText } from '../content/offer';
+import { privacy, cookiesBlock } from '../content/legal';
 import Simple, { type Block, type MediaProps } from '../views/Simple.astro';
 import { enabledLocales, href, type Locale, type PageKey } from '../i18n/routes';
 import { services, serviceById } from '../data/services';
@@ -88,7 +89,9 @@ const simple = pg && { eyebrow: pg.eyebrow[L], title: pg.title[L], lead: pg.lead
       blocks={[{ type: 'cards', title: misc.contactTitle[L], items: [[misc.phone[L], brand.contact.phone], ['WhatsApp / Telegram', `+${brand.contact.whatsapp} · @${brand.contact.telegram}`], [misc.email[L], brand.contact.email]] }]} />
   )}
 
-  {legal && (
+  {key === 'privacy' && <Simple locale={locale} eyebrow={misc.docs[L]} title={m.title} lead={privacy.lead[L]} blocks={privacy.blocks.map(blk)} cta={false} />}
+  {key === 'cookies' && <Simple locale={locale} eyebrow={misc.docs[L]} title={m.title} lead={privacy.lead[L]} blocks={[blk(cookiesBlock)]} cta={false} />}
+  {legal && key !== 'privacy' && key !== 'cookies' && (
     <Simple locale={locale} eyebrow={misc.docs[L]} title={m.title} lead={misc.legalLead[L]} cta={false} />
   )}
 </Base>
