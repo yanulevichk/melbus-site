@@ -4,7 +4,9 @@ name = "melbus-site"
 pages_build_output_dir = "dist"
 compatibility_date = "2025-01-01"
 
-# хранилище видео от клиентов (R2). Создать бакет melbus-videos в панели Cloudflare → R2.
-[[r2_buckets]]
-binding = "VIDEOS"
-bucket_name = "melbus-videos"
+# хранилище видео от клиентов (R2). ПОКА ВЫКЛЮЧЕНО (15.11.2026): R2 в аккаунте ещё не включён, а привязка к несуществующему
+# бакету ломает сборку. Без хранилища заявка уходит, а в Telegram пишется «видео не загрузилось — попросите прислать в WhatsApp».
+# Включить: R2 в панели Cloudflare → бакет melbus-videos → раскомментировать 3 строки ниже.
+# [[r2_buckets]]
+# binding = "VIDEOS"
+# bucket_name = "melbus-videos"
