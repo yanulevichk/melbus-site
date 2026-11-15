@@ -1,0 +1,581 @@
+---
+/**
+ * ГЛАВНАЯ (люкс). Все тексты — в src/content/home.ts, каждая фраза сразу на 4 языках.
+ * Движение: фильм первого экрана, «лента скотча» на кадрах, горизонтальные шаги.
+ */
+import Faq from '../components/Faq.astro';
+import { href, type Locale } from '../i18n/routes';
+import { ui } from '../i18n/ui';
+import { brand } from '../config/brand';
+import { faqFor } from '../data/faq';
+import { boardOptions, DEMO, PACKAGES, GRID, moneyLocale } from '../data/pricing';
+import { pkgText } from '../content/prices';
+import NoHours from '../components/NoHours.astro';
+import { home as H } from '../content/home';
+import { areaText } from '../content/areas';
+const { locale } = Astro.props as { locale: Locale };
+const L = locale;
+const quote = href(locale, 'quote');
+const ai = ui.aiLabel[L];
+const fmt = new Intl.NumberFormat(moneyLocale(L));
+const EX = 1; // пример пакетов на главной — 2 комнаты
+// мини-QR для наклеек (декоративный узор)
+const qr = (seed: number) => {
+  let r = seed; const rnd = () => ((r = (r * 9301 + 49297) % 233280) / 233280);
+  const cells: [number, number][] = [];
+  for (let x = 0; x < 15; x++) for (let y = 0; y < 15; y++) {
+    const f = (x < 5 && y < 5) || (x > 9 && y < 5) || (x < 5 && y > 9);
+    if (!f && rnd() > 0.5) cells.push([x, y]);
+  }
+  return cells;
+};
+---
+
+<!-- 1. ПЕРВЫЙ ЭКРАН: фильм «вся квартира в одной коробке».
+     Компьютер — прокрутка ведёт фильм (кадры на canvas), телефон — видео по кругу без звука. -->
+<section class="lx-film dark" data-film data-intro-hero data-dur="22.5" data-length="7" data-count="270" data-base="/scenes/film/d">
+  <div class="lx-film__stage" data-film-stage>
+    <picture class="lx-film__poster">
+      <source media="(max-width: 1023px)" srcset="/scenes/film/poster-m.webp" width="540" height="960" />
+      <img src="/scenes/film/poster-d.webp" alt={H.posterAlt[L]} width="1600" height="900" fetchpriority="high" decoding="async" />
+    </picture>
+    <canvas class="lx-film__canvas" data-film-canvas aria-hidden="true"></canvas>
+    <video class="lx-film__video" data-film-video data-src="/video/film-m.mp4" muted playsinline loop preload="none" poster="/scenes/film/poster-m.webp" aria-hidden="true"></video>
+    <div class="lx-film__shade" aria-hidden="true"></div>
+
+    <div class="container lx-film__intro" data-film-intro>
+      <p class="lx-film__kicker" data-intro-fade>{H.kicker[L]}</p>
+      <h1 class="lx-film__title" data-intro-title>{H.title[0][L]}<br />{H.title[1][L]}</h1>
+      <i class="lx-film__line" data-intro-line aria-hidden="true"></i>
+      <p class="lx-film__lead" data-intro-fade>{H.lead[L]}</p>
+      <div class="lx-film__cta" data-intro-fade>
+        <a href={quote} class="btn btn--primary">{ui.cta.price[L]}</a>
+        <a href={quote + '#video'} class="lux-link">{ui.cta.video[L]}</a>
+      </div>
+      <p class="lx-film__hint" data-intro-fade aria-hidden="true"><i></i>{H.hint[L]}</p>
+    </div>
+
+    <div class="container lx-film__caps" aria-hidden="true">
+      {H.caps.map(([from, to, t, d]) => (
+        <p class="lx-film__cap" data-film-cap data-from={from} data-to={to}><strong>{t[L]}</strong><span>{d[L]}</span></p>
+      ))}
+    </div>
+
+    <div class="container lx-film__end" data-film-cap data-from="21.6" data-to="99">
+      <p class="lx-film__endt">{H.endTitle[L]}</p>
+      <div class="lx-film__cta">
+        <a href={quote} class="btn btn--primary">{ui.cta.price[L]}</a>
+        <a href={quote + '#video'} class="lux-link">{ui.cta.video[L]}</a>
+      </div>
+    </div>
+
+    <div class="lx-film__foot">
+      <button type="button" class="lx-film__watch" data-film-open><i aria-hidden="true"></i>{H.watch[L]}</button>
+      <span class="lx-film__ai">{ai}</span>
+    </div>
+    <div class="lx-film__bar" aria-hidden="true"><i data-film-progress></i></div>
+  </div>
+</section>
+
+<!-- 1б. КОРОТКО О ГЛАВНОМ -->
+<section class="lx-band dark">
+  <div class="container">
+    <ul class="lx-band__facts">
+      {H.band.map(([t, d]) => <li><strong>{t[L]}</strong><span>{d[L]}</span></li>)}
+    </ul>
+  </div>
+</section>
+
+<!-- 2. ОБЕЩАНИЕ -->
+<section class="lx-sec lx-statement">
+  <div class="container lx-statement__grid">
+    <div class="lx-statement__body">
+      <p class="lx-statement__text">{H.statement[L]}</p>
+      <a class="lux-link" href={href(locale, 'guarantee')}>{H.statementLink[L]}</a>
+    </div>
+    <figure class="lx-statement__media" data-tape>
+      <div class="tape__media lx-vid" data-video="1">
+        <video muted loop playsinline preload="none" poster="/img/site/phone.webp" width="900" height="900" aria-label={H.phoneAlt[L]}>
+          <source data-src="/video/phone.mp4" type="video/mp4" />
+        </video>
+        <span class="lx-ai">{ai}</span>
+      </div>
+      <figcaption>{H.phoneCaption[L]}</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- 3. ЦЕНА -->
+<section class="lx-sec lx-price">
+  <div class="container lx-price__grid">
+    <div class="lx-price__head">
+      <h2 class="lx-h2">{H.price.h2[L]}</h2>
+      <p class="lx-lead">{H.price.lead[L]}</p>
+    </div>
+    <div class="lx-price__calc">
+      <div class="lx-seg" role="group" aria-label={H.price.seg[L]} data-board-for="board-lux">
+        {boardOptions.map((o, i) => <button type="button" class="lx-seg__b" data-value={o.value} data-status={o.status[L]} aria-pressed={i === 1 ? 'true' : 'false'}>{o.label[L]}</button>)}
+      </div>
+      <div class="lx-board" id="board-lux" data-board>
+        <p class="lx-board__status" data-board-status>{boardOptions[1].status[L]}</p>
+        <div class="lx-board__row" aria-hidden="true">
+          <span class="lx-board__from">{H.price.from[L]}</span>
+          {[0, 1, 2, 3].map((i) => (
+            <span class={`lx-reel${i === 0 ? ' lx-reel--k' : ''}`} data-reel><span class="lx-reel__strip">{Array.from({ length: 33 }, (_, k) => <i>{k % 11 === 10 ? '' : k % 11}</i>)}</span></span>
+          ))}
+          <span class="lx-board__cur">zł</span>
+        </div>
+        <p class="sr-only" aria-live="polite">{H.price.sr[L]} <span data-board-value>{boardOptions[1].value}</span> zł</p>
+      </div>
+      {DEMO && <p class="lx-note">{H.price.demo[L]}</p>}
+      <a href={href(locale, 'calculator')} class="btn btn--primary">{H.price.next[L]}</a>
+    </div>
+  </div>
+</section>
+
+<!-- 3б. МЫ НЕ ПРОДАЁМ ЧАСЫ -->
+<NoHours locale={locale} />
+
+<!-- 4. ШАГИ (это последовательность — номера по делу) -->
+<section class="lx-sec lx-steps">
+  <div class="container lx-head">
+    <h2 class="lx-h2">{H.steps.h2[L]}</h2>
+    <p class="lx-lead">{H.steps.lead[L]}</p>
+  </div>
+  <div class="lx-hs" data-hscroll>
+    <div class="lx-hs__track container" data-hscroll-track>
+      <div class="lx-route" aria-hidden="true"><svg viewBox="0 0 2400 40" preserveAspectRatio="none"><path class="lx-route__base" d="M0 20 L2400 20" /><path data-route d="M0 20 L2400 20" /></svg></div>
+      <i class="lx-hs__fill" data-fill aria-hidden="true"></i>
+      {H.steps.items.map(([img, t, d], i) => (
+        <article class="lx-step">
+          <div class="lx-step__media" data-slot={`V${i + 2}`}>
+            <img src={`/img/film/${img}.webp`} alt="" width="720" height="900" loading="lazy" decoding="async" />
+            <span class="lx-step__n">{i + 1}</span>
+          </div>
+          <h3 class="lx-step__t">{t[L]}</h3>
+          <p class="lx-step__d">{d[L]}</p>
+        </article>
+      ))}
+    </div>
+  </div>
+  <p class="container lx-note lx-steps__note">{H.steps.note[L]}</p>
+</section>
+
+<!-- 5. СТАНДАРТЫ -->
+<section class="lx-sec lx-std">
+  <div class="container lx-std__grid">
+    <div class="lx-std__media" data-tape>
+      <div class="tape__media lx-std__img lx-vid" data-slot="D1" data-video="1">
+        <video muted loop playsinline preload="none" poster="/img/site/gloves.webp" width="720" height="900" aria-label={H.std.alt[L]}>
+          <source data-src="/video/gloves.mp4" type="video/mp4" />
+        </video>
+        <span class="lx-ai">{ai}</span>
+      </div>
+    </div>
+    <div class="lx-std__text">
+      <h2 class="lx-h2">{H.std.h2[L]}</h2>
+      <p class="lx-lead">{H.std.lead[L]}</p>
+      <dl class="lx-list">
+        {H.std.items.map(([t, d]) => <div><dt>{t[L]}</dt><dd>{d[L]}</dd></div>)}
+      </dl>
+    </div>
+  </div>
+</section>
+
+<!-- 6. КОРОБКИ -->
+<section class="lx-sec lx-boxes">
+  <div class="container">
+    <div class="lx-head">
+      <h2 class="lx-h2">{H.boxes.h2[L]}</h2>
+      <p class="lx-lead">{H.boxes.lead[L]}</p>
+    </div>
+    <figure class="lx-boxes__img" data-tape>
+      <div class="tape__media">
+        <picture>
+          <source media="(max-width: 767px)" srcset={`/scenes/box/poster-m-${L}.webp`} />
+          <img src={`/scenes/box/poster-d-${L}.webp`} alt={H.boxes.alt[L]} width="1600" height="688" loading="lazy" decoding="async" />
+        </picture>
+      </div>
+    </figure>
+    <ul class="lx-rooms" aria-label={H.boxes.roomsAria[L]}>
+      {H.boxes.rooms.map(([room, color, n], i) => (
+        <li class="lx-sticker">
+          <i class="lx-sticker__bar" style={`--c:${color}`}></i>
+          <span class="lx-sticker__room">{room[L]}</span>
+          <span class="lx-sticker__n">{n}</span>
+          <svg class="lx-sticker__qr" viewBox="0 0 15 15" aria-hidden="true">
+            <path d="M0 0h5v5H0zM10 0h5v5h-5zM0 10h5v5H0z" fill="none" stroke="currentColor" stroke-width="1" transform="translate(.5 .5) scale(.933)" />
+            {qr(11 + i * 17).map(([x, y]) => <rect x={x} y={y} width="1" height="1" />)}
+          </svg>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<!-- 7. ПАКЕТЫ: «Под ключ» лишь немного дороже «Стандарта» (цены — src/data/pricing.ts) -->
+<section class="lx-sec lx-pk">
+  <div class="container">
+    <div class="lx-head">
+      <h2 class="lx-h2">{pkgText.h2[L]}</h2>
+      <p class="lx-lead">{pkgText.lead[L]}</p>
+    </div>
+    <div class="lx-pk__cols">
+      {PACKAGES.map((p, i) => (
+        <article class={`lx-pk__col${i === 2 ? ' is-f' : ''}`}>
+          {i === 2 && <span class="lx-pk__badge">{pkgText.best[L]}</span>}
+          <p class="lx-pk__note">{p.note[L]}</p>
+          <h3 class="lx-pk__name">{p.name[L]}</h3>
+          <p class="lx-pk__price">{fmt.format(GRID[EX][i])} zł</p>
+          {i > 0 && <p class="lx-pk__diff">{pkgText.more[L].replace('{d}', fmt.format(GRID[EX][i] - GRID[EX][i - 1])).replace('{n}', PACKAGES[i - 1].name[L])}</p>}
+          <ul>{p.items.map((it) => <li>{it[L]}</li>)}</ul>
+          <a class="lux-link" href={`${quote}?size=${EX}&pkg=${p.quote}`}>{ui.cta.quote[L]}</a>
+        </article>
+      ))}
+    </div>
+    <p class="lx-pk__calc"><a class="lux-link" href={`${href(locale, 'calculator')}?size=${EX}&pkg=2`}>{pkgText.calc[L]}</a>{DEMO && <span class="lx-note"> · {H.price.demo[L]}</span>}</p>
+  </div>
+</section>
+
+<!-- 8. ГАРАНТИЯ -->
+<section class="lx-sec lx-guar dark grain">
+  <div class="container">
+    <h2 class="lx-xl" set:html={H.guarantee.h2[L]} />
+    <div class="lx-guar__cols">
+      {H.guarantee.cols.map(([t, d]) => (
+        <div><h3>{t[L]}</h3><p>{d[L]}</p></div>
+      ))}
+    </div>
+    <a class="lux-link" href={href(locale, 'guarantee')}>{H.guarantee.link[L]}</a>
+  </div>
+</section>
+
+<!-- 9. ЦИФРЫ -->
+<section class="lx-facts">
+  <div class="container lx-facts__row">
+    {H.facts.map(([n, l], i) => (
+      <div class="lx-fact"><strong>{i === 0 ? `${brand.facts.years}+` : n[L]}</strong><span>{l[L]}</span></div>
+    ))}
+  </div>
+</section>
+
+<!-- 10. ГДЕ РАБОТАЕМ -->
+<section class="lx-sec lx-area">
+  <div class="container lx-area__grid">
+    <div>
+      <h2 class="lx-h2">{H.area.h2[L]}</h2>
+      <p class="lx-lead">{H.area.lead[L]}</p>
+      <a class="lux-link" href={href(locale, 'areas')}>{areaText.all[L]}</a>
+    </div>
+    <svg class="lx-map" viewBox="0 0 400 400" role="img" aria-label={H.area.mapAria[L]}>
+      <path data-draw class="lx-map__outer" d="M200 20 a180 180 0 1 1 -0.01 0" />
+      <circle cx="200" cy="200" r="110" class="lx-map__ring" />
+      <circle cx="200" cy="200" r="46" class="lx-map__city" />
+      <text x="200" y="12" class="lx-map__km">{H.area.km[L]}</text>
+      {H.area.places.map(([x, y, n, big]) => (
+        <g class={big ? 'lx-map__pt is-big' : 'lx-map__pt'}><circle cx={x} cy={y} r={big ? 4.5 : 2.6} /><text x={x + (big ? 9 : 6)} y={y + 4}>{n[L]}</text></g>
+      ))}
+    </svg>
+  </div>
+</section>
+
+<!-- 11. ОТЗЫВЫ (честно) -->
+<section class="lx-reviews">
+  <div class="container">
+    <p class="lx-reviews__t">{H.reviews[L]}</p>
+  </div>
+</section>
+
+<!-- 12. ВОПРОСЫ -->
+<section class="lx-sec lx-faq">
+  <div class="container lx-faq__grid">
+    <h2 class="lx-h2">{H.faqH2[L]}</h2>
+    <Faq items={faqFor(locale)} reveal={false} />
+  </div>
+</section>
+
+<!-- 13. ФИНАЛ -->
+<section class="lx-sec lx-cta dark grain">
+  <figure class="lx-cta__film" data-tape>
+    <div class="tape__media lx-vid" data-video="1">
+      <video muted loop playsinline preload="none" poster="/img/site/van-side.webp" width="1280" height="720" aria-label={H.vanAlt[L]}>
+        <source data-src="/video/van.mp4" type="video/mp4" />
+      </video>
+      <span class="lx-ai">{ai}</span>
+    </div>
+  </figure>
+  <div class="container">
+    <h2 class="lx-mega">{H.endTitle[L]}</h2>
+    <div class="lx-cta__row">
+      <p class="lx-lead">{H.finalLead[L]}</p>
+      <div class="lx-cta__btns">
+        <a href={quote} class="btn btn--primary">{ui.cta.quote[L]}</a>
+        <a href={`https://wa.me/${brand.contact.whatsapp}`} class="lux-link" target="_blank" rel="noopener">{ui.cta.writeWhatsapp[L]}</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- окно «Смотреть ролик» (видео грузится только по нажатию) -->
+<dialog class="lx-modal" data-film-modal aria-label={H.modalAria[L]}>
+  <button type="button" class="lx-modal__x" data-film-close aria-label={ui.cta.close[L]}>×</button>
+  <video data-src="/video/film-1280.mp4" controls playsinline preload="none" poster="/scenes/film/poster-d.webp" width="1280" height="720"></video>
+</dialog>
+
+<style>
+  /* ---------- общий ритм ---------- */
+  .lx-sec { padding-block: clamp(96px, 13vw, 210px); }
+  .lx-h2 { font-family: var(--font-display); font-size: var(--fs-xl); font-weight: 200; letter-spacing: -0.045em; line-height: .98; max-width: 13ch; }
+  .lx-xl { font-family: var(--font-display); font-size: var(--fs-xl); font-weight: 200; letter-spacing: -0.045em; line-height: .98; }
+  .lx-mega { font-family: var(--font-display); font-size: var(--fs-mega); font-weight: 200; letter-spacing: -0.05em; line-height: .92; max-width: 11ch; }
+  .lx-lead { font-size: clamp(1.05rem, 1rem + .3vw, 1.25rem); line-height: 1.6; color: var(--muted); max-width: 44ch; }
+  .lx-head { display: grid; gap: 28px; margin-bottom: clamp(48px, 7vw, 104px); }
+  @media (min-width: 960px) { .lx-head { grid-template-columns: 7fr 5fr; align-items: end; } }
+  .lx-note { font-size: .875rem; color: var(--muted); }
+  .lx-steps__note { margin-top: 32px; }
+
+  /* ---------- первый экран: фильм ---------- */
+  .lx-film { position: relative; background: var(--graphite); color: #fff; }
+  .lx-film__stage { position: relative; height: 100svh; min-height: 580px; overflow: hidden; isolation: isolate; }
+  .lx-film__poster, .lx-film__poster img, .lx-film__canvas, .lx-film__video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .lx-film__canvas { opacity: 0; transition: opacity .5s var(--ease-lux); }
+  .lx-film:global(.is-live) .lx-film__canvas { opacity: 1; }
+  .lx-film__video { display: none; opacity: 0; transition: opacity .8s var(--ease-lux); }
+  .lx-film__shade { position: absolute; inset: 0; z-index: 1; pointer-events: none;
+    background: linear-gradient(180deg, rgba(16,22,29,.62) 0%, rgba(16,22,29,0) 20%, rgba(16,22,29,0) 46%, rgba(16,22,29,.82) 100%),
+                linear-gradient(90deg, rgba(16,22,29,.5) 0%, rgba(16,22,29,0) 58%); }
+
+  .lx-film__intro { position: absolute; left: 0; right: 0; bottom: clamp(88px, 13vh, 150px); z-index: 2; display: grid; justify-items: start; }
+  .lx-film__kicker { color: rgba(255,255,255,.72); font-size: 1rem; margin-bottom: clamp(16px, 2.4vw, 28px); }
+  .lx-film__title { font-family: var(--font-display); font-size: clamp(2.2rem, max(min(11vw, 3rem), .9rem + 6.1vw), 8.2rem); font-weight: 200; letter-spacing: -0.055em; line-height: .9; color: #fff; }
+  html.js .lx-film__title { visibility: hidden; }
+  .lx-film__line { display: block; width: min(420px, 60%); height: 2px; margin: clamp(24px, 3vw, 40px) 0 clamp(20px, 2.6vw, 32px); background: var(--tape); transform-origin: 0 50%; }
+  html.js .lx-film__line { transform: scaleX(0); }
+  .lx-film__lead { font-size: clamp(1.05rem, 1rem + .35vw, 1.3rem); line-height: 1.6; color: rgba(255,255,255,.84); max-width: 38ch; }
+  .lx-film__cta { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 28px; margin-top: clamp(24px, 3vw, 40px); }
+  .lx-film__cta .lux-link { color: #fff; }
+  html.js [data-intro-fade] { opacity: 0; }
+  .lx-film__hint { display: none; }
+
+  /* подписи по ходу фильма */
+  .lx-film__caps { position: absolute; left: 0; right: 0; bottom: clamp(88px, 13vh, 150px); z-index: 2; display: grid; pointer-events: none; }
+  .lx-film__cap { grid-area: 1 / 1; display: grid; gap: 14px; justify-items: start; opacity: 0; transform: translateY(22px); transition: opacity .55s var(--ease-lux), transform .8s var(--ease-lux); }
+  .lx-film__cap::before { content: ""; width: 64px; height: 2px; background: var(--tape); transform: scaleX(0); transform-origin: 0 50%; transition: transform .8s var(--ease-lux) .05s; }
+  .lx-film__cap.is-on { opacity: 1; transform: none; }
+  .lx-film__cap.is-on::before { transform: scaleX(1); }
+  .lx-film__cap strong { font-family: var(--font-display); font-weight: 200; font-size: clamp(2rem, 1rem + 3.2vw, 4.6rem); letter-spacing: -0.05em; line-height: .95; max-width: 14ch; }
+  .lx-film__cap span { font-size: clamp(1rem, .95rem + .3vw, 1.2rem); line-height: 1.55; color: rgba(255,255,255,.84); max-width: 34ch; }
+
+  /* финал фильма: призыв */
+  .lx-film__end { position: absolute; left: 0; right: 0; bottom: clamp(88px, 13vh, 150px); z-index: 2; display: grid; justify-items: start; opacity: 0; visibility: hidden; transform: translateY(22px); transition: opacity .6s var(--ease-lux), transform .8s var(--ease-lux), visibility 0s .6s; }
+  .lx-film__end:global(.is-on) { opacity: 1; visibility: visible; transform: none; transition-delay: 0s; }
+  .lx-film__endt { font-family: var(--font-display); font-weight: 200; font-size: clamp(2.6rem, 1rem + 5vw, 6.4rem); letter-spacing: -0.055em; line-height: .92; max-width: 11ch; }
+
+  .lx-film__foot { position: absolute; left: 0; right: 0; bottom: 0; z-index: 3; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 var(--gutter) calc(14px + var(--bar-h, 0px)); }
+  .lx-film__watch { display: inline-flex; align-items: center; gap: 12px; min-height: 48px; padding: 0; border: 0; background: none; color: #fff; font: inherit; font-weight: 500; cursor: pointer; }
+  .lx-film__watch i { position: relative; width: 36px; height: 36px; border: 1px solid rgba(255,255,255,.5); border-radius: 50%; transition: border-color .3s, background .3s; }
+  .lx-film__watch i::after { content: ""; position: absolute; left: 14px; top: 11px; border-left: 10px solid #fff; border-top: 7px solid transparent; border-bottom: 7px solid transparent; }
+  .lx-film__watch:hover i { border-color: var(--tape); background: rgba(20,220,213,.12); }
+  .lx-film__ai { font-size: .75rem; letter-spacing: .02em; color: rgba(255,255,255,.62); }
+  .lx-film__bar { position: absolute; left: 0; right: 0; bottom: 0; height: 2px; z-index: 3; background: rgba(255,255,255,.12); }
+  .lx-film__bar i { display: block; height: 100%; background: var(--tape); transform-origin: 0 50%; transform: scaleX(0); }
+
+  @media (min-width: 1024px) {
+    .lx-film__hint { display: inline-flex; align-items: center; gap: 12px; margin-top: clamp(28px, 4vh, 48px); font-size: .9rem; color: rgba(255,255,255,.66); }
+    .lx-film__hint i { position: relative; width: 1px; height: 36px; background: rgba(255,255,255,.25); overflow: hidden; }
+    .lx-film__hint i::after { content: ""; position: absolute; left: 0; top: -40%; width: 1px; height: 40%; background: var(--tape); animation: lxhint 2.2s var(--ease-lux) infinite; }
+    .lx-film__foot { padding-bottom: 18px; }
+  }
+  @keyframes lxhint { to { top: 100%; } }
+  @media (max-width: 1023px) {
+    .lx-film__canvas { display: none; }
+    .lx-film__video { display: block; }
+    .lx-film:global(.is-playing) .lx-film__video { opacity: 1; }
+    .lx-film__intro { bottom: calc(var(--bar-h, 0px) + 72px); }
+    .lx-film__lead { font-size: 1rem; }
+    .lx-film__caps { top: calc(var(--header-h) + env(safe-area-inset-top, 0px) + 20px); bottom: auto; }
+    .lx-film__cap { gap: 8px; }
+    .lx-film__cap::before { width: 40px; }
+    .lx-film__cap strong { font-size: 1.55rem; }
+    .lx-film__cap span { display: none; }
+    .lx-film__end { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) { .lx-film__video { display: none !important; } .lx-film__hint i::after { animation: none; } }
+
+  /* короткая полоса фактов под фильмом */
+  .lx-band { background: var(--graphite); color: #fff; }
+  .lx-band__facts { list-style: none; margin: 0; padding: 0; display: grid; }
+  .lx-band__facts li { display: grid; gap: 2px; padding: 22px 0; border-bottom: 1px solid #26303B; }
+  .lx-band__facts strong { font-weight: 500; color: var(--dark-ink); }
+  .lx-band__facts span { color: var(--dark-muted); font-size: .95rem; }
+  @media (min-width: 900px) {
+    .lx-band__facts { grid-template-columns: repeat(3, 1fr); }
+    .lx-band__facts li { border-bottom: 0; padding: 32px 24px 32px 0; }
+    .lx-band__facts li + li { padding-left: 24px; border-left: 1px solid #26303B; }
+  }
+
+  /* окно с роликом */
+  .lx-modal { width: min(1280px, 94vw); max-width: none; padding: 0; border: 0; background: #000; color: #fff; overflow: visible; }
+  .lx-modal::backdrop { background: rgba(10,14,19,.86); backdrop-filter: blur(6px); }
+  .lx-modal video { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; background: #000; }
+  .lx-modal__x { position: absolute; right: 0; top: -52px; width: 44px; height: 44px; border: 1px solid rgba(255,255,255,.4); border-radius: 50%; background: none; color: #fff; font-size: 1.6rem; line-height: 1; cursor: pointer; }
+  .lx-modal__x:hover { border-color: var(--tape); }
+
+  /* ---------- обещание ---------- */
+  .lx-statement__grid { display: grid; gap: clamp(48px, 6vw, 96px); align-items: center; }
+  .lx-statement__body { display: grid; gap: clamp(32px, 4vw, 56px); justify-items: start; }
+  @media (min-width: 1024px) { .lx-statement__grid { grid-template-columns: 7fr 5fr; } }
+  .lx-statement__media { margin: 0; display: grid; gap: 14px; }
+  .lx-statement__media figcaption { color: var(--muted); font-size: .95rem; max-width: 36ch; }
+  .lx-vid { position: relative; overflow: hidden; background: var(--graphite); }
+  .lx-vid video { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .lx-statement .lx-vid { aspect-ratio: 1; }
+  .lx-cta { position: relative; overflow: hidden; padding-top: 0; }
+  .lx-cta__film { margin: 0 0 clamp(56px, 7vw, 112px); }
+  .lx-cta__film .lx-vid { aspect-ratio: 4 / 3; }
+  @media (min-width: 768px) { .lx-cta__film .lx-vid { aspect-ratio: 21 / 9; } }
+  .lx-cta__film .lx-vid::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg, rgba(16,22,29,0) 55%, var(--graphite) 100%); }
+  .lx-statement__text { font-family: var(--font-display); font-weight: 200; font-size: var(--fs-l); letter-spacing: -0.04em; line-height: 1.12; max-width: 28ch; text-wrap: pretty; }
+
+  /* ---------- цена ---------- */
+  .lx-price { background: #FFFFFF; }
+  .lx-price__grid { display: grid; gap: 56px; }
+  @media (min-width: 1024px) { .lx-price__grid { grid-template-columns: 5fr 7fr; gap: 64px; } }
+  .lx-price__head { display: grid; gap: 28px; align-content: start; }
+  .lx-price__calc { display: grid; gap: 28px; justify-items: start; }
+  .lx-seg { display: flex; flex-wrap: wrap; gap: 4px 28px; border-bottom: 1px solid var(--hair); width: 100%; }
+  .lx-seg__b { position: relative; padding: 14px 0 16px; border: 0; background: none; cursor: pointer; font-size: 1.05rem; color: var(--muted); transition: color .3s; }
+  .lx-seg__b::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--graphite); transform: scaleX(0); transform-origin: 0 50%; transition: transform .5s var(--ease-lux); }
+  .lx-seg__b:hover { color: var(--ink); }
+  .lx-seg__b[aria-pressed="true"] { color: var(--ink); }
+  .lx-seg__b[aria-pressed="true"]::after { transform: scaleX(1); }
+  .lx-board { --cell: clamp(64px, 13vw, 168px); display: grid; gap: 8px; }
+  .lx-board__status { color: var(--muted); font-size: .95rem; }
+  .lx-board__row { display: flex; align-items: flex-end; gap: .02em; }
+  .lx-board__from { font-size: 1.05rem; color: var(--muted); margin-right: .6em; padding-bottom: calc(var(--cell) * .16); }
+  .lx-board__cur { font-family: var(--font-display); font-weight: 200; font-size: calc(var(--cell) * .38); margin-left: .35em; padding-bottom: calc(var(--cell) * .14); }
+  .lx-reel { position: relative; width: calc(var(--cell) * .66); height: var(--cell); overflow: hidden; -webkit-mask: linear-gradient(transparent, #000 18%, #000 82%, transparent); mask: linear-gradient(transparent, #000 18%, #000 82%, transparent); }
+  .lx-reel--k { margin-right: calc(var(--cell) * .2); }
+  .lx-reel__strip { display: block; will-change: transform; }
+  .lx-reel__strip i { display: grid; place-items: center; height: var(--cell); font-style: normal; font-family: var(--font-display); font-weight: 200; font-size: calc(var(--cell) * .92); letter-spacing: -0.06em; line-height: 1; font-variant-numeric: tabular-nums; }
+
+  /* ---------- шаги ---------- */
+  .lx-hs { overflow: hidden; }
+  .lx-hs__track { position: relative; display: grid; gap: 56px; }
+  .lx-route, .lx-hs__fill { display: none; }
+  .lx-step { display: grid; gap: 16px; align-content: start; }
+  .lx-step__media { position: relative; aspect-ratio: 4 / 5; background: linear-gradient(160deg, #1A232D 0%, #10161D 70%); color: var(--dark-ink); overflow: hidden; }
+  .lx-step:nth-child(even) .lx-step__media { background: linear-gradient(160deg, #E4E8EC 0%, #CBD2D9 100%); color: var(--ink); }
+  .lx-step__media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 1.2s var(--ease-lux); }
+  .lx-step__media::after { content: ""; position: absolute; inset: 45% 0 0; background: linear-gradient(transparent, rgba(16,22,29,.55)); pointer-events: none; }
+  .lx-step:hover .lx-step__media img { transform: scale(1.04); }
+  .lx-step__n { position: absolute; z-index: 1; color: #fff; left: 6%; bottom: -0.08em; font-family: var(--font-display); font-weight: 200; font-size: clamp(9rem, 22vw, 17rem); line-height: .8; letter-spacing: -0.06em; opacity: .9; }
+  .lx-step__t { font-family: var(--font-display); font-weight: 300; font-size: var(--fs-m); letter-spacing: -0.03em; }
+  .lx-step__d { color: var(--muted); max-width: 34ch; }
+  @media (max-width: 1023px) {
+    .lx-hs__track { padding-left: calc(var(--gutter) + 28px); }
+    .lx-hs__track::before { content: ""; position: absolute; left: calc(var(--gutter) + 4px); top: 0; bottom: 0; width: 1px; background: var(--hair); }
+    .lx-hs__fill { display: block; position: absolute; left: calc(var(--gutter) + 3.5px); top: 0; bottom: 0; width: 2px; background: var(--tape); transform-origin: 50% 0; }
+  }
+  @media (min-width: 640px) and (max-width: 1023px) { .lx-hs__track { grid-template-columns: 1fr 1fr; } }
+  @media (min-width: 1024px) {
+    .lx-hs__track { display: flex; gap: 48px; width: max-content; max-width: none; padding-bottom: 80px; }
+    .lx-step { width: min(420px, 29vw); }
+    .lx-route { display: block; position: absolute; left: 0; right: 0; bottom: 24px; height: 40px; }
+    .lx-route svg { width: 100%; height: 100%; overflow: visible; }
+    .lx-route path { fill: none; stroke: var(--tape); stroke-width: 2; vector-effect: non-scaling-stroke; }
+    .lx-route .lx-route__base { stroke: var(--hair); stroke-width: 1; }
+  }
+
+  /* ---------- стандарты ---------- */
+  .lx-std__grid { display: grid; gap: 56px; }
+  @media (min-width: 1024px) { .lx-std__grid { grid-template-columns: 5fr 6fr; gap: 8%; align-items: start; } .lx-std__media { position: sticky; top: calc(var(--header-h) + 32px); } }
+  .lx-std__img { position: relative; aspect-ratio: 4 / 5; overflow: hidden; background: var(--graphite); }
+  .lx-std__img img, .lx-std__img video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .lx-ai { position: absolute; right: 12px; top: 12px; z-index: 2; font-size: .72rem; padding: 4px 8px; border-radius: 2px; background: rgba(16,22,29,.55); color: #fff; backdrop-filter: blur(6px); }
+  .lx-ph { aspect-ratio: 4 / 5; display: grid; align-content: end; padding: 24px; background: linear-gradient(170deg, #1C2630 0%, #10161D 80%); color: var(--dark-muted); font-size: .9rem; }
+  .lx-std__text { display: grid; gap: 28px; align-content: start; }
+  .lx-list { margin: clamp(16px, 3vw, 40px) 0 0; border-top: 1px solid var(--hair); }
+  .lx-list > div { display: grid; gap: 6px; padding: 26px 0; border-bottom: 1px solid var(--hair); }
+  @media (min-width: 640px) { .lx-list > div { grid-template-columns: 15ch 1fr; gap: 32px; } }
+  .lx-list dt { font-weight: 500; }
+  .lx-list dd { margin: 0; color: var(--muted); max-width: 46ch; }
+
+  /* ---------- коробки ---------- */
+  .lx-boxes { background: #FFFFFF; }
+  .lx-boxes__img { margin: 0 calc(var(--gutter) * -1); }
+  .lx-boxes__img img { width: 100%; height: auto; display: block; background: linear-gradient(#fff, #EEF1F4); }
+  @media (min-width: 768px) { .lx-boxes__img { margin: 0; } }
+  .lx-rooms { list-style: none; padding: 0; margin: clamp(40px, 5vw, 72px) 0 0; display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 210px), 1fr)); }
+  .lx-sticker { position: relative; display: grid; grid-template-columns: 8px 1fr auto; grid-template-rows: auto auto; column-gap: 16px; padding: 16px 16px 16px 0; background: var(--paper); border: 1px solid var(--hair); }
+  .lx-sticker__bar { grid-row: 1 / 3; background: var(--c); }
+  .lx-sticker__room { font-weight: 500; }
+  .lx-sticker__n { grid-column: 2; font-family: var(--font-display); font-weight: 200; font-size: 2.2rem; letter-spacing: -0.05em; line-height: 1; }
+  .lx-sticker__qr { grid-column: 3; grid-row: 1 / 3; width: 46px; height: 46px; align-self: center; color: var(--graphite); fill: var(--graphite); }
+
+  /* ---------- пакеты ---------- */
+  .lx-pk__cols { display: grid; border-top: 1px solid var(--hair); }
+  .lx-pk__col { position: relative; display: grid; gap: 18px; align-content: start; padding: 36px 0 44px; border-bottom: 1px solid var(--hair); }
+  .lx-pk__col.is-f::before { content: ""; position: absolute; left: 0; right: 0; top: -1px; height: 2px; background: var(--tape); }
+  .lx-pk__note { color: var(--muted); font-size: .95rem; }
+  .lx-pk__name { font-family: var(--font-display); font-weight: 200; font-size: var(--fs-l); letter-spacing: -0.045em; }
+  .lx-pk__price { font-family: var(--font-display); font-weight: 200; font-size: clamp(2rem, 1.4rem + 1.6vw, 2.8rem); letter-spacing: -0.04em; line-height: 1; font-variant-numeric: tabular-nums; }
+  .lx-pk__diff { margin-top: -8px; color: var(--deep); font-weight: 600; font-size: .92rem; }
+  .lx-pk__badge { justify-self: start; padding: 3px 10px; font-size: .75rem; font-weight: 600; background: var(--tape); color: var(--graphite); border-radius: 2px; }
+  .lx-pk__calc { margin-top: clamp(28px, 4vw, 48px); display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; }
+  .lx-pk__col ul { list-style: none; padding: 0; margin: 8px 0 12px; display: grid; gap: 10px; color: var(--muted); }
+  @media (min-width: 900px) {
+    .lx-pk__cols { grid-template-columns: repeat(3, 1fr); }
+    .lx-pk__col { padding: 40px 40px 8px 0; border-bottom: 0; }
+    .lx-pk__col + .lx-pk__col { padding-left: 40px; border-left: 1px solid var(--hair); }
+  }
+
+  /* ---------- гарантия ---------- */
+  .lx-guar { background: radial-gradient(70% 90% at 85% 0%, #14262C 0%, var(--dark) 60%); }
+  .lx-guar .container { display: grid; gap: clamp(48px, 6vw, 88px); justify-items: start; }
+  .lx-guar__cols { display: grid; gap: 0; width: 100%; border-top: 1px solid #26303B; }
+  .lx-guar__cols > div { display: grid; gap: 10px; padding: 28px 0; border-bottom: 1px solid #26303B; }
+  .lx-guar__cols h3 { font-family: var(--font); font-weight: 500; font-size: 1.15rem; letter-spacing: 0; }
+  .lx-guar__cols p { color: var(--dark-muted); max-width: 40ch; }
+  @media (min-width: 900px) {
+    .lx-guar__cols { grid-template-columns: repeat(3, 1fr); border-bottom: 0; }
+    .lx-guar__cols > div { border-bottom: 0; padding-right: 32px; }
+    .lx-guar__cols > div + div { padding-left: 32px; border-left: 1px solid #26303B; }
+  }
+
+  /* ---------- цифры ---------- */
+  .lx-facts { padding-block: clamp(64px, 8vw, 120px); border-bottom: 1px solid var(--hair); }
+  .lx-facts__row { display: grid; grid-template-columns: 1fr 1fr; gap: 40px 24px; }
+  @media (min-width: 900px) { .lx-facts__row { grid-template-columns: repeat(4, 1fr); } }
+  .lx-fact { display: grid; gap: 10px; }
+  .lx-fact strong { font-family: var(--font-display); font-weight: 200; white-space: nowrap; font-size: clamp(2.1rem, 1rem + 3.4vw, 4.6rem); letter-spacing: -0.06em; line-height: .9; font-variant-numeric: tabular-nums; }
+  .lx-fact span { color: var(--muted); }
+
+  /* ---------- карта ---------- */
+  .lx-area__grid { display: grid; gap: 56px; align-items: center; }
+  @media (min-width: 960px) { .lx-area__grid { grid-template-columns: 6fr 5fr; } }
+  .lx-area__grid > div { display: grid; gap: 28px; justify-items: start; }
+  .lx-map { width: 100%; max-width: 480px; justify-self: center; overflow: visible; }
+  .lx-map__outer { fill: none; stroke: var(--steel); stroke-width: 1; vector-effect: non-scaling-stroke; }
+  .lx-map__ring { fill: none; stroke: var(--hair); stroke-width: 1; stroke-dasharray: 2 6; }
+  .lx-map__city { fill: color-mix(in oklab, var(--tape) 10%, transparent); stroke: var(--deep); stroke-width: 1; }
+  .lx-map__km { font-size: 11px; fill: var(--muted); text-anchor: middle; }
+  .lx-map__pt circle { fill: var(--graphite); }
+  .lx-map__pt.is-big circle { fill: var(--tape); stroke: var(--graphite); stroke-width: 2; }
+  .lx-map__pt text { font-size: 12px; fill: var(--ink); paint-order: stroke; stroke: var(--bg); stroke-width: 4px; }
+  .lx-map__pt.is-big text { font-weight: 600; }
+
+  /* ---------- отзывы ---------- */
+  .lx-reviews { padding-block: clamp(56px, 7vw, 104px); border-block: 1px solid var(--hair); background: #FFFFFF; }
+  .lx-reviews__t { font-family: var(--font-display); font-weight: 200; font-size: var(--fs-m); letter-spacing: -0.03em; line-height: 1.3; max-width: 40ch; }
+
+  /* ---------- вопросы ---------- */
+  .lx-faq__grid { display: grid; gap: 40px; }
+  @media (min-width: 1024px) { .lx-faq__grid { grid-template-columns: 4fr 7fr; gap: 8%; align-items: start; } }
+
+  /* ---------- финал ---------- */
+  .lx-cta .container { display: grid; gap: clamp(40px, 6vw, 80px); }
+  .lx-cta__row { display: grid; gap: 32px; border-top: 1px solid #26303B; padding-top: 32px; }
+  .lx-cta__btns { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 28px; }
+  @media (min-width: 900px) { .lx-cta__row { grid-template-columns: 1fr auto; align-items: center; } }
+</style>

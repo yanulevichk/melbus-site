@@ -1,0 +1,45 @@
+---
+/** Страница «Где работаем»: все районы и города со ссылками на их страницы. */
+import PageHero from '../components/PageHero.astro';
+import CtaBand from '../components/CtaBand.astro';
+import { href, type Locale } from '../i18n/routes';
+import { areas } from '../data/areas';
+import { areaText as T } from '../content/areas';
+const { locale: L } = Astro.props as { locale: Locale };
+const groups = [
+  { title: T.hub.districts[L], items: areas.filter((a) => a.kind === 'district') },
+  { title: T.hub.towns[L], items: areas.filter((a) => a.kind === 'town') },
+];
+const sort = (x: typeof areas) => [...x].sort((a, b) => a.name[L].localeCompare(b.name[L], L));
+---
+<PageHero eyebrow={T.hub.eyebrow[L]} title={T.hub.title[L]} lead={T.hub.lead[L]} />
+
+<section class="hub">
+  <div class="container hub__in">
+    {groups.map((g) => (
+      <div class="hub__group">
+        <h2 class="hub__h">{g.title}</h2>
+        <ul class="hub__list">
+          {sort(g.items).map((a) => <li><a href={href(L, `area:${a.id}`)}><span>{a.name[L]}</span></a></li>)}
+        </ul>
+      </div>
+    ))}
+    <p class="hub__other">{T.hub.other[L]}</p>
+  </div>
+</section>
+
+<CtaBand locale={L} />
+
+<style>
+  .hub { padding-block: clamp(72px, 10vw, 160px); background: #FFFFFF; }
+  .hub__in { display: grid; gap: clamp(48px, 6vw, 88px); }
+  .hub__group { display: grid; gap: 24px; }
+  .hub__h { font-family: var(--font-display); font-weight: 200; font-size: var(--fs-l); letter-spacing: -0.045em; }
+  .hub__list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--hair); }
+  @media (min-width: 900px) { .hub__list { grid-template-columns: repeat(3, 1fr); } }
+  @media (min-width: 1200px) { .hub__list { grid-template-columns: repeat(4, 1fr); } }
+  .hub__list a { display: flex; align-items: center; min-height: 64px; padding-right: 16px; border-bottom: 1px solid var(--hair); font-size: clamp(1.05rem, 1rem + .3vw, 1.25rem); transition: color .25s; }
+  .hub__list a span { background: linear-gradient(var(--tape), var(--tape)) 0 100% / 0 2px no-repeat; transition: background-size .5s var(--ease-lux); padding-bottom: 2px; }
+  .hub__list a:hover span { background-size: 100% 2px; }
+  .hub__other { color: var(--muted); max-width: 56ch; }
+</style>

@@ -1,0 +1,43 @@
+---
+/** Блок «Мы не продаём часы»: почасовая оплата против цены MELBUS. Тексты — src/content/prices.ts. */
+import type { Locale } from '../i18n/routes';
+import { noHours as N } from '../content/prices';
+interface Props { locale: Locale; dark?: boolean }
+const { locale: L, dark = false } = Astro.props;
+---
+<section class:list={['nh', { 'dark grain': dark }]}>
+  <div class="container nh__grid">
+    <div class="nh__head">
+      <h2 class="nh__h2">{N.h2[L]}</h2>
+      <p class="nh__lead">{N.lead[L]}</p>
+    </div>
+    <div class="nh__cmp" role="table" aria-label={N.h2[L]}>
+      <div class="nh__row nh__row--head" role="row"><span role="columnheader">{N.them[L]}</span><span role="columnheader" class="nh__us">{N.us[L]}</span></div>
+      {N.rows.map(([a, b]) => (
+        <div class="nh__row" role="row"><span role="cell" class="nh__them">{a[L]}</span><span role="cell" class="nh__ok">{b[L]}</span></div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .nh { padding-block: clamp(88px, 12vw, 190px); background: #FFFFFF; }
+  .nh.dark { background: radial-gradient(70% 90% at 10% 0%, #14262C 0%, var(--dark) 60%); color: #fff; }
+  .nh__grid { display: grid; gap: clamp(40px, 6vw, 88px); }
+  @media (min-width: 1024px) { .nh__grid { grid-template-columns: 5fr 7fr; gap: 8%; align-items: start; } }
+  .nh__head { display: grid; gap: 24px; }
+  .nh__h2 { font-family: var(--font-display); font-weight: 200; font-size: var(--fs-xl); letter-spacing: -0.045em; line-height: .98; max-width: 11ch; }
+  .nh__lead { font-size: clamp(1.05rem, 1rem + .3vw, 1.2rem); line-height: 1.6; color: var(--muted); max-width: 42ch; }
+  .dark .nh__lead { color: var(--dark-muted); }
+  .nh__cmp { border-top: 1px solid var(--hair); }
+  .dark .nh__cmp, .dark .nh__row { border-color: #26303B; }
+  .nh__row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 20px 0; border-bottom: 1px solid var(--hair); }
+  .nh__row--head { font-size: .9rem; color: var(--muted); padding-block: 14px; }
+  .dark .nh__row--head { color: var(--dark-muted); }
+  .nh__us { color: var(--ink); font-weight: 600; position: relative; }
+  .dark .nh__us { color: #fff; }
+  .nh__us::after { content: ""; position: absolute; left: 0; bottom: -15px; width: 48px; height: 2px; background: var(--tape); }
+  .nh__them { color: var(--muted); text-decoration: line-through; text-decoration-color: rgba(143,154,167,.6); text-decoration-thickness: 1px; }
+  .dark .nh__them { color: var(--dark-muted); }
+  .nh__ok { font-weight: 500; }
+</style>

@@ -1,33 +1,33 @@
 ---
 import PageHero from '../components/PageHero.astro';
-import SceneSlot from '../components/SceneSlot.astro';
+import Media from '../components/Media.astro';
 import SectionHead from '../components/SectionHead.astro';
 import CtaBand from '../components/CtaBand.astro';
 import { href, type Locale } from '../i18n/routes';
-import { ui } from '../i18n/ru';
-import { services, type Service } from '../data/services';
+import { ui } from '../i18n/ui';
+import { services, servicesText as T, type Service } from '../data/services';
 const { locale, service: s } = Astro.props as { locale: Locale; service: Service };
-const others = services.filter((x) => x.slug !== s.slug && x.group === s.group).slice(0, 3);
+const others = services.filter((x) => x.id !== s.id && x.group === s.group).slice(0, 3);
 ---
-<PageHero eyebrow="Услуга" title={s.title} lead={s.lead}>
+<PageHero eyebrow={T.one[locale]} title={s.title[locale]} lead={s.lead[locale]}>
   <Fragment slot="actions">
-    <a href={href(locale, 'quote')} class="btn btn--primary" data-magnetic>{ui.cta.price} <span class="arrow">→</span></a>
-    <a href={href(locale, 'pricing')} class="btn btn--ghost">{ui.nav.pricing}</a>
+    <a href={href(locale, 'quote')} class="btn btn--primary" data-magnetic>{ui.cta.price[locale]} <span class="arrow">→</span></a>
+    <a href={href(locale, 'pricing')} class="btn btn--ghost">{ui.nav.pricing[locale]}</a>
   </Fragment>
-  <SceneSlot id={`svc-${s.slug}`} title={s.scene} length={1.4} />
+  <Media locale={locale} video={s.media.video} poster={s.media.poster} alt={s.title[locale]} />
 </PageHero>
 
 <section class="section section--tight">
   <div class="container">
-    <SectionHead eyebrow="Что входит" title="Включено<br>в фиксированную цену" />
-    <ul class="inc">{s.includes.map((it, i) => <li data-reveal><span>{String(i + 1).padStart(2, '0')}</span>{it}</li>)}</ul>
+    <SectionHead eyebrow={T.incEyebrow[locale]} title={T.incTitle[locale]} />
+    <ul class="inc">{s.includes.map((it, i) => <li data-reveal><span>{String(i + 1).padStart(2, '0')}</span>{it[locale]}</li>)}</ul>
   </div>
 </section>
 
 <section class="section section--tight">
   <div class="container">
-    <h2 class="t-eyebrow" data-reveal>Ещё услуги</h2>
-    <div class="more">{others.map((o) => <a href={href(locale, `service:${o.slug}`)} data-reveal><strong>{o.title}</strong><span class="t-muted">{o.short}</span></a>)}</div>
+    <h2 class="t-eyebrow" data-reveal>{T.more[locale]}</h2>
+    <div class="more">{others.map((o) => <a href={href(locale, `service:${o.id}`)} data-reveal><strong>{o.title[locale]}</strong><span class="t-muted">{o.short[locale]}</span></a>)}</div>
   </div>
 </section>
 <CtaBand locale={locale} />

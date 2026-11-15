@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /team/
+Disallow: /oferta/
+Disallow: /ru/oferta/
+Disallow: /uk/oferta/
+Disallow: /en/offer/
+
+Sitemap: https://melbus.pl/sitemap-index.xml

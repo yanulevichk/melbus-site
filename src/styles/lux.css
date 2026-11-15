@@ -1,0 +1,72 @@
+/*
+ * MELBUS ЛЮКС — тема (включается классом html.lux).
+ * Принципы: тонкий широкий Unbounded крупно, тишина и воздух, тонкие линии вместо карточек,
+ * бирюза только как «скотч» (линии, главная кнопка). Одна фирменная идея движения — «лента скотча».
+ */
+html.lux {
+  --paper: #F4F6F8;
+  --silver: #DCE1E7;
+  --steel: #8F9AA7;
+  --graphite: #10161D;
+  --deep: #077E79;
+  --tape: #14DCD5;
+  --hair: #D3D9DF;
+  --ease-lux: cubic-bezier(.65, 0, .35, 1);
+  --fs-mega: clamp(3rem, 1.2rem + 7.6vw, 9.5rem);
+  --fs-xl: clamp(2.2rem, 1.1rem + 4.2vw, 5.6rem);
+  --fs-l: clamp(1.6rem, 1.05rem + 2.2vw, 3.2rem);
+  --fs-m: clamp(1.25rem, 1.05rem + .8vw, 1.75rem);
+  --radius: 4px;
+}
+
+/* типографика: тонкий широкий заголовочный шрифт, обычный регистр */
+html.lux h1, html.lux h2, html.lux .t-hero, html.lux .t-h2 { font-weight: 200; letter-spacing: -0.045em; line-height: .96; }
+html.lux .t-h3 { font-family: var(--font); font-weight: 500; letter-spacing: -0.01em; }
+html.lux .t-eyebrow { text-transform: none; letter-spacing: 0; font-size: .95rem; font-weight: 450; }
+html.lux .accent { color: inherit; }
+html.lux body { font-size: 1.0625rem; }
+
+/* кнопки: прямые, спокойные; бирюзовая — только главная */
+html.lux .btn { --h: 56px; border-radius: 3px; font-weight: 500; letter-spacing: 0; padding: 0 1.7em; }
+html.lux .btn--primary { background: var(--tape); color: var(--graphite); }
+html.lux .btn--primary:hover { background: #4FE6E1; }
+html.lux .btn--ghost { border-color: color-mix(in oklab, currentColor 35%, transparent); }
+html.lux .btn--ghost:hover { background: transparent; color: inherit; border-color: currentColor; }
+html.lux .btn .arrow { display: none; }
+.lux-link { display: inline-flex; align-items: center; min-height: 56px; font-weight: 500; background: linear-gradient(currentColor, currentColor) 0 calc(50% + .8em) / 100% 1px no-repeat; transition: background-size .5s var(--ease-lux); }
+.lux-link:hover { background-size: 0 1px; background-position: 100% calc(50% + .8em); }
+
+/* шапка */
+html.lux .hdr__link { border-radius: 0; padding: 10px 12px; color: var(--dark-muted); }
+html.lux .hdr__link:hover, html.lux .hdr__link[aria-current="page"] { background: none; color: var(--dark-ink); }
+html.lux .hdr__burger { border-radius: 3px; }
+html.lux .menu__link { font-weight: 200; }
+html.lux .menu__num { display: none; }
+
+/* нижняя панель телефона */
+html.lux .mbar__btn { border-radius: 3px; }
+
+/* футер */
+html.lux .ftr .t-eyebrow { color: var(--dark-muted); }
+html.lux .ftr__word { font-weight: 200; color: #1B242E; letter-spacing: -0.05em; }
+html.lux .ftr__phone { font-family: var(--font-display); font-weight: 200; font-size: 1.9rem; }
+
+/* вопросы */
+html.lux summary { font-weight: 450; }
+html.lux summary i { border-radius: 2px; }
+
+/* зерно: тонкий шум поверх тёмных экранов (статичный, без нагрузки) */
+.grain { position: relative; isolation: isolate; }
+.grain::after { content: ""; position: absolute; inset: 0; z-index: 3; pointer-events: none; opacity: .07; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+
+/* «лента скотча»: бирюзовая линия протягивается и открывает кадр сверху вниз */
+[data-tape] { position: relative; }
+[data-tape] > .tape__media { position: relative; }
+html.js [data-tape] > .tape__media { clip-path: inset(0 0 100% 0); }
+.tape__line { position: absolute; left: 0; right: 0; top: 0; height: 2px; background: var(--tape); transform: scaleX(0); transform-origin: 0 50%; z-index: 2; pointer-events: none; }
+@media (prefers-reduced-motion: reduce) { html.js [data-tape] > .tape__media { clip-path: none; } .tape__line { display: none; } }
+
+/* тонкие линии вместо карточек */
+.hair-t { border-top: 1px solid var(--hair); }
+.dark .hair-t, .hair-t.on-dark { border-color: #26303B; }

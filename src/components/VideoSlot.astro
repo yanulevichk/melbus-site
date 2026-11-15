@@ -4,9 +4,10 @@
  * Положить /public/video/<id>.mp4 (+ <id>.webm) и <id>.avif (постер), указать src={id}.
  * Видео грузится только когда попадает в экран и ставится на паузу, когда уходит.
  */
-import { ui } from '../i18n/ru';
-interface Props { id: string; title: string; src?: string; ratio?: string; ai?: boolean }
-const { id, title, src, ratio = '4 / 5', ai = true } = Astro.props;
+import { ui } from '../i18n/ui';
+import type { Locale } from '../i18n/routes';
+interface Props { id: string; title: string; src?: string; ratio?: string; ai?: boolean; locale?: Locale }
+const { id, title, src, ratio = '4 / 5', ai = true, locale = 'pl' } = Astro.props;
 ---
 <figure class="vslot" style={`--r:${ratio}`} data-video={src ? '1' : '0'}>
   {src ? (
@@ -20,7 +21,7 @@ const { id, title, src, ratio = '4 / 5', ai = true } = Astro.props;
       <span class="vslot__t">{title}</span>
     </div>
   )}
-  {ai && <span class="vslot__ai">{ui.aiLabel}</span>}
+  {ai && <span class="vslot__ai">{ui.aiLabel[locale]}</span>}
 </figure>
 
 <style>

@@ -5,13 +5,11 @@
  */
 export const brand = {
   name: 'MELBUS',
-  // TODO: заменить на настоящие данные из KRS/CEIDG
+  // Реквизиты (JDG, CEIDG) — от владельца 14.11.2026; населённый пункт для 05-090 — по справочникам (Falenty Duże, gm. Raszyn)
   legal: {
-    company: 'MELBUS [forma prawna]',
-    address: '[adres rejestrowy]',
-    nip: '[NIP]',
-    krs: '[KRS]',
-    capital: '[kapitał zakładowy]',
+    company: 'MELBUS Edhar Lekh',
+    address: 'ul. Źródlana 40, 05-090 Falenty Duże',
+    nip: '1133069416',
   },
   // TODO: настоящие номера
   contact: {
@@ -25,7 +23,6 @@ export const brand = {
   hours: '7 / 7',
   facts: {
     years: 5, // «5+ лет в логистике»
-    deliveriesPerMonth: 30000,
   },
   site: 'https://melbus.pl', // TODO: финальный домен
 } as const;

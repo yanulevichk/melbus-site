@@ -1,0 +1,10 @@
+# Cloudflare Pages: сайт (папка dist) + функции заявок (папка functions).
+# Секреты (токен бота, id чата) — НЕ здесь, а в панели Cloudflare: Settings → Variables and Secrets.
+name = "melbus-site"
+pages_build_output_dir = "dist"
+compatibility_date = "2025-01-01"
+
+# хранилище видео от клиентов (R2). Создать бакет melbus-videos в панели Cloudflare → R2.
+[[r2_buckets]]
+binding = "VIDEOS"
+bucket_name = "melbus-videos"
