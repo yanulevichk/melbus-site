@@ -4,7 +4,7 @@ const R = path.resolve(__dirname, '../../../..');
 const files = [
   'tools/film/remotion/src/social/stories.ts', 'tools/film/remotion/src/social/posts.ts', 'tools/film/remotion/src/social/texts.ts', 'tools/film/remotion/src/social/gptbank.ts',
   'src/content/home.ts', 'src/content/pages.ts', 'src/content/quote.ts', 'src/content/calculator.ts', 'src/content/areas.ts',
-  'src/content/prices.ts', 'src/content/offer.ts', 'src/i18n/ui.ts', 'src/data/areas.ts', 'src/data/services.ts', 'src/data/faq.ts', 'src/data/pricing.ts',
+  'src/content/prices.ts', 'src/content/offer.ts', 'src/content/moveform.ts', 'src/content/legal.ts', 'src/data/move.ts', 'src/i18n/ui.ts', 'src/data/areas.ts', 'src/data/services.ts', 'src/data/faq.ts', 'src/data/pricing.ts',
 ];
 const CYR = /[Ѐ-ӿ]/, LAT = /[A-Za-zĄąĆćĘęŁłŃńÓóŚśŹźŻż]/;
 const OK_LAT = new Set(['MELBUS', 'QR', 'VAT', 'BLIK', 'TV', 'AI', 'km', 'zł', 'Reels', 'WhatsApp', 'Telegram', 'Instagram', 'TikTok', 'Facebook', 'Google', 'IKEA', 'XL', 'XXL', 'M', 'S', 'L', 'RODO', 'GDPR', 'KSeF', 'OC', 'EU', 'PL', 'UA', 'EN', 'RU', 'm²', 'm2', 'MEL', 'BUS', 'CapCut', 'Ultra', 'Higgsfield', 'ChatGPT', 'Blender', 'Seedance', 'Kling', 'm', 'x', 'h', 'Wi', 'Fi', 'faktura', 'Mokotów', 'email', 'Email', 'Cookies', 'cookies', 'NIP', 'Warszawa', 'PDF', 'Wi-Fi', 'IBAN', 'SMS', 'URL', 'CRM', 'Open', 'Graph']);

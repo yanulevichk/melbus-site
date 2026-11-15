@@ -9,7 +9,7 @@ import HomeLux from '../views/HomeLux.astro';
 import Services from '../views/Services.astro';
 import Service from '../views/Service.astro';
 import Quote from '../views/Quote.astro';
-import Calculator from '../views/Calculator.astro';
+import MoveForm from '../views/MoveForm.astro';
 import Pricing from '../views/Pricing.astro';
 import Area from '../views/Area.astro';
 import Areas from '../views/Areas.astro';
@@ -78,7 +78,8 @@ const simple = pg && { eyebrow: pg.eyebrow[L], title: pg.title[L], lead: pg.lead
 
   {['guarantee', 'how', 'about'].includes(key) && simple && <Simple locale={locale} {...simple} />}
   {key === 'pricing' && <Pricing locale={locale} />}
-  {key === 'calculator' && simple && <Calculator locale={locale} eyebrow={simple.eyebrow} title={simple.title} lead={simple.lead} />}
+  {/* 15.11.2026: калькулятор = форма «Что у вас дома» (цена по списку вещей и адресам) */}
+  {key === 'calculator' && <MoveForm locale={locale} />}
 
   {key === 'faq' && simple && (
     <Simple locale={locale} {...simple} blocks={[{ type: 'faq', title: misc.faqTitle[L], items: faq }]} />

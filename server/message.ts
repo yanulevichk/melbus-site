@@ -4,6 +4,7 @@
  */
 import { quoteText as Q } from '../src/content/quote';
 import { esc } from './telegram';
+import { cleanMove, moveLines, moveOfferParams, type MovePayload } from './move';
 
 export interface Addr { addr?: string; floor?: string; lift?: number; dist?: string }
 export interface QuotePayload {
@@ -15,6 +16,8 @@ export interface QuotePayload {
   videos?: { key: string; name: string; size: number }[];
   skipped?: { name: string; size: number }[];
   hp?: string; t?: number;
+  /** форма «Что у вас дома» (/kalkulator/): список вещей, уровень, адреса с этажами — см. server/move.ts */
+  move?: MovePayload;
 }
 
 const str = (v: unknown, max = 300) => (typeof v === 'string' ? v.trim().slice(0, max) : '');
@@ -41,36 +44,42 @@ export function quoteMessage(id: string, p: QuotePayload, links: string[], teamU
   const digits = phone.replace(/\D/g, '');
   const wa = digits.length >= 9 ? ` · <a href="https://wa.me/${digits.length === 9 ? '48' + digits : digits}">открыть WhatsApp</a>` : '';
   add('Телефон', `${esc(phone)}${ch >= 0 ? ` · связь: ${esc(Q.channels[ch][ru])}` : ''}${wa}`);
-  const s = int(p.size, 0, Q.sizes.length - 1);
-  const est = int(p.est, 1, 1_000_000);
-  add('Объём', `${s >= 0 ? esc(Q.sizes[s][ru]) : '—'}${est > 0 ? ` · ориентир из калькулятора: от ${zl(est)} zł` : ''}`);
-  const addr = (a?: Addr) => {
-    if (!a) return '';
-    const parts = [esc(str(a.addr, 200)) || '—'];
-    if (str(a.floor, 10)) parts.push(`этаж ${esc(str(a.floor, 10))}`);
-    const l = int(a.lift, 0, Q.liftOpts.length - 1);
-    if (l >= 0) parts.push(`лифт: ${esc(Q.liftOpts[l][ru].toLowerCase())}`);
-    if (str(a.dist, 10)) parts.push(`от парковки ${esc(str(a.dist, 10))} м`);
-    return parts.join(', ');
-  };
-  const pk = int(p.pkg, 0, Q.pkgs.length - 1);
-  add('Пакет', pk >= 0 ? `<b>${esc(Q.pkgs[pk][ru])}</b>` : '—');
-  add('Откуда', addr(p.from));
-  add('Куда', addr(p.to));
+  if (p.move && typeof p.move === 'object') {
+    lines.push(...moveLines(cleanMove(p.move)).lines);
+  } else {
+    const s = int(p.size, 0, Q.sizes.length - 1);
+    const est = int(p.est, 1, 1_000_000);
+    add('Объём', `${s >= 0 ? esc(Q.sizes[s][ru]) : '—'}${est > 0 ? ` · ориентир из калькулятора: от ${zl(est)} zł` : ''}`);
+    const addr = (a?: Addr) => {
+      if (!a) return '';
+      const parts = [esc(str(a.addr, 200)) || '—'];
+      if (str(a.floor, 10)) parts.push(`этаж ${esc(str(a.floor, 10))}`);
+      const l = int(a.lift, 0, Q.liftOpts.length - 1);
+      if (l >= 0) parts.push(`лифт: ${esc(Q.liftOpts[l][ru].toLowerCase())}`);
+      if (str(a.dist, 10)) parts.push(`от парковки ${esc(str(a.dist, 10))} м`);
+      return parts.join(', ');
+    };
+    const pk = int(p.pkg, 0, Q.pkgs.length - 1);
+    add('Пакет', pk >= 0 ? `<b>${esc(Q.pkgs[pk][ru])}</b>` : '—');
+    add('Откуда', addr(p.from));
+    add('Куда', addr(p.to));
+  }
   const date = str(p.date, 10).match(/^(\d{4})-(\d{2})-(\d{2})$/);
   const time = str(p.time, 10) === 'evening' ? Q.evening[ru].toLowerCase() : esc(str(p.time, 10));
   add('Дата', [date ? `${date[3]}.${date[2]}.${date[1]}` : 'не указана', time, p.flex ? 'гибко ±2 дня' : ''].filter(Boolean).join(', '));
-  const items = (Array.isArray(p.items) ? p.items : []).map((n, i) => (Number.isInteger(n) && n > 0 && n < 100 && Q.items[i] ? `${Q.items[i][ru]} ×${n}` : '')).filter(Boolean);
-  add('Вещи', [items.join(', '), p.skipItems ? '«покажу всё на видео»' : ''].filter(Boolean).join(' · ') || '—');
-  const extras = (Array.isArray(p.extras) ? p.extras : []).map((i) => Q.extras[int(i, 0, Q.extras.length - 1)]?.[ru]).filter(Boolean);
-  add('Услуги', extras.map(esc).join(', ') || '—');
+  if (!p.move) {
+    const items = (Array.isArray(p.items) ? p.items : []).map((n, i) => (Number.isInteger(n) && n > 0 && n < 100 && Q.items[i] ? `${Q.items[i][ru]} ×${n}` : '')).filter(Boolean);
+    add('Вещи', [items.join(', '), p.skipItems ? '«покажу всё на видео»' : ''].filter(Boolean).join(' · ') || '—');
+    const extras = (Array.isArray(p.extras) ? p.extras : []).map((i) => Q.extras[int(i, 0, Q.extras.length - 1)]?.[ru]).filter(Boolean);
+    add('Услуги', extras.map(esc).join(', ') || '—');
+  }
   if (p.nip) lines.push('<b>🧾 Нужна фактура на фирму (NIP)</b>');
   add('Комментарий', esc(str(p.comment, 1500)));
   const vids = Array.isArray(p.videos) ? p.videos.slice(0, 10) : [];
   if (vids.length) lines.push(`<b>🎥 Видео (${vids.length}):</b>\n${vids.map((v, i) => `${i + 1}. <a href="${links[i]}">${esc(str(v.name, 80))}</a> (${mb(v.size)})`).join('\n')}`);
   const skipped = Array.isArray(p.skipped) ? p.skipped.slice(0, 10) : [];
   if (skipped.length) lines.push(`⚠️ <b>Видео не загрузилось:</b> ${skipped.map((v) => `${esc(str(v.name, 80))} (${mb(v.size)})`).join(', ')} — попросите прислать в WhatsApp`);
-  if (!vids.length && !skipped.length) lines.push('🎥 Видео не прислали — попросите снять квартиру.');
+  if (!vids.length && !skipped.length && !(p.move && p.move.mode !== 'video')) lines.push('🎥 Видео не прислали — попросите снять квартиру.');
   if (teamUrl) lines.push(`👉 <a href="${teamUrl}">Создать оферту по этой заявке</a>`);
   return lines.join('\n');
 }
@@ -95,5 +104,9 @@ export function teamOfferUrl(origin: string, id: string, p: QuotePayload) {
   const fl = (a?: Addr) => String(Math.max(0, Math.min(30, parseInt(str(a?.floor, 10), 10) || 0)));
   q.set('ff', fl(p.from)); q.set('ft', fl(p.to));
   q.set('lf', iv(p.from?.lift, 0, 2, 0) > 0 ? '1' : '0'); q.set('lt', iv(p.to?.lift, 0, 2, 0) > 0 ? '1' : '0');
+  if (p.move && typeof p.move === 'object') {
+    const S = cleanMove(p.move), m = moveLines(S);
+    for (const [k, v] of Object.entries(moveOfferParams(S, m.total, m.r, str(p.lang, 5)))) q.set(k, v);
+  }
   return `${origin}/team/oferta/?${q}`;
 }

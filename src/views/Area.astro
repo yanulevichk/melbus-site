@@ -9,12 +9,15 @@ import { href, type Locale } from '../i18n/routes';
 import { ui } from '../i18n/ui';
 import { areas, areaById, type Area } from '../data/areas';
 import { areaText as T } from '../content/areas';
+import { PLACES } from '../data/move';
 interface Props { locale: Locale; area: Area }
 const { locale: L, area: a } = Astro.props;
 const loc = a.loc[L];
 const near = a.near.map(areaById).filter((x): x is Area => !!x);
-// калькулятор сразу с нужным расстоянием: район — «по Варшаве», город — «до 50 км»
-const calc = `${href(L, 'calculator')}?dist=${a.kind === 'town' ? 1 : 0}`;
+// форма «Что у вас дома» сразу с этим районом/городом в «Откуда» (подсказки адресов — PLACES в src/data/move.ts)
+const slug = (s: string) => s.split(', ').pop()!.toLowerCase().replace(/ł/g, 'l').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '-');
+const place = PLACES.find((p) => slug(p.n) === a.id)?.n;
+const calc = place ? `${href(L, 'calculator')}?from=${encodeURIComponent(place)}` : href(L, 'calculator');
 ---
 <PageHero eyebrow={a.kind === 'town' ? T.eyebrowTown[L] : T.eyebrowDistrict[L]} title={T.h1[L](loc)} lead={T.lead[L](loc)}>
   <Fragment slot="actions">
