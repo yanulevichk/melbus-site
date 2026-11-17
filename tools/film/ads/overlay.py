@@ -1,5 +1,5 @@
 """
-Надписи и озвучка поверх готового ролика рекламы «Ищем курьеров GLS» (1080×1920).
+Надписи и озвучка поверх готового ролика рекламы «Ищем водителей» (1080×1920).
   python3 overlay.py <видео> <выход> <заголовок через |> [--voice файл.mp3] [--sub "подстрочник цены"] [--noprice] [--py Y]
 Шрифты: Unbounded 800 и Onest 600 (TTF собираются из woff2 проекта, путь — в FONTS).
 """
@@ -16,6 +16,8 @@ src, out, head = a[0], a[1], a[2].replace('|', '\n')
 voice = a[a.index('--voice') + 1] if '--voice' in a else None
 sub = a[a.index('--sub') + 1] if '--sub' in a else 'пн–пт · в 15:00 свободен'
 noprice = '--noprice' in a
+BADGE = a[a.index('--badge') + 1] if '--badge' in a else 'ИЩЕМ ВОДИТЕЛЕЙ · ВАРШАВА'
+FOOT = a[a.index('--foot') + 1] if '--foot' in a else 'Доставка посылок · Варшава'
 PY = int(a[a.index('--py') + 1]) if '--py' in a else 1185      # высота блока цены
 tmp = out + '.layers'; os.makedirs(tmp, exist_ok=True)
 
@@ -30,9 +32,9 @@ def plate(img, y, w, h, fill, r=18):
     d = ImageDraw.Draw(img); d.rounded_rectangle(((W - w) / 2, y - h / 2, (W + w) / 2, y + h / 2), r, fill=fill)
 
 # 1 — плашка сверху
-L1 = layer(); f = font(UB, 34); d = ImageDraw.Draw(L1)
-w, h = text_c(d, 250, 'ИЩЕМ КУРЬЕРОВ GLS · ВАРШАВА', f, GRAPH)
-L1 = layer(); plate(L1, 250, w + 56, h + 44, TEAL + (255,), 14); text_c(ImageDraw.Draw(L1), 250, 'ИЩЕМ КУРЬЕРОВ GLS · ВАРШАВА', f, GRAPH)
+L1 = layer(); f = font(UB, 38); d = ImageDraw.Draw(L1)
+w, h = text_c(d, 250, BADGE, f, GRAPH)
+L1 = layer(); plate(L1, 250, w + 56, h + 44, TEAL + (255,), 14); text_c(ImageDraw.Draw(L1), 250, BADGE, f, GRAPH)
 # 2 — заголовок (белый, мягкая тень)
 L2 = layer()
 if head.strip():
@@ -52,8 +54,8 @@ L4 = layer(); band = Image.new('RGBA', (W + 200, 120), TEAL + (255,))
 f = font(UB, 46); bd = ImageDraw.Draw(band); bb = bd.textbbox((0, 0), 'НАПИШИ В WHATSAPP', font=f)
 bd.text(((W + 200 - (bb[2] - bb[0])) / 2 - bb[0], (120 - (bb[3] - bb[1])) / 2 - bb[1]), 'НАПИШИ В WHATSAPP', font=f, fill=GRAPH)
 band = band.rotate(2.2, expand=True, resample=Image.BICUBIC); L4.alpha_composite(band, (-100, 1450 - band.height // 2))
-f = font(ON, 32); w, h = text_c(ImageDraw.Draw(layer()), 0, 'Доставка посылок GLS · Варшава', f, WHITE)
-plate(L4, 1570, w + 44, h + 30, GRAPH + (215,), 12); text_c(ImageDraw.Draw(L4), 1570, 'Доставка посылок GLS · Варшава', f, WHITE)
+f = font(ON, 32); w, h = text_c(ImageDraw.Draw(layer()), 0, FOOT, f, WHITE)
+plate(L4, 1570, w + 44, h + 30, GRAPH + (215,), 12); text_c(ImageDraw.Draw(L4), 1570, FOOT, f, WHITE)
 # 0 — пометка
 L0 = layer(); ImageDraw.Draw(L0).text((40, 150), 'Визуализация', font=font(ON, 24), fill=(255, 255, 255, 140))
 for i, L in enumerate((L0, L1, L2, L3, L4)): L.save(f'{tmp}/L{i}.png')
