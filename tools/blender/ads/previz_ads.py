@@ -20,6 +20,7 @@ OUT = argv[1] if len(argv) > 1 else '/tmp/ads'
 RW, RH = (int(argv[2]), int(argv[3])) if len(argv) > 3 else (540, 960)
 KMOD, NMOD = (int(argv[4]), int(argv[5])) if len(argv) > 5 else (0, 1)
 FPS = 24
+SAMPLES = int(os.environ.get('ADS_SAMPLES', '10'))
 
 # ---------------- утилиты ----------------
 def clamp01(v): return max(0.0, min(1.0, v))
@@ -37,7 +38,8 @@ def eback(k, c1=1.70158):
 
 bpy.ops.wm.read_factory_settings(use_empty=True)
 sc = bpy.context.scene
-col = sc.collection
+col = bpy.data.collections.new('main'); sc.collection.children.link(col)
+hudc = bpy.data.collections.new('hudc'); sc.collection.children.link(hudc)
 FONT = bpy.data.fonts.load('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf')
 
 MATS = {}
@@ -65,12 +67,12 @@ def set_emit(m, strength, alpha=None):
 
 TEAL = (0.02, 0.72, 0.68)
 M = {
-    'white': mat('white', (0.9, 0.9, 0.9), .45), 'dark': mat('dark', (0.03, 0.035, 0.045), .5),
+    'white': mat('white', (0.86, 0.87, 0.88), .3), 'paint': mat('paint', (0.9, 0.9, 0.9), .22), 'dark': mat('dark', (0.03, 0.035, 0.045), .5),
     'graph': mat('graph', (0.06, 0.085, 0.11), .5), 'mid': mat('mid', (0.22, 0.24, 0.27), .7),
     'light': mat('light', (0.62, 0.64, 0.67), .6), 'glass': mat('glass', (0.05, 0.08, 0.1), .08, alpha=.35),
     'glass_s': mat('glass_s', (0.04, 0.06, 0.09), .1, metal=.6),
     'teal': mat('teal', TEAL, .4, emit=1.2), 'teal_m': mat('teal_m', TEAL, .45),
-    'road': mat('road', (0.035, 0.037, 0.042), .7), 'walk': mat('walk', (0.2, 0.2, 0.21), .8),
+    'road': mat('road', (0.075, 0.078, 0.085), .65), 'walk': mat('walk', (0.2, 0.2, 0.21), .8),
     'line': mat('line', (0.8, 0.8, 0.8), .6), 'lamp': mat('lamp', (1, .93, .8), .3, emit=6),
     'red': mat('red', (.8, .05, .04), .4, emit=1.5), 'tree': mat('tree', (0.1, 0.2, 0.14), .9),
     'clay': mat('clay', (0.78, 0.76, 0.73), .75), 'metal': mat('metal', (0.7, 0.72, 0.75), .25, metal=1),
@@ -80,6 +82,11 @@ M = {
     'h_tplate': mat('h_tplate', TEAL, 1, emit=1.6, ecol=(0.08, 0.86, 0.83)),
     'h_bar': mat('h_bar', (0.12, 0.15, 0.18), 1, emit=.6, ecol=(0.12, 0.15, 0.18)),
 }
+
+def _own(o):
+    for c in list(o.users_collection): c.objects.unlink(o)
+    col.objects.link(o)
+    return o
 
 def empty(name, loc=(0, 0, 0), parent=None):
     e = bpy.data.objects.new(name, None); col.objects.link(e)
@@ -100,7 +107,7 @@ def box(name, sx, sy, sz, m, loc=(0, 0, 0), parent=None, bevel=.02, rot=None):
 
 def cyl(name, r, h, m, loc=(0, 0, 0), parent=None, axis='z', n=28, r2=None):
     bpy.ops.mesh.primitive_cone_add(vertices=n, radius1=r, radius2=r if r2 is None else r2, depth=h)
-    o = bpy.context.active_object; o.name = name
+    o = _own(bpy.context.active_object); o.name = name
     for p in o.data.polygons: p.use_smooth = len(p.vertices) == 4
     o.data.materials.append(m); o.parent = parent; o.location = loc
     if axis == 'y': o.rotation_euler = (math.pi / 2, 0, 0)
@@ -109,7 +116,7 @@ def cyl(name, r, h, m, loc=(0, 0, 0), parent=None, axis='z', n=28, r2=None):
 
 def sphere(name, r, m, loc=(0, 0, 0), parent=None, scale=None):
     bpy.ops.mesh.primitive_uv_sphere_add(segments=24, ring_count=12, radius=r)
-    o = bpy.context.active_object; o.name = name
+    o = _own(bpy.context.active_object); o.name = name
     for p in o.data.polygons: p.use_smooth = True
     o.data.materials.append(m); o.parent = parent; o.location = loc
     if scale: o.scale = scale
@@ -117,7 +124,7 @@ def sphere(name, r, m, loc=(0, 0, 0), parent=None, scale=None):
 
 def torus(name, R, r, m, loc=(0, 0, 0), parent=None):
     bpy.ops.mesh.primitive_torus_add(major_radius=R, minor_radius=r, major_segments=40, minor_segments=10)
-    o = bpy.context.active_object; o.name = name
+    o = _own(bpy.context.active_object); o.name = name
     for p in o.data.polygons: p.use_smooth = True
     o.data.materials.append(m); o.parent = parent; o.location = loc
     return o
@@ -132,20 +139,54 @@ def text(name, s, size, m, loc=(0, 0, 0), rot=(0, 0, 0), parent=None, align='CEN
 def light(kind, energy, loc, rot=(0, 0, 0), color=(1, 1, 1), size=1.0, parent=None):
     d = bpy.data.lights.new(kind, kind); d.energy = energy; d.color = color
     if kind == 'AREA': d.size = size
-    if kind == 'SUN': d.angle = math.radians(6)
+    if kind == 'SUN': d.angle = math.radians(1.2)
     if kind == 'SPOT': d.spot_size = size; d.spot_blend = .5
     o = bpy.data.objects.new(kind, d); col.objects.link(o); o.location = loc; o.rotation_euler = rot; o.parent = parent
     return o
 
+def _desc(o):
+    out = [o]
+    for c in o.children: out += _desc(c)
+    return out
+
 # ---------------- камера и надписи ----------------
 camd = bpy.data.cameras.new('cam'); camd.clip_start = .03; camd.clip_end = 900
-cam = bpy.data.objects.new('cam', camd); col.objects.link(cam); sc.camera = cam
+cam = bpy.data.objects.new('cam', camd); sc.collection.objects.link(cam); sc.camera = cam
 HUD = empty('hud', (0, 0, -.25), cam)
 HUDS = []   # (obj, t_in, t_out, base_scale)
+CHK, CHK_FN, CAM_MARGIN = [], [], .1
 
-def set_cam(pos, target, lens, roll=0.0):
+def hermite(keys, t):
+    """keys: [(время, значение)] — гладкая кривая через точки (скорость непрерывна, без остановок на ключах)."""
+    n = len(keys)
+    if t <= keys[0][0]: return keys[0][1] * 1
+    if t >= keys[-1][0]: return keys[-1][1] * 1
+    i = max(j for j in range(n - 1) if keys[j][0] <= t)
+    t0, p0 = keys[i]; t1, p1 = keys[i + 1]
+    def tan(j):
+        a, b = max(j - 1, 0), min(j + 1, n - 1)
+        m = (keys[b][1] - keys[a][1]) * (1.0 / (keys[b][0] - keys[a][0]))
+        return m * (.35 if j in (0, n - 1) else 1.0)
+    h = t1 - t0; u = (t - t0) / h; u2, u3 = u * u, u * u * u
+    return p0 * (2 * u3 - 3 * u2 + 1) + tan(i) * (h * (u3 - 2 * u2 + u)) + p1 * (-2 * u3 + 3 * u2) + tan(i + 1) * (h * (u3 - u2))
+
+def hand_noise(t, amp):
+    return Vector((math.sin(t * 1.3) + .5 * math.sin(t * 2.9 + 1), math.sin(t * 1.1 + 2) + .5 * math.sin(t * 3.3),
+                   math.sin(t * 1.7 + 4) + .5 * math.sin(t * 2.3 + .5))) * amp
+
+def cam_path(t, K, amp=.012, fstop=None, focus=None):
+    """K: [(t, позиция, цель, объектив)]"""
+    pos = hermite([(k[0], Vector(k[1])) for k in K], t) + hand_noise(t, amp)
+    tg = hermite([(k[0], Vector(k[2])) for k in K], t) + hand_noise(t + 7, amp * .6)
+    set_cam(pos, tg, hermite([(k[0], float(k[3])) for k in K], t), .004 * math.sin(t * .9), fstop, focus)
+    return pos, tg
+
+def set_cam(pos, target, lens, roll=0.0, fstop=None, focus=None):
     cam.location = pos
     d = Vector(target) - Vector(pos)
+    camd.dof.use_dof = fstop is not None
+    if fstop is not None:
+        camd.dof.aperture_fstop = fstop; camd.dof.focus_distance = focus if focus is not None else d.length
     q = d.to_track_quat('-Z', 'Y')
     cam.rotation_euler = (q.to_matrix().to_4x4() @ Matrix.Rotation(roll, 4, 'Z')).to_euler()
     camd.lens = lens
@@ -173,10 +214,13 @@ def apply_hud(t):
         s = eback(seg(t, a, a + .28))
         if b is not None: s *= 1 - ein(seg(t, b - .18, b))
         g.scale = (s, s, s) if s > .001 else (0, 0, 0)
+    for b, a in TAPES:
+        k = eout(seg(t, a, a + .32))
+        b.scale = (max(k, .0001), 1, 1); b.location.x = -.65 + .65 * k
 
 # ---------------- бус (нос в +X, водитель слева = +Y) ----------------
 def make_van(name='van', passenger_seat=True, logo=True):
-    r = empty(name); W, D = M['white'], M['dark']
+    r = empty(name); W, D = M['paint'], M['dark']
     box('cargo', 3.5, 2.0, 1.95, W, (-.9, 0, 1.425), r, .07)
     box('cabfloor', 1.9, 1.96, .06, D, (1.75, 0, .5), r, 0)
     box('hood', .85, 2.0, .75, W, (2.28, 0, .83), r, .1)
@@ -195,9 +239,17 @@ def make_van(name='van', passenger_seat=True, logo=True):
     box('skirt', 5.3, 2.02, .14, D, (-.02, 0, .48), r, .03)
     box('bumper', .16, 2.0, .3, D, (2.72, 0, .6), r, .04)
     box('grille', .03, 1.15, .22, D, (2.715, 0, .98), r, .01)
+    for s in (1, -1):
+        box('mirror_arm', .06, .22, .04, D, (2.02, s * 1.08, 1.5), r, 0)
+        box('mirror', .05, .1, .3, D, (2.03, s * 1.2, 1.58), r, .02)
+        box('handle', .14, .02, .035, D, (1.0, s * 1.0, 1.12), r, .008)
+    box('plate', .01, .5, .12, M['light'], (2.805, 0, .6), r, 0)
+    box('rhandle', .02, .3, .04, D, (-2.66, 0, 1.15), r, 0)
+    box('rseam', .012, .012, 1.8, D, (-2.655, 0, 1.42), r, 0)
     wheels = []
     for wx in (1.8, -1.55):
         for s in (1, -1):
+            cyl('arch', .47, .05, D, (wx, s * .99, .42), r, 'y', 32)
             w = cyl('wheel', .37, .26, D, (wx, s * .9, .37), r, 'y'); wheels.append(w)
             cyl('hub', .2, .27, M['light'], (0, 0, 0), w, 'z', 16).rotation_euler = (0, 0, 0)
     # сдвижная дверь (правый борт) и тёмный проём за ней
@@ -210,7 +262,7 @@ def make_van(name='van', passenger_seat=True, logo=True):
             text('logoA', 'MEL', .36, M['graph'], (ax - .02 * (1 if s < 0 else -1), s * 1.012, 1.5), rot, r, 'RIGHT', .004)
             text('logoB', 'BUS', .36, M['teal_m'], (ax + .02 * (1 if s < 0 else -1), s * 1.012, 1.5), rot, r, 'LEFT', .004)
     # кабина внутри
-    box('dash', .42, 1.9, .28, D, (1.98, 0, 1.13), r, .05)
+    box('dash', .4, 1.9, .28, D, (2.05, 0, 1.13), r, .05)
     ys = (.45, -.45) if passenger_seat else (.45,)
     for y in ys:
         box('seat', .5, .5, .14, M['mid'], (1.3, y, .9), r, .05)
@@ -230,32 +282,32 @@ def spin_wheels(v, dist):
 def make_figure(m, pose='sit', parent=None, courier=False):
     r = empty('fig', (0, 0, 0), parent)
     if pose == 'sit':
-        box('pelvis', .3, .36, .2, m, (0, 0, .1), r, .07)
+        box('pelvis', .3, .36, .2, m, (0, 0, .105), r, .07)
         box('torso', .22, .4, .52, m, (-.05, 0, .46), r, .09, rot=(0, -.1, 0))
         sphere('head', .12, m, (-.02, 0, .9), r)
         for s in (1, -1):
-            box('thigh', .44, .14, .13, m, (.2, s * .1, .1), r, .05)
-            box('shin', .12, .12, .44, m, (.44, s * .1, -.13), r, .05)
-            box('uarm', .11, .1, .32, m, (.04, s * .25, .52), r, .04, rot=(0, .5, 0))
-            box('farm', .34, .09, .09, m, (.27, s * .21, .47), r, .04, rot=(0, -.25, 0))
+            box('thigh', .4, .14, .13, m, (.2, s * .1, .105), r, .05)
+            box('shin', .12, .12, .42, m, (.4, s * .1, -.15), r, .05)
+            box('uarm', .11, .1, .3, m, (.02, s * .26, .55), r, .04, rot=(0, .45, 0))
+            box('farm', .22, .09, .09, m, (.2, s * .26, .46), r, .04, rot=(0, -.2, 0))
     else:
         dk, tl = (M['graph'], M['teal_m']) if courier else (m, m)
         for s in (1, -1):
-            box('leg', .16, .15, .86, dk, (0, s * .1, .43), r, .06)
+            box('leg', .16, .15, .76, dk, (0, s * .1, .49), r, .06)
             box('shoe', .26, .13, .09, M['dark'] if courier else m, (.04, s * .1, .045), r, .03)
-            box('uarm', .11, .11, .34, dk, (.05, s * .27, 1.3), r, .045, rot=(0, -.35, 0))
-            box('farm', .32, .1, .1, dk, (.24, s * .25, 1.1), r, .04)
-            sphere('hand', .06, M['dark'] if courier else m, (.4, s * .23, 1.1), r)
-        box('torso', .26, .42, .64, dk, (0, 0, 1.18), r, .1)
+            box('uarm', .11, .1, .3, dk, (.06, s * .28, 1.32), r, .045, rot=(0, -.35, 0))
+            box('farm', .3, .09, .09, dk, (.27, s * .285, 1.1), r, .04)
+            sphere('hand', .055, M['dark'] if courier else m, (.46, s * .285, 1.1), r)
+        box('torso', .26, .44, .62, dk, (0, 0, 1.2), r, .1)
         if courier:
-            box('trim', .265, .425, .05, tl, (0, 0, .93), r, .01)
+            box('trim', .262, .442, .04, tl, (0, 0, .95), r, .01)
             box('zip', .01, .03, .5, tl, (.132, 0, 1.22), r, 0)
         sphere('head', .13, m, (0, 0, 1.68), r)
         if courier:
             cyl('cap', .136, .08, dk, (0, 0, 1.78), r, 'z', 24)
             box('visor', .14, .2, .02, tl, (.17, 0, 1.75), r, .008)
-            pb = box('parcel', .36, .44, .3, M['white'], (.42, 0, 1.13), r, .015)
-            box('tape', .365, .06, .305, M['teal_m'], (.42, 0, 1.13), r, 0)
+            pb = box('parcel', .36, .44, .3, M['white'], (.44, 0, 1.13), r, .015)
+            box('tape', .362, .06, .302, M['teal_m'], (.44, 0, 1.13), r, 0)
     return r
 
 # ---------------- город ----------------
@@ -278,7 +330,12 @@ def buildings(x0, x1, y_face, side, hmin, hmax, seed, night=False, depth=22, wmi
         m = mat('b%.2f%.2f%d' % (tone[0], tone[2], night), tone, .8)
         yc = y_face + side * d / 2
         box('bld', w - .6, d, h, m, (x + w / 2, yc, h / 2), None, 0)
-        fl = 3.4; z = 2.2
+        if not night:
+            box('shop', w - 1.2, d + .1, 2.6, M['glass_s'], (x + w / 2, yc, 1.5), None, 0)
+            box('shoplight', w - 2.2, .06, .14, M['lamp'], (x + w / 2, y_face - side * .08, 2.95), None, 0)
+        box('parapet', w - .4, d + .2, .5, m, (x + w / 2, yc, h + .25), None, 0)
+        box('roofbox', w * .3, d * .3, 2.4, m, (x + w / 2 + rnd.uniform(-2, 2), yc, h + 1.2), None, 0)
+        fl = 3.4; z = 5.2 if not night else 2.2
         while z < h - 2:
             box('band', w - 1.6, d + .06, 1.5, M['glass_s'], (x + w / 2, yc, z + .75), None, 0); z += fl
         if night:
@@ -306,75 +363,101 @@ def car(x, y, heading=0.0, rgb=(.5, .1, .1)):
         for s in (1, -1): cyl('cw', .32, .22, M['dark'], (wx, s * .85, .32), r, 'y', 16)
     return r
 
-def render_setup(world=(0.5, 0.6, 0.75), wstr=1.0, night=False):
+SUN_DIR = Vector((.6, -.55, .32)).normalized()
+HUD_WORLD = MAIN_WORLD = None
+def render_setup(world=(0.5, 0.6, 0.75), wstr=1.0, night=False, haze=.0035):
     sc.render.engine = 'BLENDER_EEVEE'
     ee = sc.eevee
-    ee.taa_render_samples = 24; ee.use_gtao = True; ee.gtao_distance = 1.2
+    ee.taa_render_samples = SAMPLES; ee.use_gtao = True; ee.gtao_distance = 1.6; ee.gtao_factor = 1.3
     ee.use_bloom = True; ee.bloom_threshold = 1.0; ee.bloom_intensity = .06 if not night else .12; ee.bloom_radius = 6
     ee.use_ssr = True; ee.use_soft_shadows = True; ee.shadow_cube_size = '1024'; ee.shadow_cascade_size = '2048'
     sc.view_settings.view_transform = 'Filmic'; sc.view_settings.look = 'Medium High Contrast'
     w = bpy.data.worlds.new('w'); w.use_nodes = True
-    bg = w.node_tree.nodes['Background']; bg.inputs[0].default_value = (*world, 1); bg.inputs[1].default_value = wstr
+    nt = w.node_tree; bg = nt.nodes['Background']; bg.inputs[0].default_value = (*world, 1); bg.inputs[1].default_value = wstr
+    if not night:
+        sky = nt.nodes.new('ShaderNodeTexSky'); sky.sky_type = 'HOSEK_WILKIE'; sky.turbidity = 2.6; sky.ground_albedo = .25
+        sky.sun_direction = SUN_DIR
+        nt.links.new(sky.outputs[0], bg.inputs[0]); bg.inputs[1].default_value = 1.5 * wstr
+        sc.view_settings.exposure = .55
+    vol = nt.nodes.new('ShaderNodeVolumeScatter'); vol.inputs['Density'].default_value = haze
+    vol.inputs['Anisotropy'].default_value = .55
+    vol.inputs['Color'].default_value = (.75, .85, 1, 1) if not night else (.35, .5, .8, 1)
+    if haze > 0: nt.links.new(vol.outputs[0], nt.nodes['World Output'].inputs['Volume'])
+    ee.volumetric_start = .5; ee.volumetric_end = 260; ee.volumetric_tile_size = '8'; ee.volumetric_samples = 48
+    ee.use_volumetric_lights = True; ee.use_volumetric_shadows = False
+    ee.bokeh_max_size = 60; ee.use_bokeh_jittered = False
     sc.world = w
+    bw = bpy.data.worlds.new('hudw'); bw.use_nodes = True; bw.node_tree.nodes['Background'].inputs[1].default_value = 0
+    global HUD_WORLD, MAIN_WORLD; HUD_WORLD, MAIN_WORLD = bw, w
     sc.render.resolution_x, sc.render.resolution_y = RW, RH
     sc.render.image_settings.file_format = 'PNG'; sc.render.fps = FPS
 
-def sun(energy=4.0, rot=(math.radians(52), 0, math.radians(35)), color=(1, .93, .82)):
-    return light('SUN', energy, (0, 0, 50), rot, color)
+def sun(energy=5.0, direction=None, color=(1, .86, .68)):
+    """Низкое тёплое солнце (длинные тени); direction — куда СВЕТИТ солнце оттуда, где оно на небе."""
+    global SUN_DIR
+    if direction is not None: SUN_DIR = Vector(direction).normalized()
+    o = light('SUN', energy, (0, 0, 50), (0, 0, 0), color)
+    o.rotation_euler = (-SUN_DIR).to_track_quat('-Z', 'Y').to_euler()
+    return o
 
 def badge(t_out=None):
     """Плашка «ИЩЕМ КУРЬЕРА» — с первой секунды в каждом ролике."""
     hud('ИЩЕМ КУРЬЕРА · ВАРШАВА', .74, .058, 'g', .05, t_out, plate='teal')
 
+TAPES = []
 def cta(t):
-    hud('Напиши в WhatsApp', -.5, .06, 'g', t, None, plate='teal')
-    hud('Маршруты GLS · работодатель MELBUS', -.6, .03, 'w', t + .15, None, plate='dark')
+    if NOTEXT: return
+    g = empty('tape_g', (0, -.5, 0), HUD); g.rotation_euler = (0, 0, math.radians(2.2))
+    b = box('tape_b', 1.3, .12, .002, M['h_tplate'], (0, 0, -.003), g, 0)
+    TAPES.append((b, t))
+    hud('НАПИШИ В WHATSAPP  →', -.5, .058, 'g', t + .22, None).rotation_euler = (0, 0, math.radians(2.2))
+    hud('Маршруты GLS · Варшава', -.6, .032, 'w', t + .4, None, plate='dark')
 
 # =====================================================================================
 # 8 — «ПУСТОЕ КРЕСЛО»
 # =====================================================================================
 def scene8():
-    render_setup((0.55, 0.66, 0.82), 1.1); sun(4.5, (math.radians(58), 0, math.radians(-140)))
+    sun(6, (.95, .02, .32)); render_setup(wstr=1.0, haze=.0025)
     street(-80, 260); buildings(-80, 260, 11, 1, 14, 34, 1); buildings(-80, 260, -11, -1, 14, 34, 2)
     for i in range(18): tree(-70 + i * 19, 8.2 * (1 if i % 2 else -1), .9)
     v = make_van(passenger_seat=False); van = v['root']
     v['glass'][2].hide_render = True                     # правое окно снято — через него влетает камера
     ghost = make_figure(M['ghost'], 'sit', van); ghost.location = (1.3, .45, .97)
     cam.parent = van
+    CHK.append(('призрак/кабина', meshes(ghost), [o for o in meshes(van) if o not in meshes(ghost)]))
     light('POINT', 60, (1.5, -.2, 2.1), parent=van, color=(1, .95, .9))
     badge(3.3)
     hud('ЗДЕСЬ ДОЛЖЕН\nБЫТЬ ТЫ', .56, .1, 'w', 3.7, None, plate='dark')
     hud('6500–8000 zł', -.2, .12, 't', 4.7, None, plate='dark')
     hud('на руки · пн–пт · в 15:00 свободен', -.32, .04, 'w', 4.95, None, plate='dark')
     cta(5.9)
-    A = [(0.0, (10.5, -6.0, 1.3), (1.2, 0, 1.3), 30), (1.5, (5.2, -4.2, 1.7), (1.5, 0, 1.45), 30),
-         (2.5, (1.75, -1.75, 1.72), (1.5, .45, 1.45), 26), (3.4, (1.55, -.8, 1.62), (1.42, .45, 1.38), 17),
-         (7.5, (1.42, -.72, 1.64), (1.35, .5, 1.42), 16)]
+    A = [(0.0, (13.0, -7.5, .75), (1.6, 0, 1.25), 40), (1.3, (7.0, -4.9, 1.35), (1.6, 0, 1.4), 34),
+         (2.3, (3.0, -2.5, 1.75), (1.55, .3, 1.45), 26), (3.0, (1.56, -1.22, 1.72), (1.48, .45, 1.42), 19),
+         (3.9, (1.5, -.8, 1.66), (1.42, .45, 1.38), 16.5), (7.5, (1.42, -.68, 1.68), (1.36, .5, 1.44), 15.5)]
     def apply(t):
         x = -40 + 11 * t
         van.location = (x, 2.6, 0); spin_wheels(v, x)
         v['steer'].rotation_euler = (0, 0, .55 * math.sin(t * 2.3) + .2 * math.sin(t * 5.1))
-        for i in range(len(A) - 1):
-            if t <= A[i + 1][0] or i == len(A) - 2:
-                k = eio(seg(t, A[i][0], A[i + 1][0]))
-                set_cam(lerp3(A[i][1], A[i + 1][1], k), lerp3(A[i][2], A[i + 1][2], k), lerp(A[i][3], A[i + 1][3], k)); break
-        g = eback(seg(t, 3.45, 3.95))
-        ghost.scale = (g, g, g)
-        set_emit(M['ghost'], 2.2 + 1.2 * math.sin(t * 6.5), .26 + .1 * math.sin(t * 6.5))
+        cam_path(t, A, amp=.006 + .01 * (1 - seg(t, 2.2, 3.2)), fstop=lerp(2.8, 1.8, seg(t, 2.5, 3.6)))
+        g = eout(seg(t, 3.45, 4.1))
+        ghost.scale = (1, 1, 1) if g > 0 else (0, 0, 0)
+        set_emit(M['ghost'], (2.2 + 1.2 * math.sin(t * 6.5)) * g, (.26 + .1 * math.sin(t * 6.5)) * g)
     return 7.5, apply
 
 # =====================================================================================
 # 9 — «ВЫБЕРИ ПЕРСОНАЖА»
 # =====================================================================================
 def scene9():
-    render_setup((0.01, 0.014, 0.02), 1.0, night=True)
+    render_setup((0.01, 0.014, 0.02), 1.0, night=True, haze=.005)
     box('floor', 60, 60, .1, mat('stage', (0.02, 0.025, 0.03), .55), (0, 0, -.05), None, 0)
     cyl('pod', 1.15, .22, M['graph'], (0, 0, .11), None, 'z', 64)
     torus('ring', 1.16, .025, M['teal'], (0, 0, .225))
     ring2 = torus('ring2', 1.5, .012, M['teal'], (0, 0, .02))
-    spin = empty('spin', (0, 0, .22))
-    make_figure(M['clay'], 'stand', spin, courier=True)
-    v = make_van(); v['root'].location = (-1.5, 5.2, 0); v['root'].rotation_euler = (0, 0, math.radians(-28))
+    spin = empty('spin', (0, 0, .226))
+    fig = make_figure(M['clay'], 'stand', spin, courier=True)
+    CHK.append(('коробка/руки', named('parcel'), [o for o in meshes(fig) if o.name.split('.')[0] != 'parcel']))
+    CHK.append(('фигура/подиум', meshes(fig), named('pod', 'ring')))
+    v = make_van(); v['root'].location = (-2.6, 8.5, 0); v['root'].rotation_euler = (0, 0, math.radians(-30))
     light('AREA', 900, (2.5, -3.5, 4.2), (math.radians(48), 0, math.radians(32)), (1, .96, .9), 3)
     light('AREA', 500, (-3.5, -1, 3.0), (math.radians(60), 0, math.radians(-75)), (0.3, .95, .92), 3)
     light('AREA', 220, (-1, 4, 5), (math.radians(-50), 0, 0), (.6, .8, 1), 4)
@@ -391,12 +474,14 @@ def scene9():
             box('barbg', .94, .016, .002, M['h_bar'], (0, y - .04, -.002), HUD, 0)
             f = box('barfill', 1, .016, .002, M['h_tplate'], (0, y - .04, 0), HUD, 0); bars.append((f, t0 + .1, lvl))
     btn = hud('ИГРАТЬ  ▶', -.56, .075, 'g', 4.6, None, plate='teal')
-    hud('Напиши в WhatsApp · маршруты GLS · MELBUS', -.66, .028, 'w', 5.2, None, plate='dark')
+    hud('Напиши в WhatsApp · маршруты GLS', -.66, .03, 'w', 5.2, None, plate='dark')
     def apply(t):
         spin.rotation_euler = (0, 0, math.radians(-65) + 1.25 * t + .9 * eout(seg(t, 0, 1.2)))
         ring2.scale = (1 + .06 * math.sin(t * 3),) * 2 + (1,)
-        a = math.radians(-90 + 10 * math.sin(t * .5))
-        set_cam((7.4 * math.cos(a), 7.4 * math.sin(a), 1.3), (0, 0, .05), 50)
+        a = math.radians(-112 + 44 * eout(seg(t, 0, 7.0)))
+        d = lerp(10.5, 7.3, eout(seg(t, 0, 2.2))) - .25 * seg(t, 2.2, 7)
+        pos = Vector((d * math.cos(a), d * math.sin(a), lerp(.7, 1.35, eout(seg(t, 0, 2.6))))) + hand_noise(t, .008)
+        set_cam(pos, (0, 0, .0), 44, 0, 2.0, (Vector((0, 0, 1.2)) - pos).length)
         for f, t0, lvl in bars:
             k = eout(seg(t, t0, t0 + .6)) * lvl
             f.scale = (max(k * .94, .0001), 1, 1); f.location.x = -.47 + .94 * k / 2
@@ -420,7 +505,7 @@ GLYPH = {
     ' ': '.....,.....,.....,.....,.....,.....,.....',
 }
 def scene10():
-    render_setup((0.006, 0.01, 0.022), 1.0, night=True)
+    render_setup((0.006, 0.01, 0.022), 1.0, night=True, haze=.0022)
     rnd = random.Random(10)
     box('ground', 500, 500, .1, mat('wet', (0.02, 0.022, 0.028), .18), (0, 0, -.05), None, 0)
     COLS, ROWS, CW, CH = 45, 38, 1.0, 1.6
@@ -452,9 +537,10 @@ def scene10():
     street(-150, 150)                                       # дорога по y=0 перенесётся ниже
     for o in list(bpy.data.objects):
         if o.name.startswith(('asphalt', 'walk', 'dash')): o.location.y -= 38
-    for i in range(10): lamp_post(-90 + i * 20, -29.5, 1)
+    for i in range(10): lamp_post(-98 + i * 20, -29.5, 1)
     v = make_van(); van = v['root']
     light('SPOT', 4000, (2.8, 0, 1.0), (0, math.radians(-82), 0), (1, .95, .85), math.radians(50), parent=van)
+    CHK.append(('бус/улица', meshes(van), named('pole', 'arm', 'head', 'bld', 'walk')))
     light('SUN', .25, (0, 0, 50), (math.radians(30), 0, math.radians(20)), (.5, .6, 1))
     badge(2.4)
     hud('пн–пт · 5:30–15:00 · на руки', .72, .045, 'w', 4.1, None, plate='dark')
@@ -468,9 +554,9 @@ def scene10():
             if want is not cur: o.material_slots[0].material = want; w[3] = want
         pulse = 7 + 5 * math.sin((t - 3.6) * 9) * (1 - seg(t, 3.6, 5.0)) if t > 3.6 else 7
         set_emit(m_teal, pulse)
-        k = eio(seg(t, 0, 4.2)); k2 = seg(t, 4.2, 7.5)
-        set_cam(lerp3((-5, 14, 1.5), (0, -66, 13), k) + Vector((0, -3 * k2, .8 * k2)),
-                lerp3((0, 40, 44), (0, 40, 31.5), k), lerp(16, 30, k))
+        cam_path(t, [(0, (-9, 20, 1.4), (-2, 40, 46), 15), (1.5, (-13, -4, 3.5), (-1, 40, 40), 18),
+                     (3.0, (-6, -44, 9.5), (0, 40, 33), 25), (4.4, (0, -64, 12.5), (0, 40, 31.5), 30),
+                     (7.5, (2.5, -69, 13.6), (0, 40, 31.2), 30.5)], amp=.02)
         x = -62 + 13.5 * (t - 2.2)
         van.location = (x, -36.5, 0); spin_wheels(v, x)
     return 7.5, apply
@@ -479,9 +565,9 @@ def scene10():
 # 11 — «БУС ИЗ КОРОБОК»
 # =====================================================================================
 def scene11():
-    render_setup((0.55, 0.66, 0.82), 1.1); sun(4.5, (math.radians(50), 0, math.radians(200)))
-    street(-120, 160, 14); buildings(-120, 160, 12, 1, 16, 44, 5); buildings(-120, 160, -12, -1, 16, 44, 6)
-    for i in range(14): tree(-100 + i * 19, 9.3 * (1 if i % 2 else -1), .9)
+    sun(6, (-.94, .03, .36)); render_setup(wstr=1.0, haze=.0025)
+    street(-140, 180, 34, 6); buildings(-140, 180, 23, 1, 18, 60, 5); buildings(-140, 180, -23, -1, 18, 60, 6)
+    for i in range(16): tree(-110 + i * 17, 19.5 * (1 if i % 2 else -1), 1.0)
     v = make_van(); van = v['root']
     ghost = make_figure(M['ghost'], 'sit', van); ghost.location = (1.3, .45, .97)
     rnd = random.Random(11)
@@ -490,24 +576,36 @@ def scene11():
     b0 = box('bx', C * .94, C * .94, C * .94, M['white'], (0, 0, -80), None, .012)
     b0.data.materials.append(M['teal_m'])
     tp = box('bxt', C * .95, C * .14, C * .95, M['teal_m'], (0, 0, -80), None, 0)
-    cells = []
     nx, ny, nz = 15, 6, 6
+    solid = set()
     for i in range(nx):
         for j in range(ny):
             for k in range(nz):
-                x = -2.7 + C * (i + .5); y = -1.08 + C * (j + .5); z = .3 + C * (k + .5)
+                x = -2.7 + C * (i + .5); z = .3 + C * (k + .5)
                 if x > 1.9 and z > 1.25 + (2.7 - x) * 1.4: continue        # скос капота/лобового
-                surf = i in (0, nx - 1) or j in (0, ny - 1) or k in (0, nz - 1) or (x > 1.5 and z > 1.1)
-                if not surf: continue
-                cells.append((x, y, z))
+                solid.add((i, j, k))
     boxes = []
-    for (x, y, z) in cells:
+    for (i, j, k) in sorted(solid):
+        nb = [(i + 1, j, k), (i - 1, j, k), (i, j + 1, k), (i, j - 1, k), (i, j, k + 1)]
+        if all(n in solid for n in nb): continue                           # только оболочка
+        x = -2.7 + C * (i + .5); y = -1.08 + C * (j + .5); z = .3 + C * (k + .5)
         g = empty('bg'); o = bpy.data.objects.new('b', b0.data); col.objects.link(o); o.parent = g
         o2 = bpy.data.objects.new('bt', tp.data); col.objects.link(o2); o2.parent = g
-        order = (x + 2.7) / 5.4 * .62 + (z / 2.5) * .28 + rnd.uniform(0, .1)
-        a = rnd.uniform(0, 2 * math.pi); R = rnd.uniform(22, 55)
-        start = Vector((R * math.cos(a) * 1.6, R * math.sin(a) * .35, rnd.uniform(14, 48)))
-        boxes.append((g, Vector((x, y, z)), start, .25 + 3.3 * order, Vector((rnd.uniform(-6, 6), rnd.uniform(-6, 6), rnd.uniform(-6, 6)))))
+        # колонна (одинаковые x, y) летит строго вертикально, нижние раньше верхних → коробки не встречаются
+        t0 = .15 + 3.0 * (.68 * i / nx + .32 * k / nz) + rnd.uniform(0, .04) + .05 * ((i * 7 + j * 3) % 5) / 5
+        boxes.append((g, Vector((x, y, z)), t0, rnd.uniform(46, 60)))
+    CHK.append(('призрак/кабина', meshes(ghost), [o for o in meshes(van) if o not in meshes(ghost)]))
+    CHK.append(('бус/улица', meshes(van), named('trunk', 'crown', 'bld', 'walk', 'shop')))
+    def box_check(t):
+        cols_ = {}
+        for g, tgt, t0, H in boxes:
+            if g.scale.x > .01: cols_.setdefault((round(tgt.x, 3), round(tgt.y, 3)), []).append(g.location.z)
+        out = []
+        for key, zs in cols_.items():
+            zs.sort()
+            if any(b - a < C * .94 for a, b in zip(zs, zs[1:])): out.append('коробки в колонне %s' % (key,))
+        return out
+    CHK_FN.append(box_check)
     ringm = mat('shock', TEAL, .5, emit=6, alpha=.8)
     shock = torus('shock', 1.0, .05, ringm, (0, 0, 1.2))
     badge(4.6)
@@ -517,49 +615,52 @@ def scene11():
     cta(6.9)
     TS = 4.55
     def apply(t):
-        for g, tgt, start, t0, sp in boxes:
-            k = seg(t, t0, t0 + .95); e = eout(k)
-            p = start.lerp(tgt, e); p.z += 3.0 * math.sin(e * math.pi) * (1 - e)
-            g.location = p
-            r = (1 - e)
-            g.rotation_euler = (sp.x * r, sp.y * r, sp.z * r)
+        for g, tgt, t0, H in boxes:
+            k = seg(t, t0, t0 + 1.0)
+            fall = (1 - k) ** 2.2                      # быстро сверху, мягкая посадка
+            sq = .06 * math.sin(seg(t, t0 + 1.0, t0 + 1.22) * math.pi)   # лёгкое «приседание» при посадке
+            g.location = (tgt.x, tgt.y, tgt.z + 52.0 * fall)
             s = 1.0 if t < TS else 0.0
             if TS - .12 < t < TS: s = 1 + .25 * seg(t, TS - .12, TS)
-            g.scale = (s, s, s)
+            g.scale = (s, s, s * (1 - sq))
         vs = 0.0 if t < TS else 1 + .07 * (1 - eout(seg(t, TS, TS + .35)))
         van.scale = (vs, vs, vs)
         q = seg(t, TS, TS + .7)
         shock.scale = (.01,) * 3 if q <= 0 or q >= 1 else (1 + 9 * eout(q),) * 2 + (1,)
         set_emit(ringm, 6 * (1 - q), .8 * (1 - q))
-        g_ = eback(seg(t, TS + .5, TS + 1.0)); ghost.scale = (g_, g_, g_)
-        set_emit(M['ghost'], 3.0 + 1.6 * math.sin(t * 6.5), .5 + .12 * math.sin(t * 6.5))
-        k1 = eio(seg(t, 0, 4.4)); k2 = eio(seg(t, 4.7, 8.0))
-        p1 = Vector((13.5, 7.6, 6.2)).lerp(Vector((8.1, 4.3, 1.9)), k1)
-        pos = p1.lerp(Vector((5.3, 1.75, 1.8)), k2)
-        tg = Vector((0, 0, 1.3)).lerp(Vector((1.3, .45, 1.55)), k2)
-        set_cam(pos, tg, lerp(24, 34, k2))
+        g_ = eout(seg(t, TS + .45, TS + 1.1)); ghost.scale = (1, 1, 1) if g_ > 0 else (0, 0, 0)
+        set_emit(M['ghost'], (3.0 + 1.6 * math.sin(t * 6.5)) * g_, (.5 + .12 * math.sin(t * 6.5)) * g_)
+        # облёт по дуге: высоко сбоку → низко спереди-слева → наезд на пустое кресло
+        O = [(0, Vector((100, 17.5, 8.0))), (2.2, Vector((62, 12.5, 4.2))), (4.4, Vector((30, 9.4, 1.75))),
+             (5.6, Vector((24, 7.2, 1.7))), (8.0, Vector((19, 5.6, 1.78)))]
+        o = hermite(O, t); a = math.radians(o.x)
+        imp = .05 * math.exp(-(t - TS) * 7) * math.sin((t - TS) * 60) if t >= TS else 0
+        pos = Vector((o.y * math.cos(a), o.y * math.sin(a), o.z + imp)) + hand_noise(t, .012)
+        tg = hermite([(0, Vector((0, 0, 3.2))), (3.0, Vector((0, 0, 1.4))), (4.6, Vector((.2, 0, 1.3))), (8.0, Vector((1.25, .42, 1.5)))], t)
+        set_cam(pos, tg, hermite([(0, 22.0), (4.4, 28.0), (8.0, 40.0)], t), 0, lerp(4.0, 2.0, seg(t, 4.6, 6.5)), (tg - pos).length)
     return 8.0, apply
 
 # =====================================================================================
 # 12 — «ГИГАНТСКИЙ БУС»
 # =====================================================================================
 def scene12():
-    render_setup((0.55, 0.66, 0.82), 1.1); sun(4.5, (math.radians(55), 0, math.radians(-30)))
+    sun(6.5, (-.95, -.02, .38)); render_setup(wstr=1.0, haze=.0045)
     street(-420, 200, 30, 6)
     buildings(-420, 200, 18, 1, 38, 120, 7, depth=40, wmin=18, wmax=34)
     buildings(-420, 200, -18, -1, 38, 120, 8, depth=40, wmin=18, wmax=34)
     rnd = random.Random(12)
     for i in range(22):
         s = 1 if i % 2 else -1
-        tree(-150 + i * 14 + rnd.uniform(-2, 2), s * 16.4, 1.0); lamp_post(-146 + i * 14, s * 15.6, s)
+        if s < 0 and 2 < -150 + i * 14 < 44: continue
+        tree(-150 + i * 14 + rnd.uniform(-2, 2), s * 16.6, 1.0); lamp_post(-146 + i * 14, s * 15.9, s)
     cols = [(.5, .08, .06), (.08, .16, .4), (.55, .55, .58), (.05, .05, .06), (.6, .5, .1)]
     for i in range(16):
         s = 1 if i % 2 else -1
         cx_ = -60 + i * 7.2 + rnd.uniform(-.8, .8)
         if s < 0 and 2 < cx_ < 40: continue
         car(cx_, s * 13.6, 0 if s > 0 else math.pi, rnd.choice(cols))
-    mover = car(0, -11.5, 0, (.75, .75, .78))
     v = make_van(); van = v['root']; van.scale = (10, 10, 10)
+    CHK.append(('великан/улица', meshes(van), named('cbody', 'ccab', 'cw', 'trunk', 'crown', 'pole', 'arm', 'head', 'bld', 'shop', 'parapet', 'walk')))
     badge(4.4)
     hud('НАМ ОЧЕНЬ\nНУЖЕН ВОДИТЕЛЬ', .56, .095, 'w', 4.7, None, plate='dark')
     hud('6500–8000 zł', -.2, .12, 't', 5.7, None, plate='dark')
@@ -574,20 +675,21 @@ def scene12():
         van.location = (x, 0, 0); van.rotation_euler = (0, dip * 2.2, 0)
         for w in v['wheels']: w.rotation_euler = (math.pi / 2, -x / 3.7, 0)
         v['door'].location.x = .12 - 1.3 * eio(seg(t, 4.7, 6.0))
-        mover.location = (-30 + 9 * t, -11.5, 0)
         sh = min(1.0, speed / 150) * .09 + .06 * (1 - seg(t, TSTOP, TSTOP + .5)) * (1 if t >= TSTOP else 0)
         jx, jz = sh * math.sin(t * 47), sh * math.sin(t * 61 + 1)
-        k2 = eio(seg(t, 3.6, 8.0))
-        pos = Vector((19, -14.6, 1.65)) + Vector((4 * k2, -.4 * k2, .25 * k2)) + Vector((jx, 0, jz))
-        tg = lerp3((-40, -2, 9), (-12, -5, 11.5), eio(seg(t, 0, 4.6)))
-        set_cam(pos, tg, lerp(17, 15, k2))
+        pos = hermite([(0, Vector((14, -14.9, 1.5))), (3.0, Vector((18, -14.7, 1.6))), (5.0, Vector((22, -14.6, 1.7))),
+                       (8.0, Vector((25.5, -14.9, 1.9)))], t) + hand_noise(t, .012) + Vector((jx, 0, jz))
+        # сначала обычная улица на уровне глаз → взгляд уезжает вверх на великана → на открывающуюся дверь
+        tg = hermite([(0, Vector((-30, -9, 1.6))), (1.1, Vector((-55, -4, 5))), (2.4, Vector((-60, -1, 15))),
+                      (4.4, Vector((-10, -4, 12))), (6.2, Vector((-16, -8, 13.5))), (8.0, Vector((-17, -8, 13.5)))], t)
+        set_cam(pos, tg, hermite([(0, 24.0), (2.4, 18.0), (4.4, 15.0), (8.0, 14.5)], t), .012 * math.sin(t * 1.3))
     return 8.0, apply
 
 # =====================================================================================
 # 13 — «ЛОВИ КЛЮЧИ»
 # =====================================================================================
 def scene13():
-    render_setup((0.55, 0.66, 0.82), 1.1); sun(4.5, (math.radians(52), 0, math.radians(215)))
+    sun(6, (.95, .03, .32)); render_setup(wstr=1.0, haze=.0025)
     street(-60, 160); buildings(-60, 160, 11, 1, 14, 36, 13); buildings(-60, 160, -11, -1, 14, 36, 14)
     for i in range(12): tree(-40 + i * 17, 8.2 * (1 if i % 2 else -1), .9)
     v = make_van(); van = v['root']; van.location = (11.5, 2.4, 0); van.rotation_euler = (0, 0, math.radians(197))
@@ -615,22 +717,32 @@ def scene13():
         fingers.append(h_)
     th = empty('th', (.052, 0, -.02), hand); th.rotation_euler = (0, .7, 0)
     box('thumb', .022, .024, .065, M['graph'], (0, 0, .03), th, .008)
+    CHK.append(('ключи/рука', meshes(keys), meshes(hand)))
+    CHK.append(('ключи/мир', meshes(keys), meshes(van) + meshes(thrower) + named('asphalt')))
+    CHK.append(('рука/мир', meshes(hand), meshes(van) + meshes(thrower)))
     badge(3.6)
-    hud('ЛОВИ!', .5, .16, 'w', .7, 3.2)
+    hud('ЛОВИ!', .5, .15, 'w', .7, 3.2, plate='dark')
     hud('БУС 2020+ · ПН–ПТ\nВ 15:00 СВОБОДЕН', .58, .07, 'w', 4.3, None, plate='dark')
-    hud('Опыт не нужен — научим', -.3, .045, 'w', 5.0, None, plate='dark')
+    hud('Опыт не нужен — научим', .44, .045, 'w', 5.0, None, plate='dark')
     cta(5.6)
-    CAM = Vector((0, 0, 1.62)); P0 = Vector((7.75, .15, 2.15)); TC = 3.3
+    CAM = Vector((0, 0, 1.62)); P0 = Vector((7.6, .15, 2.3)); TC = 3.3; KLOC = Vector((0, -.037, .03))
     def hand_pose(t):
         up = eout(seg(t, 2.3, 3.1)); lift = eio(seg(t, 3.5, 4.5))
-        rest = Vector((.52, -.08, 1.33)); show = Vector((.42, -.01, 1.585))
-        p = Vector((.5, -.1, .95)).lerp(rest, up).lerp(show, lift)
+        rest = Vector((.52, -.06, 1.3)); show = Vector((.43, -.01, 1.56))
+        p = Vector((.42, -.1, .9)).lerp(rest, up).lerp(show, lift)
         hit = seg(t, TC, TC + .5); p.z -= .045 * math.sin(hit * math.pi) * (1 - hit)
-        tilt = lerp(math.radians(-62), math.radians(-12), lift)      # ладонь почти горизонтально → к камере
-        return p, Euler((0, tilt, math.radians(-90)), 'XYZ')
+        # ладонь вверх (ловит ключи сверху) → разворот ладонью к камере
+        a_ = math.radians(lerp(18, 80, lift)); c_, s_ = math.cos(a_), math.sin(a_)
+        R = Matrix(((0, s_, c_), (-1, 0, 0), (0, -c_, s_)))      # столбцы: X=(0,-1,0), Y=(s,0,-c), Z=пальцы=(c,0,s)
+        return p, R.to_euler('XYZ')
     def apply(t):
-        set_cam(CAM + Vector((0, 0, .01 * math.sin(t * 1.7))), (6, .3, 1.5 - .12 * eio(seg(t, 3.5, 4.5))), lerp(22, 26, eio(seg(t, 3.4, 4.6))))
         p, e = hand_pose(t)
+        # перевод фокуса: бус вдалеке → ключи летят → рука с брелоком у камеры
+        kd = (keys.matrix_world.translation - CAM).length if t > .6 else 8.0
+        foc = lerp(8.0, max(.3, kd), eio(seg(t, .5, 1.3)))
+        set_cam(CAM + hand_noise(t, .006) + Vector((-.05 * eio(seg(t, 0, 3)), 0, 0)),
+                (6, .3, 1.5 - .12 * eio(seg(t, 3.5, 4.5))), hermite([(0, 20.0), (3.3, 23.0), (4.6, 27.0), (7, 28.0)], t),
+                0, 2.0, foc)
         hand.location = p; hand.rotation_euler = e
         curl = lerp(.15, .5, eout(seg(t, TC, TC + .25)))
         for f in fingers: f.rotation_euler = (curl, 0, 0)
@@ -638,32 +750,101 @@ def scene13():
         if t < TC:
             k = seg(t, .55, TC)
             ke = k * (2 - k) * .55 + k * .45                # быстрый старт, «зависание» у камеры
-            pc, _ = hand_pose(TC)
-            end = pc + Vector((-.02, 0, .05))
-            pos = P0.lerp(end, ke); pos.z += 1.5 * math.sin(ke * math.pi) * (1 - .15 * ke)
+            pc, ec = hand_pose(TC)
+            Mh = Matrix.Translation(pc) @ ec.to_matrix().to_4x4()
+            end = Mh @ KLOC                                  # ровно то место на ладони, где ключи останутся
+            # подлёт к ладони со стороны её «лица» (по нормали), чтобы не задеть пальцы
+            nrm = (Mh.to_3x3() @ Vector((0, -1, 0))).normalized()
+            pos = P0.lerp(end, ke) + nrm * (.25 * (1 - ke) ** .3); pos.z += 1.5 * math.sin(ke * math.pi) * (1 - ke) ** .5
             if k <= 0: pos = P0 + Vector((0, 0, -.9))
             keys.parent = None
             keys.location = pos
-            sp = (1 - ke) * 9 + .4
-            keys.rotation_euler = (sp * 1.3, sp * .7 + math.pi / 2, sp)
+            sp = max(0.0, 1 - ke / .82) * 9      # к ладони ключи подлетают уже ровно, без вращения
+            q_spin = Euler((sp * 1.3, sp * .7, sp), 'XYZ').to_quaternion()
+            q = (ec.to_quaternion() @ q_spin)
+            keys.rotation_euler = q.to_euler()
             s = 1.0 if k > 0 else 0.0
             keys.scale = (s, s, s)
         else:
             keys.parent = hand; keys.scale = (1, 1, 1)
-            sw = .5 * math.sin((t - TC) * 9) * math.exp(-(t - TC) * 3)
-            keys.location = (0, -.03, .075); keys.rotation_euler = (sw * .3, sw, 0)
+            sw = .35 * math.sin((t - TC) * 9) * math.exp(-(t - TC) * 3)
+            keys.location = KLOC; keys.rotation_euler = (0, sw, 0)   # качаются только в плоскости ладони
         arm = eio(seg(t, .2, .6)) - eio(seg(t, .6, 1.3))
         thrower.rotation_euler = (0, -.25 * arm, math.pi)
     return 7.0, apply
+
+# ---------------- проверка столкновений (ADS_CHECK=1 — без рендера) ----------------
+from mathutils.bvhtree import BVHTree
+def meshes(objs):
+    out = []
+    for o in (objs if isinstance(objs, (list, tuple)) else [objs]):
+        for d in _desc(o):
+            if d.type == 'MESH' and d.name.split('.')[0] not in ('tape', 'trim', 'zip', 'cap', 'visor', 'hub', 'arch'): out.append(d)
+    return out
+def named(*pref):
+    return [o for o in col.all_objects if o.type == 'MESH' and o.name.split('.')[0] in pref]
+def _aabb(o):
+    mw = o.matrix_world; pts = [mw @ Vector(c) for c in o.bound_box]
+    return (Vector((min(p.x for p in pts), min(p.y for p in pts), min(p.z for p in pts))),
+            Vector((max(p.x for p in pts), max(p.y for p in pts), max(p.z for p in pts))))
+def _bvh(o, dg):
+    oe = o.evaluated_get(dg); me = oe.to_mesh(); mw = oe.matrix_world
+    tr = BVHTree.FromPolygons([mw @ v.co for v in me.vertices], [tuple(p.vertices) for p in me.polygons])
+    oe.to_mesh_clear(); return tr
+def run_checks(t):
+    hits = []; dg = bpy.context.evaluated_depsgraph_get(); cache = {}
+    def bvh(o):
+        if o.name not in cache: cache[o.name] = _bvh(o, dg)
+        return cache[o.name]
+    for label, A, B in CHK:
+        ba = [(o, _aabb(o)) for o in A if o.scale.length > .01 and o.matrix_world.to_scale().length > .01]
+        bb = [(o, _aabb(o)) for o in B if o.matrix_world.to_scale().length > .01]
+        for oa, (a0, a1) in ba:
+            for ob, (b0, b1) in bb:
+                if oa is ob: continue
+                if a1.x < b0.x or b1.x < a0.x or a1.y < b0.y or b1.y < a0.y or a1.z < b0.z or b1.z < a0.z: continue
+                if bvh(oa).overlap(bvh(ob)): hits.append('%s: %s × %s' % (label, oa.name, ob.name))
+    cp = cam.matrix_world.translation
+    for o in col.all_objects:
+        if o.type != 'MESH' or o.hide_render or o.matrix_world.to_scale().length < .01: continue
+        a0, a1 = _aabb(o); m = CAM_MARGIN
+        if not (a0.x - m < cp.x < a1.x + m and a0.y - m < cp.y < a1.y + m and a0.z - m < cp.z < a1.z + m): continue
+        r = bvh(o).find_nearest(cp)
+        if r[0] is not None and r[3] < CAM_MARGIN: hits.append('КАМЕРА %.0f мм от %s' % (r[3] * 1000, o.name))
+    for fn in CHK_FN: hits += fn(t)
+    return hits
 
 # ---------------- запуск ----------------
 DUR, APPLY = {8: scene8, 9: scene9, 10: scene10, 11: scene11, 12: scene12, 13: scene13}[SCENE]()
 N = int(DUR * FPS)
 os.makedirs(OUT, exist_ok=True)
+for o in _desc(HUD):
+    for c in list(o.users_collection): c.objects.unlink(o)
+    hudc.objects.link(o)
+HAS_HUD = (not NOTEXT) and len(HUDS) > 0
+if os.environ.get('ADS_CHECK'):
+    total = 0; seen = {}
+    for f in range(N):
+        t = f / FPS; APPLY(t); bpy.context.view_layer.update()
+        for h in run_checks(t):
+            total += 1
+            if h.split(' от ')[-1] not in seen: seen[h.split(' от ')[-1]] = 1; print('HIT t=%.2f %s' % (t, h))
+    print('CHECK_TOTAL', SCENE, total); sys.exit(0)
 for f in range(N):
     if f % NMOD != KMOD: continue
     t = f / FPS
     APPLY(t); apply_hud(t)
+    hudc.hide_render = True; col.hide_render = False
+    sc.world = MAIN_WORLD; sc.render.film_transparent = False; sc.eevee.taa_render_samples = SAMPLES
+    sc.render.image_settings.color_mode = 'RGB'
     sc.render.filepath = os.path.join(OUT, 'f%04d.png' % f)
     bpy.ops.render.render(write_still=True)
+    if HAS_HUD:
+        dof = camd.dof.use_dof; camd.dof.use_dof = False
+        hudc.hide_render = False; col.hide_render = True
+        sc.world = HUD_WORLD; sc.render.film_transparent = True; sc.eevee.taa_render_samples = 4
+        sc.render.image_settings.color_mode = 'RGBA'
+        sc.render.filepath = os.path.join(OUT, 'h%04d.png' % f)
+        bpy.ops.render.render(write_still=True)
+        camd.dof.use_dof = dof
 print('ADS_PREVIZ_DONE', SCENE, N)
