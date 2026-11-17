@@ -14,7 +14,7 @@ TEAL, GRAPH, WHITE = (20, 220, 213), (16, 22, 29), (255, 255, 255)
 a = sys.argv[1:]
 src, out, head = a[0], a[1], a[2].replace('|', '\n')
 voice = a[a.index('--voice') + 1] if '--voice' in a else None
-sub = a[a.index('--sub') + 1] if '--sub' in a else 'на руки · пн–пт · в 15:00 свободен'
+sub = a[a.index('--sub') + 1] if '--sub' in a else 'пн–пт · в 15:00 свободен'
 noprice = '--noprice' in a
 PY = int(a[a.index('--py') + 1]) if '--py' in a else 1185      # высота блока цены
 tmp = out + '.layers'; os.makedirs(tmp, exist_ok=True)
