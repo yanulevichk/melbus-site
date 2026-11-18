@@ -1,0 +1,84 @@
+---
+/**
+ * ТАБЛО ЦЕНЫ В ФИРМЕННОМ СТИЛЕ (18.11.2026): наклейка с белой коробки MELBUS — бирюзовая полоса слева (как у наклеек
+ * комнат), логотип, название пакета, цифры-барабаны, QR и «01/1». При смене цены полоса скотча «переклеивается»,
+ * под мышью наклейка чуть наклоняется. Движок — priceBoard() в src/scripts/motion.ts (data-board, событие board:set).
+ * Кнопки выбора — снаружи: [data-board-for="<id>"] [data-value].
+ */
+import type { Locale } from '../i18n/routes';
+import { home as H } from '../content/home';
+import { PACKAGES } from '../data/pricing';
+interface Props { locale: Locale; id: string; value: number; status: string; pkg?: number }
+const { locale: L, id, value, status, pkg = 1 } = Astro.props;
+let r = 7; const rnd = () => ((r = (r * 9301 + 49297) % 233280) / 233280);
+const cells: [number, number][] = [];
+for (let x = 0; x < 15; x++) for (let y = 0; y < 15; y++) {
+  const f = (x < 5 && y < 5) || (x > 9 && y < 5) || (x < 5 && y > 9);
+  if (!f && rnd() > 0.5) cells.push([x, y]);
+}
+---
+<div class="plab" id={id} data-board data-plab data-value={value}>
+  <div class="plab__card">
+    <i class="plab__bar" aria-hidden="true"></i>
+    <div class="plab__top">
+      <img class="plab__logo" src="/brand/melbus-light.svg" alt="MELBUS" width="148" height="28" />
+      <span class="plab__pkg">{PACKAGES[pkg].name[L]}</span>
+    </div>
+    <p class="plab__status" data-board-status>{status}</p>
+    <div class="plab__row" aria-hidden="true">
+      <span class="plab__from">{H.price.from[L]}</span>
+      {[0, 1, 2, 3].map((i) => (
+        <span class={`plab__reel${i === 0 ? ' plab__reel--k' : ''}`} data-reel><span class="plab__strip">{Array.from({ length: 33 }, (_, k) => <i>{k % 11 === 10 ? '' : k % 11}</i>)}</span></span>
+      ))}
+      <span class="plab__cur">zł</span>
+    </div>
+    <div class="plab__foot">
+      <svg class="plab__qr" viewBox="0 0 15 15" aria-hidden="true">
+        <path d="M0 0h5v5H0zM10 0h5v5h-5zM0 10h5v5H0z" fill="none" stroke="currentColor" stroke-width="1" transform="translate(.5 .5) scale(.933)" />
+        {cells.map(([x, y]) => <rect x={x} y={y} width="1" height="1" />)}
+      </svg>
+      <span class="plab__fixed">{H.label.fixed[L]}</span>
+      <span class="plab__n" aria-hidden="true"><small>{H.label.box[L]}</small>01/1</span>
+    </div>
+    <i class="plab__gloss" aria-hidden="true"></i>
+  </div>
+  <i class="plab__tape" aria-hidden="true"></i>
+  <p class="sr-only" aria-live="polite">{H.price.sr[L]} <span data-board-value>{value}</span> zł</p>
+</div>
+
+<style>
+  .plab { --cell: clamp(54px, 9.5vw, 116px); position: relative; width: min(100%, 620px); perspective: 1100px; padding: 18px 0 0; }
+  .plab__card { position: relative; display: grid; gap: 14px; padding: clamp(20px, 3vw, 32px) clamp(18px, 3vw, 34px) clamp(18px, 2.4vw, 26px) calc(clamp(18px, 3vw, 34px) + 12px);
+    background: #fff; color: var(--graphite, #10161D); border: 1px solid var(--hair, #DCE1E7); border-radius: 4px; overflow: hidden;
+    box-shadow: 0 1px 0 rgba(16,22,29,.04), 0 24px 60px -28px rgba(16,22,29,.35); transform-style: preserve-3d;
+    transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); transition: transform .5s cubic-bezier(.2,.7,.2,1), box-shadow .5s; }
+  .plab.is-tilt .plab__card { transition: transform .12s linear, box-shadow .5s; box-shadow: 0 1px 0 rgba(16,22,29,.04), 0 34px 70px -26px rgba(16,22,29,.42); }
+  .plab__bar { position: absolute; left: 0; top: 0; bottom: 0; width: 10px; background: var(--tape, #14DCD5); transform-origin: 50% 0; }
+  .plab__top { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-bottom: 12px; border-bottom: 1px dashed var(--hair, #DCE1E7); }
+  .plab__logo { width: clamp(108px, 14vw, 148px); height: auto; }
+  .plab__pkg { font-size: .78rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--deep, #077E79); }
+  .plab__status { margin: 0; color: var(--muted, #5B6672); font-size: .95rem; }
+  .plab__row { display: flex; align-items: flex-end; gap: .02em; }
+  .plab__from { font-size: 1rem; color: var(--muted, #5B6672); margin-right: .5em; padding-bottom: calc(var(--cell) * .17); }
+  .plab__cur { font-family: var(--font-display); font-weight: 200; font-size: calc(var(--cell) * .36); margin-left: .3em; padding-bottom: calc(var(--cell) * .15); }
+  .plab__reel { position: relative; width: calc(var(--cell) * .64); height: var(--cell); overflow: hidden; -webkit-mask: linear-gradient(transparent, #000 18%, #000 82%, transparent); mask: linear-gradient(transparent, #000 18%, #000 82%, transparent); }
+  .plab__reel--k { margin-right: calc(var(--cell) * .18); }
+  .plab__strip { display: block; will-change: transform; }
+  .plab__strip i { display: grid; place-items: center; height: var(--cell); font-style: normal; font-family: var(--font-display); font-weight: 200; font-size: calc(var(--cell) * .9); letter-spacing: -0.06em; line-height: 1; font-variant-numeric: tabular-nums; }
+  .plab__foot { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 14px; padding-top: 12px; border-top: 1px dashed var(--hair, #DCE1E7); }
+  .plab__qr { width: 40px; height: 40px; fill: currentColor; }
+  .plab__fixed { font-size: .86rem; line-height: 1.35; }
+  .plab__n { display: grid; justify-items: end; font-family: var(--font-display); font-weight: 300; font-size: 1.35rem; letter-spacing: -0.04em; line-height: 1; }
+  .plab__n small { font-family: var(--font-sans, inherit); font-size: .66rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted, #5B6672); margin-bottom: 4px; }
+  .plab__gloss { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .4s; background: radial-gradient(420px circle at var(--gx, 50%) var(--gy, 0%), rgba(255,255,255,.75), transparent 60%); mix-blend-mode: soft-light; }
+  .plab.is-tilt .plab__gloss { opacity: 1; }
+  /* полоса бирюзового скотча через верхний угол — «переклеивается» при каждой новой цене */
+  .plab__tape { position: absolute; z-index: 2; right: 9%; top: 3px; width: 32%; height: 30px; background: var(--tape, #14DCD5); opacity: .9; transform: rotate(-3deg); transform-origin: 0 50%;
+    box-shadow: 0 2px 6px rgba(16,22,29,.12); clip-path: polygon(0 10%, 2% 0, 98% 6%, 100% 0, 100% 100%, 97% 92%, 2% 100%, 0 90%, 1.5% 50%); }
+  .plab.is-new .plab__tape { animation: plab-tape .75s cubic-bezier(.2,.7,.2,1); }
+  .plab.is-new .plab__bar { animation: plab-bar .7s cubic-bezier(.2,.7,.2,1); }
+  @keyframes plab-tape { 0% { transform: rotate(-3deg) scaleX(0); } 100% { transform: rotate(-3deg) scaleX(1); } }
+  @keyframes plab-bar { 0% { transform: scaleY(0); } 100% { transform: scaleY(1); } }
+  @media (max-width: 520px) { .plab__fixed { font-size: .8rem; } .plab__qr { width: 34px; height: 34px; } }
+  @media (prefers-reduced-motion: reduce) { .plab.is-new .plab__tape, .plab.is-new .plab__bar { animation: none; } .plab__card { transition: none; } }
+</style>

@@ -1,0 +1,78 @@
+---
+/**
+ * ШАГИ «КАК ПРОХОДИТ ПЕРЕЕЗД» (18.11.2026, владелец: «в одну строку, и когда скролишь — сползают вбок»).
+ * Экран закреплён (CSS sticky), лента уезжает вбок при обычной прокрутке вниз — движок hScroll() в src/scripts/alive.ts.
+ * Без JS и при «уменьшить движение» — обычная лента, листается вбок пальцем/колёсиком. Тексты — src/content/home.ts (steps).
+ */
+import type { Locale } from '../i18n/routes';
+import { home as H } from '../content/home';
+interface Props { locale: Locale }
+const { locale: L } = Astro.props;
+---
+<section class="lx-steps" data-hscroll>
+  <!-- 18.11.2026 (владелец): шаги в одну строку, при прокрутке вниз лента уезжает вбок. Экран «закреплён» через CSS sticky,
+       сдвиг считает motion.ts (hScroll). Без JS и при «уменьшить движение» — обычная лента, листается пальцем/колёсиком вбок. -->
+  <div class="lx-hs__stage" data-hscroll-stage>
+    <div class="container lx-head lx-hs__head">
+      <h2 class="lx-h2" data-split data-tapeline>{H.steps.h2[L]}</h2>
+      <p class="lx-lead">{H.steps.lead[L]}</p>
+    </div>
+    <div class="lx-hs__view">
+      <ol class="lx-hs__track" data-hscroll-track>
+        {H.steps.items.map(([img, t, d], i) => (
+          <li class="lx-step" data-hs-item>
+            <div class="lx-step__media" data-slot={`V${i + 2}`}>
+              <img src={`/img/film/${img}.webp`} alt="" width="720" height="900" loading={i < 3 ? 'eager' : 'lazy'} decoding="async" data-hs-img />
+              <span class="lx-step__n">{i + 1}</span>
+            </div>
+            <h3 class="lx-step__t">{t[L]}</h3>
+            <p class="lx-step__d">{d[L]}</p>
+          </li>
+        ))}
+      </ol>
+    </div>
+    <div class="container lx-hs__foot">
+      <span class="lx-hs__count" aria-hidden="true"><b data-hscroll-n>01</b> / {String(H.steps.items.length).padStart(2, '0')}</span>
+      <i class="lx-hs__bar" aria-hidden="true"><i data-hscroll-fill></i></i>
+      <span class="lx-note">{H.steps.note[L]}</span>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* ---------- шаги: одна строка, при прокрутке уезжает вбок ---------- */
+  /* --mh — высота кадра (подбирается под высоту экрана, чтобы заголовок, карточки и счётчик влезали целиком), --cw — ширина карточки */
+  .lx-steps { position: relative; padding-block: clamp(72px, 9vw, 140px); --mh: clamp(220px, calc(100svh - 470px), 520px); --cw: min(calc(var(--mh) * .9), 32vw); }
+  @media (max-width: 767px) { .lx-steps { --mh: clamp(200px, calc(100svh - var(--header-h) - var(--bar-h, 64px) - 280px), 440px); --cw: min(80vw, calc(var(--mh) * 1.15)); } }
+  .lx-hs__stage { display: grid; grid-template-columns: minmax(0, 1fr); gap: clamp(20px, 3.2vh, 40px); }
+  .lx-hs__head { margin-bottom: 0; }
+  .lx-hs__view { min-width: 0; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
+  .lx-hs__view::-webkit-scrollbar { display: none; }
+  .lx-hs__track { list-style: none; margin: 0; display: flex; gap: clamp(16px, 2.6vw, 44px); width: max-content;
+    padding: 0 var(--gutter-r) 0 max(var(--gutter), calc((100vw - var(--max)) / 2 + var(--gutter))); }
+  .lx-step { width: var(--cw); display: grid; gap: 12px; align-content: start; scroll-snap-align: start; }
+  .lx-step__media { position: relative; height: var(--mh); background: #10161D; overflow: hidden; }
+  .lx-step__media img { position: absolute; top: 0; left: -8%; width: 116%; max-width: none; height: 100%; object-fit: cover; will-change: transform; }
+  .lx-step__media::after { content: ""; position: absolute; inset: 45% 0 0; background: linear-gradient(transparent, rgba(16,22,29,.55)); pointer-events: none; }
+  .lx-step__n { position: absolute; z-index: 1; color: #fff; left: 7%; bottom: 6%; font-family: var(--font-display); font-weight: 200; font-size: clamp(3.4rem, calc(var(--mh) * .2), 7rem); line-height: 1; letter-spacing: -0.05em; opacity: .92; }
+  .lx-step__t { font-family: var(--font-display); font-weight: 300; font-size: var(--fs-m); letter-spacing: -0.03em; }
+  .lx-step__d { color: var(--muted); max-width: 34ch; }
+  .lx-hs__foot { display: flex; align-items: center; gap: 18px; }
+  .lx-hs__count { font-variant-numeric: tabular-nums; font-size: .9rem; color: var(--muted); white-space: nowrap; }
+  .lx-hs__count b { color: var(--ink); font-weight: 600; }
+  .lx-hs__bar { position: relative; flex: 1; height: 1px; background: var(--hair); }
+  .lx-hs__bar i { position: absolute; left: 0; top: -1px; height: 3px; width: 100%; background: var(--tape); transform-origin: left; transform: scaleX(var(--p, 0)); }
+  .lx-hs__foot .lx-note { white-space: nowrap; }
+  @media (max-width: 767px) { .lx-hs__foot .lx-note { display: none; } }
+  /* движок включён: экран закреплён (sticky), высота секции = экран + длина ленты (ставит JS) */
+  .lx-steps.is-hs { padding-block: 0; }
+  .lx-steps.is-hs .lx-hs__stage { position: sticky; top: 0; height: 100vh; height: 100svh; align-content: center; padding-top: var(--header-h); overflow: hidden; }
+  .lx-steps.is-hs .lx-hs__view { overflow: visible; scroll-snap-type: none; }
+  .lx-steps.is-hs .lx-hs__track { will-change: transform; }
+  @media (max-width: 767px) {
+    .lx-steps.is-hs .lx-hs__stage { padding-bottom: var(--bar-h, 64px); }
+    .lx-steps.is-hs .lx-hs__head .lx-lead { display: none; }
+    .lx-steps.is-hs .lx-hs__head { gap: 0; }
+  }
+
+</style>

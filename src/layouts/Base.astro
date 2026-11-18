@@ -81,7 +81,8 @@ const site = { '@context': 'https://schema.org', '@type': 'WebSite', '@id': `${b
   <ClientRouter />
 </head>
 <body data-page={pageKey}>
-  <div class="curtain" data-curtain aria-hidden="true" transition:persist="curtain"><img src="/brand/mark-dark.svg" alt="" width="72" height="70" /></div>
+  <!-- переход между страницами (18.11.2026): клапаны коробки закрываются, по шву протягивается скотч MELBUS, на новой странице скотч срывается -->
+  <div class="curtain" data-curtain aria-hidden="true" transition:persist="curtain"><i class="curtain__flap curtain__flap--t"></i><i class="curtain__flap curtain__flap--b"></i><div class="curtain__tape"><span>{Array.from({ length: 14 }, () => 'MELBUS').join('  ·  ')}</span></div></div>
   <a href="#main" class="skip">{ui.a11y.skip[locale]}</a>
   <Header locale={locale} current={nav} pageKey={pageKey} />
   <main id="main"><slot /></main>
