@@ -1,0 +1,223 @@
+---
+/**
+ * ДЕМО «ЖИВОГО» САЙТА (18.11.2026, просьба владельца: «сделай эти фишки и скинь как демо, чтобы отдельно было понятно
+ * каждую фишку»). Каждая фишка — свой блок: номер, что происходит, что сделать (навести / прокрутить / нажать), где на сайте.
+ * Здесь работает НАСТОЯЩИЙ код сайта (те же компоненты и motion.ts / alive.ts), а не копия.
+ * Только по-русски (для владельца), скрыта от поиска: noindex + Disallow: /proto/ в robots.txt.
+ */
+import Base from '../../layouts/Base.astro';
+import PriceLabel from '../../components/PriceLabel.astro';
+import Packages from '../../components/Packages.astro';
+import Marquee from '../../components/Marquee.astro';
+import Steps from '../../components/Steps.astro';
+import { boardOptions } from '../../data/pricing';
+const L = 'ru' as const;
+const F = [
+  ['Курсор-кольцо', 'Мягко догоняет мышь. На ссылках и кнопках растёт, на картинках-ссылках показывает подпись («Открыть», «Смотреть»), в поле ввода прячется.', 'Поводите мышью по примерам ниже.', 'Только компьютер с мышью', 'На всём сайте'],
+  ['Заголовки выезжают по строкам', 'Каждая строка заголовка выезжает снизу, а под ним протягивается бирюзовая полоса, как кусок скотча.', 'Нажмите «Повторить» или прокрутите ниже — так появляется каждый крупный заголовок.', 'Компьютер и телефон', 'Главная: все крупные заголовки'],
+  ['Картинки раскрываются шторкой', 'Кадр открывается снизу вверх и чуть «выдыхает» (уменьшается), а при прокрутке медленно плывёт, будто снят камерой.', 'Нажмите «Повторить», потом медленно прокрутите — кадры плывут.', 'Компьютер и телефон', 'Услуги, картинки на главной'],
+  ['Кнопки-магниты', 'Главная бирюзовая кнопка тянется за курсором и мягко возвращается на место.', 'Подведите мышь к кнопке и поводите вокруг неё.', 'Только компьютер с мышью', 'Все бирюзовые кнопки'],
+  ['Плавная прокрутка', 'Колесо мыши крутит страницу мягко, без рывков — так ощущается дорогой сайт.', 'Выключите и включите плавность кнопкой и покрутите колесо — почувствуйте разницу.', 'Компьютер (на телефоне — родная прокрутка пальцем)', 'На всём сайте'],
+  ['Табло цены — наклейка с коробки', 'Табло стало фирменной наклейкой: бирюзовая полоса, логотип, QR, «Коробка 01/1». Цифры крутятся барабанами, скотч на углу переклеивается при каждой новой цене, под мышью наклейка наклоняется и бликует.', 'Нажимайте «Студия», «3 комнаты», «Дом». Поводите мышью по наклейке.', 'Компьютер и телефон (наклон — только мышью)', 'Главная, блок «Сколько стоит переезд»'],
+  ['Переход между страницами «скотчем»', 'При переходе на другую страницу экран закрывается, как клапаны коробки, по шву протягивается лента MELBUS, а на новой странице лента срывается.', 'Нажмите «Показать переход» или перейдите по любой ссылке в меню.', 'Компьютер и телефон', 'Между всеми страницами'],
+  ['Пакеты оживают', 'Под мышью пакет приподнимается, за курсором — мягкая бирюзовая подсветка, сверху протягивается скотч, всплывает 3D-иконка, пункты по очереди получают галочки, соседние пакеты приглушаются.', 'Наведите мышь на любой пакет. На телефоне пакет оживает сам, когда он посередине экрана.', 'Компьютер и телефон', 'Главная, блок «Три пакета»'],
+  ['Бегущая строка', 'Слова «Квартиры · Дома · Офисы · Пианино · Польша и ЕС» плывут сами, от прокрутки ускоряются и наклоняются, при прокрутке вверх едут обратно.', 'Прокрутите быстро вниз, потом вверх.', 'Компьютер и телефон', 'Главная, сразу после первого экрана'],
+  ['Шаги лентой вбок', 'Шесть шагов стоят в одну строку. Экран останавливается, и при прокрутке вниз лента уезжает вбок; внизу счётчик 01 / 06 и бирюзовая полоса.', 'Просто прокручивайте вниз, как обычно.', 'Компьютер и телефон', 'Главная, «Как проходит переезд»'],
+];
+const n = (i: number) => String(i + 1).padStart(2, '0');
+---
+<Base locale={L} pageKey="lux" title="Живой сайт — демо" description="Демо анимаций сайта MELBUS: каждая фишка отдельно." noindex theme="lux">
+  <section class="ad-hero dark grain">
+    <div class="container ad-hero__in">
+      <p class="ad-hero__k">MELBUS · демо для владельца</p>
+      <h1 class="ad-hero__h">Живой сайт: <br />10 фишек по отдельности</h1>
+      <p class="ad-hero__p">Здесь работает тот же код, что на сайте. Каждая фишка — свой блок: что происходит, что сделать и где она на сайте. Откройте на компьютере и на телефоне.</p>
+      <ol class="ad-toc">
+        {F.map(([t], i) => <li><a href={`#f${i + 1}`}><b>{n(i)}</b>{t}</a></li>)}
+      </ol>
+    </div>
+  </section>
+
+  {F.map(([t, d, tr, dev, where], i) => (
+    <>
+      <header class="ad-h container" id={`f${i + 1}`}>
+        <span class="ad-h__n">{n(i)}</span>
+        <div class="ad-h__body">
+          <h2 class="ad-h__t">{t}</h2>
+          <p class="ad-h__d">{d}</p>
+          <p class="ad-h__try"><b>Попробуйте:</b> {tr}</p>
+          <p class="ad-h__meta"><span>{dev}</span><span>{where}</span></p>
+        </div>
+      </header>
+
+      {i === 0 && (
+        <div class="container ad-s ad-cur">
+          <a href="#f1" class="ad-cur__link">Обычная ссылка</a>
+          <button type="button" class="btn btn--ghost">Обычная кнопка</button>
+          <a href="#f1" class="ad-cur__card" data-cursor="Открыть"><img src="/img/services/kvartira.webp" alt="" width="360" height="450" loading="lazy" /><span>Картинка-ссылка</span></a>
+          <a href="#f1" class="ad-cur__card" data-cursor="Смотреть"><img src="/img/film/step-5-road.webp" alt="" width="360" height="450" loading="lazy" /><span>Ролик</span></a>
+          <label class="ad-cur__field">Поле ввода<input type="text" placeholder="Здесь кольцо прячется" /></label>
+        </div>
+      )}
+
+      {i === 1 && (
+        <div class="container ad-s">
+          <h3 class="lx-h2 ad-split" id="ad-split" data-split data-tapeline>Переезд, который не дорожает</h3>
+          <button type="button" class="ad-replay" data-replay="split" data-target="#ad-split">Повторить</button>
+        </div>
+      )}
+
+      {i === 2 && (
+        <div class="container ad-s">
+          <div class="ad-imgs" id="ad-imgs">
+            <span class="ad-imgs__i" data-img><img src="/img/film/step-4-pack.webp" alt="" width="720" height="900" loading="lazy" /></span>
+            <span class="ad-imgs__i" data-img><img src="/img/services/ofis.webp" alt="" width="720" height="900" loading="lazy" /></span>
+          </div>
+          <button type="button" class="ad-replay" data-replay="img" data-target="#ad-imgs">Повторить</button>
+        </div>
+      )}
+
+      {i === 3 && (
+        <div class="container ad-s ad-mag">
+          <a href="#f4" class="btn btn--primary">Рассчитать цену</a>
+          <span class="ad-mag__hint">← поводите мышью вокруг</span>
+        </div>
+      )}
+
+      {i === 4 && (
+        <div class="container ad-s">
+          <button type="button" class="ad-toggle" data-smooth aria-pressed="true"><i></i><span>Плавная прокрутка: <b>включена</b></span></button>
+          <div class="ad-lines" aria-hidden="true">{Array.from({ length: 14 }, (_, k) => <i style={`--k:${k}`}></i>)}</div>
+        </div>
+      )}
+
+      {i === 5 && (
+        <div class="container ad-s ad-board">
+          <div class="ad-seg" role="group" aria-label="Что перевозим" data-board-for="board-demo">
+            {boardOptions.map((o, k) => <button type="button" data-value={o.value} data-status={o.status[L]} aria-pressed={k === 1 ? 'true' : 'false'}>{o.label[L]}</button>)}
+          </div>
+          <PriceLabel locale={L} id="board-demo" value={boardOptions[1].value} status={boardOptions[1].status[L]} />
+          <p class="lx-note">Цифры для примера: ставки ещё утверждаются.</p>
+        </div>
+      )}
+
+      {i === 6 && (
+        <div class="container ad-s ad-row">
+          <button type="button" class="btn btn--primary" data-replay="curtain">Показать переход</button>
+          <a href="/ru/" class="lux-link">Перейти на главную по-настоящему</a>
+        </div>
+      )}
+
+      {i === 7 && <Packages locale={L} />}
+      {i === 8 && <div class="ad-s ad-s--flush"><Marquee locale={L} /><Marquee locale={L} tone="dark" /></div>}
+      {i === 9 && <Steps locale={L} />}
+    </>
+  ))}
+
+  <section class="ad-end container">
+    <p>Все фишки вместе — на главной.</p>
+    <a href="/ru/" class="btn btn--primary">Открыть главную</a>
+  </section>
+</Base>
+
+<script>
+  import { gsap } from 'gsap';
+  // кнопки «Повторить», «Показать переход», переключатель плавной прокрутки
+  const init = () => {
+    document.querySelectorAll<HTMLButtonElement>('[data-replay]').forEach((b) => {
+      if (b.dataset.ready) return; b.dataset.ready = '1';
+      b.addEventListener('click', () => {
+        const kind = b.dataset.replay, t = b.dataset.target ? document.querySelector<HTMLElement>(b.dataset.target) : null;
+        if (kind === 'curtain') { document.dispatchEvent(new CustomEvent('melbus:curtain-demo')); return; }
+        if (kind === 'split' && t) {
+          gsap.fromTo(t.querySelectorAll('.split-line'), { yPercent: 110 }, { yPercent: 0, duration: 1.1, ease: 'expo.out', stagger: 0.08 });
+          t.classList.remove('is-taped'); void t.offsetWidth; setTimeout(() => t.classList.add('is-taped'), 350);
+        }
+        if (kind === 'img' && t) t.querySelectorAll<HTMLElement>('[data-img]').forEach((box, k) => {
+          const img = box.querySelector('img');
+          gsap.fromTo(box, { clipPath: 'inset(100% 0% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.3, ease: 'expo.out', delay: k * 0.15 });
+          if (img) gsap.fromTo(img, { scale: 1.2 }, { scale: 1.04, duration: 1.6, ease: 'expo.out', delay: k * 0.15 });
+        });
+      });
+    });
+    const sw = document.querySelector<HTMLButtonElement>('[data-smooth]');
+    if (sw && !sw.dataset.ready) {
+      sw.dataset.ready = '1';
+      const lenis = (window as any).__lenis;
+      if (!lenis) { sw.querySelector('b')!.textContent = 'выключена в настройках устройства'; sw.disabled = true; }
+      sw.addEventListener('click', () => {
+        const on = sw.getAttribute('aria-pressed') !== 'true';
+        sw.setAttribute('aria-pressed', String(on));
+        sw.querySelector('b')!.textContent = on ? 'включена' : 'выключена';
+        if (lenis) lenis.options.lerp = on ? 0.1 : 1;
+      });
+    }
+  };
+  document.addEventListener('astro:page-load', init);
+  document.addEventListener('astro:before-swap', () => { const l = (window as any).__lenis; if (l) l.options.lerp = 0.1; });
+</script>
+
+<style>
+  .ad-hero { padding: calc(var(--header-h) + clamp(56px, 9vw, 120px)) 0 clamp(64px, 9vw, 120px); }
+  .ad-hero__in { display: grid; gap: 22px; }
+  .ad-hero__k { color: var(--tape); font-size: .82rem; letter-spacing: .14em; text-transform: uppercase; }
+  .ad-hero__h { font-family: var(--font-display); font-weight: 200; font-size: var(--fs-xl); letter-spacing: -0.05em; line-height: .98; }
+  .ad-hero__p { max-width: 52ch; color: var(--dark-muted, #A9B3BE); font-size: 1.1rem; line-height: 1.6; }
+  .ad-toc { list-style: none; padding: 0; margin: 16px 0 0; display: grid; gap: 0 32px; border-top: 1px solid #26303B; }
+  @media (min-width: 768px) { .ad-toc { grid-template-columns: 1fr 1fr; } }
+  .ad-toc a { display: flex; gap: 16px; align-items: baseline; padding: 14px 0; border-bottom: 1px solid #26303B; color: #fff; transition: color .3s, padding .4s var(--ease-lux); }
+  .ad-toc a:hover { color: var(--tape); padding-left: 8px; }
+  .ad-toc b { font-weight: 600; color: var(--tape); font-variant-numeric: tabular-nums; }
+
+  .ad-h { display: grid; grid-template-columns: auto 1fr; gap: 0 clamp(20px, 4vw, 56px); padding-top: clamp(80px, 11vw, 160px); padding-bottom: clamp(28px, 4vw, 48px); scroll-margin-top: var(--header-h); }
+  .ad-h__n { font-family: var(--font-display); font-weight: 200; font-size: clamp(3.4rem, 2rem + 6vw, 8rem); line-height: .85; letter-spacing: -0.06em; color: var(--tape); -webkit-text-stroke: 0; }
+  .ad-h__body { display: grid; gap: 14px; align-content: start; max-width: 70ch; }
+  .ad-h__t { font-family: var(--font-display); font-weight: 300; font-size: clamp(1.6rem, 1.1rem + 2vw, 2.8rem); letter-spacing: -0.04em; line-height: 1.05; }
+  .ad-h__d { font-size: 1.08rem; line-height: 1.6; }
+  .ad-h__try { padding: 12px 16px; background: #fff; border-left: 3px solid var(--tape); line-height: 1.5; }
+  .ad-h__meta { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: .86rem; color: var(--muted); }
+  .ad-h__meta span + span::before { content: "·"; margin-right: 18px; color: var(--steel, #8F9AA7); }
+  @media (max-width: 600px) { .ad-h { grid-template-columns: 1fr; gap: 8px; } }
+
+  .ad-s { padding-bottom: clamp(48px, 7vw, 96px); border-bottom: 1px solid var(--hair); }
+  .ad-s--flush { padding-bottom: 0; border-bottom: 0; }
+  .ad-row { display: flex; flex-wrap: wrap; align-items: center; gap: 16px 32px; }
+  .ad-replay { margin-top: 24px; display: inline-flex; align-items: center; gap: 10px; padding: 10px 18px; border: 1px solid var(--hair); background: #fff; border-radius: 3px; font: inherit; font-weight: 500; cursor: pointer; }
+  .ad-replay::before { content: "↻"; color: var(--deep); font-size: 1.1em; }
+  .ad-replay:hover { border-color: var(--ink); }
+
+  .ad-cur { display: flex; flex-wrap: wrap; gap: 24px; align-items: center; }
+  .ad-cur__link { font-weight: 500; text-decoration: underline; text-underline-offset: 4px; }
+  .ad-cur__card { position: relative; display: block; width: 200px; aspect-ratio: 4 / 5; overflow: hidden; border-radius: 3px; background: var(--graphite); }
+  .ad-cur__card img { width: 100%; height: 100%; object-fit: cover; transition: transform 1s var(--ease-lux); }
+  .ad-cur__card:hover img { transform: scale(1.05); }
+  .ad-cur__card span { position: absolute; left: 12px; bottom: 10px; color: #fff; font-size: .85rem; }
+  .ad-cur__field { display: grid; gap: 8px; font-size: .9rem; color: var(--muted); }
+  .ad-cur__field input { width: 240px; height: 48px; padding: 0 14px; border: 1px solid var(--hair); border-radius: 3px; font: inherit; color: var(--ink); background: #fff; }
+
+  .ad-split { max-width: 14ch; }
+  .ad-imgs { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(12px, 2vw, 28px); max-width: 860px; }
+  .ad-imgs__i { aspect-ratio: 4 / 5; background: var(--graphite); }
+  .ad-imgs__i img { width: 100%; height: 100%; object-fit: cover; }
+
+  .ad-mag { display: flex; align-items: center; gap: 28px; min-height: 220px; justify-content: center; background: #fff; border: 1px solid var(--hair); margin-bottom: 0; }
+  .ad-mag__hint { color: var(--muted); font-size: .92rem; }
+  @media (max-width: 600px) { .ad-mag { margin-inline: var(--gutter); width: auto; flex-direction: column; } }
+
+  .ad-toggle { display: inline-flex; align-items: center; gap: 14px; padding: 12px 18px 12px 12px; border: 1px solid var(--hair); background: #fff; border-radius: 40px; font: inherit; cursor: pointer; }
+  .ad-toggle i { position: relative; width: 46px; height: 26px; border-radius: 20px; background: var(--hair); transition: background .3s; }
+  .ad-toggle i::after { content: ""; position: absolute; left: 3px; top: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.25); transition: transform .35s var(--ease-lux); }
+  .ad-toggle[aria-pressed="true"] i { background: var(--tape); }
+  .ad-toggle[aria-pressed="true"] i::after { transform: translateX(20px); }
+  .ad-lines { display: grid; gap: 10px; margin-top: 32px; max-width: 760px; }
+  .ad-lines i { display: block; height: 12px; border-radius: 2px; background: color-mix(in oklab, var(--steel, #8F9AA7) 30%, transparent); width: calc(100% - var(--k) * 4.5%); }
+
+  .ad-board { display: grid; gap: 22px; justify-items: start; }
+  .ad-seg { display: flex; flex-wrap: wrap; gap: 4px 26px; border-bottom: 1px solid var(--hair); width: min(100%, 620px); }
+  .ad-seg button { position: relative; padding: 14px 0 16px; border: 0; background: none; cursor: pointer; font: inherit; font-size: 1.02rem; color: var(--muted); }
+  .ad-seg button::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--graphite); transform: scaleX(0); transform-origin: 0 50%; transition: transform .5s var(--ease-lux); }
+  .ad-seg button[aria-pressed="true"] { color: var(--ink); }
+  .ad-seg button[aria-pressed="true"]::after { transform: scaleX(1); }
+
+  .ad-end { display: grid; justify-items: start; gap: 20px; padding-block: clamp(80px, 10vw, 140px); font-family: var(--font-display); font-weight: 200; font-size: var(--fs-l); letter-spacing: -0.04em; }
+</style>

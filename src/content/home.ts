@@ -49,6 +49,20 @@ export const home = {
     demo: l('Цифры для примера: ставки ещё утверждаются.', 'Ceny przykładowe: stawki są jeszcze ustalane.', 'Цифри для прикладу: ставки ще затверджуються.', 'Sample figures: rates are still being finalised.'),
     next: l('Посчитать свой переезд', 'Policz swoją przeprowadzkę', 'Порахувати свій переїзд', 'Price your move'),
   },
+  /** бегущая строка (18.11.2026): ускоряется от прокрутки, меняет направление вместе с ней */
+  marquee: [
+    l('Квартиры', 'Mieszkania', 'Квартири', 'Flats'),
+    l('Дома', 'Domy', 'Будинки', 'Houses'),
+    l('Офисы', 'Biura', 'Офіси', 'Offices'),
+    l('Пианино', 'Pianina', 'Піаніно', 'Pianos'),
+    l('Польша и ЕС', 'Polska i UE', 'Польща та ЄС', 'Poland and the EU'),
+  ] as L[],
+  marqueeAria: l('Что перевозим: квартиры, дома, офисы, пианино; по Польше и в страны ЕС', 'Co przewozimy: mieszkania, domy, biura, pianina; w Polsce i do krajów UE', 'Що перевозимо: квартири, будинки, офіси, піаніно; Польщею та до країн ЄС', 'What we move: flats, houses, offices, pianos; across Poland and to EU countries'),
+  /** наклейка-табло цены */
+  label: {
+    fixed: l('Цена, которую вы приняли, не меняется', 'Cena, którą zaakceptujesz, się nie zmienia', 'Ціна, яку ви прийняли, не змінюється', 'The price you accept doesn’t change'),
+    box: l('Коробка', 'Karton', 'Коробка', 'Box'),
+  },
   steps: {
     h2: l('Как проходит переезд', 'Jak wygląda przeprowadzka', 'Як проходить переїзд', 'How the move works'),
     lead: l('От видео на телефоне до последней собранной полки — шесть шагов, и на каждом понятно, что дальше.', 'Od wideo z telefonu po ostatnią złożoną półkę — sześć kroków i na każdym wiesz, co dalej.', 'Від відео на телефоні до останньої зібраної полиці — шість кроків, і на кожному зрозуміло, що далі.', 'From a phone video to the last shelf assembled: six steps, and at each one you know what comes next.'),

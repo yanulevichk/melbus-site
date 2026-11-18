@@ -70,3 +70,11 @@ html.js [data-tape] > .tape__media { clip-path: inset(0 0 100% 0); }
 /* тонкие линии вместо карточек */
 .hair-t { border-top: 1px solid var(--hair); }
 .dark .hair-t, .hair-t.on-dark { border-color: #26303B; }
+
+/* общие блоки главной (18.11.2026: глобально — их используют и компоненты Packages, PriceLabel, и демо /proto/alive/) */
+.lx-sec { padding-block: clamp(96px, 13vw, 210px); }
+.lx-h2 { font-family: var(--font-display); font-size: var(--fs-xl); font-weight: 200; letter-spacing: -0.045em; line-height: .98; max-width: 13ch; }
+.lx-lead { font-size: clamp(1.05rem, 1rem + .3vw, 1.25rem); line-height: 1.6; color: var(--muted); max-width: 44ch; }
+.lx-head { display: grid; gap: 28px; margin-bottom: clamp(48px, 7vw, 104px); }
+@media (min-width: 960px) { .lx-head { grid-template-columns: 7fr 5fr; align-items: end; } }
+.lx-note { font-size: .875rem; color: var(--muted); }

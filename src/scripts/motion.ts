@@ -20,7 +20,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { SplitText } from 'gsap/SplitText';
 import { mountVanta } from './vanta-bg';
 import { heroFilm } from './hero-film';
-import { cursor, alivePage } from './alive';
+import { cursor, alivePage, hScroll } from './alive';
 
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
@@ -51,21 +51,31 @@ function tapeLogo() {
 
 /* ---------- шторка между страницами ---------- */
 function curtain() {
+  // 18.11.2026: «скотч» — клапаны коробки закрываются к середине, по шву протягивается лента MELBUS; на новой странице лента срывается вправо
   const el = document.querySelector<HTMLElement>('[data-curtain]');
+  const flaps = el ? el.querySelectorAll<HTMLElement>('.curtain__flap') : [];
+  const tape = el?.querySelector<HTMLElement>('.curtain__tape') || null;
   return {
     in: () => new Promise<void>((res) => {
-      if (!el || reduce()) return res();
-      gsap.killTweensOf(el);
-      gsap.set(el, { visibility: 'visible' });
-      gsap.fromTo(el, { clipPath: 'inset(100% 0 0 0)' }, { clipPath: 'inset(0% 0 0 0)', duration: 0.5, ease: 'expo.inOut', onComplete: () => res() });
-      gsap.fromTo(el.querySelector('img'), { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.4, delay: 0.2 });
+      if (!el || !tape || reduce()) return res();
+      gsap.killTweensOf([el, tape, ...flaps]);
+      gsap.set(el, { visibility: 'visible' }); el.classList.add('is-on');
+      const tl = gsap.timeline({ onComplete: () => res() });
+      tl.fromTo(flaps, { scaleY: 0 }, { scaleY: 1, duration: 0.42, ease: 'power3.inOut' }, 0)
+        .fromTo(tape, { clipPath: 'inset(0 100% 0 0)', xPercent: 0, yPercent: 0, rotation: -2.5 }, { clipPath: 'inset(0 0% 0 0)', duration: 0.42, ease: 'expo.out' }, 0.24)
+        .fromTo(tape.firstElementChild, { x: '-6%' }, { x: '0%', duration: 0.6, ease: 'expo.out' }, 0.24);
     }),
     out: () => {
-      if (!el || getComputedStyle(el).visibility !== 'visible') return;
-      gsap.to(el, { clipPath: 'inset(0 0 100% 0)', duration: 0.65, ease: 'expo.inOut', delay: 0.05, onComplete: () => { gsap.set(el, { visibility: 'hidden' }); } });
+      if (!el || !tape || getComputedStyle(el).visibility !== 'visible') return;
+      const tl = gsap.timeline({ onComplete: () => { gsap.set(el, { visibility: 'hidden' }); el.classList.remove('is-on'); } });
+      tl.to(tape, { clipPath: 'inset(0 0% 0 100%)', yPercent: -18, rotation: -5, duration: 0.5, ease: 'power3.in' }, 0.05)
+        .to(flaps, { scaleY: 0, duration: 0.6, ease: 'expo.inOut' }, 0.32);
     },
   };
 }
+// демо-страница /proto/alive/: показать переход без перехода и сравнить прокрутку с плавностью и без
+document.addEventListener('melbus:curtain-demo', () => { const c = curtain(); c.in().then(() => setTimeout(() => c.out(), 450)); });
+(window as any).__lenis = lenis;
 document.addEventListener('astro:before-preparation', (e: any) => {
   const load = e.loader;
   e.loader = async () => { await Promise.all([curtain().in(), load()]); };
@@ -293,21 +303,6 @@ function mount3d(host: HTMLElement, tl: gsap.core.Timeline, local: (() => void)[
   local.push(() => { alive = false; evs.forEach((n) => window.removeEventListener(n, go)); io.disconnect(); api?.destroy(); api = null; });
 }
 
-/* ---------- шаги: маршрут и бус ---------- */
-function stepsRoute(desktop: boolean, reduceNow: boolean, local: (() => void)[]) {
-  const wrap = document.querySelector<HTMLElement>('[data-hscroll]');
-  if (!wrap || reduceNow) return;
-  if (desktop) return; // на компьютере бус двигается в самой ленте (см. ниже)
-  const fill = wrap.querySelector<HTMLElement>('[data-fill]');
-  const bus = wrap.querySelector<HTMLElement>('[data-fill-bus]');
-  if (!fill) return;
-  const t = gsap.timeline();
-  t.fromTo(fill, { scaleY: 0 }, { scaleY: 1, ease: 'none' }, 0);
-  if (bus) t.fromTo(bus, { top: '0%' }, { top: '100%', ease: 'none' }, 0);
-  const trig = ScrollTrigger.create({ trigger: wrap.querySelector('[data-hscroll-track]'), start: 'top 70%', end: 'bottom 60%', scrub: 0.4, animation: t });
-  local.push(() => { trig.kill(); t.kill(); });
-}
-
 /* ---------- табло цены: барабаны с цифрами ---------- */
 function priceBoard(board: HTMLElement) {
   const reels = Array.from(board.querySelectorAll<HTMLElement>('[data-reel]'));
@@ -333,6 +328,7 @@ function priceBoard(board: HTMLElement) {
       r.classList.remove('is-hit'); void r.offsetWidth; r.classList.add('is-hit');
     });
     if (out) out.textContent = fmt.format(value);
+    if (board.hasAttribute('data-plab') && !reduce()) { board.classList.remove('is-new'); void board.offsetWidth; board.classList.add('is-new'); }   // скотч «переклеивается»
   };
   const pick = (b: HTMLButtonElement, spin = 1) => {
     chips.forEach((c) => c.setAttribute('aria-pressed', String(c === b)));
@@ -340,6 +336,17 @@ function priceBoard(board: HTMLElement) {
     show(Number(b.dataset.value), spin);
   };
   chips.forEach((b) => b.addEventListener('click', () => pick(b)));
+  // наклейка чуть наклоняется за мышью, по ней бежит блик
+  const card = board.querySelector<HTMLElement>('.plab__card');
+  if (card && finePointer() && !reduce()) {
+    board.addEventListener('pointermove', (e) => {
+      const r = card.getBoundingClientRect(), px = (e.clientX - r.left) / r.width, py = (e.clientY - r.top) / r.height;
+      board.classList.add('is-tilt');
+      card.style.setProperty('--ry', `${((px - 0.5) * 9).toFixed(2)}deg`); card.style.setProperty('--rx', `${((0.5 - py) * 7).toFixed(2)}deg`);
+      card.style.setProperty('--gx', `${(px * 100).toFixed(1)}%`); card.style.setProperty('--gy', `${(py * 100).toFixed(1)}%`);
+    });
+    board.addEventListener('pointerleave', () => { board.classList.remove('is-tilt'); card.style.setProperty('--rx', '0deg'); card.style.setProperty('--ry', '0deg'); });
+  }
   // внешнее управление (калькулятор): board.dispatchEvent(new CustomEvent('board:set', { detail: { value, status } }))
   let seen = false, pending: number | null = null;
   board.addEventListener('board:set', (e) => {
@@ -387,20 +394,25 @@ function initPage() {
       gsap.to(el, { opacity: 1, y: 0, duration: 1, ease: 'expo.out', delay: delay ? delay + 0.25 : 0, scrollTrigger: { trigger: el, start: 'top 92%', once: true } });
     });
 
-    /* бегущая строка */
+    /* бегущая строка: сама едет медленно, от прокрутки ускоряется и наклоняется, меняет направление вместе с прокруткой */
     document.querySelectorAll<HTMLElement>('[data-marquee]').forEach((el) => {
       const track = el.firstElementChild as HTMLElement;
       if (!track || rm) return;
       track.append(...Array.from(track.children).map((c) => c.cloneNode(true)));
-      let x = 0, dir = -1;
+      let x = 0, dir = -1, lastY = window.scrollY, sk = 0, boost = 0;
       const speed = Number(el.dataset.marquee) || 60;
       const tick = (_t: number, dt: number) => {
-        const v = lenis ? lenis.velocity : 0;
-        if (v) dir = v > 0 ? -1 : 1;
-        x += dir * (speed + Math.abs(v) * 6) * (dt / 1000);
+        const y = window.scrollY;
+        // скорость прокрутки: у Lenis своя, на телефоне (родная прокрутка) — по сдвигу за кадр
+        const v = lenis && lenis.velocity ? lenis.velocity : (y - lastY) / Math.max(1, dt / 16.7);
+        lastY = y;
+        if (Math.abs(v) > 0.2) dir = v > 0 ? -1 : 1;
+        boost += (Math.min(60, Math.abs(v)) - boost) * 0.12;
+        x += dir * (speed + boost * 22) * (dt / 1000);
         const half = track.scrollWidth / 2;
         if (x <= -half) x += half; if (x > 0) x -= half;
-        gsap.set(track, { x });
+        sk += (Math.max(-8, Math.min(8, -v * 0.35)) - sk) * 0.1;
+        track.style.transform = `translate3d(${x.toFixed(1)}px,0,0) skewX(${sk.toFixed(2)}deg)`;
       };
       gsap.ticker.add(tick);
       cleanups.push(() => gsap.ticker.remove(tick));
@@ -523,32 +535,8 @@ function initPage() {
       local.push(() => tl.kill());
     });
 
-    /* горизонтальная лента шагов */
-    document.querySelectorAll<HTMLElement>('[data-hscroll]').forEach((wrap) => {
-      const track = wrap.querySelector<HTMLElement>('[data-hscroll-track]');
-      const line = wrap.querySelector<SVGPathElement>('[data-route]');
-      // 18.11.2026: на компьютере лента больше не закрепляется — шаги стоят сеткой 3×2 (HomeLux.astro)
-      if (!track || !desktop || reduceNow || getComputedStyle(track).display !== 'flex') return;
-      const dist = () => track.scrollWidth - wrap.clientWidth;
-      const tl = gsap.timeline();
-      tl.to(track, { x: () => -dist(), ease: 'none' }, 0);
-      if (line) {
-        const L = line.getTotalLength();
-        gsap.set(line, { strokeDasharray: L, strokeDashoffset: L });
-        tl.to(line, { strokeDashoffset: 0, ease: 'none' }, 0);
-        const bus = wrap.querySelector<HTMLElement>('[data-route-bus]');
-        const svg = line.ownerSVGElement!;
-        if (bus) tl.eventCallback('onUpdate', () => {
-          const k = tl.progress();
-          const pt = line.getPointAtLength(L * k), pt2 = line.getPointAtLength(Math.min(L, L * k + 4));
-          const r = svg.getBoundingClientRect(), vb = svg.viewBox.baseVal;
-          const sx = r.width / vb.width, sy = r.height / vb.height;
-          const ang = Math.atan2((pt2.y - pt.y) * sy, (pt2.x - pt.x) * sx) * 180 / Math.PI;
-          gsap.set(bus, { x: pt.x * sx, y: pt.y * sy, rotation: ang, opacity: k > 0.002 && k < 0.998 ? 1 : 0 });
-        });
-      }
-      ScrollTrigger.create({ trigger: wrap, start: 'top top+=' + (parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-h')) || 76), end: () => '+=' + dist(), pin: true, scrub: 0.6, animation: tl, invalidateOnRefresh: true });
-    });
+    /* горизонтальная лента шагов: экран закреплён (sticky), лента уезжает вбок при прокрутке — alive.ts hScroll */
+    document.querySelectorAll<HTMLElement>('[data-hscroll]').forEach((wrap) => hScroll(wrap, local));
 
     /* закреплённый медиа-стек */
     document.querySelectorAll<HTMLElement>('[data-swap]').forEach((wrap) => {
@@ -610,7 +598,6 @@ function initPage() {
     });
 
     /* шаги: бус едет по маршруту (компьютер) / линия заполняется (телефон) */
-    stepsRoute(desktop, reduceNow, local);
 
     return () => local.splice(0).forEach((f) => f());
   });

@@ -1,0 +1,87 @@
+---
+/**
+ * ПАКЕТЫ (18.11.2026): Грузотакси по часам · Перевозка · Под ключ. Цифры — та же формула, что в форме (src/data/pricing.ts).
+ * «Оживают» при наведении (владелец): за мышью — мягкая подсветка, сверху протягивается бирюзовая полоса-скотч,
+ * всплывает 3D-иконка пакета, пункты по очереди получают бирюзовую галочку, соседние колонки приглушаются.
+ * На телефоне то же самое включается, когда колонка доезжает до середины экрана (alive.ts → [data-pk]).
+ */
+import { href, type Locale } from '../i18n/routes';
+import { home as H } from '../content/home';
+import { PACKAGES, GRID, HOURLY, DEMO, moneyLocale, formQuery } from '../data/pricing';
+import { pkgText } from '../content/prices';
+interface Props { locale: Locale; ex?: number }
+const { locale: L, ex: EX = 1 } = Astro.props;
+const pricing = href(L, 'pricing');
+const fmt = new Intl.NumberFormat(moneyLocale(L));
+const ICON: Record<string, string> = { taxi: 'wheel', move: 'boxes', full: 'keys' };
+---
+<section class="lx-sec lx-pk">
+  <div class="container">
+    <div class="lx-head">
+      <h2 class="lx-h2" data-split data-tapeline>{pkgText.h2[L]}</h2>
+      <p class="lx-lead">{pkgText.lead[L]}</p>
+    </div>
+    <div class="lx-pk__cols" data-pk>
+      {PACKAGES.map((p) => (
+        <article class={`lx-pk__col${p.lvl === 3 ? ' is-f' : ''}`} data-pk-col>
+          <i class="lx-pk__glow" aria-hidden="true"></i>
+          <i class="lx-pk__tape" aria-hidden="true"></i>
+          <img class="lx-pk__ico" src={`/img/icons/${ICON[p.id]}.webp`} alt="" width="192" height="192" loading="lazy" decoding="async" />
+          {p.lvl === 3 && <span class="lx-pk__badge">{pkgText.best[L]}</span>}
+          <p class="lx-pk__note">{p.note[L]}</p>
+          <h3 class="lx-pk__name">{p.name[L]}</h3>
+          <p class="lx-pk__price">{p.lvl === 1 ? pkgText.perHour[L].replace('{n}', fmt.format(HOURLY)) : `${p.lvl === 2 ? pkgText.from[L] + ' ' : ''}${fmt.format(GRID[EX][p.lvl === 2 ? 0 : 2])} zł`}</p>
+          {p.lvl === 2 && <p class="lx-pk__diff">{pkgText.orHourly[L]}</p>}
+          <ul>{p.items.map((it, k) => <li style={`--k:${k}`}><i aria-hidden="true"></i>{it[L]}</li>)}</ul>
+          <a class="lux-link" href={`${pricing}${formQuery(EX, p.lvl)}`}>{pkgText.calc[L]}</a>
+        </article>
+      ))}
+    </div>
+    {DEMO && <p class="lx-pk__calc"><span class="lx-note">{H.price.demo[L]}</span></p>}
+  </div>
+</section>
+
+<style>
+  .lx-pk__cols { display: grid; border-top: 1px solid var(--hair); }
+  .lx-pk__col { position: relative; isolation: isolate; display: grid; gap: 18px; align-content: start; padding: 36px 0 44px; border-bottom: 1px solid var(--hair);
+    transition: opacity .5s var(--ease-lux), transform .6s var(--ease-lux); }
+  .lx-pk__note { color: var(--muted); font-size: .95rem; padding-right: 84px; }
+  .lx-pk__name { font-family: var(--font-display); font-weight: 200; font-size: var(--fs-l); letter-spacing: -0.045em; }
+  .lx-pk__price { font-family: var(--font-display); font-weight: 200; font-size: clamp(2rem, 1.4rem + 1.6vw, 2.8rem); letter-spacing: -0.04em; line-height: 1; font-variant-numeric: tabular-nums; transition: transform .6s var(--ease-lux); }
+  .lx-pk__diff { margin-top: -8px; color: var(--deep); font-weight: 600; font-size: .92rem; }
+  .lx-pk__badge { justify-self: start; padding: 3px 10px; font-size: .75rem; font-weight: 600; background: var(--tape); color: var(--graphite); border-radius: 2px; }
+  .lx-pk__calc { margin-top: clamp(28px, 4vw, 48px); display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; }
+  .lx-pk__col ul { list-style: none; padding: 0; margin: 8px 0 12px; display: grid; gap: 10px; color: var(--muted); }
+  .lx-pk__col li { position: relative; padding-left: 26px; transition: color .4s, transform .5s var(--ease-lux); transition-delay: calc(var(--k) * 70ms); }
+  /* галочка: серая чёрточка → бирюзовая галочка */
+  .lx-pk__col li i { position: absolute; left: 0; top: .62em; width: 12px; height: 6px; border-left: 1.5px solid var(--steel, #8F9AA7); border-bottom: 1.5px solid var(--steel, #8F9AA7);
+    transform: translateY(-50%) rotate(-45deg) scale(.85); transform-origin: 30% 70%; transition: border-color .35s, transform .45s var(--ease-lux); transition-delay: calc(var(--k) * 70ms); }
+  /* подсветка за мышью, полоса-скотч, иконка */
+  .lx-pk__glow { position: absolute; z-index: -1; inset: 0; opacity: 0; transition: opacity .5s; pointer-events: none;
+    background: radial-gradient(360px circle at var(--mx, 50%) var(--my, 30%), rgba(20,220,213,.13), transparent 70%), #fff; box-shadow: 0 30px 70px -40px rgba(16,22,29,.35); }
+  .lx-pk__tape { position: absolute; left: 0; right: 0; top: -1px; height: 3px; background: var(--tape); transform: scaleX(0); transform-origin: 0 50%; transition: transform .7s var(--ease-lux); }
+  .lx-pk__col.is-f .lx-pk__tape { transform: scaleX(1); height: 2px; }
+  .lx-pk__ico { position: absolute; right: 0; top: 26px; width: 72px; height: 72px; border-radius: 50%; mix-blend-mode: multiply; opacity: .55; filter: grayscale(1);
+    transform: translateY(8px) rotate(-6deg) scale(.86); transition: transform .7s var(--ease-lux), opacity .5s, filter .5s; }
+  .lx-pk__col .lux-link { justify-self: start; }
+
+  /* живое состояние: наведение мышью или «доехала до середины экрана» на телефоне */
+  .lx-pk__col.is-live .lx-pk__glow { opacity: 1; }
+  .lx-pk__col.is-live .lx-pk__tape { transform: scaleX(1); height: 3px; }
+  .lx-pk__col.is-live .lx-pk__ico { opacity: 1; filter: none; transform: translateY(-4px) rotate(4deg) scale(1.04); }
+  .lx-pk__col.is-live .lx-pk__price { transform: translateX(6px); }
+  .lx-pk__col.is-live li { color: var(--ink); transform: translateX(4px); }
+  .lx-pk__col.is-live li i { border-color: var(--deep); transform: translateY(-70%) rotate(-45deg) scale(1); }
+  @media (hover: hover) and (pointer: fine) {
+    .lx-pk__cols.has-live .lx-pk__col:not(.is-live) { opacity: .5; }
+  }
+  @media (min-width: 1024px) {
+    .lx-pk__cols { grid-template-columns: repeat(3, 1fr); }
+    .lx-pk__col { padding: 40px 32px 32px; border-bottom: 0; }
+    .lx-pk__col + .lx-pk__col { border-left: 1px solid var(--hair); }
+    .lx-pk__ico { right: 24px; top: 30px; }
+    .lx-pk__col.is-live { transform: translateY(-8px); }
+  }
+  @media (max-width: 1023px) { .lx-pk__glow { inset: 0 calc(var(--gutter) * -1); } }
+  @media (prefers-reduced-motion: reduce) { .lx-pk__col, .lx-pk__col *, .lx-pk__col li i { transition: none !important; } }
+</style>

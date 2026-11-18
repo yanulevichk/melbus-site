@@ -12,6 +12,10 @@ import { boardOptions, DEMO, PACKAGES, GRID, HOURLY, moneyLocale, formQuery } fr
 import { pkgText } from '../content/prices';
 import NoHours from '../components/NoHours.astro';
 import HeroFilm from '../components/HeroFilm.astro';
+import PriceLabel from '../components/PriceLabel.astro';
+import Packages from '../components/Packages.astro';
+import Marquee from '../components/Marquee.astro';
+import Steps from '../components/Steps.astro';
 import { home as H } from '../content/home';
 import { areaText } from '../content/areas';
 const { locale } = Astro.props as { locale: Locale };
@@ -46,6 +50,9 @@ const qr = (seed: number) => {
   </div>
 </section>
 
+<!-- 1в. БЕГУЩАЯ СТРОКА: что перевозим (ускоряется от прокрутки) -->
+<Marquee locale={L} />
+
 <!-- 2. ОБЕЩАНИЕ -->
 <section class="lx-sec lx-statement">
   <div class="container lx-statement__grid">
@@ -76,17 +83,7 @@ const qr = (seed: number) => {
       <div class="lx-seg" role="group" aria-label={H.price.seg[L]} data-board-for="board-lux">
         {boardOptions.map((o, i) => <button type="button" class="lx-seg__b" data-value={o.value} data-status={o.status[L]} data-href={`${pricing}${formQuery(o.size, 2)}`} aria-pressed={i === 1 ? 'true' : 'false'}>{o.label[L]}</button>)}
       </div>
-      <div class="lx-board" id="board-lux" data-board>
-        <p class="lx-board__status" data-board-status>{boardOptions[1].status[L]}</p>
-        <div class="lx-board__row" aria-hidden="true">
-          <span class="lx-board__from">{H.price.from[L]}</span>
-          {[0, 1, 2, 3].map((i) => (
-            <span class={`lx-reel${i === 0 ? ' lx-reel--k' : ''}`} data-reel><span class="lx-reel__strip">{Array.from({ length: 33 }, (_, k) => <i>{k % 11 === 10 ? '' : k % 11}</i>)}</span></span>
-          ))}
-          <span class="lx-board__cur">zł</span>
-        </div>
-        <p class="sr-only" aria-live="polite">{H.price.sr[L]} <span data-board-value>{boardOptions[1].value}</span> zł</p>
-      </div>
+      <PriceLabel locale={L} id="board-lux" value={boardOptions[1].value} status={boardOptions[1].status[L]} />
       {DEMO && <p class="lx-note">{H.price.demo[L]}</p>}
       <a href={`${pricing}${formQuery(1, 2)}`} class="btn btn--primary" data-board-cta>{H.price.next[L]}</a>
     </div>
@@ -97,29 +94,7 @@ const qr = (seed: number) => {
 <NoHours locale={locale} />
 
 <!-- 4. ШАГИ (это последовательность — номера по делу) -->
-<section class="lx-sec lx-steps">
-  <div class="container lx-head">
-    <h2 class="lx-h2" data-split data-tapeline>{H.steps.h2[L]}</h2>
-    <p class="lx-lead">{H.steps.lead[L]}</p>
-  </div>
-  <div class="lx-hs" data-hscroll>
-    <div class="lx-hs__track container" data-hscroll-track>
-      <div class="lx-route" aria-hidden="true"><svg viewBox="0 0 2400 40" preserveAspectRatio="none"><path class="lx-route__base" d="M0 20 L2400 20" /><path data-route d="M0 20 L2400 20" /></svg></div>
-      <i class="lx-hs__fill" data-fill aria-hidden="true"></i>
-      {H.steps.items.map(([img, t, d], i) => (
-        <article class="lx-step">
-          <div class="lx-step__media" data-slot={`V${i + 2}`} data-img>
-            <img src={`/img/film/${img}.webp`} alt="" width="720" height="900" loading="lazy" decoding="async" />
-            <span class="lx-step__n">{i + 1}</span>
-          </div>
-          <h3 class="lx-step__t">{t[L]}</h3>
-          <p class="lx-step__d">{d[L]}</p>
-        </article>
-      ))}
-    </div>
-  </div>
-  <p class="container lx-note lx-steps__note">{H.steps.note[L]}</p>
-</section>
+<Steps locale={L} />
 
 <!-- 5. СТАНДАРТЫ -->
 <section class="lx-sec lx-std">
@@ -174,28 +149,7 @@ const qr = (seed: number) => {
 </section>
 
 <!-- 7. ПАКЕТЫ (18.11.2026): Грузотакси по часам · Перевозка · Под ключ. Цифры — та же формула, что в форме (src/data/pricing.ts) -->
-<section class="lx-sec lx-pk">
-  <div class="container">
-    <div class="lx-head">
-      <h2 class="lx-h2" data-split data-tapeline>{pkgText.h2[L]}</h2>
-      <p class="lx-lead">{pkgText.lead[L]}</p>
-    </div>
-    <div class="lx-pk__cols">
-      {PACKAGES.map((p) => (
-        <article class={`lx-pk__col${p.lvl === 3 ? ' is-f' : ''}`}>
-          {p.lvl === 3 && <span class="lx-pk__badge">{pkgText.best[L]}</span>}
-          <p class="lx-pk__note">{p.note[L]}</p>
-          <h3 class="lx-pk__name">{p.name[L]}</h3>
-          <p class="lx-pk__price">{p.lvl === 1 ? pkgText.perHour[L].replace('{n}', fmt.format(HOURLY)) : `${p.lvl === 2 ? pkgText.from[L] + ' ' : ''}${fmt.format(GRID[EX][p.lvl === 2 ? 0 : 2])} zł`}</p>
-          {p.lvl === 2 && <p class="lx-pk__diff">{pkgText.orHourly[L]}</p>}
-          <ul>{p.items.map((it) => <li>{it[L]}</li>)}</ul>
-          <a class="lux-link" href={`${pricing}${formQuery(EX, p.lvl)}`}>{pkgText.calc[L]}</a>
-        </article>
-      ))}
-    </div>
-    {DEMO && <p class="lx-pk__calc"><span class="lx-note">{H.price.demo[L]}</span></p>}
-  </div>
-</section>
+<Packages locale={L} />
 
 <!-- 8. ГАРАНТИЯ -->
 <section class="lx-sec lx-guar dark grain">
@@ -292,14 +246,8 @@ const qr = (seed: number) => {
 
 <style>
   /* ---------- общий ритм ---------- */
-  .lx-sec { padding-block: clamp(96px, 13vw, 210px); }
-  .lx-h2 { font-family: var(--font-display); font-size: var(--fs-xl); font-weight: 200; letter-spacing: -0.045em; line-height: .98; max-width: 13ch; }
   .lx-xl { font-family: var(--font-display); font-size: var(--fs-xl); font-weight: 200; letter-spacing: -0.045em; line-height: .98; }
   .lx-mega { font-family: var(--font-display); font-size: var(--fs-mega); font-weight: 200; letter-spacing: -0.05em; line-height: .92; max-width: 11ch; }
-  .lx-lead { font-size: clamp(1.05rem, 1rem + .3vw, 1.25rem); line-height: 1.6; color: var(--muted); max-width: 44ch; }
-  .lx-head { display: grid; gap: 28px; margin-bottom: clamp(48px, 7vw, 104px); }
-  @media (min-width: 960px) { .lx-head { grid-template-columns: 7fr 5fr; align-items: end; } }
-  .lx-note { font-size: .875rem; color: var(--muted); }
   .lx-steps__note { margin-top: 32px; }
 
   /* ---------- первый экран: фильм ---------- */
@@ -417,40 +365,6 @@ const qr = (seed: number) => {
   .lx-seg__b:hover { color: var(--ink); }
   .lx-seg__b[aria-pressed="true"] { color: var(--ink); }
   .lx-seg__b[aria-pressed="true"]::after { transform: scaleX(1); }
-  .lx-board { --cell: clamp(64px, 13vw, 168px); display: grid; gap: 8px; }
-  .lx-board__status { color: var(--muted); font-size: .95rem; }
-  .lx-board__row { display: flex; align-items: flex-end; gap: .02em; }
-  .lx-board__from { font-size: 1.05rem; color: var(--muted); margin-right: .6em; padding-bottom: calc(var(--cell) * .16); }
-  .lx-board__cur { font-family: var(--font-display); font-weight: 200; font-size: calc(var(--cell) * .38); margin-left: .35em; padding-bottom: calc(var(--cell) * .14); }
-  .lx-reel { position: relative; width: calc(var(--cell) * .66); height: var(--cell); overflow: hidden; -webkit-mask: linear-gradient(transparent, #000 18%, #000 82%, transparent); mask: linear-gradient(transparent, #000 18%, #000 82%, transparent); }
-  .lx-reel--k { margin-right: calc(var(--cell) * .2); }
-  .lx-reel__strip { display: block; will-change: transform; }
-  .lx-reel__strip i { display: grid; place-items: center; height: var(--cell); font-style: normal; font-family: var(--font-display); font-weight: 200; font-size: calc(var(--cell) * .92); letter-spacing: -0.06em; line-height: 1; font-variant-numeric: tabular-nums; }
-
-  /* ---------- шаги ---------- */
-  .lx-hs { overflow: hidden; }
-  .lx-hs__track { position: relative; display: grid; gap: 56px; }
-  .lx-route, .lx-hs__fill { display: none; }
-  .lx-step { display: grid; gap: 16px; align-content: start; }
-  .lx-step__media { position: relative; aspect-ratio: 4 / 5; background: linear-gradient(160deg, #1A232D 0%, #10161D 70%); color: var(--dark-ink); overflow: hidden; }
-  .lx-step:nth-child(even) .lx-step__media { background: linear-gradient(160deg, #E4E8EC 0%, #CBD2D9 100%); color: var(--ink); }
-  .lx-step__media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 1.2s var(--ease-lux); }
-  .lx-step__media::after { content: ""; position: absolute; inset: 45% 0 0; background: linear-gradient(transparent, rgba(16,22,29,.55)); pointer-events: none; }
-  .lx-step:hover .lx-step__media img { transform: scale(1.04); }
-  /* 18.11.2026: цифра целиком внутри кадра (раньше обрезалась снизу) */
-  .lx-step__n { position: absolute; z-index: 1; color: #fff; left: 7%; bottom: 6%; font-family: var(--font-display); font-weight: 200; font-size: clamp(4.5rem, 9vw, 7.5rem); line-height: 1; letter-spacing: -0.05em; opacity: .92; }
-  .lx-step__t { font-family: var(--font-display); font-weight: 300; font-size: var(--fs-m); letter-spacing: -0.03em; }
-  .lx-step__d { color: var(--muted); max-width: 34ch; }
-  @media (max-width: 1023px) {
-    .lx-hs__track { padding-left: calc(var(--gutter) + 28px); }
-    .lx-hs__track::before { content: ""; position: absolute; left: calc(var(--gutter) + 4px); top: 0; bottom: 0; width: 1px; background: var(--hair); }
-    .lx-hs__fill { display: block; position: absolute; left: calc(var(--gutter) + 3.5px); top: 0; bottom: 0; width: 2px; background: var(--tape); transform-origin: 50% 0; }
-  }
-  @media (min-width: 640px) and (max-width: 1023px) { .lx-hs__track { grid-template-columns: 1fr 1fr; } }
-  /* 18.11.2026: на компьютере все 6 шагов видны сразу (сетка 3×2) — закреплённая горизонтальная лента у владельца не листалась дальше 4-го */
-  @media (min-width: 1024px) {
-    .lx-hs__track { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 64px 40px; }
-  }
 
   /* ---------- стандарты ---------- */
   .lx-std__grid { display: grid; gap: 56px; }
@@ -478,22 +392,6 @@ const qr = (seed: number) => {
   .lx-sticker__n { grid-column: 2; font-family: var(--font-display); font-weight: 200; font-size: 2.2rem; letter-spacing: -0.05em; line-height: 1; }
   .lx-sticker__qr { grid-column: 3; grid-row: 1 / 3; width: 46px; height: 46px; align-self: center; color: var(--graphite); fill: var(--graphite); }
 
-  /* ---------- пакеты ---------- */
-  .lx-pk__cols { display: grid; border-top: 1px solid var(--hair); }
-  .lx-pk__col { position: relative; display: grid; gap: 18px; align-content: start; padding: 36px 0 44px; border-bottom: 1px solid var(--hair); }
-  .lx-pk__col.is-f::before { content: ""; position: absolute; left: 0; right: 0; top: -1px; height: 2px; background: var(--tape); }
-  .lx-pk__note { color: var(--muted); font-size: .95rem; }
-  .lx-pk__name { font-family: var(--font-display); font-weight: 200; font-size: var(--fs-l); letter-spacing: -0.045em; }
-  .lx-pk__price { font-family: var(--font-display); font-weight: 200; font-size: clamp(2rem, 1.4rem + 1.6vw, 2.8rem); letter-spacing: -0.04em; line-height: 1; font-variant-numeric: tabular-nums; }
-  .lx-pk__diff { margin-top: -8px; color: var(--deep); font-weight: 600; font-size: .92rem; }
-  .lx-pk__badge { justify-self: start; padding: 3px 10px; font-size: .75rem; font-weight: 600; background: var(--tape); color: var(--graphite); border-radius: 2px; }
-  .lx-pk__calc { margin-top: clamp(28px, 4vw, 48px); display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; }
-  .lx-pk__col ul { list-style: none; padding: 0; margin: 8px 0 12px; display: grid; gap: 10px; color: var(--muted); }
-  @media (min-width: 900px) {
-    .lx-pk__cols { grid-template-columns: repeat(3, 1fr); }
-    .lx-pk__col { padding: 40px 40px 8px 0; border-bottom: 0; }
-    .lx-pk__col + .lx-pk__col { padding-left: 40px; border-left: 1px solid var(--hair); }
-  }
 
   /* ---------- гарантия ---------- */
   .lx-guar { background: radial-gradient(70% 90% at 85% 0%, #14262C 0%, var(--dark) 60%); }
