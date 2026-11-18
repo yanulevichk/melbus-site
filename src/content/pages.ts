@@ -25,18 +25,9 @@ export const meta: Record<string, { title: L; description: L; nav?: string }> = 
     nav: 'services',
   },
   pricing: {
-    title: l('Цены на переезд', 'Cennik przeprowadzek', 'Ціни на переїзд', 'Moving prices'),
-    description: l('Пакеты и ставки MELBUS: что входит в цену и как мы её фиксируем по видео.', 'Pakiety i stawki MELBUS: co obejmuje cena i jak ustalamy ją na podstawie wideo.', 'Пакети й ставки MELBUS: що входить у ціну і як ми фіксуємо її за відео.', 'MELBUS packages and rates: what the price includes and how we fix it from a video.'),
+    title: l('Цены и расчёт переезда', 'Cennik i wycena przeprowadzki', 'Ціни й розрахунок переїзду', 'Moving prices and quote'),
+    description: l('Отметьте вещи или пришлите видео — цена за весь переезд сразу, и она не изменится. Грузотакси, перевозка, под ключ.', 'Zaznacz rzeczy albo wyślij wideo — od razu cena za całą przeprowadzkę, która się nie zmieni. Taxi bagażowe, transport, pod klucz.', 'Позначте речі або надішліть відео — ціна за весь переїзд одразу, і вона не зміниться. Вантажне таксі, перевезення, під ключ.', 'Pick your things or send a video and get a price for the whole move right away — one that won’t change. Van and driver, transport, full service.'),
     nav: 'pricing',
-  },
-  calculator: {
-    title: l('Калькулятор переезда', 'Kalkulator przeprowadzki', 'Калькулятор переїзду', 'Moving cost calculator'),
-    description: l('Ориентировочная цена переезда за 30 секунд.', 'Orientacyjna cena przeprowadzki w 30 sekund.', 'Орієнтовна ціна переїзду за 30 секунд.', 'Estimate your moving cost in 30 seconds.'),
-    nav: 'pricing',
-  },
-  quote: {
-    title: l('Заявка на переезд', 'Zapytanie o przeprowadzkę', 'Заявка на переїзд', 'Moving quote request'),
-    description: l('Расскажите о переезде и пришлите видео — получите фиксированную цену.', 'Opowiedz o przeprowadzce i wyślij wideo — otrzymasz stałą cenę.', 'Розкажіть про переїзд і надішліть відео — отримайте фіксовану ціну.', 'Tell us about your move and send a video — get a fixed price.'),
   },
   guarantee: {
     title: l('Гарантия фиксированной цены', 'Gwarancja stałej ceny', 'Гарантія фіксованої ціни', 'Fixed price guarantee'),
@@ -82,29 +73,6 @@ export const meta: Record<string, { title: L; description: L; nav?: string }> = 
 meta.lux = meta.home;
 
 export const pages: Record<string, LPage> = {
-  pricing: {
-    eyebrow: l('Цены', 'Cennik', 'Ціни', 'Prices'),
-    title: l('Честная цена<br>до переезда', 'Uczciwa cena<br>przed przeprowadzką', 'Чесна ціна<br>до переїзду', 'An honest price<br>before you move'),
-    lead: l('Все цены брутто и за весь переезд — не за часы. Точную цену назовём по видео, и она не изменится в день переезда.', 'Wszystkie ceny brutto, za całą przeprowadzkę — nie za godziny. Dokładną cenę podamy na podstawie wideo i nie zmieni się ona w dniu przeprowadzki.', 'Усі ціни брутто й за весь переїзд — не за години. Точну ціну назвемо за відео, і вона не зміниться в день переїзду.', 'All prices include VAT and are for the whole move, not by the hour. We’ll give you the exact price from a video, and it won’t change on moving day.'),
-    media: { video: '/video/phone.mp4', poster: '/img/site/phone.webp', square: true,
-      alt: l('Рука с телефоном снимает квартиру на видео', 'Ręka z telefonem nagrywa mieszkanie', 'Рука з телефоном знімає квартиру на відео', 'A hand filming a flat on a phone'),
-      caption: l('Две-три минуты видео на телефон — и мы называем окончательную цену.', 'Dwie, trzy minuty wideo z telefonu — i podajemy ostateczną cenę.', 'Дві-три хвилини відео на телефон — і ми називаємо остаточну ціну.', 'Two or three minutes of phone video — and we give you the final price.') },
-    blocks: [
-      { type: 'list', eyebrow: l('Всегда включено', 'Zawsze w cenie', 'Завжди включено', 'Always included'), title: l('Без доплат<br>за мелочи', 'Bez dopłat<br>za drobiazgi', 'Без доплат<br>за дрібниці', 'No extra charges<br>for the little things'), items: [
-        [l('Подача буса и топливо по Варшаве', 'Dojazd busa i paliwo w Warszawie', 'Подача буса й пальне в межах Варшави', 'Van arrival and fuel within Warsaw'), l('Не считаем отдельно дорогу до вас.', 'Nie liczymy osobno dojazdu do Ciebie.', 'Не рахуємо окремо дорогу до вас.', 'We don’t charge separately for getting to you.')],
-        [l('Защита мебели и дома', 'Ochrona mebli i domu', 'Захист меблів і дому', 'Furniture and home protection'), l('Плёнка, одеяла, ремни, дорожки на пол, накладки на косяки.', 'Folia, koce, pasy, chodniki na podłogę, osłony na futryny.', 'Плівка, ковдри, ремені, доріжки на підлогу, накладки на одвірки.', 'Stretch film, blankets, straps, floor runners, door frame guards.')],
-        [l('Бахилы и перчатки', 'Ochraniacze na buty i rękawice', 'Бахіли й рукавички', 'Shoe covers and gloves'), l('Стандарт бригады, а не услуга за деньги.', 'Standard ekipy, a nie płatna usługa.', 'Стандарт бригади, а не платна послуга.', 'A crew standard, not a paid extra.')],
-        [l('Фактура VAT', 'Faktura VAT', 'Фактура VAT', 'VAT invoice'), l('Для частных клиентов и фирм.', 'Dla klientów prywatnych i firm.', 'Для приватних клієнтів і фірм.', 'For private clients and companies.')],
-      ] },
-    ],
-  },
-
-  calculator: {
-    eyebrow: l('Калькулятор', 'Kalkulator', 'Калькулятор', 'Calculator'),
-    title: l('Сколько стоит<br>ваш переезд', 'Ile kosztuje<br>Twoja przeprowadzka', 'Скільки коштує<br>ваш переїзд', 'What your move<br>will cost'),
-    lead: l('Выберите, что и куда везём, — табло покажет ориентир. Точную цену назовём по видео.', 'Wybierz, co i dokąd wieziemy — tablica pokaże orientacyjną cenę. Dokładną podamy na podstawie wideo.', 'Оберіть, що й куди веземо, — табло покаже орієнтир. Точну ціну назвемо за відео.', 'Choose what we’re moving and where — the board shows a ballpark figure. We’ll give you the exact price from a video.'),
-  },
-
   guarantee: {
     eyebrow: l('Гарантия', 'Gwarancja', 'Гарантія', 'Guarantee'),
     title: l('Цена, которую<br>вы приняли, —<br>окончательная', 'Cena, którą<br>przyjmujesz,<br>jest ostateczna', 'Ціна, яку<br>ви прийняли, —<br>остаточна', 'The price<br>you accept<br>is final'),

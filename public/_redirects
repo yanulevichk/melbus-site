@@ -1,0 +1,21 @@
+# Cloudflare Pages: старые адреса → новые (18.11.2026). Формат: откуда куда код
+# «Калькулятор» и «Заявка» слиты в «Цены и расчёт» (одна форма «Что у вас дома»).
+/kalkulator /cennik/ 301
+/kalkulator/ /cennik/ 301
+/wycena /cennik/ 301
+/wycena/ /cennik/ 301
+/ru/kalkulyator /ru/ceny/ 301
+/ru/kalkulyator/ /ru/ceny/ 301
+/ru/zayavka /ru/ceny/ 301
+/ru/zayavka/ /ru/ceny/ 301
+/uk/kalkulyator /uk/tsiny/ 301
+/uk/kalkulyator/ /uk/tsiny/ 301
+/uk/zayavka /uk/tsiny/ 301
+/uk/zayavka/ /uk/tsiny/ 301
+/en/calculator /en/pricing/ 301
+/en/calculator/ /en/pricing/ 301
+/en/quote /en/pricing/ 301
+/en/quote/ /en/pricing/ 301
+# инструмент менеджера теперь — та же форма в режиме ?team=1
+/team/oferta /ru/ceny/?team=1 302
+/team/oferta/ /ru/ceny/?team=1 302

@@ -3,7 +3,7 @@ import * as path from 'node:path';
 const R = path.resolve(__dirname, '../../../..');
 const files = [
   'tools/film/remotion/src/social/stories.ts', 'tools/film/remotion/src/social/posts.ts', 'tools/film/remotion/src/social/texts.ts', 'tools/film/remotion/src/social/gptbank.ts',
-  'src/content/home.ts', 'src/content/pages.ts', 'src/content/quote.ts', 'src/content/calculator.ts', 'src/content/areas.ts',
+  'src/content/home.ts', 'src/content/pages.ts', 'src/content/quote.ts', 'src/content/areas.ts',
   'src/content/prices.ts', 'src/content/offer.ts', 'src/content/moveform.ts', 'src/content/legal.ts', 'src/data/move.ts', 'src/i18n/ui.ts', 'src/data/areas.ts', 'src/data/services.ts', 'src/data/faq.ts', 'src/data/pricing.ts',
 ];
 const CYR = /[Ѐ-ӿ]/, LAT = /[A-Za-zĄąĆćĘęŁłŃńÓóŚśŹźŻż]/;

@@ -4,7 +4,7 @@ import type { L } from './text';
 export const ui = {
   nav: {
     services: { ru: 'Услуги', pl: 'Usługi', uk: 'Послуги', en: 'Services' },
-    pricing: { ru: 'Цены', pl: 'Cennik', uk: 'Ціни', en: 'Prices' },
+    pricing: { ru: 'Цены и расчёт', pl: 'Cennik i wycena', uk: 'Ціни й розрахунок', en: 'Prices and quote' },
     how: { ru: 'Как мы работаем', pl: 'Jak pracujemy', uk: 'Як ми працюємо', en: 'How we work' },
     guarantee: { ru: 'Гарантия цены', pl: 'Gwarancja ceny', uk: 'Гарантія ціни', en: 'Price guarantee' },
     about: { ru: 'О нас', pl: 'O nas', uk: 'Про нас', en: 'About us' },

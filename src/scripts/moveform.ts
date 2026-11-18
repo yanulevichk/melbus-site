@@ -3,7 +3,7 @@
  * Форма «Что у вас дома» в браузере: вещи и размеры, адреса, коробки, допы, дата, табло с барабанами, бус с коробками,
  * отправка заявки (/api/quote, видео — /api/upload/*). Надписи приходят из MoveForm.astro (JSON, нужный язык).
  */
-import { LEVELS, ROOMS, P, ITEMS, ITEM, EXTRAS, PRESETS, PLACE, KM_FREE, KM_RATE, HOURLY, BOX_MAT, CAP, calc, route, roadKm, specOf, asmOn, money } from '../data/move';
+import { LEVELS, ROOMS, P, ITEMS, ITEM, EXTRAS, PRESETS, PLACE, KM_FREE, KM_RATE, HOURLY, HOURLY2, EXAMPLE, BOX_MAT, CAP, calc, route, specOf, asmOn, money } from '../data/move';
 
 const ICO = {
   list: '<path d="M9 6h11M9 12h11M9 18h11M4 6h1M4 12h1M4 18h1"/>',
@@ -109,7 +109,9 @@ export function initMoveForm() {
 
   // ===== состояние: пример — 2 комнаты, «Под ключ», Мокотув → Бемово =====
   const S = { mode: 'list', level: 3, hours: 2,
-    from: { place: 'Warszawa, Mokotów', floor: 3, lift: true, door: 0, house: 0 }, to: { place: 'Warszawa, Bemowo', floor: 2, lift: false, door: 1, house: 0 },
+    // начальное состояние = пример, по которому считаются цены на главной и в меню (EXAMPLE) — цифры совпадают
+    from: { place: EXAMPLE.from, floor: EXAMPLE.floor, lift: true, door: 0, house: 0 }, to: { place: EXAMPLE.to, floor: EXAMPLE.floor, lift: true, door: 0, house: 0 },
+    pay: 'fixed', asmAll: false,
     list: [], boxes: 0, extras: {}, unpack: false, ahead: false, kitchen: false, preset: 'two', room: 'pop', q: '', date: '', dateK: 0, dateLabel: '' };
   let uid = 0;
   const T0 = Date.now();
@@ -123,14 +125,28 @@ export function initMoveForm() {
   const qs = new URLSearchParams(location.search);
   const sizeK = ['studio', 'two', 'three', 'house', 'three'][Number(qs.get('size'))];
   if (qs.has('size') && sizeK) applyPreset(sizeK);
-  const pkgQ = qs.get('pkg');
+  const pkgQ = qs.get('pkg');                       // старые ссылки: 0 Перевозка, 1 Стандарт, 2 Под ключ
   if (pkgQ === '0' || pkgQ === '1') S.level = 2;
-  if (pkgQ === '1') { S.kitchen = true; S.ahead = true; S.list.forEach((e) => { e.asm = true; }); }
+  if (pkgQ === '1') S.asmAll = true;
   const lvlQ = Number(qs.get('lvl'));
   if (lvlQ >= 1 && lvlQ <= 3) S.level = lvlQ;
   for (const k of ['from', 'to']) { const v = qs.get(k); if (v && PLACE[v]) S[k].place = v; }
   if (S.from.place === S.to.place) S.to.place = S.from.place === 'Warszawa, Śródmieście' ? 'Warszawa, Mokotów' : 'Warszawa, Śródmieście';
   if (qs.get('mode') === 'video') S.mode = 'video';
+  // ?s= — весь расчёт клиента (ссылка менеджеру из Telegram): уровень, оплата, адреса, вещи, коробки, допы
+  try {
+    const m = qs.get('s') ? JSON.parse(qs.get('s')) : null;
+    if (m && typeof m === 'object') {
+      for (const k of ['level', 'hours', 'boxes', 'dateK']) if (Number.isFinite(m[k])) S[k] = m[k];
+      for (const k of ['unpack', 'ahead', 'kitchen', 'asmAll']) S[k] = m[k] === true;
+      if (m.pay === 'hourly' || m.pay === 'fixed') S.pay = m.pay;
+      if (m.mode === 'video' || m.mode === 'list') S.mode = m.mode;
+      if (m.extras && typeof m.extras === 'object') S.extras = { ...m.extras };
+      for (const k of ['from', 'to']) if (m[k] && typeof m[k] === 'object') S[k] = { ...S[k], ...m[k] };
+      if (Array.isArray(m.list)) { S.list = m.list.filter((e) => e && ITEM[e.id]).map((e) => ({ u: ++uid, id: e.id, n: e.n || 1, sel: { ...ITEM[e.id].def, ...(e.sel || {}) }, asm: e.asm, cond: e.cond || 'ok' })); S.preset = ''; }
+    }
+  } catch { /* битая ссылка — открываем обычный пример */ }
+  const TEAM = qs.get('team') === '1';
   const countOf = (id) => S.list.filter((e) => e.id === id).reduce((a, e) => a + e.n, 0);
   const totalItems = () => S.list.reduce((a, e) => a + e.n, 0);
   function summary(e, withWork = true) {
@@ -138,7 +154,7 @@ export function initMoveForm() {
     if (withWork) {
       const c = e.cond || 'ok';
       if (it.kind === 'ward' && c !== 'ok') parts.push({ whole: T.wWhole, fix: T.wFix, drop: T.wDrop }[c]);
-      else if (specOf(e).a > 0) parts.push(asmOn(e, S.level) ? T.wAsm : T.wNoAsm);
+      else if (specOf(e).a > 0) parts.push(asmOn(e, S.level, S.asmAll) ? T.wAsm : T.wNoAsm);
     }
     return parts.join(' · ');
   }
@@ -189,6 +205,7 @@ export function initMoveForm() {
   ${[262, 852].map((x) => `<g><circle cx="${x}" cy="390" r="54" fill="url(#${p}t)"/><circle cx="${x}" cy="390" r="31" fill="url(#${p}r)"/>${[0, 72, 144, 216, 288].map((a) => `<path d="M${x} 390L${(x + 27 * Math.cos((a - 90) * Math.PI / 180)).toFixed(1)} ${(390 + 27 * Math.sin((a - 90) * Math.PI / 180)).toFixed(1)}" stroke="#7D8995" stroke-width="7" stroke-linecap="round"/>`).join('')}<circle cx="${x}" cy="390" r="9" fill="#56626E"/></g>`).join('')}
 </svg>`;
   $('vanA').innerHTML = vanSVG('mfva'); $('vanB').innerHTML = vanSVG('mfvb');
+  $('vanB').insertAdjacentHTML('beforeend', '<span class="vanbox__more" data-el="vanMore" hidden></span>');   // 3+ бусов: «+1» на втором
   for (const p of ['mfva', 'mfvb']) root.querySelector(`[data-cells="${p}"]`).innerHTML = Array.from({ length: CELLS }, (_, i) => {
     const col = 11 - Math.floor(i / 5), row = 4 - (i % 5);
     return `<image class="cell" href="/img/icons/box.webp" x="${(126 + col * 42.5 + 1).toFixed(1)}" y="${(116 + row * 41.2 + 0.6).toFixed(1)}" width="40.5" height="40.5"/>`;
@@ -344,7 +361,7 @@ export function initMoveForm() {
         <div class="opts" role="radiogroup" aria-label="${T.oldAria}">${o('ok', T.cOk, T.cOkS)}${o('whole', T.cWhole, T.cWholeS)}${o('fix', T.cFix, tr(T.cFixS, { p: per(60) }))}${o('drop', T.cDrop, tr(T.cDropS, { p: per(90) }))}</div></details>`;
     }
     if (sp.a > 0 && (it.kind !== 'ward' || (draft.cond || 'ok') === 'ok')) {
-      h += `<div class="end"><button type="button" class="sw" role="switch" aria-checked="${asmOn(draft, S.level)}" data-act="asm"><span class="sw__l">${T.asm}<small>${tr(T.asmS, { p: per(sp.a), h: hrs(sp.a) })}</small></span><span class="sw__k"></span></button></div>`;
+      h += `<div class="end"><button type="button" class="sw" role="switch" aria-checked="${asmOn(draft, S.level, S.asmAll)}" data-act="asm"><span class="sw__l">${T.asm}<small>${tr(T.asmS, { p: per(sp.a), h: hrs(sp.a) })}</small></span><span class="sw__k"></span></button></div>`;
     }
     if (it.kind === 'tv') {
       h += `<p>${T.tvTxt}</p><div class="end"><button type="button" class="sw" role="switch" aria-checked="${!!S.extras.tvOff}" data-act="xsw" data-v="tvOff"><span class="sw__l">${T.tvOff}<small>${tr(T.perPc, { p: per(48) })}</small></span><span class="sw__k"></span></button>
@@ -368,6 +385,7 @@ export function initMoveForm() {
     const X = x.x || {};
     switch (x.k) {
       case 'hourly': return [T.lHourly, tr(T.subHourly, { h: X.h, rate: HOURLY })];
+      case 'hourly2': return [T.lHourly2, tr(T.subHourly2, { h: dec(X.h), rate: X.rate, crew: X.crew })];
       case 'km': return [T.lKm, Math.round(X.km) + ' ' + I.units.km + ' × ' + dec(KM_RATE) + ' zł'];
       case 'carry': return [T.lCarry, tr(T.subWork, { h: hrs(x.min) })];
       case 'road': return [T.lRoad, tr(T.subRoad, { km: Math.round(X.km), t: tdur(X.min), crew: X.crew })];
@@ -399,12 +417,13 @@ export function initMoveForm() {
       drums($('barP'), sum ? Math.round(sum / 10) * 10 : null); $('barM').textContent = T.barVideo;
       return r;
     }
-    $('bK').textContent = r.hourly ? T.kHourly : T.kPrice;
+    $('bK').textContent = r.hourly ? T.kHourly : r.paidHourly ? T.kHourly2 : T.kPrice;
     drums($('bP'), r.empty ? 0 : r.total); $('bPtext').textContent = r.empty ? '' : zl(r.total);
-    $('bFix').textContent = r.hourly ? T.fixHourly : r.empty ? T.fixEmpty : T.fix;
+    $('bFix').textContent = r.hourly ? T.fixHourly : r.empty ? T.fixEmpty : r.paidHourly ? tr(T.fixHourly2, { rate: r.hourly2.rate, min: HOURLY2.min, fixed: zl(calc({ ...S, pay: 'fixed' }).total) }) : T.fix;
     $('van').hidden = !!r.hourly || !!r.empty;
     if (!r.hourly && !r.empty) {
       setFill(r.vol, r.buses);
+      $('vanMore').hidden = r.buses < 3; $('vanMore').textContent = '+' + (r.buses - 2);
       $('vanCap').textContent = r.buses > 1 ? tr(T.vanMany, { n: pl(r.buses, 'buses'), m3: m3(r.vol) }) : tr(T.vanOne, { p: Math.round(Math.min(1, r.fill) * 100), m3: m3(r.vol) });
     }
     const crewWord = (n) => pl(n, 'people').replace(/^\d+ /, '');
@@ -414,7 +433,7 @@ export function initMoveForm() {
     $('lines').innerHTML = r.lines.map((x) => { const [a, b] = lineText(x, r); return `<li class="${x.sum < 0 ? 'minus' : ''}"><span>${a}<small>${b}</small></span><b>${x.sum < 0 ? '−' + zl(-x.sum) : zl(x.sum)}</b></li>`; }).join('');
     $('bNote').textContent = r.hourly ? T.noteHourly : T.note1;
     drums($('barP'), r.empty ? null : r.total);
-    $('barM').textContent = r.empty ? T.barList : r.hourly ? T.barHourly : `${pl(totalItems(), 'things')} · ${pl(r.crew, 'people')} · ≈${hrs(r.dur * 60)} ${I.units.h} · ${T.barFix}`;
+    $('barM').textContent = r.empty ? T.barList : r.hourly ? T.barHourly : r.paidHourly ? `${pl(r.crew, 'people')} · ${T.barHourly2}` : `${pl(totalItems(), 'things')} · ${pl(r.crew, 'people')} · ≈${hrs(r.dur * 60)} ${I.units.h} · ${T.barFix}`;
     return r;
   }
 
@@ -469,6 +488,17 @@ export function initMoveForm() {
     $('subBoxes').textContent = S.level === 3 ? T.subBoxes3 : T.subBoxes2;
     const swi = (a, on, show = true) => { const b = root.querySelector(`[data-act="${a}"].sw`); b.hidden = !show; b.setAttribute('aria-checked', String(on)); };
     swi('kitchen', S.kitchen, S.level === 2); swi('ahead', S.ahead, S.level === 2); swi('unpack', S.unpack);
+    // «Перевозка»: как платить и разборка всей мебели (в «Под ключ» сборка уже входит)
+    const l2 = S.level === 2 && !video;
+    $('pay').hidden = !l2;
+    root.querySelectorAll('[data-act="pay"]').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.v === S.pay)));
+    $('payNote').textContent = S.pay === 'hourly' ? tr(T.payNoteH, { rate: HOURLY2.base, min: HOURLY2.min }) : T.payNoteF;
+    $('asmAllBox').hidden = S.level !== 2;
+    root.querySelector('[data-act="asmAll"]').setAttribute('aria-checked', String(!!S.asmAll));
+    if (S.level === 2) {
+      const d = calc({ ...S, asmAll: true, pay: 'fixed' }).raw - calc({ ...S, asmAll: false, pay: 'fixed' }).raw;
+      $('asmAllS').textContent = tr(T.asmAllS, { p: d > 0 ? '+' + zl(d) : '' }).trim();
+    }
     $('kitchenS').textContent = tr(T.kitchenS, { n: fmt(Math.round((money(100) + 10 * BOX_MAT) / 10) * 10) });
     $('aheadS').textContent = tr(T.aheadS, { n: BOX_MAT });
     $('unpackS').textContent = tr(T.unpackS, { n: fmt(money(9)) });
@@ -524,7 +554,7 @@ export function initMoveForm() {
       case 'close': sheet.close(); return;
       case 'psel': draft.sel[b.dataset.k] = +v; renderSheet(lastFocus); return;
       case 'cond': draft.cond = v; renderSheet(lastFocus); return;
-      case 'asm': draft.asm = !asmOn(draft, S.level); renderSheet(lastFocus); return;
+      case 'asm': draft.asm = !asmOn(draft, S.level, S.asmAll); renderSheet(lastFocus); return;
       case 'dn': draft.n = Math.max(1, Math.min(20, draft.n + +b.dataset.d)); renderSheet(lastFocus); return;
       case 'xsw': { const n = v === 'conn' ? countOf('washer') + countOf('dishw') || 1 : countOf('tv') || draft.n; S.extras[v] = S.extras[v] ? 0 : Math.max(1, n); break; }
       case 'save': {
@@ -536,6 +566,8 @@ export function initMoveForm() {
       }
       case 'del': S.list = S.list.filter((x) => x.u !== draft.u); draft = null; sheet.close(); break;
       case 'kitchen': case 'ahead': case 'unpack': S[a] = !S[a]; break;
+      case 'pay': S.pay = v; break;
+      case 'asmAll': S.asmAll = !S.asmAll; S.list.forEach((x) => delete x.asm); break;
       case 'box': S.boxes = Math.max(0, Math.min(150, S.boxes + +b.dataset.d)); break;
       case 'date': if (S.date === v) { S.date = ''; S.dateK = 0; S.dateLabel = ''; } else { S.date = v; S.dateK = +b.dataset.k; S.dateLabel = b.dataset.l; } break;
       case 'jump': go(root.querySelector('#' + v)); return;
@@ -561,7 +593,10 @@ export function initMoveForm() {
   if (hero) new IntersectionObserver(([en]) => { away.hero = en.isIntersecting; syncBar(); }, { rootMargin: '0px 0px -45% 0px' }).observe(hero);
   syncBar();
 
-  // ===== отправка заявки: тот же /api/quote, что и форма заявки; видео — кусками в R2 =====
+  // ===== отправка заявки: /api/quote; цену сервер пересчитает сам по списку (server/move.ts); видео — кусками в R2 =====
+  const movePayload = () => ({ mode: S.mode, level: S.level, hours: S.hours, boxes: S.boxes, unpack: S.unpack, ahead: S.ahead, kitchen: S.kitchen,
+    extras: S.extras, dateK: S.dateK, pay: S.pay, asmAll: S.asmAll, from: { ...S.from }, to: { ...S.to },
+    list: S.list.map((e) => ({ id: e.id, n: e.n, sel: e.sel, asm: e.asm, cond: e.cond })) });
   const form = $('sendForm'), err = $('err'), btn = $('sendBtn');
   const showErr = (m) => { err.textContent = m; err.hidden = !m; };
   form.addEventListener('submit', async (ev) => {
@@ -579,15 +614,10 @@ export function initMoveForm() {
       btn.textContent = T.sending;
     }
     const r = calc(S);
-    const end = (k) => ({ addr: S[k].place, floor: String(S[k].floor), lift: S[k].lift ? 1 : 0, dist: '' });
     const payload = {
-      lang: LANG, est: S.mode === 'video' && S.level !== 1 ? undefined : r.total, from: end('from'), to: end('to'), date: S.date,
+      lang: LANG, est: S.mode === 'video' && S.level !== 1 ? undefined : r.total, date: S.date,
       name: String(fd.get('name') || ''), phone, channel: Number(fd.get('channel') || 0), comment: String(fd.get('comment') || ''), hp: String(fd.get('website') || ''), t: T0,
-      videos, skipped,
-      // цену сервер пересчитает сам по этому списку (server/move.ts)
-      move: { mode: S.mode, level: S.level, hours: S.hours, boxes: S.boxes, unpack: S.unpack, ahead: S.ahead, kitchen: S.kitchen, extras: S.extras, dateK: S.dateK,
-        from: { ...S.from }, to: { ...S.to },
-        list: S.list.map((e) => ({ id: e.id, n: e.n, sel: e.sel, asm: e.asm, cond: e.cond })) },
+      videos, skipped, move: movePayload(),
     };
     try {
       const res = await fetch('/api/quote', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) });
@@ -598,6 +628,40 @@ export function initMoveForm() {
       showErr(e2.message === 'phone' ? T.errPhone : T.errSend); btn.disabled = false; btn.textContent = T.send;
     }
   });
+
+  // ===== режим менеджера (?team=1): та же форма → оферта клиенту (/api/offer/create пересчитает цену той же формулой) =====
+  if (TEAM) {
+    const tf = $('teamForm'), terr = $('teamErr'), tbtn = $('teamBtn');
+    form.hidden = true; tf.hidden = false;
+    const f = (n) => tf.querySelector(`[name="${n}"]`);
+    f('quoteId').value = qs.get('id') || ''; f('lang').value = qs.get('lang') || 'pl';
+    f('name').value = qs.get('name') || ''; f('phone').value = qs.get('phone') || ''; f('date').value = qs.get('date') || S.date || '';
+    const KEY = 'melbus-team-key';
+    try { f('key').value = localStorage.getItem(KEY) || ''; } catch {}
+    const sum = () => { const m = Math.round((Number(f('manual').value) || 0) / 10) * 10, base = calc(S).total || 0; $('teamSum').textContent = `Итог оферты: ${zl(Math.max(0, base + m))}${m ? ` (по форме ${zl(base)}, корректировка ${m > 0 ? '+' : '−'}${zl(Math.abs(m))})` : ''}`; };
+    tf.addEventListener('input', sum); root.addEventListener('click', () => setTimeout(sum, 0)); sum();
+    tf.addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      terr.hidden = true; tbtn.disabled = true; tbtn.textContent = 'Создаём…';
+      try { localStorage.setItem(KEY, f('key').value); } catch {}
+      const body = { quoteId: f('quoteId').value.trim().toUpperCase(), lang: f('lang').value, name: f('name').value, phone: f('phone').value,
+        date: f('date').value, window: f('window').value, note: f('note').value, manual: Math.round((Number(f('manual').value) || 0) / 10) * 10, manualReason: f('reason').value, move: movePayload() };
+      try {
+        const res = await fetch('/api/offer/create', { method: 'POST', headers: { 'content-type': 'application/json', 'x-team-key': f('key').value }, body: JSON.stringify(body) });
+        const j = await res.json().catch(() => ({}));
+        if (!res.ok || !j.ok) throw new Error(j.error || 'send');
+        const L2 = body.lang, o = j.offer, dt = o.date ? new Intl.DateTimeFormat(L2, { day: 'numeric', month: 'long' }).format(new Date(o.date + 'T12:00:00')) : '';
+        const tpl = o.pay === 'hourly' ? I.offerMsgH : I.offerMsg, msg = tr(tpl[L2] || tpl.pl, { name: o.name || '', total: new Intl.NumberFormat(L2 === 'en' ? 'en' : 'ru').format(o.price.total) + ' zł', pkg: I.pkgNames[L2][o.lvl - 1], date: dt, url: j.url });
+        $('teamMsg').value = msg; $('teamOut').hidden = false;
+        const d = (f('phone').value.match(/\d/g) || []).join('');
+        $('teamWa').href = `https://wa.me/${d.length === 9 ? '48' + d : d}?text=${encodeURIComponent(msg)}`;
+      } catch (e3) {
+        terr.textContent = { bad_key: 'Неверный пароль команды.', not_configured: 'Оферты ещё не включены: нужно хранилище R2 в Cloudflare.', already_accepted: 'Эту оферту клиент уже принял — создайте новую без номера заявки.' }[e3.message] || 'Не получилось создать оферту. Попробуйте ещё раз.';
+        terr.hidden = false;
+      } finally { tbtn.disabled = false; tbtn.textContent = 'Создать оферту'; }
+    });
+  }
+  root.addEventListener('click', (ev) => { if (ev.target.closest('[data-act="team-copy"]')) navigator.clipboard?.writeText($('teamMsg').value); });
 
   render(true);
 }

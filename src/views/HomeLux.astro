@@ -8,14 +8,14 @@ import { href, type Locale } from '../i18n/routes';
 import { ui } from '../i18n/ui';
 import { brand } from '../config/brand';
 import { faqFor } from '../data/faq';
-import { boardOptions, DEMO, PACKAGES, GRID, moneyLocale } from '../data/pricing';
+import { boardOptions, DEMO, PACKAGES, GRID, HOURLY, moneyLocale, formQuery } from '../data/pricing';
 import { pkgText } from '../content/prices';
 import NoHours from '../components/NoHours.astro';
 import { home as H } from '../content/home';
 import { areaText } from '../content/areas';
 const { locale } = Astro.props as { locale: Locale };
 const L = locale;
-const quote = href(locale, 'quote');
+const pricing = href(locale, 'pricing');   // 18.11.2026: одна страница «Цены и расчёт» (форма)
 const ai = ui.aiLabel[L];
 const fmt = new Intl.NumberFormat(moneyLocale(L));
 const EX = 1; // пример пакетов на главной — 2 комнаты
@@ -49,8 +49,8 @@ const qr = (seed: number) => {
       <i class="lx-film__line" data-intro-line aria-hidden="true"></i>
       <p class="lx-film__lead" data-intro-fade>{H.lead[L]}</p>
       <div class="lx-film__cta" data-intro-fade>
-        <a href={quote} class="btn btn--primary">{ui.cta.price[L]}</a>
-        <a href={quote + '#video'} class="lux-link">{ui.cta.video[L]}</a>
+        <a href={pricing} class="btn btn--primary">{ui.cta.price[L]}</a>
+        <a href={pricing + '?mode=video'} class="lux-link">{ui.cta.video[L]}</a>
       </div>
       <p class="lx-film__hint" data-intro-fade aria-hidden="true"><i></i>{H.hint[L]}</p>
     </div>
@@ -64,8 +64,8 @@ const qr = (seed: number) => {
     <div class="container lx-film__end" data-film-cap data-from="21.6" data-to="99">
       <p class="lx-film__endt">{H.endTitle[L]}</p>
       <div class="lx-film__cta">
-        <a href={quote} class="btn btn--primary">{ui.cta.price[L]}</a>
-        <a href={quote + '#video'} class="lux-link">{ui.cta.video[L]}</a>
+        <a href={pricing} class="btn btn--primary">{ui.cta.price[L]}</a>
+        <a href={pricing + '?mode=video'} class="lux-link">{ui.cta.video[L]}</a>
       </div>
     </div>
 
@@ -114,7 +114,7 @@ const qr = (seed: number) => {
     </div>
     <div class="lx-price__calc">
       <div class="lx-seg" role="group" aria-label={H.price.seg[L]} data-board-for="board-lux">
-        {boardOptions.map((o, i) => <button type="button" class="lx-seg__b" data-value={o.value} data-status={o.status[L]} aria-pressed={i === 1 ? 'true' : 'false'}>{o.label[L]}</button>)}
+        {boardOptions.map((o, i) => <button type="button" class="lx-seg__b" data-value={o.value} data-status={o.status[L]} data-href={`${pricing}${formQuery(o.size, 2)}`} aria-pressed={i === 1 ? 'true' : 'false'}>{o.label[L]}</button>)}
       </div>
       <div class="lx-board" id="board-lux" data-board>
         <p class="lx-board__status" data-board-status>{boardOptions[1].status[L]}</p>
@@ -128,12 +128,12 @@ const qr = (seed: number) => {
         <p class="sr-only" aria-live="polite">{H.price.sr[L]} <span data-board-value>{boardOptions[1].value}</span> zł</p>
       </div>
       {DEMO && <p class="lx-note">{H.price.demo[L]}</p>}
-      <a href={href(locale, 'calculator')} class="btn btn--primary">{H.price.next[L]}</a>
+      <a href={`${pricing}${formQuery(1, 2)}`} class="btn btn--primary" data-board-cta>{H.price.next[L]}</a>
     </div>
   </div>
 </section>
 
-<!-- 3б. МЫ НЕ ПРОДАЁМ ЧАСЫ -->
+<!-- 3б. МОЖНО И ПО ЧАСАМ (бывш. «Мы не продаём часы») -->
 <NoHours locale={locale} />
 
 <!-- 4. ШАГИ (это последовательность — номера по делу) -->
@@ -213,7 +213,7 @@ const qr = (seed: number) => {
   </div>
 </section>
 
-<!-- 7. ПАКЕТЫ: «Под ключ» лишь немного дороже «Стандарта» (цены — src/data/pricing.ts) -->
+<!-- 7. ПАКЕТЫ (18.11.2026): Грузотакси по часам · Перевозка · Под ключ. Цифры — та же формула, что в форме (src/data/pricing.ts) -->
 <section class="lx-sec lx-pk">
   <div class="container">
     <div class="lx-head">
@@ -221,19 +221,19 @@ const qr = (seed: number) => {
       <p class="lx-lead">{pkgText.lead[L]}</p>
     </div>
     <div class="lx-pk__cols">
-      {PACKAGES.map((p, i) => (
-        <article class={`lx-pk__col${i === 2 ? ' is-f' : ''}`}>
-          {i === 2 && <span class="lx-pk__badge">{pkgText.best[L]}</span>}
+      {PACKAGES.map((p) => (
+        <article class={`lx-pk__col${p.lvl === 3 ? ' is-f' : ''}`}>
+          {p.lvl === 3 && <span class="lx-pk__badge">{pkgText.best[L]}</span>}
           <p class="lx-pk__note">{p.note[L]}</p>
           <h3 class="lx-pk__name">{p.name[L]}</h3>
-          <p class="lx-pk__price">{fmt.format(GRID[EX][i])} zł</p>
-          {i > 0 && <p class="lx-pk__diff">{pkgText.more[L].replace('{d}', fmt.format(GRID[EX][i] - GRID[EX][i - 1])).replace('{n}', PACKAGES[i - 1].name[L])}</p>}
+          <p class="lx-pk__price">{p.lvl === 1 ? pkgText.perHour[L].replace('{n}', fmt.format(HOURLY)) : `${p.lvl === 2 ? pkgText.from[L] + ' ' : ''}${fmt.format(GRID[EX][p.lvl === 2 ? 0 : 2])} zł`}</p>
+          {p.lvl === 2 && <p class="lx-pk__diff">{pkgText.orHourly[L]}</p>}
           <ul>{p.items.map((it) => <li>{it[L]}</li>)}</ul>
-          <a class="lux-link" href={`${quote}?size=${EX}&pkg=${p.quote}`}>{ui.cta.quote[L]}</a>
+          <a class="lux-link" href={`${pricing}${formQuery(EX, p.lvl)}`}>{pkgText.calc[L]}</a>
         </article>
       ))}
     </div>
-    <p class="lx-pk__calc"><a class="lux-link" href={`${href(locale, 'calculator')}?size=${EX}&pkg=2`}>{pkgText.calc[L]}</a>{DEMO && <span class="lx-note"> · {H.price.demo[L]}</span>}</p>
+    {DEMO && <p class="lx-pk__calc"><span class="lx-note">{H.price.demo[L]}</span></p>}
   </div>
 </section>
 
@@ -309,7 +309,7 @@ const qr = (seed: number) => {
     <div class="lx-cta__row">
       <p class="lx-lead">{H.finalLead[L]}</p>
       <div class="lx-cta__btns">
-        <a href={quote} class="btn btn--primary">{ui.cta.quote[L]}</a>
+        <a href={pricing} class="btn btn--primary">{ui.cta.quote[L]}</a>
         <a href={`https://wa.me/${brand.contact.whatsapp}`} class="lux-link" target="_blank" rel="noopener">{ui.cta.writeWhatsapp[L]}</a>
       </div>
     </div>
@@ -321,6 +321,14 @@ const qr = (seed: number) => {
   <button type="button" class="lx-modal__x" data-film-close aria-label={ui.cta.close[L]}>×</button>
   <video data-src="/video/film-1280.mp4" controls playsinline preload="none" poster="/scenes/film/poster-d.webp" width="1280" height="720"></video>
 </dialog>
+
+<script>
+  // табло цены: кнопка «Дальше» открывает форму с тем же примером, что выбран на табло (цифры совпадают)
+  document.addEventListener('astro:page-load', () => {
+    const cta = document.querySelector<HTMLAnchorElement>('[data-board-cta]');
+    document.querySelectorAll<HTMLElement>('[data-board-for] [data-href]').forEach((b) => b.addEventListener('click', () => { if (cta) cta.href = b.dataset.href!; }));
+  });
+</script>
 
 <style>
   /* ---------- общий ритм ---------- */

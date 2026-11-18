@@ -14,7 +14,7 @@ const { locale, title = ui.ctaBand.title[locale], lead = ui.ctaBand.lead[locale]
     <div class="cta__side">
       <p class="t-lead" data-reveal>{lead}</p>
       <div class="cta__btns" data-reveal>
-        <a href={href(locale, 'quote')} class="btn btn--primary" data-magnetic>{ui.cta.quote[locale]} <span class="arrow">→</span></a>
+        <a href={href(locale, 'pricing')} class="btn btn--primary" data-magnetic>{ui.cta.quote[locale]} <span class="arrow">→</span></a>
         <a href={`https://wa.me/${brand.contact.whatsapp}`} class="btn btn--ghost" target="_blank" rel="noopener">{ui.cta.whatsapp[locale]}</a>
       </div>
     </div>

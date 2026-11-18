@@ -9,6 +9,7 @@ import '../styles/moveform.css';
 import { href, type Locale } from '../i18n/routes';
 import { mf, plural, units } from '../content/moveform';
 import { quoteText as Q } from '../content/quote';
+import { offerText } from '../content/offer';
 import { LEVELS, ROOMS, P, ITEMS, EXTRAS, PRESETS, PLACES } from '../data/move';
 interface Props { locale: Locale }
 const { locale: L } = Astro.props;
@@ -25,6 +26,9 @@ const i18n = {
   extras: Object.fromEntries(EXTRAS.map((e) => [e.id, { name: e.name[L], d: e.d[L], unit: e.unit?.[L] ?? '' }])),
   presets: Object.fromEntries(Object.entries(PRESETS).map(([k, p]) => [k, p.t[L]])),
   channels: Q.channels.map((c) => c[L]),
+  offerMsg: offerText.message,                 // режим менеджера: сообщение клиенту на его языке
+  offerMsgH: offerText.messageHourly,
+  pkgNames: Object.fromEntries((['ru', 'pl', 'uk', 'en'] as const).map((x) => [x, LEVELS.map((v) => v.t[x])])),
 };
 const steps: [string, string][] = [['s-level', t('sLevel')], ['s-route', t('sRoute')], ['s-items', t('sItems')], ['s-boxes', t('sBoxes')], ['s-extra', t('sExtra')], ['s-date', t('sDate')], ['s-send', t('sSend')]];
 const shortOf = Object.fromEntries(steps);
@@ -62,6 +66,14 @@ const shortOf = Object.fromEntries(steps);
       <section class="step" id="s-level" data-short={shortOf['s-level']} aria-labelledby="mf-h-level">
         <div class="step__head"><h2 id="mf-h-level">{t('hLevel')}</h2><p class="sub">{t('subLevel')}</p></div>
         <div class="levels" role="radiogroup" aria-labelledby="mf-h-level" data-el="levels"></div>
+        <div class="pay" data-el="pay" hidden>
+          <p class="pay__q" id="mf-pay">{t('payQ')}</p>
+          <div class="seg seg--pay" role="radiogroup" aria-labelledby="mf-pay">
+            <button type="button" role="radio" data-act="pay" data-v="fixed">{t('payFixed')} <small>{t('payRec')}</small></button>
+            <button type="button" role="radio" data-act="pay" data-v="hourly">{t('payHourly')}</button>
+          </div>
+          <p class="pay__note" data-el="payNote"></p>
+        </div>
       </section>
 
       <section class="step" id="s-route" data-short={shortOf['s-route']} aria-labelledby="mf-h-route">
@@ -131,6 +143,9 @@ const shortOf = Object.fromEntries(steps);
 
       <section class="step" id="s-extra" data-short={shortOf['s-extra']} aria-labelledby="mf-h-extra">
         <div class="step__head"><h2 id="mf-h-extra">{t('hExtra')}</h2><p class="sub">{t('subExtra')}</p></div>
+        <div class="end end--asm" data-el="asmAllBox" hidden>
+          <button type="button" class="sw" role="switch" data-act="asmAll"><span class="sw__l">{t('asmAll')}<small data-el="asmAllS"></small></span><span class="sw__k"></span></button>
+        </div>
         <div class="grid grid--wide" data-el="extras"></div>
       </section>
 
@@ -171,6 +186,35 @@ const shortOf = Object.fromEntries(steps);
           <p class="err" role="alert" data-el="err" hidden></p>
           <button type="submit" class="mbtn mbtn--dark" data-el="sendBtn">{t('send')}</button>
           <p class="sent" data-el="sent" hidden></p>
+        </form>
+        <!-- режим менеджера (?team=1, ссылка из Telegram): та же форма → оферта клиенту. Интерфейс по-русски (внутренний). -->
+        <form class="send__form team" data-el="teamForm" novalidate hidden>
+          <p class="sub"><b>Режим менеджера.</b> Поправьте вещи и адреса по видео — цена выше пересчитается. Затем создайте оферту.</p>
+          <div class="team__row">
+            <label class="fld"><span>№ заявки</span><input name="quoteId" placeholder="M-261118-ABCD" /></label>
+            <label class="fld"><span>Язык клиента</span><select name="lang"><option value="pl">PL</option><option value="ru">RU</option><option value="uk">UA</option><option value="en">EN</option></select></label>
+          </div>
+          <div class="team__row">
+            <label class="fld"><span>Имя клиента</span><input name="name" /></label>
+            <label class="fld"><span>Телефон (клиент не видит)</span><input name="phone" type="tel" placeholder="+48" /></label>
+          </div>
+          <div class="team__row">
+            <label class="fld"><span>Дата переезда</span><input name="date" type="date" /></label>
+            <label class="fld"><span>Окно прибытия</span><input name="window" placeholder="8:00–9:00" /></label>
+          </div>
+          <label class="fld"><span>Заметка для клиента</span><textarea name="note" placeholder="Например: пианино несём вчетвером"></textarea></label>
+          <div class="team__row">
+            <label class="fld"><span>Корректировка ± zł</span><input name="manual" type="number" step="10" value="0" /></label>
+            <label class="fld"><span>Причина (клиент не видит)</span><input name="reason" placeholder="узкая лестница, длинный пронос…" /></label>
+          </div>
+          <p class="team__sum" data-el="teamSum"></p>
+          <label class="fld"><span>Пароль команды</span><input name="key" type="password" autocomplete="current-password" /></label>
+          <p class="err" role="alert" data-el="teamErr" hidden></p>
+          <button type="submit" class="mbtn mbtn--dark" data-el="teamBtn">Создать оферту</button>
+          <div class="team__out" data-el="teamOut" hidden>
+            <label class="fld"><span>Сообщение клиенту (на его языке)</span><textarea data-el="teamMsg" rows="5" readonly></textarea></label>
+            <div class="team__act"><button type="button" class="mbtn" data-act="team-copy">Скопировать</button><a class="mbtn mbtn--tape" data-el="teamWa" target="_blank" rel="noopener">Отправить в WhatsApp</a></div>
+          </div>
         </form>
       </div>
     </section>
