@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Первый экран MELBUS: прототипы</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600&family=Unbounded:wght@200;300&display=swap">
+<style>html,body{margin:0} *{box-sizing:border-box} img{max-width:100%}</style>
+</head>
+<body>
+<style>
+  /* Выбор из трёх прототипов: крупные карточки-кадры, графит MELBUS (одна тёмная тема намеренно) */
+  :root { --bg: #0B1015; --panel: #10161D; --line: #233040; --fg: #EEF2F5; --muted: #8F9AA7; --tape: #14DCD5;
+    --display: 'Unbounded', 'Arial Black', system-ui, sans-serif; --text: 'Onest', system-ui, -apple-system, 'Segoe UI', sans-serif; color-scheme: dark; }
+  body { background: var(--bg); color: var(--fg); font: 16px/1.55 var(--text); }
+  .wrap { max-width: 1180px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 40px 72px; display: grid; gap: 36px; }
+  h1 { margin: 0; font: 200 clamp(2rem, 1.1rem + 4vw, 4.2rem)/1 var(--display); letter-spacing: -0.05em; text-wrap: balance; }
+  .lead { margin: 0; color: var(--muted); max-width: 64ch; font-size: 1.05rem; }
+  .tip { display: grid; gap: 8px; padding: 18px 20px; background: var(--panel); border-left: 2px solid var(--tape); max-width: 860px; }
+  .tip p { margin: 0; }
+  .tip p + p { color: var(--muted); }
+  .cards { display: grid; gap: 18px; }
+  @media (min-width: 900px) { .cards { grid-template-columns: repeat(3, 1fr); } }
+  .card { position: relative; display: grid; align-content: end; min-height: 420px; padding: 22px; border-radius: 3px; overflow: hidden; color: #fff; text-decoration: none; isolation: isolate; background: #05080B; }
+  .card img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; transition: transform 1.2s cubic-bezier(.2,.7,.2,1); }
+  .card::before { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, rgba(5,8,11,.1) 30%, rgba(5,8,11,.88)); }
+  .card:hover img, .card:focus-visible img { transform: scale(1.05); }
+  .card:focus-visible { outline: 2px solid var(--tape); outline-offset: 3px; }
+  .card small { color: var(--tape); font-weight: 600; letter-spacing: .12em; text-transform: uppercase; font-size: .74rem; }
+  .card b { font: 300 clamp(1.6rem, 1.2rem + 1vw, 2.2rem)/1.05 var(--display); letter-spacing: -0.04em; margin-top: 6px; }
+  .card span { color: rgba(255,255,255,.82); margin-top: 8px; }
+  .card em { position: absolute; top: 16px; left: 16px; font-style: normal; font-size: .78rem; font-weight: 600; background: var(--tape); color: #10161D; padding: 4px 9px; border-radius: 2px; }
+  .card .go { margin-top: 16px; font-weight: 600; }
+  .light img { filter: brightness(1.05); }
+  .note { margin: 0; color: var(--muted); font-size: .9rem; }
+</style>
+
+<div class="wrap">
+  <header style="display:grid;gap:16px">
+    <h1>Первый экран: три прототипа</h1>
+    <p class="lead">Это не картинки, а настоящие страницы: прокручивайте их, как сайт. Кадры — короткая версия нашего фильма (10 секунд вместо 23), отдельно нарезанная для компьютера и для телефона.</p>
+  </header>
+
+  <div class="tip">
+    <p><b>Моё мнение:</b> эффекты 1, 2 и 6 сильнее всего вместе. Огромное слово MELBUS, прокрутка «влетает» в букву, дальше короткий фильм под прокрутку в тёмной кино-подаче со словами из размытия, в конце — заголовок и кнопки. Это вариант «Кино».</p>
+    <p>«Свет» — то же самое, но светлое и спокойнее. «Ночь» — без управления прокруткой: фильм идёт сам, самый лёгкий и быстрый на слабых телефонах.</p>
+  </div>
+
+  <div class="cards">
+    <a class="card light" href="v1-svet.html">
+      <img src="frames/d/0001.webp" alt="" width="1280" height="720">
+      <small>Эффекты 2 + 1</small><b>Свет</b>
+      <span>Белый экран, сквозь буквы MELBUS — город. Прокрутка влетает в букву, дальше фильм.</span>
+      <span class="go">Открыть →</span>
+    </a>
+    <a class="card" href="v2-kino.html">
+      <img src="frames/d/0085.webp" alt="" width="1280" height="720">
+      <em>Советую</em>
+      <small>Эффекты 2 + 1 + 6</small><b>Кино</b>
+      <span>То же, но тёмное: зерно плёнки, виньетка, слова проявляются из размытия.</span>
+      <span class="go">Открыть →</span>
+    </a>
+    <a class="card" href="v3-noch.html">
+      <img src="frames/d/0140.webp" alt="" width="1280" height="720">
+      <small>Эффект 6</small><b>Ночь</b>
+      <span>Фильм идёт сам по кругу, медленный наезд камеры, слова по одному.</span>
+      <span class="go">Открыть →</span>
+    </a>
+  </div>
+  <p class="note">Откройте и на телефоне — там вертикальные кадры. Всё сделано из готового фильма, новых трат нет. Кадры — визуализация.</p>
+</div>
+
+</body>
+</html>
