@@ -27,7 +27,7 @@ const nav = [
       {enabledLocales.length > 1 && (
         <nav class="hdr__langs" aria-label={ui.a11y.langs[locale]}>{enabledLocales.map((l) => <a href={href(l, pageKey)} lang={locales[l].htmlLang} hreflang={locales[l].htmlLang} data-astro-reload aria-current={l === locale ? 'true' : undefined}>{locales[l].label}</a>)}</nav>
       )}
-      <a href={href(locale, 'quote')} class="btn btn--primary btn--sm hdr__cta" data-magnetic>{ui.cta.price[locale]}</a>
+      <a href={href(locale, 'pricing')} class="btn btn--primary btn--sm hdr__cta" data-magnetic>{ui.cta.price[locale]}</a>
       <button class="hdr__burger" type="button" aria-expanded="false" aria-controls="menu" data-menu-toggle>
         <span class="sr">{ui.cta.menu[locale]}</span><i></i><i></i>
       </button>
@@ -46,7 +46,7 @@ const nav = [
       </nav>
       <div class="menu__foot" data-menu-item>
         <a href={`tel:${brand.contact.phoneHref}`} class="menu__phone">{brand.contact.phone}</a>
-        <a href={href(locale, 'quote')} class="btn btn--primary">{ui.cta.price[locale]}</a>
+        <a href={href(locale, 'pricing')} class="btn btn--primary">{ui.cta.price[locale]}</a>
       </div>
     </div>
   </div>

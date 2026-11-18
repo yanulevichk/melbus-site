@@ -11,7 +11,7 @@ const others = services.filter((x) => x.id !== s.id && x.group === s.group).slic
 ---
 <PageHero eyebrow={T.one[locale]} title={s.title[locale]} lead={s.lead[locale]}>
   <Fragment slot="actions">
-    <a href={href(locale, 'quote')} class="btn btn--primary" data-magnetic>{ui.cta.price[locale]} <span class="arrow">→</span></a>
+    <a href={href(locale, 'pricing')} class="btn btn--primary" data-magnetic>{ui.cta.price[locale]} <span class="arrow">→</span></a>
     <a href={href(locale, 'pricing')} class="btn btn--ghost">{ui.nav.pricing[locale]}</a>
   </Fragment>
   <Media locale={locale} video={s.media.video} poster={s.media.poster} alt={s.title[locale]} />

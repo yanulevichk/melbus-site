@@ -8,9 +8,7 @@ import Base from '../layouts/Base.astro';
 import HomeLux from '../views/HomeLux.astro';
 import Services from '../views/Services.astro';
 import Service from '../views/Service.astro';
-import Quote from '../views/Quote.astro';
 import MoveForm from '../views/MoveForm.astro';
-import Pricing from '../views/Pricing.astro';
 import Area from '../views/Area.astro';
 import Areas from '../views/Areas.astro';
 import Offer from '../views/Offer.astro';
@@ -27,7 +25,8 @@ import { ui } from '../i18n/ui';
 import { brand } from '../config/brand';
 
 export function getStaticPaths() {
-  const keys: PageKey[] = ['home', 'services', 'pricing', 'calculator', 'quote', 'guarantee', 'how', 'about', 'faq', 'contact', 'terms', 'privacy', 'cookies', 'complaints', 'lux', 'areas', 'offer', ...services.map((s) => `service:${s.id}` as PageKey), ...areas.map((a) => `area:${a.id}` as PageKey)];
+  // 18.11.2026: «Калькулятор» и «Заявка» слиты в «Цены и расчёт» (pricing) — старые адреса ведут туда (public/_redirects)
+  const keys: PageKey[] = ['home', 'services', 'pricing', 'guarantee', 'how', 'about', 'faq', 'contact', 'terms', 'privacy', 'cookies', 'complaints', 'lux', 'areas', 'offer', ...services.map((s) => `service:${s.id}` as PageKey), ...areas.map((a) => `area:${a.id}` as PageKey)];
   return enabledLocales.flatMap((locale) => keys.map((key) => ({
     params: { path: href(locale, key).replace(/^\/|\/$/g, '') || undefined },
     props: { locale, key },
@@ -71,15 +70,13 @@ const simple = pg && { eyebrow: pg.eyebrow[L], title: pg.title[L], lead: pg.lead
   {(key === 'home' || key === 'lux') && <HomeLux locale={locale} />}
   {key === 'services' && <Services locale={locale} />}
   {svc && <Service locale={locale} service={svc} />}
-  {key === 'quote' && <Quote locale={locale} />}
   {area && <Area locale={locale} area={area} />}
   {key === 'areas' && <Areas locale={locale} />}
   {key === 'offer' && <Offer locale={locale} />}
 
   {['guarantee', 'how', 'about'].includes(key) && simple && <Simple locale={locale} {...simple} />}
-  {key === 'pricing' && <Pricing locale={locale} />}
-  {/* 15.11.2026: калькулятор = форма «Что у вас дома» (цена по списку вещей и адресам) */}
-  {key === 'calculator' && <MoveForm locale={locale} />}
+  {/* 18.11.2026: одна страница «Цены и расчёт» = форма «Что у вас дома» (цена по списку вещей и адресам) */}
+  {key === 'pricing' && <MoveForm locale={locale} />}
 
   {key === 'faq' && simple && (
     <Simple locale={locale} {...simple} blocks={[{ type: 'faq', title: misc.faqTitle[L], items: faq }]} />

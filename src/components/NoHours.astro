@@ -1,5 +1,5 @@
 ---
-/** Блок «Мы не продаём часы»: почасовая оплата против цены MELBUS. Тексты — src/content/prices.ts. */
+/** Блок «Можно и по часам»: почасовая оплата и фиксированная цена MELBUS рядом. Тексты — src/content/prices.ts. */
 import type { Locale } from '../i18n/routes';
 import { noHours as N } from '../content/prices';
 interface Props { locale: Locale; dark?: boolean }
@@ -37,7 +37,7 @@ const { locale: L, dark = false } = Astro.props;
   .nh__us { color: var(--ink); font-weight: 600; position: relative; }
   .dark .nh__us { color: #fff; }
   .nh__us::after { content: ""; position: absolute; left: 0; bottom: -15px; width: 48px; height: 2px; background: var(--tape); }
-  .nh__them { color: var(--muted); text-decoration: line-through; text-decoration-color: rgba(143,154,167,.6); text-decoration-thickness: 1px; }
+  .nh__them { color: var(--muted); }
   .dark .nh__them { color: var(--dark-muted); }
   .nh__ok { font-weight: 500; }
 </style>

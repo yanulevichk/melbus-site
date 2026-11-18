@@ -2,20 +2,19 @@
 /**
  * ОФЕРТА ДЛЯ КЛИЕНТА: /oferta/?id=…&s=… (ru/uk — /ru/oferta/, /uk/oferta/; en — /en/offer/). noindex.
  * Данные берутся с сервера (/api/offer/get) по подписанной ссылке; принятие — /api/offer/accept.
- * Тексты — src/content/offer.ts, пакеты и подписи — src/data/pricing.ts.
+ * Тексты — src/content/offer.ts, пакеты — src/data/pricing.ts, цена — src/data/move.ts (сервер: server/offer.ts).
  */
 import { href, type Locale } from '../i18n/routes';
 import { brand } from '../config/brand';
 import { offerText as T } from '../content/offer';
-import { PACKAGES, SIZES, AMOUNTS, ZONES, EXTRAS, DATE_ADJ } from '../data/pricing';
+import { PACKAGES } from '../data/pricing';
 interface Props { locale: Locale }
 const { locale: L } = Astro.props;
 const pick = (o: Record<string, any>): any => Object.fromEntries(Object.entries(o).map(([k, v]) => [k, Array.isArray(v) ? v.map((x) => x[L] ?? pick(x)) : v && typeof v === 'object' && !('ru' in v) ? pick(v) : v[L]]));
 const data = {
   t: pick(T),
-  pkgNames: PACKAGES.map((p) => p.name[L]), pkgItems: PACKAGES.map((p) => p.items.map((i) => i[L])),
-  sizes: SIZES.map((s) => s.status[L]), amounts: AMOUNTS.map((a) => a.label[L]), zones: ZONES.map((z) => z.label[L]),
-  extras: EXTRAS.map((e) => e.label[L]), adj: DATE_ADJ.map((d) => d.label[L]),
+  // 18.11.2026: пакеты по уровню формы (1 Грузотакси, 2 Перевозка, 3 Под ключ); цена — та же формула, что форма на сайте
+  pkgNames: Object.fromEntries(PACKAGES.map((p) => [p.lvl, p.name[L]])), pkgItems: Object.fromEntries(PACKAGES.map((p) => [p.lvl, p.items.map((i) => i[L])])),
 };
 const wa = `https://wa.me/${brand.contact.whatsapp}`;
 ---
@@ -59,8 +58,9 @@ const wa = `https://wa.me/${brand.contact.whatsapp}`;
 </section>
 
 <script>
-  type D = { t: Record<string, any>; pkgNames: string[]; pkgItems: string[][]; sizes: string[]; amounts: string[]; zones: string[]; extras: string[]; adj: string[] };
-  type O = { id: string; name: string; size: number; amount: number; pkg: number; zone: number; floorsFrom: number; liftFrom: boolean; floorsTo: number; liftTo: boolean; extras: number[]; from: string; to: string; date: string; window: string; items: string; note: string; dateAdj: number; price: Record<string, number>; validUntil: string; status: string; expired: boolean };
+  type D = { t: Record<string, any>; pkgNames: Record<string, string>; pkgItems: Record<string, string[]> };
+  type O = { id: string; name: string; lvl: number; pay: 'fixed' | 'hourly'; floorsFrom: number; liftFrom: boolean; floorsTo: number; liftTo: boolean; from: string; to: string; date: string; window: string; items: string; note: string; status: string; validUntil: string; expired?: boolean;
+    price: { calc: number; manual: number; total: number; deposit: number; hourly?: { rate: number; h: number; min: number } } };
   function initOffer() {
     const root = document.querySelector<HTMLElement>('[data-offer]');
     if (!root || root.dataset.ready) return;
@@ -91,27 +91,22 @@ const wa = `https://wa.me/${brand.contact.whatsapp}`;
       $('[data-of-title]').textContent = `${fill(t.title, { id: o.id })}${o.name ? ' · ' + fill(t.forName, { name: o.name }) : ''}`;
       $('[data-of-total]').textContent = nf.format(o.price.total);
       $('.of-total').hidden = false;
-      const sub = $('[data-of-sub]'); sub.textContent = fill(t.totalFor, { pkg: D.pkgNames[o.pkg] }); sub.hidden = false;
-      $('[data-of-nohours]').hidden = false;
+      const sub = $('[data-of-sub]'); sub.textContent = fill(o.pay === 'hourly' ? t.totalForHourly : t.totalFor, { pkg: D.pkgNames[o.lvl] }); sub.hidden = false;
+      $('[data-of-nohours]').hidden = o.pay === 'hourly';
       const v = $('[data-of-valid]'); v.textContent = fill(t.valid, { date: date(o.validUntil) }); v.hidden = o.status === 'accepted';
       const dl = $('[data-of-details]'); dl.innerHTML = '';
       row(dl, t.when, `${o.date ? date(o.date) : t.noDate}${o.window ? ' · ' + fill(t.arrival, { w: o.window }) : ''}`);
       row(dl, t.from, [o.from, floorTxt(o.floorsFrom, o.liftFrom)].filter(Boolean).join(' · '));
       row(dl, t.to, [o.to, floorTxt(o.floorsTo, o.liftTo)].filter(Boolean).join(' · '));
-      row(dl, t.what, `${D.sizes[o.size]} · ${D.amounts[o.amount]} · ${D.zones[o.zone]}`);
       row(dl, t.items, o.items, 'is-pre');
-      row(dl, t.extras, o.extras.map((e) => D.extras[e]).join(', '));
       row(dl, t.note, o.note, 'is-pre');
       const inc = $('[data-of-inc]'); inc.innerHTML = '';
-      D.pkgItems[o.pkg].forEach((x) => { const li = document.createElement('li'); li.textContent = x; inc.append(li); });
+      (D.pkgItems[o.lvl] || []).forEach((x) => { const li = document.createElement('li'); li.textContent = x; inc.append(li); });
       const pr = $('[data-of-price]'); pr.innerHTML = '';
       const p = o.price;
-      row(pr, fill(t.rows.pkg, { n: D.pkgNames[o.pkg] }), zl(p.pkg));
-      if (p.dist) row(pr, t.rows.dist, `+ ${zl(p.dist)}`);
-      if (p.floors) row(pr, t.rows.floors, `+ ${zl(p.floors)}`);
-      if (p.extras) row(pr, t.rows.extras, `+ ${zl(p.extras)}`);
-      if (p.adj) row(pr, D.adj[o.dateAdj], `${p.adj > 0 ? '+ ' : '− '}${zl(Math.abs(p.adj))}`);
+      row(pr, fill(t.rows.pkg, { n: D.pkgNames[o.lvl] }), zl(p.calc));
       if (p.manual) row(pr, t.rows.manual, `${p.manual > 0 ? '+ ' : '− '}${zl(Math.abs(p.manual))}`);
+      if (p.hourly) row(pr, t.rows.hourly, fill(t.rows.hourlyV, { rate: zl(p.hourly.rate), h: String(p.hourly.min) }));
       row(pr, t.rows.total, zl(p.total), 'is-total');
       $('[data-of-deposit]').textContent = fill(t.deposit, { d: zl(p.deposit) });
       $('[data-of-body]').hidden = false;

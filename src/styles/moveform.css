@@ -341,3 +341,23 @@ body:has(.mf) .mbar { display: none }
 .mf .consent a { color: var(--deep); text-decoration: underline; text-underline-offset: 3px }
 .mf .err { color: #A3261B; font-size: 14px; margin: 0 }
 .mf .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden }
+
+/* 18.11.2026: «Перевозка» — фиксированная цена или по часам; разборка всей мебели; 3+ бусов */
+.mf .pay { margin-top: 20px; display: grid; gap: 10px; animation: mf-in .35s var(--ease, ease) both; }
+.mf .pay__q { font-weight: 600; }
+.mf .seg--pay button small { font-size: .72em; font-weight: 600; color: var(--tape-deep, #077E79); margin-left: 6px; }
+.mf .seg--pay button[aria-checked="true"] small { color: inherit; opacity: .8; }
+.mf .pay__note { color: var(--muted); font-size: .92rem; max-width: 60ch; }
+.mf .end--asm { margin-bottom: 16px; }
+.mf .vanbox { position: relative; }
+.mf .vanbox__more { position: absolute; right: 6%; top: 4%; background: var(--tape); color: var(--graphite); font-weight: 700; font-size: .78rem; padding: 3px 8px; border-radius: 3px; }
+@keyframes mf-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .mf .pay { animation: none; } }
+.mf .team__row { display: grid; gap: 12px; }
+@media (min-width: 640px) { .mf .team__row { grid-template-columns: 1fr 1fr; } }
+.mf .team__sum { font-weight: 600; }
+.mf .team__out { display: grid; gap: 10px; }
+.mf .team__act { display: flex; flex-wrap: wrap; gap: 10px; }
+.mf .seg--pay { flex-wrap: nowrap; }
+.mf .seg--pay button { flex: 1 1 0; }
+.mf .seg--pay button small { display: block; margin: 2px 0 0; }

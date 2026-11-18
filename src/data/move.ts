@@ -19,15 +19,21 @@ export const BOX_MAT = 8;     // коробка + бумага + скотч, zł
 export const FILM = 30;       // плёнка и скотч для мебели
 export const KM_FREE = 30;    // км от адреса до адреса, которые входят в BUS
 export const KM_RATE = 2.5;   // zł за каждый км сверх KM_FREE (покрывает и обратный путь)
-export const HOURLY = 150;    // уровень 1 «Бус с водителем», zł в час, минимум 2 часа
+export const HOURLY = 150;    // пакет 1 «Грузотакси»: бус с водителем, zł в час, минимум 2 часа
+/** 18.11.2026: в «Перевозке» можно платить по часам (для тех, кого пугает фиксированная цена). Рынок Варшавы (ноябрь 2026):
+ *  бус + водитель + 2 грузчика 190–360 zł/ч, чаще 260–290 (kb.pl, locayo, panprzeprowadzka). Ставка — предложение, ждёт «да». */
+export const HOURLY2 = { base: 270, person: 90, van: 60, min: 3 };   // бус + 2 человека; каждый следующий человек; каждый следующий бус; минимум часов
+export const EXAMPLE = { from: 'Warszawa, Mokotów', to: 'Warszawa, Bemowo', floor: 2 };   // пример для цен на сайте = начальное состояние формы
 
+/** 18.11.2026 — три пакета (решение владельца): 1 грузотакси по часам; 2 вещи уже упакованы — выносим, везём, заносим
+ *  (разборка и сборка — по желанию, отдельно); 3 под ключ — упаковка, разборка и сборка мебели входят. */
 export const LEVELS = [
-  { id: 1, icon: 'wheel', t: l('Бус с водителем', 'Bus z kierowcą', 'Бус із водієм', 'Van with driver'),
-    d: l('Вы грузите, мы везём. Почасово, минимум 2 часа.', 'Ty ładujesz, my wieziemy. Za godzinę, minimum 2 godziny.', 'Ви вантажите, ми веземо. Погодинно, мінімум 2 години.', 'You load, we drive. Hourly, 2 hours minimum.') },
+  { id: 1, icon: 'wheel', t: l('Грузотакси', 'Taxi bagażowe', 'Вантажне таксі', 'Van and driver'),
+    d: l('Бус с водителем. Грузите вы, везём мы. 150 zł в час, минимум 2 часа.', 'Bus z kierowcą. Ty ładujesz, my wieziemy. 150 zł za godzinę, minimum 2 godziny.', 'Бус із водієм. Вантажите ви, веземо ми. 150 zł на годину, мінімум 2 години.', 'A van with a driver. You load, we drive. 150 zł an hour, 2 hours minimum.') },
   { id: 2, icon: 'carry', t: l('Перевозка', 'Transport', 'Перевезення', 'Transport'),
-    d: l('Вы пакуете и разбираете шкафы. Мы выносим, везём, заносим и собираем кровати.', 'Ty pakujesz i rozkręcasz szafy. My wynosimy, wieziemy, wnosimy i skręcamy łóżka.', 'Ви пакуєте й розбираєте шафи. Ми виносимо, веземо, заносимо й збираємо ліжка.', 'You pack and take the wardrobes apart. We carry, drive, carry in and put the beds back together.') },
+    d: l('Вещи уже упакованы. Мы выносим, везём и заносим. Разборку и сборку мебели можно добавить.', 'Rzeczy są już spakowane. Wynosimy, wieziemy i wnosimy. Demontaż i montaż mebli można dodać.', 'Речі вже спаковані. Ми виносимо, веземо й заносимо. Розбирання та збирання меблів можна додати.', 'Your things are already packed. We carry them out, drive and carry them in. Furniture assembly can be added.') },
   { id: 3, icon: 'key', t: l('Под ключ', 'Pod klucz', 'Під ключ', 'Full service'),
-    d: l('Разбираем мебель, пакуем в наши белые коробки, везём и собираем на новом месте.', 'Rozkręcamy meble, pakujemy w nasze białe kartony, wieziemy i skręcamy w nowym miejscu.', 'Розбираємо меблі, пакуємо в наші білі коробки, веземо й збираємо на новому місці.', 'We take the furniture apart, pack everything into our white boxes, move it and reassemble it at your new place.') },
+    d: l('Пакуем в наши белые коробки, разбираем мебель, везём и собираем на новом месте.', 'Pakujemy w nasze białe kartony, rozkręcamy meble, wieziemy i skręcamy w nowym miejscu.', 'Пакуємо в наші білі коробки, розбираємо меблі, веземо й збираємо на новому місці.', 'We pack everything into our white boxes, take the furniture apart, move it and reassemble it at your new place.') },
 ];
 
 export const ROOMS: [string, L][] = [
@@ -183,6 +189,8 @@ export interface Entry { u?: number; id: string; n: number; sel: Sel; asm?: bool
 export interface State {
   level: number; hours: number; from: End; to: End; list: Entry[]; boxes: number; extras: Record<string, number>;
   unpack?: boolean; ahead?: boolean; kitchen?: boolean; dateK?: number;
+  asmAll?: boolean;               // «Перевозка»: разобрать и собрать всю мебель (в «Под ключ» входит всегда)
+  pay?: 'fixed' | 'hourly';       // «Перевозка»: фиксированная цена (по умолчанию) или по часам
 }
 export function route(S: Pick<State, 'from' | 'to'>) {   // только от адреса до адреса: где наша база — не забота клиента
   const A = PLACE[S.from.place], B = PLACE[S.to.place];
@@ -194,15 +202,17 @@ export const DOOR = [0, 0.15, 0.3];             // у подъезда / до 50
 export const HOUSE = [0, 0.1, 0];               // блок / каменица (узкие лестницы, двор) / дом
 export const up90 = (x: number) => Math.max(90, Math.ceil((x - 90) / 100) * 100 + 90);   // вверх до …90
 export const specOf = (e: Entry) => ITEM[e.id].spec({ ...ITEM[e.id].def, ...e.sel });
-export const asmDefault = (it: Item, lvl: number) => lvl === 3 || (lvl === 2 && it.kind === 'bed');
-export const asmOn = (e: Entry, lvl: number) => specOf(e).a > 0 && (e.asm ?? asmDefault(ITEM[e.id], lvl));
+export const asmDefault = (_it: Item, lvl: number, all = false) => lvl === 3 || (lvl === 2 && all);
+export const asmOn = (e: Entry, lvl: number, all = false) => specOf(e).a > 0 && (e.asm ?? asmDefault(ITEM[e.id], lvl, all));
 export const money = (min: number) => min / 60 * RATE;
 
 /** Строки разбивки: k — что это (подпись даёт форма на нужном языке), min — минуты работы людей, sum — zł */
-export interface Line { k: 'carry' | 'road' | 'asm' | 'pack' | 'packK' | 'unpack' | 'mount' | 'junk' | 'bus' | 'mat' | 'date' | 'hourly' | 'km'; min?: number; sum: number; x?: Record<string, number> }
+export interface Line { k: 'carry' | 'road' | 'asm' | 'pack' | 'packK' | 'unpack' | 'mount' | 'junk' | 'bus' | 'mat' | 'date' | 'hourly' | 'hourly2' | 'km'; min?: number; sum: number; x?: Record<string, number> }
 export interface Result {
   lvl: number; total: number; raw: number; hourly?: boolean; empty?: boolean; crew: number; dur: number; vol: number; buses: number;
   fill: number; peopleH: number; lines: Line[]; n: number; rt: { ab: number; min: number; extraKm: number };
+  hourly2?: { rate: number; h: number; sum: number };   // «Перевозка» по часам: ставка, оценка часов, оценка суммы
+  paidHourly?: boolean;                             // итог посчитан по часам (S.pay === 'hourly')
 }
 export function calc(S: State, lvl = S.level): Result {
   const RT = route(S) || { ab: 10, min: 40, extraKm: 0 };
@@ -221,7 +231,7 @@ export function calc(S: State, lvl = S.level): Result {
     if (cond === 'drop') { junk += 90 * c; continue; }
     n += c;
     carry += sp.c * c * (cond === 'whole' ? 1.5 : 1);
-    const on = cond === 'ok' && asmOn(e, lvl);
+    const on = cond === 'ok' && asmOn(e, lvl, S.asmAll);
     const flat = sp.a > 0 && (cond === 'fix' || on || (lvl === 2 && it.kind === 'ward' && cond === 'ok'));
     vol += sp.v * c * (flat ? FLAT : 1);
     if (cond === 'fix') asm += (sp.a + 60) * c; else if (on) asm += sp.a * c;
@@ -240,20 +250,37 @@ export function calc(S: State, lvl = S.level): Result {
   }
   const work = carry + small + floors + asm + pack + unpack + mount + junk;
   if (work <= 0) return { lvl, total: 0, raw: 0, empty: true, crew: 0, dur: 0, vol: 0, buses: 0, fill: 0, peopleH: 0, lines: [], n: 0, rt: RT };
+  // не влезает в один бус — едут сразу несколько (за рулём второго — один из бригады). Проверено 18.11.2026: один бус
+  // в несколько рейсов выходит дороже и дольше (бригада катается туда-обратно), поэтому такой вариант не предлагаем.
   const buses = Math.max(1, Math.ceil(vol / CAP - 1e-9));
   const crew = Math.max(work / 60 <= 6 ? 2 : work / 60 <= 16 ? 3 : 4, buses + 1);   // за рулём второго буса — один из бригады
   const travel = n + B > 0 ? RT.min * crew : 0;
-  const busCost = buses * (BUS + kmCost);
+  const extraKm = RT.extraKm;
+  const busCost = buses * (BUS + extraKm * KM_RATE);
   const mat = (lvl === 3 || S.ahead ? B * BOX_MAT : kitchen * BOX_MAT) + (n > 0 ? FILM : 0);
   const raw = money(work + travel) + busCost + mat;
+  const dur = work / crew / 60 + (travel ? RT.min / 60 : 0);
+  // «Перевозка» по часам: ставка за бус и бригаду × часы от подачи до конца разгрузки (не меньше минимума, шаг 30 мин)
+  const rate = HOURLY2.base + (crew - 2) * HOURLY2.person + (buses - 1) * HOURLY2.van;
+  const h = Math.max(HOURLY2.min, Math.ceil(dur * 2) / 2);
+  const hourly2 = { rate, h, sum: rate * h + extraKm * KM_RATE * buses + mat };
   const W = (k: Line['k'], m: number, x?: Record<string, number>): Line => ({ k, min: m, sum: money(m), x });
+  const base = { lvl, crew, dur, vol, buses, fill: vol / (buses * CAP), peopleH: (work + travel) / 60, n, rt: RT, hourly2: lvl === 2 ? hourly2 : undefined };
+  if (lvl === 2 && S.pay === 'hourly') {
+    const lines: Line[] = [{ k: 'hourly2', sum: rate * h, x: { rate, h, crew, buses } }];
+    if (extraKm) lines.push({ k: 'km', sum: extraKm * KM_RATE * buses, x: { km: extraKm } });
+    if (mat) lines.push({ k: 'mat', sum: mat, x: { boxes: kitchen } });
+    const sum = hourly2.sum * (1 + dk);
+    if (dk) lines.push({ k: 'date', sum: hourly2.sum * dk, x: { dk } });
+    return { ...base, total: Math.round(sum / 10) * 10, raw: sum, lines, paidHourly: true };
+  }
   const lines: Line[] = [
     W('carry', carry + small + floors), W('road', travel, { km: RT.ab, min: RT.min, crew }), W('asm', asm), W(lvl === 3 ? 'pack' : 'packK', pack),
     W('unpack', unpack), W('mount', mount), W('junk', junk),
-    { k: 'bus', sum: busCost, x: { buses, extraKm: RT.extraKm } }, { k: 'mat', sum: mat, x: { boxes: B } },
+    { k: 'bus', sum: busCost, x: { buses, extraKm } }, { k: 'mat', sum: mat, x: { boxes: B } },
   ].filter((x) => x.sum > 0);
   if (dk) lines.push({ k: 'date', sum: raw * dk, x: { dk } });
-  return { lvl, total: up90(raw * (1 + dk)), raw: raw * (1 + dk), crew, dur: work / crew / 60 + (travel ? RT.min / 60 : 0), vol, buses, fill: vol / (buses * CAP), peopleH: (work + travel) / 60, lines, n, rt: RT };
+  return { ...base, total: up90(raw * (1 + dk)), raw: raw * (1 + dk), lines };
 }
 
 /**
@@ -261,9 +288,13 @@ export function calc(S: State, lvl = S.level): Result {
  * o.asmAll — разобрать и собрать всю мебель, o.kitchen / o.ahead — упаковать кухню и хрупкое / коробки заранее.
  */
 export function presetTotal(key: string, lvl: number, o: { asmAll?: boolean; kitchen?: boolean; ahead?: boolean } = {}) {
+  return calc(presetState(key, lvl, o)).total;
+}
+/** Состояние формы для заготовки: те же адреса, этажи и лифт, что у формы при открытии, — поэтому цифры совпадают везде. */
+export function presetState(key: string, lvl: number, o: { asmAll?: boolean; kitchen?: boolean; ahead?: boolean } = {}): State {
   const p = PRESETS[key];
-  const end = (place: string): End => ({ place, floor: 2, lift: true, door: 0, house: 0 });
-  return calc({ level: lvl, hours: 2, from: end('Warszawa, Mokotów'), to: end('Warszawa, Bemowo'), boxes: p.boxes, extras: {},
-    kitchen: o.kitchen, ahead: o.ahead,
-    list: p.items.map(([id, n, sel]) => ({ id, n, sel: { ...ITEM[id].def, ...(sel || {}) }, asm: o.asmAll ? true : undefined })) }).total;
+  const end = (place: string): End => ({ place, floor: EXAMPLE.floor, lift: true, door: 0, house: 0 });
+  return { level: lvl, hours: 2, from: end(EXAMPLE.from), to: end(EXAMPLE.to), boxes: p.boxes, extras: {},
+    kitchen: o.kitchen, ahead: o.ahead, asmAll: o.asmAll,
+    list: p.items.map(([id, n, sel]) => ({ id, n, sel: { ...ITEM[id].def, ...(sel || {}) } })) };
 }
