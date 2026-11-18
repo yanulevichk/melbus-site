@@ -5,7 +5,7 @@ const { eyebrow, title, lead, align = 'split' } = Astro.props;
 <div class={`shead shead--${align}`}>
   <div class="shead__l">
     {eyebrow && <span class="t-eyebrow" data-reveal>{eyebrow}</span>}
-    <h2 class="t-h2" data-split set:html={title} />
+    <h2 class="t-h2" data-split data-tapeline set:html={title} />
   </div>
   {lead && <p class="t-lead" data-reveal>{lead}</p>}
 </div>

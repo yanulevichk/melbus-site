@@ -14,7 +14,6 @@ import NoHours from '../components/NoHours.astro';
 import HeroFilm from '../components/HeroFilm.astro';
 import PriceLabel from '../components/PriceLabel.astro';
 import Packages from '../components/Packages.astro';
-import Marquee from '../components/Marquee.astro';
 import Steps from '../components/Steps.astro';
 import { home as H } from '../content/home';
 import { areaText } from '../content/areas';
@@ -49,9 +48,6 @@ const qr = (seed: number) => {
     </ul>
   </div>
 </section>
-
-<!-- 1в. БЕГУЩАЯ СТРОКА: что перевозим (ускоряется от прокрутки) -->
-<Marquee locale={L} />
 
 <!-- 2. ОБЕЩАНИЕ -->
 <section class="lx-sec lx-statement">

@@ -1,7 +1,8 @@
 /**
  * «ЖИВОЙ» СЛОЙ САЙТА (18.11.2026, просьба владельца: «нравится, когда сайт живой»).
- *  1. Курсор-кольцо (только мышь): мягко догоняет указатель, растёт на ссылках и кнопках,
- *     на картинках-ссылках показывает подпись из data-cursor («Открыть», «Смотреть»). Обычный курсор остаётся.
+ *  1. Курсор-кольцо (только мышь): 18.11.2026 владелец — «не везде надо». Кольцо появляется ТОЛЬКО над элементами
+ *     с data-cursor (картинки и ролики, которые можно открыть) — бирюзовый круг с подписью «Открыть», «Смотреть».
+ *     На обычных ссылках, кнопках и полях — только обычный курсор.
  *  2. Картинки [data-img]: раскрываются шторкой снизу при появлении и чуть «плывут» при прокрутке (параллакс).
  *  3. Заголовки [data-tapeline]: бирюзовая полоса-скотч протягивается под заголовком, когда он появился.
  * Всё отключается при «уменьшить движение». Курсор живёт вне gsap.context, страницы — внутри (см. motion.ts).
@@ -32,22 +33,15 @@ export function cursor() {
   addEventListener('pointermove', (e) => {
     if (e.pointerType !== 'mouse') return;
     tx = e.clientX; ty = e.clientY;
-    if (!shown && ring) { shown = true; x = tx; y = ty; ring.classList.add('is-on'); }
+    if (!shown) { shown = true; x = tx; y = ty; }
   }, { passive: true });
-  document.addEventListener('pointerleave', () => { shown = false; ring?.classList.remove('is-on'); });
+  document.addEventListener('pointerleave', () => { shown = false; ring?.classList.remove('is-label'); });
   addEventListener('pointerover', (e) => {
     if (!ring || !label) return;
-    const t = e.target as HTMLElement;
-    const field = t.closest('input, textarea, select, [contenteditable]');
-    const hit = t.closest<HTMLElement>('a, button, [role="button"], label, summary, [data-cursor]');
-    const text = hit?.closest<HTMLElement>('[data-cursor]')?.dataset.cursor || '';
-    ring.classList.toggle('is-field', !!field);
-    ring.classList.toggle('is-link', !!hit && !text);
+    const text = (e.target as HTMLElement).closest<HTMLElement>('[data-cursor]')?.dataset.cursor || '';
+    if (text) { x = tx; y = ty; label.textContent = text; }   // кольцо вырастает прямо из указателя
     ring.classList.toggle('is-label', !!text);
-    label.textContent = text;
   }, { passive: true });
-  addEventListener('pointerdown', () => ring?.classList.add('is-down'), { passive: true });
-  addEventListener('pointerup', () => ring?.classList.remove('is-down'), { passive: true });
 }
 
 /* ---------- 2–3. картинки и полосы под заголовками (на каждой странице, внутри gsap.context) ---------- */

@@ -1,12 +1,13 @@
 ---
-/** Ролик на странице (первый экран внутренних страниц): грузится и играет только на экране, пометка «Визуализация». */
+/** Ролик на странице (первый экран внутренних страниц): грузится и играет только на экране, пометка «Визуализация».
+ *  18.11.2026: раскрывается шторкой и плывёт при прокрутке (data-img, alive.ts) — владелец: «надо применять». */
 import { ui } from '../i18n/ui';
 import type { Locale } from '../i18n/routes';
 interface Props { locale: Locale; video: string; poster: string; alt: string; caption?: string; square?: boolean }
 const { locale, video, poster, alt, caption, square = false } = Astro.props;
 ---
-<figure class={`pmedia${square ? ' pmedia--sq' : ''}`} data-tape>
-  <div class="tape__media pmedia__frame" data-video="1">
+<figure class={`pmedia${square ? ' pmedia--sq' : ''}`}>
+  <div class="pmedia__frame" data-video="1" data-img>
     <video muted loop playsinline preload="none" poster={poster} width="1280" height="720" aria-label={alt}>
       <source data-src={video} type="video/mp4" />
     </video>

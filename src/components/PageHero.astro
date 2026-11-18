@@ -7,7 +7,7 @@ const { eyebrow, title, lead } = Astro.props;
   <div class="container">
     <div class="phero__text">
       {eyebrow && <span class="t-eyebrow" data-reveal>{eyebrow}</span>}
-      <h1 class="t-hero" data-split set:html={title} />
+      <h1 class="t-hero" data-split data-tapeline set:html={title} />
       {lead && <p class="t-lead" data-reveal>{lead}</p>}
       <div class="phero__actions" data-reveal><slot name="actions" /></div>
     </div>
