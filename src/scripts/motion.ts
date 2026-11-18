@@ -19,6 +19,8 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { SplitText } from 'gsap/SplitText';
 import { mountVanta } from './vanta-bg';
+import { heroFilm } from './hero-film';
+import { cursor, alivePage } from './alive';
 
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
@@ -364,7 +366,9 @@ function initPage() {
   const rm = reduce();
 
   const delay = introDelay; introDelay = 0;
+  cursor();                                   // курсор-кольцо (alive.ts): создаётся один раз, после смены страницы — заново
   ctx = gsap.context(() => {
+    alivePage();                              // картинки шторкой + параллакс, полосы-скотч под заголовками
     /* заголовки строками */
     document.querySelectorAll<HTMLElement>('[data-split]').forEach((el) => {
       if (rm) return;
@@ -482,6 +486,7 @@ function initPage() {
 
     /* фильм первого экрана — первым: его закрепление сдвигает всё, что ниже */
     document.querySelectorAll<HTMLElement>('[data-film]').forEach((sec) => filmHero(sec, desktop, reduceNow, local));
+    document.querySelectorAll<HTMLElement>('[data-hf]').forEach((sec) => heroFilm(sec, local));   // первый экран «Кино» (HeroFilm.astro)
 
     /* сцены */
     document.querySelectorAll<HTMLElement>('[data-scene]').forEach((el) => {
@@ -574,7 +579,7 @@ function initPage() {
 
     /* магнитные кнопки */
     if (finePointer() && !reduceNow) {
-      document.querySelectorAll<HTMLElement>('[data-magnetic]').forEach((b) => {
+      document.querySelectorAll<HTMLElement>('[data-magnetic], .btn--primary').forEach((b) => {   // 18.11.2026: все главные кнопки
         const xTo = gsap.quickTo(b, 'x', { duration: 0.5, ease: 'power3' });
         const yTo = gsap.quickTo(b, 'y', { duration: 0.5, ease: 'power3' });
         const move = (e: PointerEvent) => { const r = b.getBoundingClientRect(); xTo((e.clientX - r.left - r.width / 2) * 0.25); yTo((e.clientY - r.top - r.height / 2) * 0.35); };

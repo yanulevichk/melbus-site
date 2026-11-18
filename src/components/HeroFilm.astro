@@ -1,0 +1,99 @@
+---
+/**
+ * ПЕРВЫЙ ЭКРАН ГЛАВНОЙ «КИНО» / «СВЕТ» (18.11.2026, выбор владельца: эффекты 1 + 2 + 6 со страницы выбора).
+ * Слово MELBUS, сквозь буквы — город → прокрутка «влетает» в букву M → фильм 10 с (кадры на canvas) → заголовок и кнопки.
+ * tone: 'dark' — «Кино» (зерно, виньетка, подписи проявляются из размытия), 'light' — «Свет» (белый экран в начале).
+ * Тексты — src/content/home.ts (film2, title, lead), движок — src/scripts/hero-film.ts, кадры — public/scenes/hero/.
+ * Без JS и при «уменьшить движение»: постер + заголовок с кнопками (SEO видит h1 всегда).
+ */
+import { href, type Locale } from '../i18n/routes';
+import { home as H } from '../content/home';
+import { ui } from '../i18n/ui';
+interface Props { locale: Locale; tone?: 'dark' | 'light' }
+const { locale: L, tone = 'dark' } = Astro.props;
+const pricing = href(L, 'pricing');
+---
+<section class:list={['hf', `hf--${tone}`]} data-hf data-tone={tone} data-base="/scenes/hero" data-n="247" aria-label={H.posterAlt[L]}>
+  <div class="hf__stage" data-hf-stage>
+    <picture class="hf__poster">
+      <source media="(max-aspect-ratio: 3/4), (max-width: 700px)" srcset="/scenes/hero/poster-m.webp" width="608" height="1080" />
+      <img src="/scenes/hero/poster-d.webp" alt={H.posterAlt[L]} width="1920" height="1080" fetchpriority="high" decoding="async" />
+    </picture>
+    <canvas class="hf__canvas" aria-hidden="true"></canvas>
+    {tone === 'dark' && <i class="hf__grain" aria-hidden="true"></i>}
+    <i class="hf__dim" aria-hidden="true"></i>
+
+    <div class="hf__intro" data-hf-intro aria-hidden="true">
+      <p>{H.kicker[L]}</p>
+      <span class="hf__hint">{H.scrollHint[L]}</span>
+    </div>
+
+    {H.film2.map(([from, to, t, d]) => (
+      <p class="hf__cap" data-hf-cap data-from={from} data-to={to} aria-hidden="true"><b>{t[L]}</b><span>{d[L]}</span></p>
+    ))}
+
+    <div class="hf__outro" data-hf-outro>
+      <h1>{H.title[0][L]}<br />{H.title[1][L]}</h1>
+      <p>{H.lead[L]}</p>
+      <div class="hf__btns">
+        <a href={pricing} class="btn btn--primary" data-magnetic>{ui.cta.price[L]}</a>
+        <a href={pricing + '?mode=video'} class="lux-link">{ui.cta.video[L]}</a>
+        <button type="button" class="hf__watch" data-film-open data-cursor={ui.cursorWatch[L]}><i aria-hidden="true"></i>{H.watch[L]}</button>
+      </div>
+    </div>
+
+    <i class="hf__bar" data-hf-bar aria-hidden="true"></i>
+    <span class="hf__ai">{ui.aiLabel[L]}</span>
+  </div>
+</section>
+
+<style>
+  .hf { position: relative; height: 470vh; background: #0B1015; color: #fff; }
+  @media (max-width: 700px) { .hf { height: 420vh; } }
+  .hf.is-static { height: auto; }
+  .hf__stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; isolation: isolate; background: #0B1015; }
+  .hf.is-static .hf__stage { position: relative; }
+  .hf__poster img, .hf__canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; object-fit: cover; }
+  .hf__poster img { filter: brightness(.7); }
+  .hf.is-live .hf__poster { visibility: hidden; }
+  .hf__dim { position: absolute; inset: 0; z-index: 2; background: #0B1015; opacity: var(--dim, 0); pointer-events: none; }
+  .hf__stage::after { content: ""; position: absolute; inset: 0; z-index: 3; pointer-events: none; background: linear-gradient(180deg, rgba(11,16,21,.35) 0%, transparent 22%, transparent 48%, rgba(11,16,21,.72) 100%); }
+  .hf__grain { position: absolute; inset: -50%; z-index: 4; opacity: .1; pointer-events: none; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); animation: hf-grain .9s steps(6) infinite; }
+  @keyframes hf-grain { 0% { transform: translate(0, 0); } 25% { transform: translate(-5%, 3%); } 50% { transform: translate(4%, -4%); } 75% { transform: translate(-3%, -2%); } 100% { transform: translate(0, 0); } }
+  @media (pointer: coarse) { .hf__grain { animation: none; inset: 0; } }
+
+  .hf__intro { position: absolute; z-index: 5; left: 0; right: 0; bottom: 0; display: flex; justify-content: space-between; align-items: end; gap: 16px; padding: 0 var(--gutter-r, 16px) max(28px, env(safe-area-inset-bottom, 0px)) var(--gutter, 16px); pointer-events: none; }
+  .hf__intro p { margin: 0; font-size: clamp(.95rem, .8rem + .45vw, 1.2rem); max-width: 32ch; }
+  .hf--light .hf__intro { color: #10161D; }
+  .hf__hint { font-size: .78rem; letter-spacing: .14em; text-transform: uppercase; display: flex; align-items: center; gap: 10px; white-space: nowrap; }
+  .hf__hint::after { content: ""; width: 1px; height: 34px; background: currentColor; animation: hf-hint 1.8s ease-in-out infinite; transform-origin: top; }
+  @keyframes hf-hint { 0% { transform: scaleY(0); } 50% { transform: scaleY(1); } 100% { transform: scaleY(0); transform-origin: bottom; } }
+  .hf.is-static .hf__intro, .hf.is-static .hf__cap { display: none; }
+
+  .hf__cap { position: absolute; z-index: 6; left: var(--gutter, 16px); right: var(--gutter-r, 16px); bottom: clamp(48px, 10vh, 110px); margin: 0; max-width: 1100px; pointer-events: none; opacity: 0; transition: opacity .7s ease, transform .9s cubic-bezier(.2,.7,.1,1), filter .9s ease; }
+  .hf__cap b { display: block; font: 200 clamp(2rem, 1rem + 4.6vw, 5.6rem)/0.98 var(--font-display); letter-spacing: -0.055em; text-wrap: balance; }
+  .hf__cap span { display: block; margin-top: 14px; font-size: clamp(.98rem, .85rem + .45vw, 1.25rem); color: rgba(255,255,255,.84); max-width: 42ch; }
+  .hf--light .hf__cap { transform: translateY(28px); }
+  .hf--dark .hf__cap { filter: blur(14px); transform: scale(1.03); }
+  .hf .hf__cap.on { opacity: 1; transform: none; filter: none; }   /* .hf — чтобы перебить .hf--dark .hf__cap */
+
+  .hf__outro { position: absolute; z-index: 8; left: var(--gutter, 16px); right: var(--gutter-r, 16px); bottom: clamp(40px, 9vh, 100px); display: grid; gap: 22px; opacity: 0; transform: translateY(24px); transition: opacity .8s ease, transform .9s cubic-bezier(.2,.7,.1,1); pointer-events: none; }
+  .hf__outro.on { opacity: 1; transform: none; pointer-events: auto; }
+  .hf__outro h1 { margin: 0; font: 200 clamp(2.3rem, 1rem + 5.6vw, 6.6rem)/0.95 var(--font-display); letter-spacing: -0.06em; }
+  .hf__outro p { margin: 0; max-width: 46ch; font-size: clamp(1rem, .9rem + .4vw, 1.25rem); color: rgba(255,255,255,.86); }
+  .hf__btns { display: flex; flex-wrap: wrap; gap: 14px 24px; align-items: center; }
+  .hf__btns .lux-link { color: #fff; }
+  .hf__watch { display: inline-flex; align-items: center; gap: 10px; padding: 0; border: 0; background: none; color: rgba(255,255,255,.8); font: inherit; font-size: .92rem; cursor: pointer; }
+  .hf__watch i { width: 30px; height: 30px; border: 1px solid rgba(255,255,255,.6); border-radius: 50%; display: inline-grid; place-items: center; }
+  .hf__watch i::before { content: ""; border-left: 8px solid currentColor; border-top: 5px solid transparent; border-bottom: 5px solid transparent; margin-left: 2px; }
+  .hf__watch:hover { color: #fff; }
+  .hf__bar { position: absolute; z-index: 9; left: 0; right: 0; bottom: 0; height: 2px; background: var(--tape, #14DCD5); transform-origin: left; transform: scaleX(0); }
+  .hf__ai { position: absolute; z-index: 9; right: var(--gutter-r, 16px); top: calc(var(--header-h, 64px) + env(safe-area-inset-top, 0px) + 10px); font-size: .7rem; color: rgba(255,255,255,.62); }
+  /* телефон: снизу фиксированная панель с кнопками — подписи и финал поднимаем над ней */
+  @media (max-width: 767px) {
+    .hf__intro { padding-bottom: calc(var(--bar-h, 64px) + 20px + env(safe-area-inset-bottom, 0px)); }
+    .hf__cap { bottom: calc(var(--bar-h, 64px) + 40px); }
+    .hf__outro { bottom: calc(var(--bar-h, 64px) + 28px); }
+  }
+  @media (prefers-reduced-motion: reduce) { .hf__grain, .hf__hint::after { animation: none; } .hf__cap, .hf__outro { transition: none; } }
+</style>

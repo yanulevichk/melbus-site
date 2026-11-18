@@ -74,8 +74,8 @@ const site = { '@context': 'https://schema.org', '@type': 'WebSite', '@id': `${b
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
   <link rel="manifest" href="/site.webmanifest" />
-  {pageKey === 'home' && <link rel="preload" as="image" href="/scenes/film/poster-m.webp" media="(max-width: 1023px)" fetchpriority="high" />}
-  {pageKey === 'home' && <link rel="preload" as="image" href="/scenes/film/poster-d.webp" media="(min-width: 1024px)" fetchpriority="high" />}
+  {pageKey === 'home' && <link rel="preload" as="image" href="/scenes/hero/poster-m.webp" media="(max-aspect-ratio: 3/4), (max-width: 700px)" fetchpriority="high" />}
+  {pageKey === 'home' && <link rel="preload" as="image" href="/scenes/hero/poster-d.webp" media="(min-aspect-ratio: 3/4) and (min-width: 701px)" fetchpriority="high" />}
   <script type="application/ld+json" set:html={JSON.stringify([org, site, ...schema])} />
   <script is:inline>(function(){var d=document.documentElement;d.classList.add('js');try{if(!sessionStorage.getItem('mb-tape'))d.classList.add('tape');}catch(e){}})();</script>
   <ClientRouter />
