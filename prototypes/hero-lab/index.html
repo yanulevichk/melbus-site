@@ -1,0 +1,457 @@
+<title>Первый экран MELBUS</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600&family=Unbounded:wght@200;300;700;900&display=swap">
+<style>
+  /* Тёмная «кинопроба»: каждая карточка — живой кадр эффекта; одна тема (графит MELBUS) намеренно */
+  :root {
+    --bg: #0B1015; --panel: #10161D; --line: #233040; --fg: #EEF2F5; --muted: #8F9AA7;
+    --tape: #14DCD5; --deep: #077E79; --paper: #F4F6F8; --silver: #DCE1E7;
+    --display: 'Unbounded', 'Arial Black', system-ui, sans-serif;
+    --text: 'Onest', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    color-scheme: dark;
+  }
+  body { background: var(--bg); color: var(--fg); font: 16px/1.55 var(--text); }
+  .wrap { max-width: 1180px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 40px 80px; }
+  a { color: var(--tape); text-underline-offset: 3px; }
+  a:focus-visible, button:focus-visible, input:focus-visible { outline: 2px solid var(--tape); outline-offset: 3px; }
+  .top { display: grid; gap: 18px; padding-bottom: 36px; border-bottom: 1px solid var(--line); }
+  .top img { height: 26px; width: auto; }
+  h1 { font: 200 clamp(2.2rem, 1.2rem + 4.5vw, 4.6rem)/0.98 var(--display); letter-spacing: -0.05em; margin: 0; text-wrap: balance; }
+  h1 b { font-weight: 300; color: var(--tape); }
+  .lead { color: var(--muted); max-width: 62ch; margin: 0; font-size: 1.06rem; }
+  .ref { display: grid; gap: 10px; padding: 16px 18px; border-left: 2px solid var(--tape); background: var(--panel); max-width: 820px; }
+  .ref p { margin: 0; color: var(--muted); }
+  .ref strong { color: var(--fg); font-weight: 600; }
+  .how { margin: 0; color: var(--fg); font-weight: 500; }
+
+  .fx { display: grid; gap: 22px; padding-block: 52px; border-bottom: 1px solid var(--line); }
+  @media (min-width: 960px) { .fx { grid-template-columns: 1.55fr 1fr; gap: 40px; align-items: start; } }
+  .fx__txt { display: grid; gap: 12px; min-width: 0; }
+  .fx__n { font: 700 .78rem/1 var(--text); letter-spacing: .14em; color: var(--tape); text-transform: uppercase; }
+  .fx h2 { font: 300 clamp(1.5rem, 1.1rem + 1.4vw, 2.2rem)/1.05 var(--display); letter-spacing: -0.04em; margin: 0; text-wrap: balance; }
+  .fx dl { margin: 0; display: grid; gap: 10px; }
+  .fx dt { font-size: .74rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+  .fx dd { margin: 2px 0 0; }
+  .cost { display: inline-block; font-size: .82rem; padding: 3px 8px; border-radius: 2px; background: rgba(20,220,213,.12); color: var(--tape); }
+  .links { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: .9rem; }
+
+  .stage { position: relative; aspect-ratio: 16 / 9; max-width: 100%; overflow: hidden; border-radius: 3px; background: #05080B; isolation: isolate; }
+  @media (max-width: 560px) { .stage { aspect-ratio: 4 / 3; } }
+  .stage video, .stage > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .tag { position: absolute; right: 10px; bottom: 8px; z-index: 9; font-size: .7rem; color: rgba(255,255,255,.75); letter-spacing: .04em; }
+  .note { font-size: .82rem; color: var(--muted); margin: 8px 0 0; }
+
+  /* 1. фильм под прокрутку */
+  .s1 .cap { position: absolute; left: 6%; bottom: 14%; z-index: 2; max-width: 70%; }
+  .s1 .cap b { display: block; font: 200 clamp(1.3rem, .8rem + 2.2vw, 2.8rem)/1 var(--display); letter-spacing: -0.05em; color: #fff; transition: opacity .45s, transform .45s; }
+  .s1 .cap span { display: block; margin-top: 8px; color: rgba(255,255,255,.8); font-size: clamp(.8rem, .7rem + .3vw, 1rem); transition: opacity .45s .08s, transform .45s .08s; }
+  .s1 .cap.off b, .s1 .cap.off span { opacity: 0; transform: translateY(14px); }
+  .s1::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(5,8,11,.15), rgba(5,8,11,.55)); z-index: 1; }
+  .scrub { display: flex; align-items: center; gap: 12px; margin-top: 10px; font-size: .85rem; color: var(--muted); }
+  .scrub input { flex: 1; accent-color: var(--tape); }
+  .bar { position: absolute; left: 0; top: 0; height: 3px; background: var(--tape); z-index: 3; width: 0; }
+
+  /* 2. слово-окно */
+  .s2 .mask { position: absolute; inset: 0; z-index: 2; display: grid; place-items: center; background: var(--paper); color: #000; mix-blend-mode: screen; will-change: transform; }
+  .s2 .mask span { font: 900 clamp(3rem, 15vw, 11.5rem)/1 var(--display); letter-spacing: -0.06em; }
+  .s2 .sub2 { position: absolute; z-index: 3; left: 50%; bottom: 10%; transform: translateX(-50%); color: #10161D; font-size: clamp(.75rem, .6rem + .4vw, .95rem); letter-spacing: .14em; text-transform: uppercase; white-space: nowrap; transition: opacity .4s; }
+
+  /* 3. коробка 360° */
+  .s3 { background: radial-gradient(80% 90% at 70% 40%, #FFFFFF 0%, #E4E9EE 55%, #C9D1D9 100%); color: #10161D; }
+  .s3 .t3 { position: absolute; left: 6%; top: 50%; transform: translateY(-50%); z-index: 2; max-width: 44%; }
+  .s3 .t3 b { display: block; font: 200 clamp(1.2rem, .7rem + 2.1vw, 2.6rem)/1 var(--display); letter-spacing: -0.05em; }
+  .s3 .t3 span { display: block; margin-top: 10px; font-size: clamp(.72rem, .6rem + .35vw, .95rem); color: #56626E; }
+  .scene { position: absolute; right: 12%; top: 50%; width: clamp(110px, 20vw, 210px); aspect-ratio: 1; transform: translateY(-46%); perspective: 900px; }
+  .cube { position: absolute; inset: 0; transform-style: preserve-3d; transform: rotateX(-14deg) rotateY(0deg); }
+  .face { position: absolute; inset: 0; background: linear-gradient(160deg, #FFFFFF, #EDF1F4); border: 1px solid #D5DBE1; display: grid; place-items: center; backface-visibility: hidden; }
+  .face img { width: 62%; }
+  .face .lbl { position: absolute; right: 9%; bottom: 9%; background: #fff; border: 1px solid #D5DBE1; font: 600 .62rem/1 var(--text); padding: 4px 6px; color: #10161D; }
+  .face.top::after { content: ""; position: absolute; left: 44%; top: 0; bottom: 0; width: 12%; background: var(--tape); transform-origin: top; transform: scaleY(var(--tp, 1)); }
+  .face.front::before, .face.back::before { content: ""; position: absolute; left: 44%; top: 0; height: 22%; width: 12%; background: var(--tape); }
+  .shadow { position: absolute; left: 50%; bottom: -16%; width: 120%; height: 18%; transform: translateX(-50%); background: radial-gradient(closest-side, rgba(16,22,29,.28), transparent); }
+
+  /* 4. лента скотча */
+  .s4 .b { clip-path: polygon(0 0, var(--x1) 0, var(--x2) 100%, 0 100%); }
+  .s4 .tape { position: absolute; left: -30%; top: 50%; width: 160%; height: 20%; z-index: 3; background: var(--tape); transform: translate(var(--tx), -50%) rotate(-62deg); display: flex; align-items: center; overflow: hidden; box-shadow: 0 0 40px rgba(0,0,0,.25); }
+  .s4 .tape i { font: 700 clamp(.6rem, .4rem + .6vw, 1rem)/1 var(--display); letter-spacing: .3em; color: #10161D; white-space: nowrap; font-style: normal; opacity: .85; }
+  .s4 .w4 { position: absolute; left: 6%; bottom: 10%; z-index: 4; color: #fff; font: 200 clamp(1.1rem, .7rem + 1.8vw, 2.4rem)/1 var(--display); letter-spacing: -0.05em; text-shadow: 0 2px 30px rgba(0,0,0,.4); }
+
+  /* 5. маршрут */
+  .s5 canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .s5 svg { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2; }
+  .s5 .info { position: absolute; z-index: 3; left: 5%; bottom: 8%; display: grid; gap: 4px; }
+  .s5 .info small { color: var(--muted); font-size: clamp(.68rem, .6rem + .25vw, .85rem); letter-spacing: .08em; text-transform: uppercase; }
+  .s5 .price { font: 200 clamp(1.6rem, .9rem + 3vw, 3.6rem)/1 var(--display); letter-spacing: -0.05em; font-variant-numeric: tabular-nums; }
+  .s5 .price em { font-style: normal; font-size: .45em; color: var(--muted); margin-left: .2em; }
+  .s5 .km { font-size: clamp(.72rem, .62rem + .3vw, .92rem); color: var(--tape); }
+
+  /* 6. тёмное кино */
+  .s6 video { filter: brightness(.55) contrast(1.12) saturate(.75); transform: scale(var(--z, 1.12)); }
+  .s6::before { content: ""; position: absolute; inset: 0; z-index: 2; background: radial-gradient(70% 70% at 50% 55%, transparent 40%, rgba(0,0,0,.75)); pointer-events: none; }
+  .s6 .grain { position: absolute; inset: -50%; z-index: 3; opacity: .12; pointer-events: none; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); animation: grain 1s steps(6) infinite; }
+  @keyframes grain { 0% { transform: translate(0, 0); } 33% { transform: translate(-6%, 4%); } 66% { transform: translate(5%, -3%); } 100% { transform: translate(0, 0); } }
+  .s6 .words { position: absolute; z-index: 4; inset: 0; display: grid; place-items: center; text-align: center; }
+  .s6 .words b { position: absolute; font: 200 clamp(1.6rem, 1rem + 3.4vw, 4.4rem)/1 var(--display); letter-spacing: -0.05em; color: #fff; opacity: 0; filter: blur(12px); transform: scale(1.04); transition: opacity 1s, filter 1s, transform 1.4s; }
+  .s6 .words b.on { opacity: 1; filter: blur(0); transform: scale(1); }
+  .s6 .words b.logo img { height: clamp(26px, 4vw, 52px); width: auto; }
+
+  /* 7. крупный план + слова */
+  .s7 { background: var(--paper); color: #10161D; }
+  .s7 .pic { position: absolute; right: 0; top: 0; bottom: 0; width: 52%; overflow: hidden; clip-path: inset(var(--c, 100%) 0 0 0); }
+  .s7 .pic img { width: 100%; height: 100%; object-fit: cover; transform: scale(var(--ps, 1.15)); }
+  .s7 .lines { position: absolute; left: 6%; top: 50%; transform: translateY(-50%); display: grid; gap: .1em; z-index: 2; }
+  .s7 .lines span { display: block; overflow: hidden; font: 200 clamp(1.3rem, .7rem + 2.6vw, 3.3rem)/1.02 var(--display); letter-spacing: -0.05em; }
+  .s7 .lines span i { display: block; font-style: normal; transform: translateY(var(--y, 110%)); transition: transform .9s cubic-bezier(.2,.7,.1,1); }
+  .s7 .lines span:nth-child(3) i { color: var(--deep); }
+  .s7 .meta { position: absolute; left: 6%; bottom: 9%; font-size: clamp(.64rem, .55rem + .25vw, .82rem); letter-spacing: .12em; text-transform: uppercase; color: #56626E; z-index: 2; }
+
+  /* 8. диорама */
+  .s8 img { opacity: 0; transform: scale(1.18); transition: opacity 1.2s ease, transform 4.6s cubic-bezier(.2,.6,.2,1); }
+  .s8 img.on { opacity: 1; transform: scale(1); }
+  .s8 .c8 { position: absolute; z-index: 3; left: 6%; bottom: 10%; color: #fff; font: 200 clamp(1.1rem, .7rem + 1.8vw, 2.4rem)/1 var(--display); letter-spacing: -0.05em; text-shadow: 0 2px 30px rgba(0,0,0,.5); }
+  .s8::after { content: ""; position: absolute; inset: 0; z-index: 2; background: linear-gradient(transparent 50%, rgba(5,8,11,.6)); }
+
+  .refs { padding-block: 52px 0; display: grid; gap: 16px; }
+  .refs h2 { font: 300 clamp(1.4rem, 1rem + 1.2vw, 2rem)/1.1 var(--display); letter-spacing: -0.04em; margin: 0; }
+  .refs ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 12px; }
+  @media (min-width: 760px) { .refs ul { grid-template-columns: 1fr 1fr; gap: 14px 32px; } }
+  .refs li { display: grid; gap: 2px; padding-top: 12px; border-top: 1px solid var(--line); min-width: 0; }
+  .refs li span { color: var(--muted); font-size: .92rem; }
+  .end { margin-top: 44px; padding: 20px; background: var(--panel); border-left: 2px solid var(--tape); display: grid; gap: 8px; }
+  .end p { margin: 0; }
+  .end p:last-child { color: var(--muted); }
+  @media (prefers-reduced-motion: reduce) { .s6 .grain { animation: none; } .s7 .lines span i, .s6 .words b, .s8 img { transition: none; } }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <img src="media/melbus-dark.svg" alt="MELBUS" width="120" height="26">
+    <h1>Первый экран:<br><b>восемь эффектов</b> на выбор</h1>
+    <p class="lead">Каждый кадр ниже — живой пример, собранный из наших материалов: фильм, коробки, бус, фирменный скотч. На сайте почти все эффекты управляются прокруткой; здесь они идут сами, чтобы было видно, как это выглядит.</p>
+    <div class="ref">
+      <p><strong>Ваш референс</strong> — ролик о библиотеке «кино»-экранов: фура на дороге, машина на белом фоне, робот-манипулятор, тёмное кино с крупным тонким шрифтом. Общее у них: один главный предмет, много воздуха, огромная тонкая надпись и движение, которое ведёт прокрутка. Ролик сохранил в проект.</p>
+    </div>
+    <p class="how">Напишите номера, которые нравятся (можно 2–3 — соберём из них один экран).</p>
+  </header>
+
+  <!-- 1 -->
+  <section class="fx" aria-labelledby="h1x">
+    <div>
+      <div class="stage s1" data-fx="1">
+        <i class="bar" data-bar></i>
+        <video src="media/film-1280.mp4" muted playsinline preload="auto" data-scrubv></video>
+        <div class="cap" data-cap><b data-capt>Переезд, который не дорожает</b><span data-caps>Прокрутите — квартира сложится в коробку</span></div>
+        <span class="tag">Визуализация</span>
+      </div>
+      <label class="scrub" for="scrub1">Прокрутка <input id="scrub1" type="range" min="0" max="1000" value="0" data-scrub></label>
+      <p class="note">Потяните ползунок — так на сайте работает колесо мыши или палец.</p>
+    </div>
+    <div class="fx__txt">
+      <span class="fx__n">Эффект 1</span>
+      <h2 id="h1x">Короткий фильм под прокрутку</h2>
+      <dl>
+        <div><dt>Что видно</dt><dd>Прокрутка листает кадры фильма вперёд и назад, на каждом моменте — одна крупная фраза. Как у Apple на страницах AirPods.</dd></div>
+        <div><dt>Для MELBUS</dt><dd>Вместо 23 секунд — 8: квартира → коробка → скотч → бус уезжает. 2–3 экрана прокрутки, кадры грузятся заранее, движение мягкое.</dd></div>
+        <div><dt>Что нужно</dt><dd><span class="cost">из готового фильма · 0 кредитов</span></dd></div>
+      </dl>
+      <div class="links"><a href="https://www.apple.com/airpods-pro/" target="_blank" rel="noopener">Apple AirPods Pro</a><a href="https://scrollhaus.ai/blog/animated-hero-section-patterns/" target="_blank" rel="noopener">8 приёмов (ScrollHaus)</a></div>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="fx" aria-labelledby="h2x">
+    <div>
+      <div class="stage s2" data-fx="2">
+        <video src="media/film-1280.mp4" muted playsinline loop autoplay preload="auto"></video>
+        <div class="mask" data-mask><span><span data-origin>M</span>ELBUS</span></div>
+        <span class="sub2" data-sub2>Вся квартира — в одной коробке</span>
+        <span class="tag">Визуализация</span>
+      </div>
+    </div>
+    <div class="fx__txt">
+      <span class="fx__n">Эффект 2</span>
+      <h2 id="h2x">Слово-окно</h2>
+      <dl>
+        <div><dt>Что видно</dt><dd>Огромное слово MELBUS, сквозь буквы виден фильм. Прокрутка увеличивает слово, буква становится экраном — и вы уже внутри видео.</dd></div>
+        <div><dt>Для MELBUS</dt><dd>Сильный бренд-момент: логотип сразу запоминается. Хорошо сочетается с эффектом 1 — после «влёта» в букву начинается фильм.</dd></div>
+        <div><dt>Что нужно</dt><dd><span class="cost">код + готовый фильм · 0 кредитов</span></dd></div>
+      </dl>
+      <div class="links"><a href="https://www.awwwards.com/inspiration/animated-scroll-60" target="_blank" rel="noopener">Awwwards: анимация прокрутки</a></div>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="fx" aria-labelledby="h3x">
+    <div>
+      <div class="stage s3" data-fx="3">
+        <div class="t3"><b>Вся квартира<br>в одной коробке</b><span>Цена по видео. Не меняется в день переезда.</span></div>
+        <div class="scene"><div class="cube" data-cube>
+          <div class="face front" style="transform: translateZ(calc(var(--h) / 2))"><img src="media/melbus-light.svg" alt=""><span class="lbl">01 · КУХНЯ</span></div>
+          <div class="face back" style="transform: rotateY(180deg) translateZ(calc(var(--h) / 2))"><img src="media/melbus-light.svg" alt=""></div>
+          <div class="face right" style="transform: rotateY(90deg) translateZ(calc(var(--h) / 2))"><img src="media/mark-light.svg" alt="" style="width:34%"></div>
+          <div class="face left" style="transform: rotateY(-90deg) translateZ(calc(var(--h) / 2))"><img src="media/mark-light.svg" alt="" style="width:34%"></div>
+          <div class="face top" style="transform: rotateX(90deg) translateZ(calc(var(--h) / 2))"></div>
+        </div><div class="shadow"></div></div>
+      </div>
+    </div>
+    <div class="fx__txt">
+      <span class="fx__n">Эффект 3</span>
+      <h2 id="h3x">Предметная съёмка: коробка 360°</h2>
+      <dl>
+        <div><dt>Что видно</dt><dd>Как машина на белом фоне в вашем референсе: один предмет в студии, прокрутка вращает его, протягивается скотч, клеится наклейка.</dd></div>
+        <div><dt>Для MELBUS</dt><dd>Белая коробка с логотипом — наш «продукт». На сайте — настоящее 3D или фото-кадры, с мягким светом и тенью; здесь упрощённый макет.</dd></div>
+        <div><dt>Что нужно</dt><dd><span class="cost">3D-модель коробки уже есть · 0 кредитов</span></dd></div>
+      </dl>
+      <div class="links"><a href="https://www.utsubo.com/blog/best-threejs-websites-2026" target="_blank" rel="noopener">Лучшие 3D-сайты 2026 (Oryzo)</a><a href="https://21st.dev/@Loomix/components/cinematic-product-scroll-section" target="_blank" rel="noopener">Cinematic product scroll</a></div>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="fx" aria-labelledby="h4x">
+    <div>
+      <div class="stage s4" data-fx="4">
+        <img src="media/kvartira.webp" alt="" class="a">
+        <img src="media/mezhgorod.webp" alt="" class="b" data-b>
+        <div class="tape" data-tape><i data-tapetxt></i></div>
+        <span class="w4" data-w4>Упаковали</span>
+        <span class="tag">Визуализация</span>
+      </div>
+    </div>
+    <div class="fx__txt">
+      <span class="fx__n">Эффект 4</span>
+      <h2 id="h4x">Скотч как переход</h2>
+      <dl>
+        <div><dt>Что видно</dt><dd>Бирюзовая лента с надписью MELBUS проезжает через экран и «заклеивает» одну сцену, открывая следующую.</dd></div>
+        <div><dt>Для MELBUS</dt><dd>Фирменная деталь, которой нет у других: переходы между сценами первого экрана и между страницами сайта.</dd></div>
+        <div><dt>Что нужно</dt><dd><span class="cost">код + наши картинки · 0 кредитов</span></dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="fx" aria-labelledby="h5x">
+    <div>
+      <div class="stage s5" data-fx="5">
+        <canvas data-map></canvas>
+        <svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <path data-route d="M1170 640 C 1060 600, 980 520, 900 500 S 720 470, 640 390 S 470 300, 380 250" fill="none" stroke="#14DCD5" stroke-width="5" stroke-linecap="round" />
+          <circle cx="1170" cy="640" r="11" fill="#14DCD5"/><circle cx="380" cy="250" r="11" fill="#fff"/>
+          <text x="1190" y="676" fill="#DCE1E7" font-size="30" font-family="Onest, sans-serif">Mokotów</text>
+          <text x="400" y="232" fill="#DCE1E7" font-size="30" font-family="Onest, sans-serif">Bemowo</text>
+          <g data-van><rect x="-22" y="-12" width="44" height="24" rx="4" fill="#fff"/><rect x="8" y="-12" width="14" height="24" rx="3" fill="#10161D" opacity=".6"/></g>
+        </svg>
+        <div class="info"><small>Ваш переезд</small><span class="price"><span data-price>0</span><em>zł</em></span><span class="km" data-km>15 км · 50 мин · 2 буса</span></div>
+      </div>
+    </div>
+    <div class="fx__txt">
+      <span class="fx__n">Эффект 5</span>
+      <h2 id="h5x">Маршрут и цена на карте</h2>
+      <dl>
+        <div><dt>Что видно</dt><dd>Тёмная карта Варшавы, бирюзовая линия рисует маршрут от А до Б, бус едет по ней, а цена набирается барабаном.</dd></div>
+        <div><dt>Для MELBUS</dt><dd>Показывает главное без слов: считаем по адресам, цена известна заранее. Можно сделать интерактивным — человек вводит свои районы прямо на первом экране.</dd></div>
+        <div><dt>Что нужно</dt><dd><span class="cost">код · 0 кредитов</span></dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section class="fx" aria-labelledby="h6x">
+    <div>
+      <div class="stage s6" data-fx="6">
+        <video src="media/film-1280.mp4" muted playsinline loop autoplay preload="auto" data-zoomv></video>
+        <i class="grain"></i>
+        <div class="words" data-words><b>Тихо.</b><b>Бережно.</b><b>Вовремя.</b><b class="logo"><img src="media/melbus-dark.svg" alt="MELBUS"></b></div>
+        <span class="tag">Визуализация</span>
+      </div>
+    </div>
+    <div class="fx__txt">
+      <span class="fx__n">Эффект 6</span>
+      <h2 id="h6x">Тёмное кино</h2>
+      <dl>
+        <div><dt>Что видно</dt><dd>Как VIGIL в вашем референсе: приглушённый кадр, медленный наезд камеры, зерно плёнки, слова проявляются из размытия по одному.</dd></div>
+        <div><dt>Для MELBUS</dt><dd>Самый «дорогой» по ощущению вариант. Лучше всего — с отдельным ночным роликом: бус с фарами на пустой улице Варшавы.</dd></div>
+        <div><dt>Что нужно</dt><dd><span class="cost">из готового · 0 кр. или новый ролик ≈ 25–130 кр.</span></dd></div>
+      </dl>
+      <div class="links"><a href="https://static.shaders.com/sections/eclipse-hero" target="_blank" rel="noopener">Shaders: Eclipse hero</a><a href="https://21st.dev/@lovesickfromthe6ix/components/horizon-hero-section" target="_blank" rel="noopener">Horizon hero</a></div>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section class="fx" aria-labelledby="h7x">
+    <div>
+      <div class="stage s7" data-fx="7">
+        <div class="pic" data-pic><img src="media/std-tape.webp" alt=""></div>
+        <div class="lines" data-lines><span><i>Аккуратность</i></span><span><i>начинается</i></span><span><i>с порога.</i></span></div>
+        <span class="meta">Перчатки · бахилы · защита пола</span>
+        <span class="tag" style="color:#56626E">Визуализация</span>
+      </div>
+    </div>
+    <div class="fx__txt">
+      <span class="fx__n">Эффект 7</span>
+      <h2 id="h7x">Крупный план и большие слова</h2>
+      <dl>
+        <div><dt>Что видно</dt><dd>Как робот KUKA в референсе («Precision begins here»): светлый фон, крупный кадр детали выезжает шторкой, слова поднимаются по строкам.</dd></div>
+        <div><dt>Для MELBUS</dt><dd>Руки в фирменных перчатках, скотч, бахилы — показываем стандарт бригады. Светлый, спокойный, премиальный.</dd></div>
+        <div><dt>Что нужно</dt><dd><span class="cost">из готового · 0 кр.; новые крупные планы ≈ 1 кр. за кадр</span></dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <!-- 8 -->
+  <section class="fx" aria-labelledby="h8x">
+    <div>
+      <div class="stage s8" data-fx="8">
+        <img src="media/step-1-video.webp" alt=""><img src="media/step-4-pack.webp" alt=""><img src="media/step-2-price.webp" alt=""><img src="media/step-6-home.webp" alt="">
+        <span class="c8" data-c8>Снимаете видео</span>
+        <span class="tag">Визуализация</span>
+      </div>
+    </div>
+    <div class="fx__txt">
+      <span class="fx__n">Эффект 8</span>
+      <h2 id="h8x">Диорама: квартира складывается в коробку</h2>
+      <dl>
+        <div><dt>Что видно</dt><dd>Квартира-макет, камера облетает её, мебель «ныряет» в белую коробку, коробка закрывается — и в конце всё вылетает на места в новой квартире.</dd></div>
+        <div><dt>Для MELBUS</dt><dd>Наша история «вся квартира в одной коробке» целиком, как в мире Igloo Inc. Самый «вау», но и самый трудоёмкий: 3D-сцена или новые кадры ИИ.</dd></div>
+        <div><dt>Что нужно</dt><dd><span class="cost">3D-сцена есть в черновике · или ИИ-кадры ≈ 30–150 кр.</span></dd></div>
+      </dl>
+      <div class="links"><a href="https://www.igloo.inc/" target="_blank" rel="noopener">Igloo Inc</a><a href="https://lusion.co/" target="_blank" rel="noopener">Lusion</a><a href="https://www.awwwards.com/inspiration/hero-scroll-triggered-animation-grass-vionaro-v8" target="_blank" rel="noopener">Awwwards: 3D под прокрутку</a></div>
+    </div>
+  </section>
+
+  <section class="refs" aria-labelledby="hr">
+    <h2 id="hr">Где смотреть живьём</h2>
+    <ul>
+      <li><a href="https://www.apple.com/airpods-pro/" target="_blank" rel="noopener">Apple · AirPods Pro</a><span>Фильм и предмет под прокрутку — эталон эффекта 1.</span></li>
+      <li><a href="https://www.igloo.inc/" target="_blank" rel="noopener">Igloo Inc</a><span>Целый 3D-мир под прокрутку, сайт года Awwwards 2024 — эффект 8.</span></li>
+      <li><a href="https://lusion.co/" target="_blank" rel="noopener">Lusion</a><span>Студия интерактивного 3D: предметы реагируют на мышь.</span></li>
+      <li><a href="https://www.shopify.com/editions" target="_blank" rel="noopener">Shopify Editions</a><span>Длинный рассказ о продукте, сцены меняются прокруткой.</span></li>
+      <li><a href="https://www.utsubo.com/blog/best-threejs-websites-2026" target="_blank" rel="noopener">8 лучших 3D-сайтов 2026</a><span>Подборка с разбором приёмов: Oryzo, Shopify, Cartier.</span></li>
+      <li><a href="https://21st.dev/@Loomix/components/cinematic-product-scroll-section" target="_blank" rel="noopener">21st.dev · Cinematic product scroll</a><span>Готовые «кино»-блоки, похожие на библиотеку из вашего ролика.</span></li>
+      <li><a href="https://www.awwwards.com/inspiration/animated-scroll-60" target="_blank" rel="noopener">Awwwards · Animated scroll</a><span>Подборка анимаций прокрутки с призовых сайтов.</span></li>
+      <li><a href="https://scrollhaus.ai/blog/animated-hero-section-patterns/" target="_blank" rel="noopener">ScrollHaus · 8 приёмов первого экрана</a><span>От появления заголовка до фильма под прокрутку.</span></li>
+    </ul>
+    <div class="end">
+      <p><b>Как дальше:</b> вы называете 2–3 номера, я собираю из них один первый экран на сайте и присылаю ссылку на проверку.</p>
+      <p>Самые сильные сочетания: 2 + 1 (влёт в слово → фильм), 3 + 4 (коробка + скотч-переход), 6 + 5 (тёмное кино → маршрут и цена).</p>
+    </div>
+  </section>
+</div>
+
+<script>
+(() => {
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const visible = new Map();
+  const io = new IntersectionObserver((es) => es.forEach((e) => {
+    visible.set(e.target, e.isIntersecting);
+    e.target.querySelectorAll('video[autoplay]').forEach((v) => (e.isIntersecting && !reduce ? v.play().catch(() => {}) : v.pause()));
+  }), { threshold: 0.15 });
+  document.querySelectorAll('[data-fx]').forEach((s) => io.observe(s));
+  const on = (el) => visible.get(el);
+  const ease = (t) => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+
+  // 1 — фильм под прокрутку (ползунок = колесо мыши)
+  const s1 = document.querySelector('[data-fx="1"]'), v1 = s1.querySelector('video'), r1 = document.querySelector('[data-scrub]');
+  const caps = [[0, .2, 'Переезд, который не дорожает', 'Прокрутите — квартира сложится в коробку'], [.2, .45, 'Цена по видео', 'Две минуты на телефоне — цена, которая не изменится'], [.45, .7, 'Белые коробки MELBUS', 'Скотч и наклейка комнаты на каждой'], [.7, 1.01, 'Только ваши вещи', 'Бус едет без перегрузок и чужих грузов']];
+  let p1 = 0, t1 = 0, touched = 0, lastCap = -1;
+  const setCap = (p) => {
+    const i = caps.findIndex(([a, b]) => p >= a && p < b);
+    if (i === lastCap || i < 0) return; lastCap = i;
+    const c = s1.querySelector('[data-cap]'); c.classList.add('off');
+    setTimeout(() => { s1.querySelector('[data-capt]').textContent = caps[i][2]; s1.querySelector('[data-caps]').textContent = caps[i][3]; c.classList.remove('off'); }, 260);
+  };
+  r1.addEventListener('input', () => { touched = performance.now(); t1 = r1.value / 1000; });
+  // 2 — слово-окно
+  const s2 = document.querySelector('[data-fx="2"]'), mask = s2.querySelector('[data-mask]'), o2 = s2.querySelector('[data-origin]'), sub2 = s2.querySelector('[data-sub2]');
+  const origin2 = () => { const a = s2.getBoundingClientRect(), b = o2.getBoundingClientRect(); mask.style.transformOrigin = `${b.left - a.left + b.width * 0.12}px ${b.top - a.top + b.height * 0.55}px`; };
+  // 3 — коробка
+  const cube = document.querySelector('[data-cube]'), scene = cube.parentElement;
+  const sizeCube = () => cube.style.setProperty('--h', scene.getBoundingClientRect().width + 'px');
+  // 4 — скотч
+  const s4 = document.querySelector('[data-fx="4"]'), imgB = s4.querySelector('[data-b]'), tape = s4.querySelector('[data-tape]'), w4 = s4.querySelector('[data-w4]');
+  s4.querySelector('[data-tapetxt]').textContent = ' MELBUS ·'.repeat(40);
+  const pics4 = [['media/kvartira.webp', 'Упаковали'], ['media/mezhgorod.webp', 'Везём'], ['media/ofis.webp', 'На месте']];
+  let k4 = 0;
+  // 5 — карта
+  const s5 = document.querySelector('[data-fx="5"]'), cv = s5.querySelector('[data-map]'), route = s5.querySelector('[data-route]'), van = s5.querySelector('[data-van]'), price = s5.querySelector('[data-price]');
+  const RL = route.getTotalLength(); route.style.strokeDasharray = RL; route.style.strokeDashoffset = RL;
+  const drawMap = () => {
+    const r = s5.getBoundingClientRect(), d = devicePixelRatio || 1; cv.width = r.width * d; cv.height = r.height * d;
+    const g = cv.getContext('2d'); g.scale(d, d); g.fillStyle = '#0B1218'; g.fillRect(0, 0, r.width, r.height);
+    let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+    g.strokeStyle = '#1C2833';
+    for (let i = 0; i < 70; i++) { g.lineWidth = rnd() < .2 ? 2.2 : 1; const x = rnd() * r.width, y = rnd() * r.height, a = rnd() * Math.PI, l = 60 + rnd() * r.width * .6; g.beginPath(); g.moveTo(x - Math.cos(a) * l, y - Math.sin(a) * l); g.lineTo(x + Math.cos(a) * l, y + Math.sin(a) * l); g.stroke(); }
+    g.strokeStyle = '#13303A'; g.lineWidth = Math.max(10, r.width * .018); g.beginPath();
+    g.moveTo(r.width * .72, -10); g.bezierCurveTo(r.width * .62, r.height * .3, r.width * .8, r.height * .55, r.width * .66, r.height + 10); g.stroke();
+  };
+  const fmt = new Intl.NumberFormat('ru');
+  // 6 — тёмное кино
+  const s6 = document.querySelector('[data-fx="6"]'), v6 = s6.querySelector('video'), words = [...s6.querySelectorAll('.words b')];
+  // 7 — крупный план
+  const s7 = document.querySelector('[data-fx="7"]'), pic = s7.querySelector('[data-pic]'), lines = [...s7.querySelectorAll('.lines span i')];
+  // 8 — диорама
+  const s8 = document.querySelector('[data-fx="8"]'), imgs8 = [...s8.querySelectorAll('img')], c8 = s8.querySelector('[data-c8]');
+  const caps8 = ['Снимаете видео', 'Пакуем', 'Цена не меняется', 'Всё на своих местах'];
+
+  const layout = () => { origin2(); sizeCube(); drawMap(); };
+  addEventListener('resize', layout); document.fonts?.ready.then(layout); layout();
+
+  const T0 = performance.now();
+  let last8 = -1, last6 = -1, last7 = -1, last4 = -1;
+  function frame(now) {
+    const t = (now - T0) / 1000;
+    if (on(s1) && v1.duration) {
+      if (now - touched > 2500) { t1 = (t % 16) / 16; r1.value = Math.round(t1 * 1000); }
+      p1 += (t1 - p1) * 0.12;                 // мягкое догоняние, как на сайте
+      if (Math.abs(v1.currentTime - p1 * v1.duration) > 0.04) v1.currentTime = p1 * v1.duration;
+      s1.querySelector('[data-bar]').style.width = (p1 * 100) + '%'; setCap(p1);
+    }
+    if (on(s2)) {
+      const c = (t % 9) / 9, k = c < .35 ? 0 : c < .72 ? ease((c - .35) / .37) : 1;
+      mask.style.transform = `scale(${1 + k * 60})`;
+      sub2.style.opacity = k > .05 ? '0' : '1';
+      if (c > .97) mask.style.transform = 'scale(1)';
+    }
+    if (on(scene)) {
+      const c = (t % 10) / 10;
+      cube.style.transform = `rotateX(-14deg) rotateY(${-25 + c * 360}deg)`;
+      cube.querySelector('.top').style.setProperty('--tp', String(clamp(c / .25)));
+    }
+    if (on(s4)) {
+      const c = (t % 3.6) / 3.6, k = clamp((c - .15) / .6), e = ease(k), idx = Math.floor(t / 3.6) % pics4.length;
+      if (idx !== last4) { last4 = idx; const a = pics4[idx], b = pics4[(idx + 1) % pics4.length]; s4.querySelector('.a').src = a[0]; imgB.src = b[0]; w4.textContent = a[1]; }
+      tape.style.setProperty('--tx', `${-60 + e * 130}%`);
+      s4.style.setProperty('--x1', `${-40 + e * 160}%`); s4.style.setProperty('--x2', `${-80 + e * 160}%`);
+      if (k > .55) w4.textContent = pics4[(idx + 1) % pics4.length][1];
+    }
+    if (on(s5)) {
+      const c = (t % 7) / 7, k = ease(clamp(c / .7));
+      route.style.strokeDashoffset = RL * (1 - k);
+      const pt = route.getPointAtLength(RL * k), pt2 = route.getPointAtLength(Math.min(RL, RL * k + 3));
+      van.setAttribute('transform', `translate(${pt.x} ${pt.y}) rotate(${Math.atan2(pt2.y - pt.y, pt2.x - pt.x) * 180 / Math.PI + 180})`);
+      price.textContent = fmt.format(Math.round(3890 * k / 10) * 10);
+    }
+    if (on(s6)) {
+      const c = (t % 12) / 12, i = Math.min(3, Math.floor(c * 4));
+      s6.style.setProperty('--z', String(1.14 - c * .12)); v6.style.transform = `scale(${1.14 - c * .12})`;
+      if (i !== last6) { last6 = i; words.forEach((w, j) => w.classList.toggle('on', j === i)); }
+    }
+    if (on(s7)) {
+      const c = (t % 7) / 7, k = ease(clamp(c / .45)), st = c < .85 ? Math.min(3, Math.floor(c / .12)) : -1;
+      pic.style.setProperty('--c', `${(1 - k) * 100}%`); pic.querySelector('img').style.setProperty('--ps', String(1.15 - k * .15));
+      if (st !== last7) { last7 = st; lines.forEach((l, j) => l.style.setProperty('--y', j < st ? '0%' : '110%')); }
+    }
+    if (on(s8)) {
+      const i = Math.floor(t / 3.2) % imgs8.length;
+      if (i !== last8) { last8 = i; imgs8.forEach((im, j) => im.classList.toggle('on', j === i)); c8.textContent = caps8[i]; }
+    }
+    requestAnimationFrame(frame);
+  }
+  if (reduce) {
+    words[3].classList.add('on'); lines.forEach((l) => l.style.setProperty('--y', '0%')); pic.style.setProperty('--c', '0%'); imgs8[3].classList.add('on'); c8.textContent = caps8[3];
+    route.style.strokeDashoffset = 0; price.textContent = fmt.format(3890); cube.style.transform = 'rotateX(-14deg) rotateY(-25deg)';
+  } else requestAnimationFrame(frame);
+})();
+</script>

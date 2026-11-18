@@ -6,5 +6,6 @@ Disallow: /oferta/
 Disallow: /ru/oferta/
 Disallow: /uk/oferta/
 Disallow: /en/offer/
+Disallow: /proto/
 
 Sitemap: https://melbus.pl/sitemap-index.xml
