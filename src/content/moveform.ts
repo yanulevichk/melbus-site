@@ -216,7 +216,7 @@ export const mf = {
   connS: l('{p} за шт. Транспортные болты — если есть', '{p} za szt. Śruby transportowe — jeśli są', '{p} за шт. Транспортні болти — якщо є', '{p} each. Transport bolts if you have them'),
   perPc: l('{p} за шт.', '{p} za szt.', '{p} за шт.', '{p} each'),
   // отправка
-  hSend: l('Цену запечатываем', 'Cenę pieczętujemy', 'Ціну запечатуємо', 'We seal the price'),
+  hSend: l('Последний шаг', 'Ostatni krok', 'Останній крок', 'Last step'),
   subSend: l('Как коробку — скотчем. Оставьте имя и телефон: менеджер проверит список и пришлёт оферту по ссылке — фиксированная цена, состав работ, задаток 20 %.', 'Jak karton — taśmą. Zostaw imię i telefon: menedżer sprawdzi listę i wyśle ofertę z linkiem — stała cena, zakres prac, zadatek 20%.', 'Як коробку — скотчем. Залиште ім’я й телефон: менеджер перевірить список і надішле оферту за посиланням — фіксована ціна, склад робіт, завдаток 20 %.', 'Like a box — with tape. Leave your name and phone: our manager checks the list and sends an offer link — fixed price, scope of work, 20% deposit.'),
   name: l('Имя', 'Imię', 'Ім’я', 'Name'),
   phone: l('Телефон', 'Telefon', 'Телефон', 'Phone'),

@@ -26,7 +26,7 @@ import { brand } from '../config/brand';
 
 export function getStaticPaths() {
   // 18.11.2026: «Калькулятор» и «Заявка» слиты в «Цены и расчёт» (pricing) — старые адреса ведут туда (public/_redirects)
-  const keys: PageKey[] = ['home', 'services', 'pricing', 'guarantee', 'how', 'about', 'faq', 'contact', 'terms', 'privacy', 'cookies', 'complaints', 'lux', 'areas', 'offer', ...services.map((s) => `service:${s.id}` as PageKey), ...areas.map((a) => `area:${a.id}` as PageKey)];
+  const keys: PageKey[] = ['home', 'services', 'pricing', 'how', 'faq', 'contact', 'terms', 'privacy', 'cookies', 'complaints', 'lux', 'areas', 'offer', ...services.map((s) => `service:${s.id}` as PageKey), ...areas.map((a) => `area:${a.id}` as PageKey)];
   return enabledLocales.flatMap((locale) => keys.map((key) => ({
     params: { path: href(locale, key).replace(/^\/|\/$/g, '') || undefined },
     props: { locale, key },
@@ -74,7 +74,7 @@ const simple = pg && { eyebrow: pg.eyebrow[L], title: pg.title[L], lead: pg.lead
   {key === 'areas' && <Areas locale={locale} />}
   {key === 'offer' && <Offer locale={locale} />}
 
-  {['guarantee', 'how', 'about'].includes(key) && simple && <Simple locale={locale} {...simple} />}
+  {key === 'how' && simple && <Simple locale={locale} {...simple} />}
   {/* 18.11.2026: одна страница «Цены и расчёт» = форма «Что у вас дома» (цена по списку вещей и адресам) */}
   {key === 'pricing' && <MoveForm locale={locale} />}
 
