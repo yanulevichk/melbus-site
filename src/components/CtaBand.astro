@@ -10,7 +10,7 @@ const { locale, title = ui.ctaBand.title[locale], lead = ui.ctaBand.lead[locale]
     <path d="M-40 120 C 260 40, 420 300, 700 260 S 1080 120, 1180 360 S 1300 560, 1500 520" />
   </svg>
   <div class="container cta__in">
-    <h2 class="t-hero" data-split set:html={title} />
+    <h2 class="t-hero" data-split data-tapeline set:html={title} />
     <div class="cta__side">
       <p class="t-lead" data-reveal>{lead}</p>
       <div class="cta__btns" data-reveal>

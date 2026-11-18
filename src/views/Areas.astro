@@ -18,7 +18,7 @@ const sort = (x: typeof areas) => [...x].sort((a, b) => a.name[L].localeCompare(
   <div class="container hub__in">
     {groups.map((g) => (
       <div class="hub__group">
-        <h2 class="hub__h">{g.title}</h2>
+        <h2 class="hub__h" data-split data-tapeline>{g.title}</h2>
         <ul class="hub__list">
           {sort(g.items).map((a) => <li><a href={href(L, `area:${a.id}`)}><span>{a.name[L]}</span></a></li>)}
         </ul>

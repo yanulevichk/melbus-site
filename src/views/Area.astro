@@ -28,7 +28,7 @@ const calc = place ? `${href(L, 'pricing')}?from=${encodeURIComponent(place)}` :
 <section class="ar">
   <div class="container ar__grid">
     <div class="ar__head">
-      <h2 class="ar__h2" data-split>{T.matters[L](loc)}</h2>
+      <h2 class="ar__h2" data-split data-tapeline>{T.matters[L](loc)}</h2>
       <p class="ar__intro">{a.intro[L]}</p>
     </div>
     <dl class="ar__list">
@@ -39,7 +39,7 @@ const calc = place ? `${href(L, 'pricing')}?from=${encodeURIComponent(place)}` :
 
 <section class="ar ar--how">
   <div class="container">
-    <h2 class="ar__h2" data-split>{T.howTitle[L]}</h2>
+    <h2 class="ar__h2" data-split data-tapeline>{T.howTitle[L]}</h2>
     <ol class="ar__how">
       {T.how.map(([t, d], i) => <li><span class="ar__n">{i + 1}</span><strong>{t[L]}</strong><p>{d[L]}</p></li>)}
     </ol>
