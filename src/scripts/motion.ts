@@ -49,37 +49,10 @@ function tapeLogo() {
     .to(tape, { scaleX: 0, transformOrigin: '100% 50%', duration: 0.5, ease: 'expo.in' }, '+=0.35');
 }
 
-/* ---------- шторка между страницами ---------- */
-function curtain() {
-  // 18.11.2026: «скотч» — клапаны коробки закрываются к середине, по шву протягивается лента MELBUS; на новой странице лента срывается вправо
-  const el = document.querySelector<HTMLElement>('[data-curtain]');
-  const flaps = el ? el.querySelectorAll<HTMLElement>('.curtain__flap') : [];
-  const tape = el?.querySelector<HTMLElement>('.curtain__tape') || null;
-  return {
-    in: () => new Promise<void>((res) => {
-      if (!el || !tape || reduce()) return res();
-      gsap.killTweensOf([el, tape, ...flaps]);
-      gsap.set(el, { visibility: 'visible' }); el.classList.add('is-on');
-      const tl = gsap.timeline({ onComplete: () => res() });
-      tl.fromTo(flaps, { scaleY: 0 }, { scaleY: 1, duration: 0.42, ease: 'power3.inOut' }, 0)
-        .fromTo(tape, { clipPath: 'inset(0 100% 0 0)', xPercent: 0, yPercent: 0, rotation: -2.5 }, { clipPath: 'inset(0 0% 0 0)', duration: 0.42, ease: 'expo.out' }, 0.24)
-        .fromTo(tape.firstElementChild, { x: '-6%' }, { x: '0%', duration: 0.6, ease: 'expo.out' }, 0.24);
-    }),
-    out: () => {
-      if (!el || !tape || getComputedStyle(el).visibility !== 'visible') return;
-      const tl = gsap.timeline({ onComplete: () => { gsap.set(el, { visibility: 'hidden' }); el.classList.remove('is-on'); } });
-      tl.to(tape, { clipPath: 'inset(0 0% 0 100%)', yPercent: -18, rotation: -5, duration: 0.5, ease: 'power3.in' }, 0.05)
-        .to(flaps, { scaleY: 0, duration: 0.6, ease: 'expo.inOut' }, 0.32);
-    },
-  };
-}
-// демо-страница /proto/alive/: показать переход без перехода и сравнить прокрутку с плавностью и без
-document.addEventListener('melbus:curtain-demo', () => { const c = curtain(); c.in().then(() => setTimeout(() => c.out(), 450)); });
+/* ---------- переход между страницами: 18.11.2026 владелец — «переход скотчем пока убери вообще».
+ * Шторки нет, страница меняется сразу (ClientRouter). Старый код «скотча» — в истории git (коммит a000005). */
+// демо-страница /proto/alive/: сравнить прокрутку с плавностью и без
 (window as any).__lenis = lenis;
-document.addEventListener('astro:before-preparation', (e: any) => {
-  const load = e.loader;
-  e.loader = async () => { await Promise.all([curtain().in(), load()]); };
-});
 
 /* ---------- шапка и меню (живут между страницами) ---------- */
 function setupHeader() {
@@ -626,7 +599,7 @@ function destroyPage() {
 
 let first = true;
 document.addEventListener('astro:page-load', () => {
-  if (first) { first = false; tapeLogo(); } else curtain().out();
+  if (first) { first = false; tapeLogo(); }
   initPage();
 });
 document.addEventListener('astro:before-swap', destroyPage);
