@@ -8,7 +8,7 @@ const { locale: L, dark = false } = Astro.props;
 <section class:list={['nh', { 'dark grain': dark }]}>
   <div class="container nh__grid">
     <div class="nh__head">
-      <h2 class="nh__h2">{N.h2[L]}</h2>
+      <h2 class="nh__h2" data-split data-tapeline>{N.h2[L]}</h2>
       <p class="nh__lead">{N.lead[L]}</p>
     </div>
     <div class="nh__cmp" role="table" aria-label={N.h2[L]}>

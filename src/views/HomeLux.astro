@@ -11,11 +11,14 @@ import { faqFor } from '../data/faq';
 import { boardOptions, DEMO, PACKAGES, GRID, HOURLY, moneyLocale, formQuery } from '../data/pricing';
 import { pkgText } from '../content/prices';
 import NoHours from '../components/NoHours.astro';
+import HeroFilm from '../components/HeroFilm.astro';
 import { home as H } from '../content/home';
 import { areaText } from '../content/areas';
 const { locale } = Astro.props as { locale: Locale };
 const L = locale;
-const pricing = href(locale, 'pricing');   // 18.11.2026: одна страница «Цены и расчёт» (форма)
+const pricing = href(locale, 'pricing');
+/** первый экран: 'dark' — «Кино», 'light' — «Свет» (владельцу нравятся оба; по умолчанию «Кино») */
+const HERO_TONE: 'dark' | 'light' = 'dark';   // 18.11.2026: одна страница «Цены и расчёт» (форма)
 const ai = ui.aiLabel[L];
 const fmt = new Intl.NumberFormat(moneyLocale(L));
 const EX = 1; // пример пакетов на главной — 2 комнаты
@@ -31,51 +34,8 @@ const qr = (seed: number) => {
 };
 ---
 
-<!-- 1. ПЕРВЫЙ ЭКРАН: фильм «вся квартира в одной коробке».
-     Компьютер — прокрутка ведёт фильм (кадры на canvas), телефон — видео по кругу без звука. -->
-<section class="lx-film dark" data-film data-intro-hero data-dur="22.5" data-length="7" data-count="270" data-base="/scenes/film/d">
-  <div class="lx-film__stage" data-film-stage>
-    <picture class="lx-film__poster">
-      <source media="(max-width: 1023px)" srcset="/scenes/film/poster-m.webp" width="540" height="960" />
-      <img src="/scenes/film/poster-d.webp" alt={H.posterAlt[L]} width="1600" height="900" fetchpriority="high" decoding="async" />
-    </picture>
-    <canvas class="lx-film__canvas" data-film-canvas aria-hidden="true"></canvas>
-    <video class="lx-film__video" data-film-video data-src="/video/film-m.mp4" muted playsinline loop preload="none" poster="/scenes/film/poster-m.webp" aria-hidden="true"></video>
-    <div class="lx-film__shade" aria-hidden="true"></div>
-
-    <div class="container lx-film__intro" data-film-intro>
-      <p class="lx-film__kicker" data-intro-fade>{H.kicker[L]}</p>
-      <h1 class="lx-film__title" data-intro-title>{H.title[0][L]}<br />{H.title[1][L]}</h1>
-      <i class="lx-film__line" data-intro-line aria-hidden="true"></i>
-      <p class="lx-film__lead" data-intro-fade>{H.lead[L]}</p>
-      <div class="lx-film__cta" data-intro-fade>
-        <a href={pricing} class="btn btn--primary">{ui.cta.price[L]}</a>
-        <a href={pricing + '?mode=video'} class="lux-link">{ui.cta.video[L]}</a>
-      </div>
-      <p class="lx-film__hint" data-intro-fade aria-hidden="true"><i></i>{H.hint[L]}</p>
-    </div>
-
-    <div class="container lx-film__caps" aria-hidden="true">
-      {H.caps.map(([from, to, t, d]) => (
-        <p class="lx-film__cap" data-film-cap data-from={from} data-to={to}><strong>{t[L]}</strong><span>{d[L]}</span></p>
-      ))}
-    </div>
-
-    <div class="container lx-film__end" data-film-cap data-from="21.6" data-to="99">
-      <p class="lx-film__endt">{H.endTitle[L]}</p>
-      <div class="lx-film__cta">
-        <a href={pricing} class="btn btn--primary">{ui.cta.price[L]}</a>
-        <a href={pricing + '?mode=video'} class="lux-link">{ui.cta.video[L]}</a>
-      </div>
-    </div>
-
-    <div class="lx-film__foot">
-      <button type="button" class="lx-film__watch" data-film-open><i aria-hidden="true"></i>{H.watch[L]}</button>
-      <span class="lx-film__ai">{ai}</span>
-    </div>
-    <div class="lx-film__bar" aria-hidden="true"><i data-film-progress></i></div>
-  </div>
-</section>
+<!-- 1. ПЕРВЫЙ ЭКРАН (18.11.2026): «Кино» — слово MELBUS → фильм под прокрутку → заголовок. tone='light' — вариант «Свет» -->
+<HeroFilm locale={locale} tone={HERO_TONE} />
 
 <!-- 1б. КОРОТКО О ГЛАВНОМ -->
 <section class="lx-band dark">
@@ -109,7 +69,7 @@ const qr = (seed: number) => {
 <section class="lx-sec lx-price">
   <div class="container lx-price__grid">
     <div class="lx-price__head">
-      <h2 class="lx-h2">{H.price.h2[L]}</h2>
+      <h2 class="lx-h2" data-split data-tapeline>{H.price.h2[L]}</h2>
       <p class="lx-lead">{H.price.lead[L]}</p>
     </div>
     <div class="lx-price__calc">
@@ -139,7 +99,7 @@ const qr = (seed: number) => {
 <!-- 4. ШАГИ (это последовательность — номера по делу) -->
 <section class="lx-sec lx-steps">
   <div class="container lx-head">
-    <h2 class="lx-h2">{H.steps.h2[L]}</h2>
+    <h2 class="lx-h2" data-split data-tapeline>{H.steps.h2[L]}</h2>
     <p class="lx-lead">{H.steps.lead[L]}</p>
   </div>
   <div class="lx-hs" data-hscroll>
@@ -148,7 +108,7 @@ const qr = (seed: number) => {
       <i class="lx-hs__fill" data-fill aria-hidden="true"></i>
       {H.steps.items.map(([img, t, d], i) => (
         <article class="lx-step">
-          <div class="lx-step__media" data-slot={`V${i + 2}`}>
+          <div class="lx-step__media" data-slot={`V${i + 2}`} data-img>
             <img src={`/img/film/${img}.webp`} alt="" width="720" height="900" loading="lazy" decoding="async" />
             <span class="lx-step__n">{i + 1}</span>
           </div>
@@ -173,7 +133,7 @@ const qr = (seed: number) => {
       </div>
     </div>
     <div class="lx-std__text">
-      <h2 class="lx-h2">{H.std.h2[L]}</h2>
+      <h2 class="lx-h2" data-split data-tapeline>{H.std.h2[L]}</h2>
       <p class="lx-lead">{H.std.lead[L]}</p>
       <dl class="lx-list">
         {H.std.items.map(([t, d]) => <div><dt>{t[L]}</dt><dd>{d[L]}</dd></div>)}
@@ -186,7 +146,7 @@ const qr = (seed: number) => {
 <section class="lx-sec lx-boxes">
   <div class="container">
     <div class="lx-head">
-      <h2 class="lx-h2">{H.boxes.h2[L]}</h2>
+      <h2 class="lx-h2" data-split data-tapeline>{H.boxes.h2[L]}</h2>
       <p class="lx-lead">{H.boxes.lead[L]}</p>
     </div>
     <figure class="lx-boxes__img" data-tape>
@@ -217,7 +177,7 @@ const qr = (seed: number) => {
 <section class="lx-sec lx-pk">
   <div class="container">
     <div class="lx-head">
-      <h2 class="lx-h2">{pkgText.h2[L]}</h2>
+      <h2 class="lx-h2" data-split data-tapeline>{pkgText.h2[L]}</h2>
       <p class="lx-lead">{pkgText.lead[L]}</p>
     </div>
     <div class="lx-pk__cols">
@@ -263,7 +223,7 @@ const qr = (seed: number) => {
 <section class="lx-sec lx-area">
   <div class="container lx-area__grid">
     <div>
-      <h2 class="lx-h2">{H.area.h2[L]}</h2>
+      <h2 class="lx-h2" data-split data-tapeline>{H.area.h2[L]}</h2>
       <p class="lx-lead">{H.area.lead[L]}</p>
       <a class="lux-link" href={href(locale, 'areas')}>{areaText.all[L]}</a>
     </div>
@@ -289,7 +249,7 @@ const qr = (seed: number) => {
 <!-- 12. ВОПРОСЫ -->
 <section class="lx-sec lx-faq">
   <div class="container lx-faq__grid">
-    <h2 class="lx-h2">{H.faqH2[L]}</h2>
+    <h2 class="lx-h2" data-split data-tapeline>{H.faqH2[L]}</h2>
     <Faq items={faqFor(locale)} reveal={false} />
   </div>
 </section>

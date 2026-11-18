@@ -119,3 +119,19 @@ html.js [data-reveal] { opacity: 0; transform: translateY(28px); }
 
 /* только для экранных читалок и поисковиков */
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+/* ===== «живой» слой (18.11.2026, src/scripts/alive.ts) ===== */
+/* курсор-кольцо: обычный курсор остаётся, кольцо мягко догоняет и растёт на ссылках */
+.cur { position: fixed; left: 0; top: 0; z-index: 9999; width: 34px; height: 34px; margin: -17px 0 0 -17px; border: 1.5px solid var(--tape, #14DCD5); border-radius: 50%; pointer-events: none; opacity: 0; display: grid; place-items: center; will-change: transform; transition: width .35s cubic-bezier(.2,.7,.1,1), height .35s cubic-bezier(.2,.7,.1,1), margin .35s cubic-bezier(.2,.7,.1,1), opacity .3s, background-color .3s, border-width .2s; }
+.cur.is-on { opacity: .85; }
+.cur.is-link { width: 60px; height: 60px; margin: -30px 0 0 -30px; background-color: rgba(20, 220, 213, .12); }
+.cur.is-label { width: 88px; height: 88px; margin: -44px 0 0 -44px; background-color: var(--tape, #14DCD5); opacity: 1; }
+.cur.is-field { opacity: 0; }
+.cur.is-down { border-width: 3px; }
+.cur__l { font: 600 .72rem/1 var(--font-sans); letter-spacing: .04em; color: #10161D; opacity: 0; transition: opacity .2s; white-space: nowrap; }
+.cur.is-label .cur__l { opacity: 1; }
+/* бирюзовая полоса-скотч под заголовком: протягивается, когда заголовок появился */
+[data-tapeline]::after { content: ""; display: block; width: 64px; height: 3px; margin-top: .4em; background: var(--tape, #14DCD5); transform: scaleX(0); transform-origin: left; transition: transform 1.1s cubic-bezier(.2,.7,.1,1) .3s; }
+[data-tapeline].is-taped::after, html:not(.js) [data-tapeline]::after { transform: scaleX(1); }
+[data-img] { display: block; overflow: hidden; }
+@media (prefers-reduced-motion: reduce) { .cur { display: none; } [data-tapeline]::after { transform: none; transition: none; } }

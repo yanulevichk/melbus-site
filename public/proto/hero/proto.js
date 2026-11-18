@@ -34,7 +34,7 @@
   const stage = hero.querySelector('.stage'), canvas = hero.querySelector('canvas'), g = canvas.getContext('2d', { alpha: false });
   const caps = [...hero.querySelectorAll('[data-cap]')], outro = hero.querySelector('[data-outro]');
   const intro = hero.querySelector('[data-intro]'), bar = hero.querySelector('[data-bar]');
-  const N = 248, INTRO = 0.17, OUTRO = 0.9;
+  const N = 247, INTRO = 0.17, OUTRO = 0.9;
   const CUTS = new Set([95, 167, 203]);                 // склейки фильма: здесь соседние кадры не смешиваем (иначе «двоение»)
   const MASK = dark ? '#0B1015' : '#F4F6F8';
   const isMobile = () => matchMedia('(max-aspect-ratio: 3/4), (max-width: 700px)').matches;
@@ -50,7 +50,7 @@
     const pump = () => {
       while (active < 6 && k < order.length) {
         const i = order[k++], im = new Image(); active++;
-        im.src = `frames/${s}/${String(i + 1).padStart(4, '0')}.webp`;
+        im.src = `/scenes/hero/${s}/${String(i + 1).padStart(4, "0")}.webp`;
         (im.decode ? im.decode() : new Promise((r) => { im.onload = r; })).then(() => { if (set === s) { frames[i] = im; ready[i] = true; dirty = true; } }, () => {}).finally(() => { active--; pump(); });
       }
     };

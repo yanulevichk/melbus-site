@@ -21,6 +21,14 @@ export const home = {
     [14.5, 16.9, l('Варшава, Польша, ЕС', 'Warszawa, Polska, UE', 'Варшава, Польща, ЄС', 'Warsaw, Poland, the EU'), l('Варшава и 150 км вокруг — семь дней в неделю.', 'Warszawa i okolice do 150 km — siedem dni w tygodniu.', 'Варшава і 150 км довкола — сім днів на тиждень.', 'Within 150 km of Warsaw — seven days a week.')],
     [18.8, 20.6, l('Распакуем и расставим', 'Rozpakujemy i ustawimy', 'Розпакуємо й розставимо', 'Unpacked and in place'), l('Соберём мебель и поставим всё по местам.', 'Złożymy meble i ustawimy wszystko na swoje miejsca.', 'Зберемо меблі й поставимо все на місця.', 'We assemble the furniture and put everything in place.')],
   ] as [number, number, L, L][],
+  // 18.11.2026: первый экран «Кино» — слово MELBUS → фильм 10 с под прокрутку. [от, до] — доля фильма (0–1)
+  film2: [
+    [0.05, 0.36, l('Снимите квартиру на видео', 'Nagraj mieszkanie telefonem', 'Зніміть квартиру на відео', 'Film your flat'), l('В течение 2 часов пришлём цену, которая не изменится.', 'W ciągu 2 godzin wyślemy cenę, która się nie zmieni.', 'Протягом 2 годин надішлемо ціну, яка не зміниться.', 'Within 2 hours we’ll send a price that won’t change.')],
+    [0.42, 0.66, l('Вся квартира — в одной коробке', 'Całe mieszkanie w jednym kartonie', 'Уся квартира — в одній коробці', 'Your whole flat — in one box'), l('Пакуем, разбираем мебель, ничего не теряем.', 'Pakujemy, rozkręcamy meble, niczego nie gubimy.', 'Пакуємо, розбираємо меблі, нічого не губимо.', 'We pack, take the furniture apart and lose nothing.')],
+    [0.69, 0.82, l('Цена не меняется', 'Cena się nie zmienia', 'Ціна не змінюється', 'The price doesn’t change'), l('Ни этаж, ни тяжёлый шкаф её не сдвинут.', 'Ani piętro, ani ciężka szafa jej nie przesuną.', 'Ні поверх, ні важка шафа її не зсунуть.', 'No floor and no heavy wardrobe will move it.')],
+    [0.85, 1.01, l('Только ваши вещи', 'Tylko Twoje rzeczy', 'Лише ваші речі', 'Only your things'), l('Бус едет без перегрузок и чужих грузов.', 'Bus jedzie bez przeładunków i doładunków.', 'Бус їде без перевантажень і чужих вантажів.', 'The van carries nothing else and makes no reloads.')],
+  ] as [number, number, L, L][],
+  scrollHint: l('Прокрутите', 'Przewiń', 'Прокрутіть', 'Scroll'),
   endTitle: l('Ваш новый адрес ждёт', 'Twój nowy adres czeka', 'Ваша нова адреса чекає', 'Your new address is waiting'),
   watch: l('Смотреть ролик · 0:23', 'Zobacz film · 0:23', 'Дивитися ролик · 0:23', 'Watch the film · 0:23'),
   band: [

@@ -55,7 +55,8 @@ const nav = [
 <style>
   .hdr { position: fixed; inset: 0 0 auto; z-index: 50; padding-top: env(safe-area-inset-top, 0px); color: var(--dark-ink); --muted: var(--dark-muted); --ink: var(--dark-ink);
     transition: transform .5s var(--ease), background .4s var(--ease), box-shadow .4s var(--ease); }
-  .hdr.is-scrolled { background: color-mix(in oklab, var(--dark) 84%, transparent); backdrop-filter: saturate(1.4) blur(14px); -webkit-backdrop-filter: saturate(1.4) blur(14px); box-shadow: 0 1px 0 #26303B; }
+  /* 18.11.2026: без backdrop-filter — размытие поверх фильма первого экрана тормозило прокрутку */
+  .hdr.is-scrolled { background: color-mix(in oklab, var(--dark) 94%, transparent); box-shadow: 0 1px 0 #26303B; }
   .hdr.is-hidden { transform: translateY(-110%); }
   .hdr__in { height: var(--header-h); display: flex; align-items: center; justify-content: space-between; gap: 24px; }
   .hdr__nav { display: none; gap: 4px; }
