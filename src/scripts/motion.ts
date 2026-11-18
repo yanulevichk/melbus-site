@@ -522,7 +522,8 @@ function initPage() {
     document.querySelectorAll<HTMLElement>('[data-hscroll]').forEach((wrap) => {
       const track = wrap.querySelector<HTMLElement>('[data-hscroll-track]');
       const line = wrap.querySelector<SVGPathElement>('[data-route]');
-      if (!track || !desktop || reduceNow) return;
+      // 18.11.2026: на компьютере лента больше не закрепляется — шаги стоят сеткой 3×2 (HomeLux.astro)
+      if (!track || !desktop || reduceNow || getComputedStyle(track).display !== 'flex') return;
       const dist = () => track.scrollWidth - wrap.clientWidth;
       const tl = gsap.timeline();
       tl.to(track, { x: () => -dist(), ease: 'none' }, 0);
