@@ -29,20 +29,10 @@ export const meta: Record<string, { title: L; description: L; nav?: string }> = 
     description: l('Отметьте вещи или пришлите видео — цена за весь переезд сразу, и она не изменится. Грузотакси, перевозка, под ключ.', 'Zaznacz rzeczy albo wyślij wideo — od razu cena za całą przeprowadzkę, która się nie zmieni. Taxi bagażowe, transport, pod klucz.', 'Позначте речі або надішліть відео — ціна за весь переїзд одразу, і вона не зміниться. Вантажне таксі, перевезення, під ключ.', 'Pick your things or send a video and get a price for the whole move right away — one that won’t change. Van and driver, transport, full service.'),
     nav: 'pricing',
   },
-  guarantee: {
-    title: l('Гарантия фиксированной цены', 'Gwarancja stałej ceny', 'Гарантія фіксованої ціни', 'Fixed price guarantee'),
-    description: l('Цена из принятой оферты — окончательная. Условия гарантии MELBUS.', 'Cena z przyjętej oferty jest ostateczna. Warunki gwarancji MELBUS.', 'Ціна з прийнятої оферти — остаточна. Умови гарантії MELBUS.', 'The price in the accepted offer is final. MELBUS guarantee terms.'),
-    nav: 'guarantee',
-  },
   how: {
     title: l('Как мы работаем', 'Jak pracujemy', 'Як ми працюємо', 'How we work'),
     description: l('Шаги переезда и стандарты бригады MELBUS: перчатки, бахилы, защита дома, порядок в коробках.', 'Etapy przeprowadzki i standardy ekipy MELBUS: rękawice, ochraniacze na buty, ochrona domu, porządek w kartonach.', 'Кроки переїзду та стандарти бригади MELBUS: рукавички, бахіли, захист дому, порядок у коробках.', 'The steps of a MELBUS move and our crew standards: gloves, shoe covers, home protection, neatly labelled boxes.'),
     nav: 'how',
-  },
-  about: {
-    title: l('О нас', 'O nas', 'Про нас', 'About us'),
-    description: l(`MELBUS — ${y}+ лет в логистике и собственный парк бусов.`, `MELBUS — ponad ${y} lat w logistyce i własna flota busów.`, `MELBUS — ${y}+ років у логістиці та власний парк бусів.`, `MELBUS — ${y}+ years in logistics and our own fleet of vans.`),
-    nav: 'about',
   },
   faq: {
     title: l('Вопросы и ответы', 'Pytania i odpowiedzi', 'Питання й відповіді', 'Questions and answers'),
@@ -73,27 +63,7 @@ export const meta: Record<string, { title: L; description: L; nav?: string }> = 
 meta.lux = meta.home;
 
 export const pages: Record<string, LPage> = {
-  guarantee: {
-    eyebrow: l('Гарантия', 'Gwarancja', 'Гарантія', 'Guarantee'),
-    title: l('Цена, которую<br>вы приняли, —<br>окончательная', 'Cena, którą<br>przyjmujesz,<br>jest ostateczna', 'Ціна, яку<br>ви прийняли, —<br>остаточна', 'The price<br>you accept<br>is final'),
-    lead: l('Главное обещание MELBUS. Ниже — честные условия, при которых оно действует.', 'Najważniejsza obietnica MELBUS. Poniżej — uczciwe warunki, na których obowiązuje.', 'Головна обіцянка MELBUS. Нижче — чесні умови, за яких вона діє.', 'MELBUS’s main promise. Below are the honest terms that make it work.'),
-    media: { video: '/video/tape.mp4', poster: '/img/site/tape.webp',
-      alt: l('Бирюзовый скотч запечатывает белую коробку MELBUS', 'Turkusowa taśma zakleja biały karton MELBUS', 'Бірюзовий скотч запечатує білу коробку MELBUS', 'Turquoise tape seals a white MELBUS box'),
-      caption: l('Цену запечатываем, как коробку: что приняли в оферте — то и платите.', 'Cenę pieczętujemy jak karton: płacisz tyle, ile w przyjętej ofercie.', 'Ціну запечатуємо, як коробку: що прийняли в оферті — те й платите.', 'We seal the price like a box: you pay what you accepted in the offer.') },
-    blocks: [
-      { type: 'list', eyebrow: l('Как это работает', 'Jak to działa', 'Як це працює', 'How it works'), title: l('Риск —<br>на нашей стороне', 'Ryzyko<br>bierzemy na siebie', 'Ризик —<br>на нашому боці', 'The risk<br>is on us'), items: [
-        [l('Цена фиксируется по видео', 'Cenę ustalamy na podstawie wideo', 'Ціна фіксується за відео', 'The price is fixed from a video'), l('Мы видим вещи, этажи и подъезд заранее, поэтому считаем точно.', 'Rzeczy, piętra i klatkę schodową widzimy z góry, więc liczymy dokładnie.', 'Ми бачимо речі, поверхи й під’їзд заздалегідь, тому рахуємо точно.', 'We see the items, floors and stairwell in advance, so we price accurately.')],
-        [l('Работа затянулась — не ваша проблема', 'Trwa dłużej? To nie Twój problem', 'Робота затяглася — не ваша проблема', 'Taking longer isn’t your problem'), l('Пробки, тяжёлый шкаф, узкая лестница, которую вы показали на видео, — всё это уже в цене.', 'Korki, ciężka szafa, wąskie schody widoczne na wideo — to wszystko jest już w cenie.', 'Затори, важка шафа, вузькі сходи, які ви показали на відео, — усе це вже в ціні.', 'Traffic, a heavy wardrobe, narrow stairs you showed us on video — it’s all already in the price.')],
-        [l('Изменения — только с вашего согласия', 'Zmiany — tylko za Twoją zgodą', 'Зміни — лише з вашої згоди', 'Changes only with your consent'), l('Если вещей заметно больше или изменился адрес, бригадир оформляет изменение в приложении. Вы принимаете его до начала работ.', 'Jeśli rzeczy jest wyraźnie więcej albo zmienił się adres, brygadzista zgłasza zmianę w aplikacji. Akceptujesz ją przed rozpoczęciem pracy.', 'Якщо речей помітно більше або змінилася адреса, бригадир оформлює зміну в застосунку. Ви приймаєте її до початку робіт.', 'If there are noticeably more items or the address changes, the crew leader logs the change in the app. You accept it before work begins.')],
-        [l('Мелочи бесплатно', 'Drobiazgi gratis', 'Дрібниці безкоштовно', 'Small extras are free'), l('До 5 коробок или один небольшой предмет сверх списка — без доплаты.', 'Do 5 kartonów albo jeden mały przedmiot spoza listy — bez dopłaty.', 'До 5 коробок або один невеликий предмет поза списком — без доплати.', 'Up to 5 boxes or one small item not on the list — at no extra cost.')],
-      ] },
-      { type: 'cards', eyebrow: l('Дополнительно', 'Dodatkowo', 'Додатково', 'Plus'), title: l('Ещё три гарантии', 'Jeszcze trzy gwarancje', 'Ще три гарантії', 'Three more guarantees'), items: [
-        [l('Пунктуальность', 'Punktualność', 'Пунктуальність', 'Punctuality'), l('Окно прибытия — 30 минут. Опоздаем по своей вине — скидка 100 zł за каждые 30 минут опоздания.', 'Okno przyjazdu — 30 minut. Jeśli spóźnimy się z naszej winy, dostaniesz 100 zł rabatu za każde 30 minut spóźnienia.', 'Вікно прибуття — 30 хвилин. Запізнимося з нашої вини — знижка 100 zł за кожні 30 хвилин запізнення.', 'A 30-minute arrival window. If we’re late through our own fault, you get 100 zł off for every 30 minutes of delay.')],
-        [l('Сохранность', 'Bezpieczeństwo mienia', 'Схоронність', 'Careful handling'), l('Защищаем дом и мебель. Повреждения — по процедуре рекламации.', 'Chronimy dom i meble. Uszkodzenia — zgodnie z procedurą reklamacyjną.', 'Захищаємо дім і меблі. Пошкодження — за процедурою рекламації.', 'We protect your home and furniture. Any damage is handled under the complaints procedure.')],
-        [l('Фактура', 'Faktura', 'Фактура', 'Invoice'), l('Всегда выставляем фактуру VAT.', 'Zawsze wystawiamy fakturę VAT.', 'Завжди виставляємо фактуру VAT.', 'We always issue a VAT invoice.')],
-      ] },
-    ],
-  },
+  // 18.11.2026: «Гарантия цены» и «О нас» влиты в «Как мы работаем» (меньше страниц); старые адреса → 301 (public/_redirects)
 
   how: {
     eyebrow: l('Как мы работаем', 'Jak pracujemy', 'Як ми працюємо', 'How we work'),
@@ -111,22 +81,22 @@ export const pages: Record<string, LPage> = {
         [l('Дорога', 'Droga', 'Дорога', 'On the road'), l('В бусе только ваши вещи.', 'W busie tylko Twoje rzeczy.', 'У бусі лише ваші речі.', 'Only your things in the van.')],
         [l('Новый дом', 'Nowy dom', 'Новий дім', 'New home'), l('Заносим, собираем, расставляем.', 'Wnosimy, składamy, ustawiamy.', 'Заносимо, збираємо, розставляємо.', 'We carry in, assemble and arrange.')],
       ] },
+      { type: 'list', eyebrow: l('Как это работает', 'Jak to działa', 'Як це працює', 'How it works'), title: l('Риск —<br>на нашей стороне', 'Ryzyko<br>bierzemy na siebie', 'Ризик —<br>на нашому боці', 'The risk<br>is on us'), items: [
+        [l('Цена фиксируется по видео', 'Cenę ustalamy na podstawie wideo', 'Ціна фіксується за відео', 'The price is fixed from a video'), l('Мы видим вещи, этажи и подъезд заранее, поэтому считаем точно.', 'Rzeczy, piętra i klatkę schodową widzimy z góry, więc liczymy dokładnie.', 'Ми бачимо речі, поверхи й під’їзд заздалегідь, тому рахуємо точно.', 'We see the items, floors and stairwell in advance, so we price accurately.')],
+        [l('Работа затянулась — не ваша проблема', 'Trwa dłużej? To nie Twój problem', 'Робота затяглася — не ваша проблема', 'Taking longer isn’t your problem'), l('Пробки, тяжёлый шкаф, узкая лестница, которую вы показали на видео, — всё это уже в цене.', 'Korki, ciężka szafa, wąskie schody widoczne na wideo — to wszystko jest już w cenie.', 'Затори, важка шафа, вузькі сходи, які ви показали на відео, — усе це вже в ціні.', 'Traffic, a heavy wardrobe, narrow stairs you showed us on video — it’s all already in the price.')],
+        [l('Изменения — только с вашего согласия', 'Zmiany — tylko za Twoją zgodą', 'Зміни — лише з вашої згоди', 'Changes only with your consent'), l('Если вещей заметно больше или изменился адрес, бригадир оформляет изменение в приложении. Вы принимаете его до начала работ.', 'Jeśli rzeczy jest wyraźnie więcej albo zmienił się adres, brygadzista zgłasza zmianę w aplikacji. Akceptujesz ją przed rozpoczęciem pracy.', 'Якщо речей помітно більше або змінилася адреса, бригадир оформлює зміну в застосунку. Ви приймаєте її до початку робіт.', 'If there are noticeably more items or the address changes, the crew leader logs the change in the app. You accept it before work begins.')],
+        [l('Мелочи бесплатно', 'Drobiazgi gratis', 'Дрібниці безкоштовно', 'Small extras are free'), l('До 5 коробок или один небольшой предмет сверх списка — без доплаты.', 'Do 5 kartonów albo jeden mały przedmiot spoza listy — bez dopłaty.', 'До 5 коробок або один невеликий предмет поза списком — без доплати.', 'Up to 5 boxes or one small item not on the list — at no extra cost.')],
+      ] },
+      { type: 'cards', eyebrow: l('Дополнительно', 'Dodatkowo', 'Додатково', 'Plus'), title: l('Ещё три гарантии', 'Jeszcze trzy gwarancje', 'Ще три гарантії', 'Three more guarantees'), items: [
+        [l('Пунктуальность', 'Punktualność', 'Пунктуальність', 'Punctuality'), l('Окно прибытия — 30 минут. Опоздаем по своей вине — скидка 100 zł за каждые 30 минут опоздания.', 'Okno przyjazdu — 30 minut. Jeśli spóźnimy się z naszej winy, dostaniesz 100 zł rabatu za każde 30 minut spóźnienia.', 'Вікно прибуття — 30 хвилин. Запізнимося з нашої вини — знижка 100 zł за кожні 30 хвилин запізнення.', 'A 30-minute arrival window. If we’re late through our own fault, you get 100 zł off for every 30 minutes of delay.')],
+        [l('Сохранность', 'Bezpieczeństwo mienia', 'Схоронність', 'Careful handling'), l('Защищаем дом и мебель. Повреждения — по процедуре рекламации.', 'Chronimy dom i meble. Uszkodzenia — zgodnie z procedurą reklamacyjną.', 'Захищаємо дім і меблі. Пошкодження — за процедурою рекламації.', 'We protect your home and furniture. Any damage is handled under the complaints procedure.')],
+        [l('Фактура', 'Faktura', 'Фактура', 'Invoice'), l('Всегда выставляем фактуру VAT.', 'Zawsze wystawiamy fakturę VAT.', 'Завжди виставляємо фактуру VAT.', 'We always issue a VAT invoice.')],
+      ] },
       { type: 'cards', eyebrow: l('Стандарты бригады', 'Standardy ekipy', 'Стандарти бригади', 'Crew standards'), title: l('Что вы увидите<br>в своём доме', 'Co zobaczysz<br>w swoim domu', 'Що ви побачите<br>у своєму домі', 'What you’ll see<br>in your home'), items: [
         [l('Бахилы и перчатки', 'Ochraniacze na buty i rękawice', 'Бахіли й рукавички', 'Shoe covers and gloves'), l('Надеваем до входа в квартиру.', 'Zakładamy przed wejściem do mieszkania.', 'Вдягаємо до входу в квартиру.', 'We put them on before entering your flat.')],
         [l('Защита пола и косяков', 'Ochrona podłóg i futryn', 'Захист підлоги й одвірків', 'Floor and door frame protection'), l('Дорожки и накладки до начала работ.', 'Chodniki i osłony przed rozpoczęciem pracy.', 'Доріжки й накладки до початку робіт.', 'Runners and guards in place before work starts.')],
         [l('Белые коробки MELBUS', 'Białe kartony MELBUS', 'Білі коробки MELBUS', 'White MELBUS boxes'), l('Наклейки с названием комнаты и QR-код со списком вещей.', 'Naklejki z nazwą pokoju i kod QR z listą rzeczy.', 'Наліпки з назвою кімнати і QR-код зі списком речей.', 'Room labels and a QR code listing what’s inside.')],
       ] },
-    ],
-  },
-
-  about: {
-    eyebrow: l('О нас', 'O nas', 'Про нас', 'About us'),
-    title: l('Логистика —<br>наша профессия', 'Logistyka<br>to nasz zawód', 'Логістика —<br>наша професія', 'Logistics<br>is what we do'),
-    lead: l(`MELBUS — ${y}+ лет в доставке и собственный парк бусов. Теперь мы перевозим не только посылки, но и целые дома.`, `MELBUS — ponad ${y} lat w dostawach i własna flota busów. Teraz przewozimy nie tylko paczki, ale i całe domy.`, `MELBUS — ${y}+ років у доставці та власний парк бусів. Тепер ми перевозимо не лише посилки, а й цілі домівки.`, `MELBUS — ${y}+ years in delivery and our own fleet of vans. Now we move not just parcels but entire homes.`),
-    media: { video: '/video/van.mp4', poster: '/img/site/van-side.webp',
-      alt: l('Белый бус MELBUS едет по улице Варшавы', 'Biały bus MELBUS jedzie ulicą Warszawy', 'Білий бус MELBUS їде вулицею Варшави', 'A white MELBUS van drives through Warsaw'),
-      caption: l('Около двадцати своих бусов и больше пяти лет в логистике.', 'Około dwudziestu własnych busów i ponad pięć lat w logistyce.', 'Близько двадцяти власних бусів і понад п’ять років у логістиці.', 'Around twenty vans of our own and over five years in logistics.') },
-    blocks: [
       { type: 'text', eyebrow: l('Почему мы', 'Dlaczego my', 'Чому ми', 'Why us'), title: l('Дисциплина курьерской службы<br>в каждом переезде', 'Dyscyplina firmy kurierskiej<br>w każdej przeprowadzce', 'Дисципліна кур’єрської служби<br>у кожному переїзді', 'Courier discipline<br>in every move'), items: [
         [l('Точно в срок', 'Punktualnie', 'Точно вчасно', 'Right on time'), l('Больше пяти лет мы работаем в доставке, где всё решают минуты. Опаздывать — не в наших правилах.', 'Od ponad pięciu lat pracujemy w dostawach, gdzie liczy się każda minuta. Spóźnianie się nie leży w naszej naturze.', 'Понад п’ять років ми працюємо в доставці, де все вирішують хвилини. Запізнюватися — не в наших правилах.', 'For over five years we’ve worked in delivery, where every minute counts. Being late isn’t in our nature.')],
         [l('Свой парк', 'Własna flota', 'Власний парк', 'Our own fleet'), l('Бусы наши, а не арендованные «по звонку».', 'Busy są nasze, a nie wynajmowane „na telefon”.', 'Буси наші, а не орендовані «за дзвінком».', 'The vans are ours, not hired at the last minute.')],
@@ -134,6 +104,7 @@ export const pages: Record<string, LPage> = {
       ] },
     ],
   },
+
 
   faq: {
     eyebrow: l('Вопросы', 'Pytania', 'Питання', 'Questions'),

@@ -39,6 +39,7 @@ export const ui = {
     ai: { ru: 'Часть видео на сайте — визуализация, созданная ИИ.', pl: 'Część filmów na stronie to wizualizacje stworzone przez AI.', uk: 'Частина відео на сайті — візуалізація, створена ШІ.', en: 'Some videos on this site are AI-generated visualisations.' },
   },
   aiLabel: { ru: 'Визуализация', pl: 'Wizualizacja', uk: 'Візуалізація', en: 'Visualisation' },
+  svcAi: { ru: 'Картинки — визуализация, созданная ИИ.', pl: 'Obrazy to wizualizacje stworzone przez AI.', uk: 'Зображення — візуалізація, створена ШІ.', en: 'Images are AI-generated visualisations.' },
   sceneSoon: { ru: 'Здесь будет сцена', pl: 'Tu pojawi się scena', uk: 'Тут буде сцена', en: 'Scene coming soon' },
   ctaBand: {
     title: { ru: 'Ваш новый адрес<br>ждёт.', pl: 'Twój nowy adres<br>czeka.', uk: 'Ваша нова адреса<br>чекає.', en: 'Your new address<br>is waiting.' },

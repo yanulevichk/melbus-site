@@ -19,14 +19,12 @@ const year = new Date().getFullYear();
       </div>
       <nav class="ftr__col" aria-label={ui.nav.services[locale]}>
         <span class="t-eyebrow">{ui.nav.services[locale]}</span>
-        {services.slice(0, 7).map((s) => <a href={href(locale, `service:${s.id}`)}>{s.title[locale]}</a>)}
+        {services.map((s) => <a href={href(locale, `service:${s.id}`)}>{s.title[locale]}</a>)}
       </nav>
       <nav class="ftr__col" aria-label={ui.footer.company[locale]}>
         <span class="t-eyebrow">MELBUS</span>
         <a href={href(locale, 'pricing')}>{ui.nav.pricing[locale]}</a>
         <a href={href(locale, 'how')}>{ui.nav.how[locale]}</a>
-        <a href={href(locale, 'guarantee')}>{ui.nav.guarantee[locale]}</a>
-        <a href={href(locale, 'about')}>{ui.nav.about[locale]}</a>
         <a href={href(locale, 'areas')}>{areaText.hub.eyebrow[locale]}</a>
         <a href={href(locale, 'faq')}>{ui.nav.faq[locale]}</a>
         <a href={href(locale, 'contact')}>{ui.nav.contact[locale]}</a>

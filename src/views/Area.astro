@@ -43,7 +43,7 @@ const calc = place ? `${href(L, 'pricing')}?from=${encodeURIComponent(place)}` :
     <ol class="ar__how">
       {T.how.map(([t, d], i) => <li><span class="ar__n">{i + 1}</span><strong>{t[L]}</strong><p>{d[L]}</p></li>)}
     </ol>
-    <p class="ar__more"><a class="lux-link" href={href(L, 'guarantee')}>{ui.nav.guarantee[L]}</a></p>
+    <p class="ar__more"><a class="lux-link" href={href(L, 'how')}>{ui.nav.how[L]}</a></p>
   </div>
 </section>
 

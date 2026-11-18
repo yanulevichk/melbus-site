@@ -6,12 +6,12 @@ import { brand } from '../config/brand';
 
 interface Props { locale: Locale; current?: string; pageKey?: PageKey }
 const { locale, current = '', pageKey = 'home' } = Astro.props;
+// 18.11.2026: короткое меню — меньше страниц, меньше путаницы
 const nav = [
-  ['services', ui.nav.services[locale]],
   ['pricing', ui.nav.pricing[locale]],
+  ['services', ui.nav.services[locale]],
   ['how', ui.nav.how[locale]],
-  ['guarantee', ui.nav.guarantee[locale]],
-  ['about', ui.nav.about[locale]],
+  ['faq', ui.nav.faq[locale]],
   ['contact', ui.nav.contact[locale]],
 ] as const;
 ---
