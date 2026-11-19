@@ -7,11 +7,12 @@ import { areaPrefix } from '../data/areas';
 
 export type Locale = 'ru' | 'pl' | 'uk' | 'en';
 
-export const locales: Record<Locale, { label: string; htmlLang: string; prefix: string; enabled: boolean }> = {
-  ru: { label: 'RU', htmlLang: 'ru', prefix: '/ru', enabled: true },
-  pl: { label: 'PL', htmlLang: 'pl', prefix: '', enabled: true },
-  uk: { label: 'UA', htmlLang: 'uk', prefix: '/uk', enabled: true },
-  en: { label: 'EN', htmlLang: 'en', prefix: '/en', enabled: true },
+/** порядок = порядок в переключателе языков (владелец 19.11.2026: PL · EN · RU · UA) */
+export const locales: Record<Locale, { label: string; name: string; htmlLang: string; prefix: string; enabled: boolean }> = {
+  pl: { label: 'PL', name: 'Polski', htmlLang: 'pl', prefix: '', enabled: true },
+  en: { label: 'EN', name: 'English', htmlLang: 'en', prefix: '/en', enabled: true },
+  ru: { label: 'RU', name: 'Русский', htmlLang: 'ru', prefix: '/ru', enabled: true },
+  uk: { label: 'UA', name: 'Українська', htmlLang: 'uk', prefix: '/uk', enabled: true },
 };
 
 export const enabledLocales = (Object.keys(locales) as Locale[]).filter((l) => locales[l].enabled);

@@ -310,7 +310,8 @@ export function initMoveForm() {
     }).join('') : `<li class="more">${T.emptyHint}</li>`;
   }
   // ===== шаг 5: допы =====
-  $('extras').innerHTML = EXTRAS.map((e) => { const x = I.extras[e.id]; return `<div class="tile tile--wide" data-id="${e.id}">
+  const XTOP = ['tvOff', 'tvOn', 'conn', 'junk'];      // видны сразу; остальные — по «Все услуги»
+  $('extras').innerHTML = EXTRAS.map((e) => { const x = I.extras[e.id]; return `<div class="tile tile--wide${XTOP.includes(e.id) ? ' is-top' : ''}" data-id="${e.id}">
     <button type="button" class="tile__main" data-act="xinc" aria-label="${tr(T.addA, { x: esc(x.name) })}">${pic(e.icon)}<span class="tile__n">${x.name}</span><span class="tile__d">${x.d}</span><span class="tile__p">${zl(money(e.min))} ${x.unit || T.each}</span></button>
     <span class="tape-badge" hidden></span><span class="tile__plus" aria-hidden="true">+</span>
     <div class="tile__ctrl" hidden><button type="button" class="ib" data-act="xdec" aria-label="${tr(T.lessA, { x: esc(x.name) })}">−</button><button type="button" class="ib" data-act="xinc" aria-label="${tr(T.moreA, { x: esc(x.name) })}">+</button></div></div>`; }).join('');
@@ -409,7 +410,7 @@ export function initMoveForm() {
       const extra = xs.lines.filter((x) => ['mount', 'junk'].includes(x.k));
       const sum = extra.reduce((a, x) => a + x.sum, 0);
       $('bK').textContent = T.kVideo;
-      drums($('bP'), Math.round(sum / 10) * 10); $('bPtext').textContent = sum ? zl(sum) : '';
+      drums($('bP'), sum ? Math.round(sum / 10) * 10 : null); $('bPtext').textContent = sum ? zl(sum) : '';   // без допов — «—», а не «0 zł»
       $('bFix').textContent = sum ? T.fixVideoX : T.fixVideo;
       $('van').hidden = true; $('facts').innerHTML = '';
       $('lines').innerHTML = extra.map((x) => `<li><span>${lineText(x, xs)[0]}</span><b>${zl(x.sum)}</b></li>`).join('');
@@ -418,7 +419,7 @@ export function initMoveForm() {
       return r;
     }
     $('bK').textContent = r.hourly ? T.kHourly : r.paidHourly ? T.kHourly2 : T.kPrice;
-    drums($('bP'), r.empty ? 0 : r.total); $('bPtext').textContent = r.empty ? '' : zl(r.total);
+    drums($('bP'), r.empty ? null : r.total); $('bPtext').textContent = r.empty ? '' : zl(r.total);
     $('bFix').textContent = r.hourly ? T.fixHourly : r.empty ? T.fixEmpty : r.paidHourly ? tr(T.fixHourly2, { rate: r.hourly2.rate, min: HOURLY2.min, fixed: zl(calc({ ...S, pay: 'fixed' }).total) }) : T.fix;
     $('van').hidden = !!r.hourly || !!r.empty;
     if (!r.hourly && !r.empty) {
@@ -426,10 +427,10 @@ export function initMoveForm() {
       $('vanMore').hidden = r.buses < 3; $('vanMore').textContent = '+' + (r.buses - 2);
       $('vanCap').textContent = r.buses > 1 ? tr(T.vanMany, { n: pl(r.buses, 'buses'), m3: m3(r.vol) }) : tr(T.vanOne, { p: Math.round(Math.min(1, r.fill) * 100), m3: m3(r.vol) });
     }
-    const crewWord = (n) => pl(n, 'people').replace(/^\d+ /, '');
+    // 19.11.2026: бригада и время — одной строкой (без «часов работы людей», это путало)
     $('facts').innerHTML = r.empty ? '' : r.hourly
-      ? `<li><b>1</b><span>${T.fDriver}</span></li><li><b>${Math.max(2, S.hours)} ${I.units.h}</b><span>${T.fWithVan}</span></li><li><b>${HOURLY}</b><span>${T.fPerHour}</span></li>`
-      : `<li><b>${r.crew}</b><span>${crewWord(r.crew)}</span></li><li><b>≈${hrs(r.dur * 60)} ${I.units.h}</b><span>${T.fOnSite}</span></li><li><b>${hrs(r.peopleH * 60)}</b><span>${T.fPeopleH}</span></li>`;
+      ? `<li>${T.fDriver}</li><li>${Math.max(2, S.hours)} ${I.units.h} ${T.fWithVan}</li><li>${HOURLY} ${T.fPerHour}</li>`
+      : `<li>${pl(r.crew, 'people')}</li><li>${tr(T.onSite, { h: hrs(r.dur * 60) })}</li>`;
     $('lines').innerHTML = r.lines.map((x) => { const [a, b] = lineText(x, r); return `<li class="${x.sum < 0 ? 'minus' : ''}"><span>${a}<small>${b}</small></span><b>${x.sum < 0 ? '−' + zl(-x.sum) : zl(x.sum)}</b></li>`; }).join('');
     $('bNote').textContent = r.hourly ? T.noteHourly : T.note1;
     drums($('barP'), r.empty ? null : r.total);
@@ -571,8 +572,10 @@ export function initMoveForm() {
       case 'box': S.boxes = Math.max(0, Math.min(150, S.boxes + +b.dataset.d)); break;
       case 'date': if (S.date === v) { S.date = ''; S.dateK = 0; S.dateLabel = ''; } else { S.date = v; S.dateK = +b.dataset.k; S.dateLabel = b.dataset.l; } break;
       case 'jump': go(root.querySelector('#' + v)); return;
-      case 'go-send': go(root.querySelector('#s-send')); root.querySelector('[name="phone"]').focus({ preventScroll: true }); return;
-      case 'to-board': go($('board')); return;
+      case 'go-send': sheetBoard(false); go(root.querySelector('#s-send')); root.querySelector('[name="phone"]').focus({ preventScroll: true }); return;
+      case 'to-board': if (matchMedia('(max-width: 979px)').matches) sheetBoard(true); else { $('why').open = true; go($('board')); } return;
+      case 'sheet-close': sheetBoard(false); return;
+      case 'xall': xAll = !xAll; renderXall(); return;
       default: return;
     }
     render();
@@ -583,6 +586,22 @@ export function initMoveForm() {
   sheet.addEventListener('click', (ev) => { if (ev.target === sheet) sheet.close(); });
   const mb = (n) => (n >= 1024 ** 3 ? `${dec(n / 1024 ** 3)} GB` : `${Math.max(1, Math.round(n / 1024 ** 2))} MB`);
   $('vfile').addEventListener('change', (ev) => { $('vlist').innerHTML = [...ev.target.files].map((f) => `<li><span>${esc(f.name)}</span><span>${mb(f.size)}</span></li>`).join(''); });
+  // телефон: табло цены — лист снизу (кнопка «Из чего цена» на нижней панели)
+  function sheetBoard(on) {
+    root.classList.toggle('is-sheet', on);
+    if (on) $('why').open = true;
+    window.__lenis?.[on ? 'stop' : 'start']?.();
+  }
+  document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && root.classList.contains('is-sheet')) sheetBoard(false); });
+  // допы: сначала самые частые (XTOP), остальные — по кнопке «Все услуги» (выбранные видны всегда)
+  let xAll = false;
+  function renderXall() {
+    const hiddenN = EXTRAS.filter((e) => !XTOP.includes(e.id)).length;
+    $('xwrap').classList.toggle('is-all', xAll);
+    $('xall').hidden = !hiddenN;
+    $('xall').textContent = xAll ? T.xFew : tr(T.xAll, { n: hiddenN });
+  }
+  renderXall();
   // нижняя панель с ценой: не видна на первом экране и когда табло и так на экране
   const away = { hero: true, board: false, foot: false };
   const syncBar = () => $('bar').classList.toggle('away', away.hero || away.board || away.foot);

@@ -10,7 +10,7 @@ export const mf = {
   // первый экран
   h1: l('Что у вас дома?', 'Co masz w domu?', 'Що у вас удома?', 'What’s in your home?'),
   lead: l('Отметьте вещи или снимите видео — и получите цену, которая не изменится в день переезда.', 'Zaznacz rzeczy albo nagraj wideo — i poznaj cenę, która nie zmieni się w dniu przeprowadzki.', 'Позначте речі або зніміть відео — і отримайте ціну, яка не зміниться в день переїзду.', 'Pick your things or record a video — and get a price that won’t change on moving day.'),
-  note: l('Считаем по вашим вещам и адресам, а не по комнатам и метрам. Все цены с VAT.', 'Liczymy według Twoich rzeczy i adresów, a nie pokoi i metrów. Wszystkie ceny z VAT.', 'Рахуємо за вашими речами й адресами, а не за кімнатами й метрами. Усі ціни з VAT.', 'We price by your things and addresses, not by rooms or square metres. All prices include VAT.'),
+  note: l('Все цены с VAT.', 'Wszystkie ceny z VAT.', 'Усі ціни з VAT.', 'All prices include VAT.'),
   cardList: l('Отметить вещи', 'Zaznacz rzeczy', 'Позначити речі', 'Pick your things'),
   cardListS: l('3 минуты, цена сразу', '3 minuty, cena od razu', '3 хвилини, ціна одразу', '3 minutes, instant price'),
   cardVideo: l('Снять видео', 'Nagraj wideo', 'Зняти відео', 'Record a video'),
@@ -27,14 +27,14 @@ export const mf = {
   stepsAria: l('Шаги', 'Kroki', 'Кроки', 'Steps'),
   // 1 — что делаем
   hLevel: l('Что делаем мы', 'Co robimy my', 'Що робимо ми', 'What we do'),
-  subLevel: l('Чем больше делаем мы, тем меньше забот у вас. Вы платите за работу людей: у каждой вещи своё время.', 'Im więcej robimy my, tym mniej masz na głowie. Płacisz za pracę ludzi: każda rzecz ma swój czas.', 'Що більше робимо ми, то менше клопоту у вас. Ви платите за роботу людей: кожна річ має свій час.', 'The more we do, the less you have to worry about. You pay for people’s work: every item takes its own time.'),
+  subLevel: l('Чем больше делаем мы — тем меньше забот у вас.', 'Im więcej robimy my — tym mniej masz na głowie.', 'Що більше робимо ми — то менше клопоту у вас.', 'The more we do, the less you have to worry about.'),
   perHour: l('{n} zł в час', '{n} zł za godzinę', '{n} zł за годину', '{n} zł per hour'),
   forList: l('≈ {n} zł за ваш список', '≈ {n} zł za Twoją listę', '≈ {n} zł за ваш список', '≈ {n} zł for your list'),
   byList: l('по списку вещей', 'według listy rzeczy', 'за списком речей', 'based on your list'),
   byVideo: l('по видео', 'na podstawie wideo', 'за відео', 'from your video'),
   // 2 — адреса
   hRoute: l('Откуда и куда', 'Skąd i dokąd', 'Звідки й куди', 'From and to'),
-  subRoute: l('Дорогу считаем по вашим адресам. Этаж без лифта и далёкая парковка добавляют время на переноску.', 'Drogę liczymy według Twoich adresów. Piętro bez windy i daleki parking wydłużają noszenie.', 'Дорогу рахуємо за вашими адресами. Поверх без ліфта й далеке паркування додають час на перенесення.', 'We price the journey by your addresses. Stairs without a lift and parking far away add carrying time.'),
+  subRoute: l('Этаж, лифт и где встанет бус — от этого зависит время переноски.', 'Piętro, winda i miejsce postoju busa — od tego zależy czas noszenia.', 'Поверх, ліфт і де стане бус — від цього залежить час перенесення.', 'Floor, lift and where the van can park — this sets the carrying time.'),
   from: l('Откуда', 'Skąd', 'Звідки', 'From'),
   to: l('Куда', 'Dokąd', 'Куди', 'To'),
   addr: l('Адрес', 'Adres', 'Адреса', 'Address'),
@@ -61,7 +61,7 @@ export const mf = {
   hItems: l('Что везём', 'Co przewozimy', 'Що веземо', 'What we’re moving'),
   hVideo: l('Снимите видео', 'Nagraj wideo', 'Зніміть відео', 'Record a video'),
   hHours: l('Сколько часов нужен бус', 'Na ile godzin potrzebny jest bus', 'Скільки годин потрібен бус', 'How many hours you need the van'),
-  subItems: l('Нажмите на вещь и выберите размер — от него зависят время работы и место в бусе. Комнаты — только для удобства, цена считается по вещам.', 'Kliknij rzecz i wybierz rozmiar — od niego zależy czas pracy i miejsce w busie. Pokoje są tylko dla wygody, cena liczy się od rzeczy.', 'Натисніть на річ і виберіть розмір — від нього залежать час роботи й місце в бусі. Кімнати — лише для зручності, ціна рахується за речами.', 'Tap an item and choose its size — it sets the work time and the space in the van. Rooms are just for convenience; the price is based on the items.'),
+  subItems: l('Нажмите на вещь и выберите размер. Цена — по вещам, а не по комнатам.', 'Kliknij rzecz i wybierz rozmiar. Cena zależy od rzeczy, a nie od pokoi.', 'Натисніть на річ і виберіть розмір. Ціна — за речами, а не за кімнатами.', 'Tap an item and choose its size. The price is based on your things, not rooms.'),
   subVideo: l('2–3 минуты на телефон. Менеджер посчитает вещи и пришлёт фиксированную цену.', '2–3 minuty telefonem. Menedżer policzy rzeczy i wyśle stałą cenę.', '2–3 хвилини на телефон. Менеджер порахує речі й надішле фіксовану ціну.', '2–3 minutes on your phone. Our manager counts the items and sends you a fixed price.'),
   subHours: l('Водитель помогает, но грузите вы.', 'Kierowca pomaga, ale ładujesz Ty.', 'Водій допомагає, але вантажите ви.', 'The driver helps, but you do the loading.'),
   modeList: l('Список вещей', 'Lista rzeczy', 'Список речей', 'Item list'),
@@ -114,11 +114,11 @@ export const mf = {
   unpackS: l('{n} zł за коробку: разложим по шкафам, коробки заберём', '{n} zł za karton: rozłożymy do szaf, kartony zabierzemy', '{n} zł за коробку: розкладемо по шафах, коробки заберемо', '{n} zł per box: we put things away and take the boxes'),
   // 5 — допы
   hExtra: l('Что ещё сделать', 'Co jeszcze zrobić', 'Що ще зробити', 'Anything else'),
-  subExtra: l('Цена каждой услуги известна заранее и сразу входит в итог.', 'Cena każdej usługi jest znana z góry i od razu wchodzi do sumy.', 'Ціна кожної послуги відома заздалегідь і одразу входить у підсумок.', 'Every extra has a set price that goes straight into the total.'),
+  subExtra: l('Только то, что нужно вам. Каждая услуга сразу видна в цене.', 'Tylko to, czego potrzebujesz. Każdą usługę od razu widać w cenie.', 'Лише те, що потрібно вам. Кожна послуга одразу видна в ціні.', 'Only what you need. Each extra shows up in the price straight away.'),
   each: l('за шт.', 'za szt.', 'за шт.', 'each'),
   // 6 — дата
   hDate: l('Когда', 'Kiedy', 'Коли', 'When'),
-  subDate: l('Если дата гибкая, выберите «зелёный» день — переезд выйдет дешевле.', 'Jeśli termin jest elastyczny, wybierz „zielony” dzień — przeprowadzka będzie tańsza.', 'Якщо дата гнучка, оберіть «зелений» день — переїзд вийде дешевшим.', 'If your date is flexible, pick a “green” day — the move costs less.'),
+  subDate: l('Гибкая дата? «Зелёные» дни — дешевле.', 'Elastyczny termin? „Zielone” dni są tańsze.', 'Гнучка дата? «Зелені» дні — дешевші.', 'Flexible date? “Green” days cost less.'),
   lgGreen: l('вт–чт в середине месяца', 'wt–czw w połowie miesiąca', 'вт–чт у середині місяця', 'Tue–Thu mid-month'),
   lgEarly: l('бронь за 14 дней и раньше', 'rezerwacja 14 dni wcześniej lub dawniej', 'бронювання за 14 днів і раніше', 'booked 14+ days ahead'),
   lgPeak: l('конец и начало месяца, летние субботы', 'koniec i początek miesiąca, letnie soboty', 'кінець і початок місяця, літні суботи', 'end and start of the month, summer Saturdays'),
@@ -190,6 +190,12 @@ export const mf = {
   barVideo: l('переезд — по видео', 'przeprowadzka — z wideo', 'переїзд — за відео', 'move priced from video'),
   barFix: l('фикс', 'stała', 'фікс', 'fixed'),
   // окно вещи
+  // 19.11.2026: упрощение экрана расчёта
+  showList: l('Показать список', 'Pokaż listę', 'Показати список', 'Show list'),
+  hideList: l('Скрыть список', 'Ukryj listę', 'Сховати список', 'Hide list'),
+  xAll: l('Все услуги · ещё {n}', 'Wszystkie usługi · jeszcze {n}', 'Усі послуги · ще {n}', 'All extras · {n} more'),
+  xFew: l('Свернуть', 'Zwiń', 'Згорнути', 'Show less'),
+  onSite: l('≈{h} ч на месте и в пути', '≈{h} godz. na miejscu i w drodze', '≈{h} год на місці й у дорозі', '≈{h} h on site and driving'),
   close: l('Закрыть', 'Zamknij', 'Закрити', 'Close'),
   less: l('Меньше', 'Mniej', 'Менше', 'Fewer'),
   more: l('Больше', 'Więcej', 'Більше', 'More'),
@@ -217,7 +223,7 @@ export const mf = {
   perPc: l('{p} за шт.', '{p} za szt.', '{p} за шт.', '{p} each'),
   // отправка
   hSend: l('Последний шаг', 'Ostatni krok', 'Останній крок', 'Last step'),
-  subSend: l('Как коробку — скотчем. Оставьте имя и телефон: менеджер проверит список и пришлёт оферту по ссылке — фиксированная цена, состав работ, задаток 20 %.', 'Jak karton — taśmą. Zostaw imię i telefon: menedżer sprawdzi listę i wyśle ofertę z linkiem — stała cena, zakres prac, zadatek 20%.', 'Як коробку — скотчем. Залиште ім’я й телефон: менеджер перевірить список і надішле оферту за посиланням — фіксована ціна, склад робіт, завдаток 20 %.', 'Like a box — with tape. Leave your name and phone: our manager checks the list and sends an offer link — fixed price, scope of work, 20% deposit.'),
+  subSend: l('Оставьте имя и телефон. Менеджер проверит список и пришлёт оферту: фиксированная цена, состав работ, задаток 20 %.', 'Zostaw imię i telefon. Menedżer sprawdzi listę i wyśle ofertę: stała cena, zakres prac, zadatek 20%.', 'Залиште ім’я й телефон. Менеджер перевірить список і надішле оферту: фіксована ціна, склад робіт, завдаток 20 %.', 'Leave your name and phone. Our manager checks the list and sends an offer: fixed price, scope of work, 20% deposit.'),
   name: l('Имя', 'Imię', 'Ім’я', 'Name'),
   phone: l('Телефон', 'Telefon', 'Телефон', 'Phone'),
   channel: l('Как удобнее связаться', 'Jak się skontaktować', 'Як зручніше зв’язатися', 'How should we contact you'),

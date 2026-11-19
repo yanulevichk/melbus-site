@@ -361,3 +361,60 @@ body:has(.mf) .mbar { display: none }
 .mf .seg--pay { flex-wrap: nowrap; }
 .mf .seg--pay button { flex: 1 1 0; }
 .mf .seg--pay button small { display: block; margin: 2px 0 0; }
+
+/* ===== 19.11.2026 — экран расчёта проще и красивее (владелец: «лаконично и понятно, убери ненужное») ===== */
+/* шаги: номер «01», крупный заголовок, бирюзовая полоса-скотч под ним (data-tapeline), без верхней линии */
+.mf .steps { gap: 64px }
+.mf .step__head { border-top: 0; padding-top: 0; gap: 8px }
+.mf .step__head h2::before { content: counter(step, decimal-leading-zero); font: 600 12px var(--text); letter-spacing: .12em; color: var(--deep); margin-right: 12px; vertical-align: .55em }
+.mf .step__head h2[data-tapeline]::after { width: 48px; margin-top: .45em }
+
+/* табло цены: графитовая «наклейка» — бирюзовая полоса слева, логотип, цена, гарантия, бригада одной строкой */
+.mf .board { padding: 24px 24px 22px 32px; gap: 14px; border-radius: 4px; box-shadow: 0 34px 70px -34px rgba(16, 22, 29, .6) }
+.mf .board::before { left: 0; top: 0; bottom: 0; width: 7px; height: auto }
+.mf .board__top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 12px; border-bottom: 1px dashed var(--line-dark) }
+.mf .board__logo { width: 116px; height: auto; display: block }
+.mf .board__k { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; text-align: right }
+.mf .board__price { font-size: clamp(50px, 13vw, 66px) }
+.mf .board__fix { font-size: 14px; line-height: 1.45 }
+.mf .facts { display: flex; flex-wrap: wrap; gap: 6px; padding: 0; border: 0 }
+.mf .facts li { padding: 6px 11px; border: 1px solid var(--line-dark); border-radius: 999px; font-size: 13px; color: var(--soft); white-space: nowrap }
+.mf .why { border-top: 1px dashed var(--line-dark); padding-top: 10px }
+.mf .why summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 6px 0; font-size: 15px; font-weight: 500 }
+.mf .why summary::-webkit-details-marker { display: none }
+.mf .why summary::after { content: ""; width: 12px; height: 12px; flex: none; background: linear-gradient(var(--tape), var(--tape)) center / 12px 2px no-repeat, linear-gradient(var(--tape), var(--tape)) center / 2px 12px no-repeat; transition: transform .35s }
+.mf .why[open] summary::after { transform: rotate(45deg) }
+.mf .why .lines { margin: 12px 0 14px }
+.mf .why .board__note { margin-top: 12px }
+.mf .why[open] > :not(summary) { animation: mf-why .4s cubic-bezier(.2, .7, .2, 1) }
+@keyframes mf-why { from { opacity: 0; transform: translateY(-6px) } }
+.mf .board__x, .mf .board__grip { display: none }
+
+/* телефон: табло — лист снизу по кнопке «Из чего цена» (раньше — длинный блок посреди формы) */
+@media (max-width: 979px) {
+  .mf .layout .board { position: fixed; z-index: 45; left: 0; right: 0; bottom: 0; max-height: 88svh; overflow-y: auto; overscroll-behavior: contain;
+    border-radius: 18px 18px 0 0; padding: 30px max(20px, env(safe-area-inset-right, 0px)) calc(20px + env(safe-area-inset-bottom, 0px)) max(26px, env(safe-area-inset-left, 0px));
+    transform: translateY(105%); visibility: hidden; transition: transform .5s cubic-bezier(.2, .7, .2, 1), visibility 0s .5s }
+  .mf.is-sheet .layout .board { transform: none; visibility: visible; transition: transform .5s cubic-bezier(.2, .7, .2, 1), visibility 0s }
+  .mf .board::before { left: 0; top: 18px; bottom: 18px; width: 5px; border-radius: 0 3px 3px 0 }
+  .mf .board__grip { display: block; position: absolute; top: 10px; left: 50%; width: 40px; height: 4px; margin-left: -20px; border-radius: 4px; background: #3A4652 }
+  .mf .board__x { display: grid; place-items: center; position: absolute; top: 16px; right: 14px; width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line-dark); background: transparent; color: #fff; cursor: pointer }
+  .mf .board__x svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2 }
+  .mf .board__top { padding-right: 52px }
+  .mf .sheet-bg { position: fixed; inset: 0; z-index: 44; background: rgba(16, 22, 29, .55); opacity: 0; pointer-events: none; transition: opacity .4s }
+  .mf.is-sheet .sheet-bg { opacity: 1; pointer-events: auto }
+}
+@media (min-width: 980px) { .mf .sheet-bg { display: none } }
+
+/* «В бусе — N вещей»: список свёрнут (плитки и так показывают количество) */
+.mf .bl summary { list-style: none; cursor: pointer }
+.mf .bl summary::-webkit-details-marker { display: none }
+.mf .bl__tog { font-size: 14px; color: var(--deep); font-weight: 500; white-space: nowrap }
+.mf .bl:not([open]) .bl__hide, .mf .bl[open] .bl__show { display: none }
+.mf .bl__clear { justify-self: start }
+
+/* допы: сначала самые частые, остальные по кнопке (выбранные видны всегда) */
+.mf .xwrap { display: grid; gap: 14px }
+.mf .xwrap:not(.is-all) .tile--wide:not(.is-top):not(.on) { display: none }
+.mf .xwrap__more { justify-self: start }
+@media (prefers-reduced-motion: reduce) { .mf .layout .board, .mf .sheet-bg { transition: none } .mf .why[open] > :not(summary) { animation: none } }
