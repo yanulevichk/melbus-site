@@ -8,7 +8,17 @@
  * если браузер не умеет AVIF. Порядок загрузки: первый → каждый 8-й → ближайшие к месту прокрутки; каждый кадр
  * декодируется заранее. Соседние кадры не смешиваем (в быстрых сценах это давало «двоение»).
  * Сборка кадров — prototypes/hero-proto/README.md.
+ *
+ * 19.11.2026 (владелец: «всё равно недостаточно плавно»):
+ *  — в фильме были повторы кадров (картинка замирала и прыгала) и очень разная скорость движения по сценам. Теперь прокрутка
+ *    идёт по «весам» шагов (src/data/hero-motion.ts, считает tools/film/hero-motion.py по оптическому потоку): повторы
+ *    пропускаются, быстрым сценам достаётся больше прокрутки → видимая скорость одинаковая по всему фильму;
+ *    мягкое смешивание соседних кадров — только где движение мелкое (без «двоения»);
+ *  — плавность движения: пружина вместо простого догоняния (без рывка в начале и в конце);
+ *  — холст не больше разрешения кадров (1920×1200): на ретина-экранах было в 2–3 раза больше пикселей без пользы;
+ *    затемнение и виньетка — неподвижный CSS-слой, а не две заливки на каждый кадр.
  */
+import { HERO_W, HERO_B } from '../data/hero-motion';
 const AVIF_TEST = 'data:image/avif;base64,AAAAIGZ0eXBhdmlmAAAAAGF2aWZtaWYxbWlhZk1BMUIAAADybWV0YQAAAAAAAAAoaGRscgAAAAAAAAAAcGljdAAAAAAAAAAAAAAAAGxpYmF2aWYAAAAADnBpdG0AAAAAAAEAAAAeaWxvYwAAAABEAAABAAEAAAABAAABGgAAAB0AAAAoaWluZgAAAAAAAQAAABppbmZlAgAAAAABAABhdjAxQ29sb3IAAAAAamlwcnAAAABLaXBjbwAAABRpc3BlAAAAAAAAAAIAAAACAAAAEHBpeGkAAAAAAwgICAAAAAxhdjFDgQ0MAAAAABNjb2xybmNseAACAAIAAYAAAAAXaXBtYQAAAAAAAAABAAEEAQKDBAAAACVtZGF0EgAKCBgANogQEAwgMg8f8D///8WfhwB8+ErK42A=';
 let avif: Promise<boolean> | null = null;
 const avifOk = () => (avif ||= new Promise((r) => { const i = new Image(); i.onload = () => r(i.width > 0); i.onerror = () => r(false); i.src = AVIF_TEST; }));
@@ -65,7 +75,10 @@ export function heroFilm(sec, local) {
   // ---- холст ----
   let W = 0, H = 0, dirty = true;
   const size = (force) => {
-    const d = Math.min(2, devicePixelRatio || 1), w = Math.round(stage.clientWidth * d), h = Math.round(stage.clientHeight * d);
+    const cw = stage.clientWidth, ch = stage.clientHeight;
+    // плотность холста: не меньше размера на экране и не больше разрешения кадров (≈1920×1300) — лишние пиксели только тормозят
+    const d = Math.max(1, Math.min(devicePixelRatio || 1, 2, 1920 / cw, 1300 / ch));
+    const w = Math.round(cw * d), h = Math.round(ch * d);
     if (!force && Math.abs(w - W) < 2 && Math.abs(h - H) < 160 * d) return;   // адресная строка телефона — не пересоздаём
     W = canvas.width = w; H = canvas.height = h; g.imageSmoothingQuality = 'high'; dirty = true; buildMask();
   };
@@ -87,33 +100,35 @@ export function heroFilm(sec, local) {
   };
   (document.fonts?.load('900 100px "Unbounded Variable"') || Promise.resolve()).then(() => { fontOk = true; buildMask(); dirty = true; });
 
-  // ---- кино-обработка на холсте ----
-  let vig = null;
-  const grade = () => {
-    if (!dark) return;
-    g.fillStyle = 'rgba(6,9,12,.14)'; g.fillRect(0, 0, W, H);
-    if (!vig || vig.w !== W || vig.h !== H) { const r = g.createRadialGradient(W / 2, H * 0.52, Math.min(W, H) * 0.25, W / 2, H * 0.52, Math.max(W, H) * 0.75); r.addColorStop(0, 'rgba(0,0,0,0)'); r.addColorStop(1, 'rgba(0,0,0,.55)'); vig = { r, w: W, h: H }; }
-    g.fillStyle = vig.r; g.fillRect(0, 0, W, H);
-  };
   const cover = (im, a) => {
     const s = Math.max(W / im.naturalWidth, H / im.naturalHeight), w = im.naturalWidth * s, h = im.naturalHeight * s;
     g.globalAlpha = a; g.drawImage(im, (W - w) / 2, (H - h) / 2, w, h); g.globalAlpha = 1;
   };
   let lastKey = '';
-  const render = (fp, k) => {
-    // без смешивания соседних кадров: при 24 к/с шаг мелкий, а смешивание в быстрых сценах даёт «двоение»
-    const i = Math.min(N - 1, Math.round(fp * (N - 1)));
-    want = i;
-    const a = nearest(i); if (a < 0) return;
-    const key = `${a}:${k.toFixed(4)}:${W}:${fontOk}`;
+  // кадр по прокрутке: веса шагов → дробный номер кадра (повторы пропускаются, быстрые сцены получают больше прокрутки)
+  const C = [0]; for (let i = 0; i < N - 1; i++) C.push(C[i] + (HERO_W[i] ?? 1));
+  const TOTAL = C[N - 1] || 1;
+  const frameAt = (fp) => {
+    const x = fp * TOTAL; let lo = 0, hi = N - 1;
+    while (hi - lo > 1) { const m = (lo + hi) >> 1; if (C[m] <= x) lo = m; else hi = m; }
+    const w = C[lo + 1] - C[lo];
+    return w > 0 ? lo + Math.min(1, (x - C[lo]) / w) : lo + 1;
+  };
+  const render = (f, k) => {
+    const i = Math.min(N - 1, Math.floor(f)), fr = f - i;
+    const mix = HERO_B[i] === '1' && fr > 0.04 && fr < 0.96 && ready[i] && ready[i + 1];
+    const t = mix ? i : Math.min(N - 1, fr >= 0.5 ? i + 1 : i);
+    want = t;
+    const a = nearest(t); if (a < 0) return;
+    const key = `${a}:${mix ? fr.toFixed(2) : ''}:${k.toFixed(4)}:${W}:${fontOk}`;
     if (key === lastKey && !dirty) return;
     lastKey = key; dirty = false;
     g.setTransform(1, 0, 0, 1, 0, 0);
     const kb = 1.07 - 0.07 * Math.min(1, k);
     g.save(); g.translate(W / 2, H / 2); g.scale(kb, kb); g.translate(-W / 2, -H / 2);
     cover(frames[a], 1);
+    if (mix) cover(frames[i + 1], fr);              // мелкое движение — мягкий переход без «двоения»
     g.restore();
-    grade();
     if (k < 0.999) {
       if (fontOk) { const s = 1 + Math.pow(k, 2.3) * 110; g.setTransform(s, 0, 0, s, ox * (1 - s), oy * (1 - s)); g.drawImage(mc, 0, 0); g.setTransform(1, 0, 0, 1, 0, 0); }
       else { g.fillStyle = MASK; g.globalAlpha = Math.max(0, 1 - k * 2); g.fillRect(0, 0, W, H); g.globalAlpha = 1; }
@@ -127,22 +142,31 @@ export function heroFilm(sec, local) {
   addEventListener('resize', onResize); addEventListener('orientationchange', onOrient);
   local.push(() => { removeEventListener('resize', onResize); removeEventListener('orientationchange', onOrient); });
 
-  let cur = 0, prevCaps = '', raf = 0;
+  let cur = -1, vel = 0, prevCaps = '', raf = 0, lastT = 0, sIntro = '', sDim = '', sBar = '';
   const clamp = (x) => Math.max(0, Math.min(1, x));
-  const tick = () => {
+  const OMEGA = touch ? 13 : 10;                       // пружина без перелёта: плавно разгоняется и плавно останавливается
+  const tick = (now) => {
     if (!alive) return;
+    const dt = Math.min(0.05, lastT ? (now - lastT) / 1000 : 0.016); lastT = now;
     const r = sec.getBoundingClientRect(), total = sec.offsetHeight - stage.clientHeight;
     const target = clamp(-r.top / total);
-    cur += (target - cur) * (touch ? 0.22 : 0.14);
-    if (Math.abs(target - cur) < 0.0003) cur = target;
-    const p = cur, k = clamp(p / INTRO), fp = clamp((p - INTRO * 0.55) / (OUTRO - INTRO * 0.55));
+    if (cur < 0) cur = target;
+    vel += (OMEGA * OMEGA * (target - cur) - 2 * OMEGA * vel) * dt;
+    cur += vel * dt;
+    if (Math.abs(target - cur) < 0.00015 && Math.abs(vel) < 0.0005) { cur = target; vel = 0; }
+    const p = clamp(cur), k = clamp(p / INTRO), fp = clamp((p - INTRO * 0.55) / (OUTRO - INTRO * 0.55));
     if (r.bottom > 0 && r.top < innerHeight) {         // рисуем, только пока первый экран виден
-      render(fp, k);
-      if (intro) intro.style.opacity = String(1 - clamp(p / 0.045));
-      const capsKey = caps.map((c) => +(fp >= +c.dataset.from && fp < +c.dataset.to && p < OUTRO - 0.005)).join('') + (p >= OUTRO - 0.005 ? 'o' : '');
-      if (capsKey !== prevCaps) { prevCaps = capsKey; caps.forEach((c, j) => c.classList.toggle('on', capsKey[j] === '1')); outro?.classList.toggle('on', capsKey.endsWith('o')); }
-      stage.style.setProperty('--dim', (clamp((p - OUTRO + 0.02) / 0.1) * (dark ? 0.5 : 0.42)).toFixed(3));
-      if (bar) bar.style.transform = `scaleX(${p.toFixed(4)})`;
+      render(frameAt(fp), k);
+      const io = (1 - clamp(p / 0.045)).toFixed(3);
+      if (intro && io !== sIntro) { sIntro = io; intro.style.opacity = io; }
+      const end = p >= OUTRO - 0.005;
+      // подписи — по доле прокрутки (у каждой одинаковое время на чтение, даже где в фильме мало движения)
+      const capsKey = caps.map((c) => +(fp >= +c.dataset.from && fp < +c.dataset.to && !end)).join('') + (end ? 'o' : '');
+      if (capsKey !== prevCaps) { prevCaps = capsKey; caps.forEach((c, j) => c.classList.toggle('on', capsKey[j] === '1')); outro?.classList.toggle('on', end); }
+      const dm = (clamp((p - OUTRO + 0.02) / 0.1) * (dark ? 0.5 : 0.42)).toFixed(3);
+      if (dm !== sDim) { sDim = dm; stage.style.setProperty('--dim', dm); }
+      const br = `scaleX(${p.toFixed(4)})`;
+      if (bar && br !== sBar) { sBar = br; bar.style.transform = br; }
     }
     raf = requestAnimationFrame(tick);
   };

@@ -64,7 +64,7 @@ const shortOf = Object.fromEntries(steps);
   <div class="layout gut">
     <div class="steps">
       <section class="step" id="s-level" data-short={shortOf['s-level']} aria-labelledby="mf-h-level">
-        <div class="step__head"><h2 id="mf-h-level">{t('hLevel')}</h2><p class="sub">{t('subLevel')}</p></div>
+        <div class="step__head"><h2 id="mf-h-level" data-tapeline>{t('hLevel')}</h2><p class="sub">{t('subLevel')}</p></div>
         <div class="levels" role="radiogroup" aria-labelledby="mf-h-level" data-el="levels"></div>
         <div class="pay" data-el="pay" hidden>
           <p class="pay__q" id="mf-pay">{t('payQ')}</p>
@@ -77,7 +77,7 @@ const shortOf = Object.fromEntries(steps);
       </section>
 
       <section class="step" id="s-route" data-short={shortOf['s-route']} aria-labelledby="mf-h-route">
-        <div class="step__head"><h2 id="mf-h-route">{t('hRoute')}</h2><p class="sub">{t('subRoute')}</p></div>
+        <div class="step__head"><h2 id="mf-h-route" data-tapeline>{t('hRoute')}</h2><p class="sub">{t('subRoute')}</p></div>
         <div class="ends" data-el="ends"></div>
         <div class="route">
           <div class="route__media"><video src="/video/van.mp4" poster="/img/site/van-side.webp" muted loop playsinline autoplay preload="metadata" aria-hidden="true"></video><span class="ai">{t('ai')}</span></div>
@@ -87,7 +87,7 @@ const shortOf = Object.fromEntries(steps);
       </section>
 
       <section class="step" id="s-items" data-short={shortOf['s-items']} aria-labelledby="mf-h-items">
-        <div class="step__head"><h2 id="mf-h-items" data-el="hItems">{t('hItems')}</h2><p class="sub" data-el="subItems"></p></div>
+        <div class="step__head"><h2 id="mf-h-items" data-tapeline data-el="hItems">{t('hItems')}</h2><p class="sub" data-el="subItems"></p></div>
         <div class="seg" role="group" aria-label={t('modeAria')} data-el="mode2">
           <button type="button" data-mode="list" aria-pressed="true">{t('modeList')}</button>
           <button type="button" data-mode="video" aria-pressed="false">{t('modeVideo')}</button>
@@ -97,10 +97,11 @@ const shortOf = Object.fromEntries(steps);
           <label class="search"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><span class="vh">{t('searchA')}</span><input type="search" data-el="q" placeholder={t('search')} autocomplete="off" /></label>
           <div class="tabs" role="tablist" aria-label={t('rooms')} data-el="tabs"></div>
           <div class="grid" role="tabpanel" data-el="grid"></div>
-          <div class="bl">
-            <div class="bl__h"><h3>{t('inVan')} — <span data-el="blistN"></span></h3><button type="button" class="linkbtn" data-act="lclear" data-el="blistClear">{t('clear')}</button></div>
+          <details class="bl">
+            <summary class="bl__h"><h3>{t('inVan')} — <span data-el="blistN"></span></h3><span class="bl__tog"><span class="bl__show">{t('showList')}</span><span class="bl__hide">{t('hideList')}</span></span></summary>
             <ul class="blist" data-el="blist"></ul>
-          </div>
+            <button type="button" class="linkbtn bl__clear" data-act="lclear" data-el="blistClear">{t('clear')}</button>
+          </details>
           <p class="more">{t('special')}</p>
         </div>
         <div class="stack" data-el="itemsVideo" hidden>
@@ -127,7 +128,7 @@ const shortOf = Object.fromEntries(steps);
       </section>
 
       <section class="step" id="s-boxes" data-short={shortOf['s-boxes']} aria-labelledby="mf-h-boxes">
-        <div class="step__head"><h2 id="mf-h-boxes">{t('hBoxes')}</h2><p class="sub" data-el="subBoxes"></p></div>
+        <div class="step__head"><h2 id="mf-h-boxes" data-tapeline>{t('hBoxes')}</h2><p class="sub" data-el="subBoxes"></p></div>
         <div class="boxes">
           <div class="boxes__top">
             <div class="boxes__n"><output data-el="boxN">0</output><small data-el="boxVol">0 м³</small></div>
@@ -142,37 +143,48 @@ const shortOf = Object.fromEntries(steps);
       </section>
 
       <section class="step" id="s-extra" data-short={shortOf['s-extra']} aria-labelledby="mf-h-extra">
-        <div class="step__head"><h2 id="mf-h-extra">{t('hExtra')}</h2><p class="sub">{t('subExtra')}</p></div>
+        <div class="step__head"><h2 id="mf-h-extra" data-tapeline>{t('hExtra')}</h2><p class="sub">{t('subExtra')}</p></div>
         <div class="end end--asm" data-el="asmAllBox" hidden>
           <button type="button" class="sw" role="switch" data-act="asmAll"><span class="sw__l">{t('asmAll')}<small data-el="asmAllS"></small></span><span class="sw__k"></span></button>
         </div>
-        <div class="grid grid--wide" data-el="extras"></div>
+        <div class="xwrap" data-el="xwrap">
+          <div class="grid grid--wide" data-el="extras"></div>
+          <button type="button" class="linkbtn xwrap__more" data-act="xall" data-el="xall"></button>
+        </div>
       </section>
 
       <section class="step" id="s-date" data-short={shortOf['s-date']} aria-labelledby="mf-h-date">
-        <div class="step__head"><h2 id="mf-h-date">{t('hDate')}</h2><p class="sub">{t('subDate')}</p></div>
+        <div class="step__head"><h2 id="mf-h-date" data-tapeline>{t('hDate')}</h2><p class="sub">{t('subDate')}</p></div>
         <div class="days" role="radiogroup" aria-labelledby="mf-h-date" data-el="days"></div>
         <ul class="legend"><li><b class="g">−10 %</b> {t('lgGreen')}</li><li><b class="g">−5 %</b> {t('lgEarly')}</li><li><b class="p">+10 %</b> {t('lgPeak')}</li></ul>
       </section>
     </div>
 
-    <aside class="board" data-el="board" aria-label={t('boardA')}>
-      <p class="board__k" data-el="bK"></p>
+    <!-- 19.11.2026 (владелец: «лаконично и понятно, убери ненужное»): цена, гарантия, бригада одной строкой, бус;
+         разбивка суммы спрятана в «Из чего цена». На телефоне табло — лист снизу по кнопке «Из чего цена». -->
+    <aside class="board" data-el="board" aria-label={t('boardA')} data-lenis-prevent>
+      <i class="board__grip" aria-hidden="true"></i>
+      <button type="button" class="board__x" data-act="sheet-close" aria-label={t('close')}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg></button>
+      <div class="board__top"><img class="board__logo" src="/brand/melbus-dark.svg" alt="" width="132" height="25" /><p class="board__k" data-el="bK"></p></div>
       <p class="board__price"><span class="drums" data-el="bP" aria-hidden="true"></span><small>zł</small><span class="vh" data-el="bPtext" aria-live="polite"></span></p>
       <p class="board__fix" data-el="bFix"></p>
+      <ul class="facts" data-el="facts"></ul>
       <div class="van" data-el="van">
         <div class="vans" data-el="vans"><div class="vanbox" data-el="vanA"></div><div class="vanbox vanbox--b" data-el="vanB"></div></div>
         <p class="van__cap" data-el="vanCap"></p>
       </div>
-      <ul class="facts" data-el="facts"></ul>
-      <ol class="lines" data-el="lines"></ol>
-      <ul class="incl">{mf.incl.map((x) => <li>{x[L]}</li>)}</ul>
-      <p class="board__note" data-el="bNote"></p>
+      <details class="why" data-el="why">
+        <summary>{t('barWhy')}</summary>
+        <ol class="lines" data-el="lines"></ol>
+        <ul class="incl">{mf.incl.map((x) => <li>{x[L]}</li>)}</ul>
+        <p class="board__note" data-el="bNote"></p>
+      </details>
       <button type="button" class="mbtn mbtn--tape" data-act="go-send">{t('cta')}</button>
     </aside>
+    <div class="sheet-bg" data-act="sheet-close" aria-hidden="true"></div>
 
     <section class="send step" id="s-send" data-short={shortOf['s-send']} aria-labelledby="mf-h-send">
-      <div class="step__head"><h2 id="mf-h-send">{t('hSend')}</h2></div>
+      <div class="step__head"><h2 id="mf-h-send" data-tapeline>{t('hSend')}</h2></div>
       <div class="send__box">
         <div class="send__vid"><video src="/video/tape.mp4" poster="/img/site/tape.webp" muted loop playsinline autoplay preload="metadata" aria-hidden="true"></video><span class="ai">{t('ai')}</span></div>
         <form class="send__form" data-el="sendForm" novalidate>

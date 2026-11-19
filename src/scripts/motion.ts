@@ -69,6 +69,13 @@ function setupHeader() {
   };
   window.addEventListener('scroll', onScroll, { passive: true });
   onScroll();
+  // список языков (телефон): закрывается по тапу мимо, Esc и при прокрутке
+  const lsel = hdr.querySelector<HTMLDetailsElement>('[data-lsel]');
+  if (lsel) {
+    document.addEventListener('pointerdown', (e) => { if (lsel.open && !lsel.contains(e.target as Node)) lsel.open = false; });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') lsel.open = false; });
+    window.addEventListener('scroll', () => { if (lsel.open) lsel.open = false; }, { passive: true });
+  }
 
   const btn = hdr.querySelector<HTMLButtonElement>('[data-menu-toggle]');
   const menu = hdr.querySelector<HTMLElement>('[data-menu]');
