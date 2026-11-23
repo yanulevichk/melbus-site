@@ -126,6 +126,7 @@ window.D = (() => {
   const payments = [
     { at: '23.11 07:58', job: 'M-1145', client: 'Ирина Демо', kind: 'Почасовая оплата', method: 'BLIK', sum: 300, st: 'ожидается' },
     { at: '21.11 16:02', job: 'M-1139', client: 'Магдалена Демо', kind: 'Остаток', method: 'Карта · терминал', sum: 3112, st: 'получено' },
+    { at: '14.11 20:15', job: 'M-1139', client: 'Магдалена Демо', kind: 'Задаток 20 %', method: 'Przelewy24 · BLIK', sum: 778, st: 'получено' },
     { at: '21.11 09:30', job: 'M-1150', client: 'Демо Кафе', kind: 'Задаток 20 %', method: 'Przelewy24 · BLIK', sum: 1138, st: 'получено' },
     { at: '20.11 18:11', job: 'M-1147', client: 'Ольга Демо', kind: 'Задаток 20 %', method: 'Przelewy24 · карта', sum: 858, st: 'получено' },
     { at: '19.11 18:42', job: 'M-1142', client: 'Анна Демо', kind: 'Задаток 20 %', method: 'Przelewy24 · BLIK', sum: 778, st: 'получено' },
@@ -163,21 +164,22 @@ window.D = (() => {
     { t: 'Оферта O-2207 истекает завтра', at: '5 ч', offer: 'O-2207' },
   ];
 
+  // подписи соответствуют содержимому картинок сайта (демо-фото)
   const PHOTOS = {
-    arrive: ['/img/site/van-side.webp', 'Бус у подъезда, парковка'],
+    arrive: ['/img/site/van-side.webp', 'Бус у подъезда, место для погрузки свободно'],
     before1: ['/img/film/step-1-video.webp', 'Спальня до начала работ'],
-    before2: ['/img/services/kvartira.webp', 'Прихожая и коридор до начала'],
-    protect: ['/img/site/gloves.webp', 'Защита пола и дверных проёмов'],
-    pack1: ['/img/film/step-4-pack.webp', 'Кухня: посуда в бумаге'],
-    pack2: ['/img/site/pack.webp', 'Сервиз — хрупкое'],
-    pack3: ['/img/film/step-2-price.webp', 'Коробка закрыта, наклейка комнаты'],
-    tape: ['/img/site/tape.webp', 'Бирюзовый скотч, коробка готова'],
+    before2: ['/img/site/phone.webp', 'Гостиная до начала: съёмка комнаты'],
+    protect: ['/img/site/pack.webp', 'Коробка собрана, дно проклеено'],
+    pack1: ['/img/site/gloves.webp', 'Бокалы в бумаге — хрупкое'],
+    pack2: ['/img/film/step-4-pack.webp', 'Кухня: коробка в работе'],
+    pack3: ['/img/film/std-tape.webp', 'Коробка заклеена бирюзовым скотчем'],
+    tape: ['/img/site/tape.webp', 'Наклейка комнаты и QR на месте'],
     load: ['/img/film/step-3-book.webp', 'Погрузка по пандусу'],
-    van: ['/img/services/mebel.webp', 'Мебель закреплена ремнями'],
+    van: ['/img/services/mebel.webp', 'Груз закреплён ремнями'],
     road: ['/img/film/step-5-road.webp', 'В пути'],
     after1: ['/img/film/step-6-home.webp', 'Новая квартира: мебель расставлена'],
-    after2: ['/img/services/dom.webp', 'Коробки по комнатам'],
-    std: ['/img/film/std-tape.webp', 'Протокол приёмки'],
+    after2: ['/img/services/kvartira.webp', 'Коробки по комнатам, номера видны'],
+    std: ['/img/services/dom.webp', 'Приёмка: ключи и протокол'],
   };
 
   return { ROOMS, STAGES, PKG, PKG_STAGES, DAYS, staff, vans, jobs, leads, LEAD_ITEMS, COLS, LOST, offers, stock, payments, invoices, weeks, norms, notifications, PHOTOS };

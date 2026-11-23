@@ -147,7 +147,7 @@
     });
     return j._items;
   }
-  const STAGE_PH = { 1: ['arrive'], 2: ['before1', 'before2', 'protect'], 3: ['pack1', 'pack2', 'pack3', 'tape'], 4: ['load', 'van'], 5: ['road'], 6: ['after2'], 7: ['after1'], 8: ['std'] };
+  const STAGE_PH = { 1: ['arrive'], 2: ['before1', 'before2'], 3: ['protect', 'pack1', 'pack2', 'pack3', 'tape'], 4: ['load', 'van'], 5: ['road'], 6: ['after2'], 7: ['after1'], 8: ['std'] };
   function photosOf(j) {
     const r = rng(j.id + 'p'), out = [];
     Object.entries(STAGE_PH).forEach(([si, keys]) => {
@@ -158,7 +158,7 @@
       keys.forEach((k, i) => {
         const [src, cap] = D.PHOTOS[k];
         out.push({ src, cap, stage: si, by: j.crew[Math.floor(r() * j.crew.length)], at: t, geo: `52.${180 + Math.floor(r() * 80)}, 21.0${Math.floor(r() * 90)}`, acc: 4 + Math.floor(r() * 9), sha: Math.floor(r() * 0xffffffff).toString(16).padStart(8, '0') + Math.floor(r() * 0xffff).toString(16) });
-        if (si === 3 && i === 1 && j.id === 'M-1142') out[out.length - 1].cap = 'Сервиз из серванта — хрупкое';
+        if (si === 3 && i === 2 && j.id === 'M-1142') out[out.length - 1].cap = 'Сервиз из серванта — хрупкое';
       });
     });
     if (j.id === 'M-1143') out.push({ src: '/img/services/mebel.webp', cap: 'Повреждение: скол на углу комода (отмечен бригадиром)', stage: 4, by: 's5', at: '09:12', geo: '52.236, 21.004', acc: 6, sha: 'c41f09e2a7', dmg: true });
@@ -173,24 +173,21 @@
     'M-1143': [{ t: 'Разобрать и собрать кровать', price: 150, st: 'approved', at: '08:41', by: 's5', how: 'было в оферте' }],
   };
   function eventsOf(j) {
-    const ev = [];
-    const steps = D.PKG_STAGES[j.pkg];
+    const ev = [], steps = D.PKG_STAGES[j.pkg], lead = j.crew[0];
+    const DETAIL = { 1: ' · фото подъезда и парковки', 2: ' · фото «до», защита пола и проёмов', 4: j.boxes ? ` · ${j.boxes} из ${j.boxes} коробок в бусе` : '', 6: j.boxes ? ` · ${j.boxes} из ${j.boxes} коробок на месте` : '', 7: ' · мебель собрана', 8: ' · клиент подписал протокол, оценка 5 из 5', 9: ' · коробки и материалы сданы на склад' };
+    if (j.times?.[0]) ev.push({ at: j.times[0].split('–')[0], who: lead, t: 'начал день у буса · координаты ±7 м' });
     steps.forEach((si) => {
       const t = j.times?.[si]; if (!t) return;
       const [a, b] = t.split('–');
-      const lead = S(j.crew[0]);
-      ev.push({ at: a, who: j.crew[0], t: `шаг «${D.STAGES[si]}» начат${si === 0 ? ` · ${lead.name} отметил начало дня у буса (координаты ±7 м)` : ''}` });
-      if (si === 1) ev.push({ at: a, who: j.crew[0], t: 'фото подъезда и парковки · 1 фото' });
-      if (si === 2) ev.push({ at: a, who: j.crew[1] || j.crew[0], t: 'фото «до»: коридор, лестница, мебель · защита пола' });
-      if (b) ev.push({ at: b, who: j.crew[0], t: `шаг «${D.STAGES[si]}» закончен` });
+      if (b) ev.push({ at: b, who: si === 2 ? j.crew[1] || lead : lead, t: `«${D.STAGES[si]}» — готово, ${a}–${b}${DETAIL[si] || ''}` });
+      else ev.push({ at: a, who: lead, t: `начат шаг «${D.STAGES[si]}»`, live: true });
     });
-    (EXTRA[j.id] || []).forEach((x) => ev.push({ at: x.at, who: x.by, t: x.st === 'approved' ? `доп. работа «${x.t}» · ${zl(x.price)} · клиент подписал` : `предложена доп. работа «${x.t}» · ${zl(x.price)} · ждём подписи` }));
-    if (j.id === 'M-1142') feed.filter((f) => f.job === j.id).forEach((f) => ev.push({ at: f.at, who: f.who, t: f.t, live: true }));
-    if (j.stage >= 10) ev.push({ at: '15:48', who: j.crew[0], t: 'клиент подписал протокол приёмки · оценка 5 из 5' }, { at: '16:02', who: j.crew[0], t: `оплата остатка ${zl(j.price - j.deposit)} · карта, терминал` });
+    (EXTRA[j.id] || []).forEach((x) => ev.push({ at: x.at, who: x.by, t: x.st === 'approved' ? `доп. работа «${x.t}» · ${zl(x.price)} · клиент подписал` : `предложена доп. работа «${x.t}» · ${zl(x.price)} · ждём подписи клиента` }));
+    feed.filter((f) => f.job === j.id && /коробк/.test(f.t)).forEach((f) => ev.push({ at: f.at, who: f.who, t: f.t, live: true }));
+    if (j.stage >= 10) ev.push({ at: '16:02', who: lead, t: `оплата остатка ${zl(j.price - j.deposit)} · карта, терминал` });
     if (j.deposit) ev.push({ at: (j.depositAt || '').split(' · ')[0] || '—', who: null, t: `задаток ${zl(j.deposit)} получен${j.depositAt ? ' · ' + j.depositAt.split(' · ').slice(1).join(' · ') : ''}`, sys: true });
     const key = (e) => (/^\d\d:\d\d$/.test(e.at) ? '1' + e.at : '0' + e.at);
-    const seen = new Set();
-    return ev.filter((e) => { const k = e.at + e.t; if (seen.has(k)) return false; seen.add(k); return true; }).sort((x, y) => (key(y) > key(x) ? 1 : -1));
+    return ev.sort((x, y) => (key(y) > key(x) ? 1 : key(y) < key(x) ? -1 : 0));
   }
   // план / факт: часы людей × 40 zł + бусы (топливо) + коробки
   function money(j) {
@@ -208,6 +205,7 @@
   const view = $('#view');
   let cur = { page: 'today', arg: '' };
   function render(soft) {
+    closePop();
     const [, page = 'today', arg = ''] = (location.hash || '#/today').split('/');
     cur = { page, arg: decodeURIComponent(arg) };
     $$('[data-nav]').forEach((a) => a.classList.toggle('on', a.dataset.nav === page || (page === 'job' && a.dataset.nav === 'jobs')));
@@ -505,7 +503,7 @@
     <div class="bx-rooms">${rooms.map((r) => { const n = boxes.filter((b) => b.room === r).length, p = boxes.filter((b, i) => b.room === r && boxState(j, i) >= 1).length; return `<button class="room ${boxFilter.room === r ? 'on' : ''}" data-room="${r}"><i style="--c:${D.ROOMS[r][1]}"></i>${D.ROOMS[r][0]}<em>${p}/${n}</em></button>`; }).join('')}${boxFilter.room !== 'all' ? '<button class="room" data-room="all">Все комнаты</button>' : ''}</div>
     <div class="card card--flush"><div class="bx-tools"><label class="sf">${ico('search')}<input data-bq placeholder="Код MB-… или что внутри" value="${esc(boxFilter.q)}"></label><div class="chips">${[['all', 'Все'], ['0', 'Не упакованы'], ['1', 'Упакованы'], ['2', 'В бусе'], ['3', 'На месте']].map(([k, t]) => `<button class="chip ${boxFilter.st === k ? 'on' : ''}" data-bst="${k}">${t}</button>`).join('')}</div></div>
     <div class="tw"><table class="tbl"><thead><tr><th>Код</th><th>Комната</th><th>№</th><th>Что внутри</th><th>Статус</th><th>Фото</th><th>Упаковал</th></tr></thead><tbody>
-    ${list.map((b) => `<tr class="${b.s === 0 ? 'is-dim' : ''}"><td class="mono">${b.code}</td><td><span class="rtag"><i style="--c:${D.ROOMS[b.room][1]}"></i>${D.ROOMS[b.room][0]}</span></td><td>${String(b.no).padStart(2, '0')}</td><td>${esc(b.what)}${b.fragile ? ' <span class="st st--warn">хрупкое</span>' : ''}${b.night ? ' <span class="st st--ok">первая ночь</span>' : ''}</td><td><span class="dots3" title="${BOX_ST[b.s]}">${[1, 2, 3].map((s) => `<i class="${b.s >= s ? 'on' : ''}"></i>`).join('')}</span> <small>${BOX_ST[b.s]}</small></td><td>${b.s ? `<button class="thumb" data-lb="/img/film/step-4-pack.webp" data-cap="${b.code} · ${D.ROOMS[b.room][0]} ${String(b.no).padStart(2, '0')} · ${esc(b.what)}"><img src="${b.room === 'kitchen' ? '/img/film/step-4-pack.webp' : b.room === 'bed' ? '/img/film/step-2-price.webp' : '/img/site/pack.webp'}" alt=""><em>${b.photos}</em></button>` : '—'}</td><td>${b.s ? S(b.by).name : '—'}</td></tr>`).join('') || '<tr><td colspan="7" class="muted">Ничего не найдено</td></tr>'}</tbody></table></div></div>`;
+    ${list.map((b) => `<tr class="${b.s === 0 ? 'is-dim' : ''}"><td class="mono">${b.code}</td><td><span class="rtag"><i style="--c:${D.ROOMS[b.room][1]}"></i>${D.ROOMS[b.room][0]}</span></td><td>${String(b.no).padStart(2, '0')}</td><td>${esc(b.what)}${b.fragile ? ' <span class="st st--warn">хрупкое</span>' : ''}${b.night ? ' <span class="st st--ok">первая ночь</span>' : ''}</td><td><span class="dots3" title="${BOX_ST[b.s]}">${[1, 2, 3].map((s) => `<i class="${b.s >= s ? 'on' : ''}"></i>`).join('')}</span> <small>${BOX_ST[b.s]}</small></td><td>${b.s ? `<button class="thumb" data-lb="${b.room === 'kitchen' ? '/img/film/step-4-pack.webp' : b.room === 'living' ? '/img/site/gloves.webp' : '/img/site/tape.webp'}" data-cap="${b.code} · ${D.ROOMS[b.room][0]} ${String(b.no).padStart(2, '0')} · ${esc(b.what)}"><img src="${b.room === 'kitchen' ? '/img/film/step-4-pack.webp' : b.room === 'living' ? '/img/site/gloves.webp' : '/img/site/tape.webp'}" alt=""><em>${b.photos}</em></button>` : '—'}</td><td>${b.s ? S(b.by).name : '—'}</td></tr>`).join('') || '<tr><td colspan="7" class="muted">Ничего не найдено</td></tr>'}</tbody></table></div></div>`;
   };
   JT.items = (j, { items }) => `<div class="card card--flush"><div class="tw"><table class="tbl"><thead><tr><th>Вещь</th><th>Состояние</th><th class="r">Норма</th><th class="r">Факт</th><th></th></tr></thead><tbody>
     ${items.map((it) => `<tr><td><b>${it.t}</b><small class="muted">${it.d ? ' · ' + it.d : ''}</small>${it.dmg ? ' <span class="st st--bad">повреждение · фото</span>' : ''}</td><td><span class="pipe">${ITEM_ST.slice(1).map((s, i) => `<i class="${it.s > i ? 'on' : ''}" title="${s}"></i>`).join('')}</span> <small>${ITEM_ST[it.s]}</small></td><td class="r">${it.norm} мин</td><td class="r">${it.fact ? `<b class="${it.fact > it.norm * 1.1 ? 'warn-t' : ''}">${it.fact} мин</b>` : '—'}</td><td class="r">${it.s ? `<button class="thumb" data-lb="/img/services/mebel.webp" data-cap="${it.t}"><img src="/img/services/mebel.webp" alt=""></button>` : ''}</td></tr>`).join('')}</tbody></table></div></div>
@@ -593,10 +591,10 @@
     const wait = D.payments.filter((p) => p.st !== 'получено').reduce((a, p) => a + p.sum, 0);
     return `${head('Ноябрь 2026 · все суммы brutto', 'Финансы')}
     <div class="kpis">${[['Выручка ноября', zl(46280), '17 выполненных заказов'], ['Получено за неделю', zl(got), 'задатки и остатки'], ['Ожидается', zl(wait), 'не оплачено или в пути'], ['Прибыль ноября (оценка)', zl(21740), 'маржа ≈ 58 % без VAT']].map(([t, v, s], i) => `<div class="kpi" style="--i:${i}"><span>${t}</span><b>${v}</b><small>${s}</small></div>`).join('')}</div>
-    <div class="cols cols--job"><section class="card card--flush"><div class="card__h card__h--pad"><h2>Платежи</h2></div><div class="tw"><table class="tbl"><thead><tr><th>Когда</th><th>Заказ</th><th>Клиент</th><th>За что</th><th>Способ</th><th class="r">Сумма</th><th>Статус</th></tr></thead><tbody>
+    <section class="card card--flush fin-pay"><div class="card__h card__h--pad"><h2>Платежи</h2></div><div class="tw"><table class="tbl"><thead><tr><th>Когда</th><th>Заказ</th><th>Клиент</th><th>За что</th><th>Способ</th><th class="r">Сумма</th><th>Статус</th></tr></thead><tbody>
       ${D.payments.map((p) => `<tr data-open-job="${p.job}"><td>${p.at}</td><td class="mono">${p.job}</td><td>${esc(p.client)}</td><td>${p.kind}</td><td>${p.method}</td><td class="r"><b>${zl(p.sum)}</b></td><td><span class="st st--${p.st === 'получено' ? 'ok' : p.st === 'ожидается' ? 'live' : 'warn'}">${p.st}</span></td></tr>`).join('')}</tbody></table></div></section>
-    <section class="card"><div class="card__h"><h2>Фактуры · KSeF</h2></div><ul class="pays">${D.invoices.map((v) => `<li><div><b class="mono">${v.no}</b><small>${v.job} · ${esc(v.client)} · ${v.at}</small></div><b>${zl(v.sum)}</b><span class="st st--${v.ksef === 'принята' ? 'ok' : 'live'}">${v.ksef}</span></li>`).join('')}</ul>
-      <div class="card__h"><h2>Способы оплаты</h2></div>${[['BLIK', 46], ['Карта', 34], ['Перевод', 14], ['Наличные', 6]].map(([t, p]) => `<div class="meth"><span>${t}</span><div class="bar"><i style="--p:${p / 100}"></i></div><b>${p} %</b></div>`).join('')}</section></div>`;
+    <div class="cols"><section class="card"><div class="card__h"><h2>Фактуры · KSeF</h2></div><ul class="pays">${D.invoices.map((v) => `<li><div><b class="mono">${v.no}</b><small>${v.job} · ${esc(v.client)} · ${v.at}</small></div><b>${zl(v.sum)}</b><span class="st st--${v.ksef === 'принята' ? 'ok' : 'live'}">${v.ksef}</span></li>`).join('')}</ul>
+      </section><section class="card"><div class="card__h"><h2>Способы оплаты</h2><span class="muted">ноябрь</span></div>${[['BLIK', 46], ['Карта', 34], ['Перевод', 14], ['Наличные', 6]].map(([t, p]) => `<div class="meth"><span>${t}</span><div class="bar"><i style="--p:${p / 100}"></i></div><b>${p} %</b></div>`).join('')}</section></div>`;
   };
 
   /* ---------- ОТЧЁТЫ ---------- */
