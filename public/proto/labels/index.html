@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex" />
+<title>MELBUS — наклейки на коробки</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600&family=Unbounded:wght@300;500&display=swap" rel="stylesheet" />
+<!-- Наклейки с QR для коробок (23.11.2026, часть MELBUS OS — docs/crm/SYSTEM.md, раздел «Коробки и QR»).
+     Лист A4: 2 × 5 наклеек 99 × 57 мм. Код MB-XXXXX уникален; QR ведёт на https://melbus.pl/b/<код>.
+     Цветная полоса — комната. Номер коробки в заказе приложение бригады ставит само при упаковке, на наклейке — поле «№». -->
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+<style>
+  :root { --g: #10161D; --t: #14DCD5; --d: #077E79; --s: #DCE1E7; --st: #8F9AA7; --p: #F4F6F8; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: Onest, system-ui, sans-serif; color: var(--g); background: var(--p); }
+  .bar { position: sticky; top: 0; z-index: 2; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; padding: 14px 20px; background: var(--g); color: #fff; }
+  .bar h1 { margin: 0 12px 0 0; font: 300 18px/1.2 Unbounded, sans-serif; letter-spacing: -.02em; }
+  .bar label { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #C3CCD5; }
+  .bar select, .bar input { height: 38px; border-radius: 4px; border: 1px solid #2C3742; background: #18212A; color: #fff; padding: 0 10px; font: inherit; }
+  .bar button { height: 40px; padding: 0 18px; border: 0; border-radius: 3px; font: 600 14px Onest, sans-serif; cursor: pointer; }
+  .bar .go { background: var(--t); color: var(--g); }
+  .bar .ghost { background: transparent; color: #fff; border: 1px solid #3A4652; }
+  .note { max-width: 210mm; margin: 18px auto 0; padding: 0 12px; font-size: 14px; color: #56626E; line-height: 1.5; }
+  .sheet { width: 210mm; min-height: 297mm; margin: 16px auto; padding: 12mm 5mm; background: #fff; display: grid; grid-template-columns: 99mm 99mm; grid-auto-rows: 57mm; gap: 0 2mm; justify-content: center; align-content: start; box-shadow: 0 10px 40px rgba(16,22,29,.12); }
+  .lab { position: relative; display: grid; grid-template-columns: 9mm 1fr 33mm; overflow: hidden; border: .2mm dashed #DCE1E7; }
+  .lab__strip { background: var(--c); display: flex; align-items: center; justify-content: center; }
+  .lab__strip span { writing-mode: vertical-rl; transform: rotate(180deg); font: 600 3.3mm/1 Onest, sans-serif; letter-spacing: .12em; text-transform: uppercase; color: var(--ci, #fff); }
+  .lab__mid { padding: 4mm 3mm 3mm 4mm; display: grid; align-content: space-between; }
+  .lab__logo { width: 30mm; height: auto; display: block; }
+  .lab__room { font: 300 5.2mm/1.05 Unbounded, sans-serif; letter-spacing: -.03em; margin-top: 2mm; }
+  .lab__code { font: 600 3.6mm/1 Onest, sans-serif; letter-spacing: .06em; }
+  .lab__fields { display: flex; gap: 4mm; font-size: 2.7mm; color: #56626E; }
+  .lab__fields b { display: inline-block; width: 9mm; border-bottom: .25mm solid #8F9AA7; }
+  .lab__box { display: inline-block; width: 3mm; height: 3mm; border: .25mm solid #8F9AA7; vertical-align: -.5mm; margin-right: 1mm; }
+  .lab__qr { padding: 3mm 3mm 2mm 0; display: grid; align-content: center; justify-items: center; gap: 1.2mm; }
+  .lab__qr svg { width: 28mm; height: 28mm; display: block; }
+  .lab__qr small { font-size: 2.3mm; color: #56626E; text-align: center; line-height: 1.2; }
+  .lab__tape { position: absolute; left: 9mm; right: 0; top: 0; height: 1.2mm; background: var(--t); }
+  @media print {
+    @page { size: A4; margin: 0; }
+    body { background: #fff; }
+    .bar, .note { display: none; }
+    .sheet { margin: 0; box-shadow: none; page-break-after: always; }
+    .lab { border-color: transparent; }
+  }
+  @media (max-width: 860px) { .sheet { transform-origin: top left; transform: scale(calc((100vw - 16px) / 210mm)); margin: 8px; } }
+</style>
+</head>
+<body>
+<div class="bar">
+  <h1>Наклейки на коробки</h1>
+  <label>Комната <select id="room"></select></label>
+  <label>Листов <input id="sheets" type="number" min="1" max="20" value="1" style="width:64px" /></label>
+  <button class="ghost" id="regen" type="button">Новые коды</button>
+  <button class="go" id="print" type="button">Печать</button>
+</div>
+<p class="note">Лист A4 · 10 наклеек 99 × 57 мм (самоклеящаяся бумага, напр. 2 × 5). Каждый код — уникальный, QR ведёт на страницу коробки:
+бригада сканирует его в приложении при упаковке, погрузке и выгрузке, клиент — чтобы увидеть, что внутри. Номер коробки в заказе
+приложение ставит само; поле «№» — для подписи от руки, если нужно. Прототип: в рабочей системе коды будут выдаваться базой, без повторов.</p>
+<div id="out"></div>
+<script>
+  // комнаты: цвет полосы (фирменные тона + различимые оттенки, чтобы бригада сортировала коробки на глаз)
+  const ROOMS = [
+    ['Кухня', '#14DCD5', '#10161D'], ['Спальня', '#077E79'], ['Гостиная', '#10161D'], ['Детская', '#E9A23B', '#10161D'],
+    ['Кабинет', '#7B6CD9'], ['Ванная', '#8F9AA7'], ['Прихожая', '#E36A5C'], ['Балкон · гараж', '#4CAF7A'],
+    ['Первая ночь', '#FFFFFF', '#077E79'], ['Без комнаты', '#DCE1E7', '#10161D'],
+  ];
+  const sel = document.getElementById('room');
+  sel.innerHTML = '<option value="mix">Набор: по 1 каждой</option>' + ROOMS.map((r, i) => `<option value="${i}">${r[0]}</option>`).join('');
+  // код без похожих символов (0/O, 1/I): 5 знаков из 31 → ~28 млн вариантов
+  const ABC = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+  const code = () => 'MB-' + Array.from(crypto.getRandomValues(new Uint8Array(5)), (b) => ABC[b % ABC.length]).join('');
+  const qrSvg = (text) => { const q = qrcode(0, 'M'); q.addData(text); q.make(); return q.createSvgTag({ cellSize: 4, margin: 0, scalable: true }); };
+  const label = (ri) => {
+    const [name, c, ci] = ROOMS[ri], k = code();
+    return `<div class="lab" style="--c:${c};--ci:${ci || '#fff'}">
+      <div class="lab__strip"${c === '#FFFFFF' ? ' style="border-right:.6mm solid #14DCD5"' : ''}><span>${name}</span></div>
+      <div class="lab__mid">
+        <img class="lab__logo" src="/brand/melbus-light.svg" alt="MELBUS" />
+        <div class="lab__room">${name}</div>
+        <div class="lab__fields"><span>№ <b></b></span><span><i class="lab__box"></i>Хрупкое</span></div>
+        <div class="lab__code">${k}</div>
+      </div>
+      <div class="lab__qr">${qrSvg('https://melbus.pl/b/' + k)}<small>Сканируйте —<br>что внутри</small></div>
+      <i class="lab__tape"></i>
+    </div>`;
+  };
+  function render() {
+    const n = Math.max(1, Math.min(20, +document.getElementById('sheets').value || 1)), v = sel.value;
+    let html = '';
+    for (let s = 0; s < n; s++) {
+      html += '<div class="sheet">';
+      for (let i = 0; i < 10; i++) html += label(v === 'mix' ? i % ROOMS.length : +v);
+      html += '</div>';
+    }
+    document.getElementById('out').innerHTML = html;
+  }
+  sel.onchange = render; document.getElementById('sheets').onchange = render;
+  document.getElementById('regen').onclick = render;
+  document.getElementById('print').onclick = () => print();
+  render();
+</script>
+</body>
+</html>
