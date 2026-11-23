@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(tools/film/rife-setup.sh)",
+      "Bash(tools/film/rife-setup.sh:*)",
+      "Bash(tools/film/rife-interp.sh:*)",
+      "Bash(/opt/rife/rife-ncnn-vulkan:*)"
+    ]
+  }
+}

@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>MELBUS Бригада — прототип</title>
+  <meta name="description" content="Прототип приложения бригады MELBUS: заказы дня, шаги переезда, коробки по QR, фото, время, подпись клиента." />
+  <meta name="theme-color" content="#10161D" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Бригада" />
+  <link rel="manifest" href="/proto/app/manifest.webmanifest" />
+  <link rel="icon" href="/icon-192.png" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&family=Unbounded:wght@200;300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/proto/app/app.css" />
+</head>
+<body>
+  <!-- Прототип приложения бригады MELBUS (23.11.2026). Спецификация — docs/crm/SYSTEM.md. Демо-данные в localStorage. -->
+  <div class="stage">
+    <aside class="side" aria-label="О прототипе">
+      <img class="side__logo" src="/brand/melbus-dark.svg" alt="MELBUS" width="150" height="33" />
+      <p class="side__k">Прототип · демо-данные</p>
+      <h1 class="side__h">Приложение<br />бригады</h1>
+      <p class="side__p">Телефон бригадира на переезде: заказы дня, шаги работы, коробки по QR, фото «до» и «после», время, доп. работы и подпись клиента.</p>
+      <ul class="side__list">
+        <li><b>PIN 1234</b> — вход</li>
+        <li><b>Сканер</b> — настоящая камера; без камеры — кнопка «Демо: скан»</li>
+        <li><b>Фото</b> — с камеры телефона; на компьютере — «Демо-фото»</li>
+        <li><b>⋯</b> вверху — режим «без связи» и сброс демо</li>
+      </ul>
+      <div class="side__qr">
+        <div class="side__qrcode" data-qr="https://melbus-site.pages.dev/proto/app/" aria-label="QR-код ссылки на прототип"></div>
+        <p>Откройте на телефоне и добавьте на экран «Домой» — запустится как приложение.</p>
+      </div>
+    </aside>
+    <div class="device">
+      <div class="device__notch" aria-hidden="true"></div>
+      <div id="app" class="app" aria-live="polite"></div>
+    </div>
+  </div>
+  <noscript>Для прототипа нужен JavaScript.</noscript>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js" defer></script>
+  <script src="/proto/app/app.js" defer></script>
+</body>
+</html>
