@@ -265,7 +265,7 @@
     return `<header class="bar">${back ? `<button class="ib" data-act="back" aria-label="Назад">${ic('back')}</button>` : '<span style="width:6px"></span>'}
       <div class="bar__t">${title}${sub ? `<small>${sub}</small>` : ''}</div>${clock}<button class="ib" data-act="menu" aria-label="Меню демо">${ic('more')}</button></header>`;
   };
-  const netBar = () => (isOff() ? `<div class="net"><i></i><span><b>Нет связи</b> · ${S.pending} ${plural(S.pending, 'действие ждёт', 'действия ждут', 'действий ждут')} отправки — всё сохранено в телефоне</span></div>` : '');
+  const netBar = () => (isOff() ? `<div class="net"><i></i><span><b>Нет связи</b> · ${S.pending ? `${S.pending} ${plural(S.pending, 'действие ждёт', 'действия ждут', 'действий ждут')} отправки — всё сохранено в телефоне` : 'работаем дальше, всё сохраняется в телефоне'}</span></div>` : '');
   const tabs = (cur) => `<nav class="tabs" aria-label="Разделы">
     <button class="tab" data-act="tab" data-v="today" ${cur === 'today' ? 'aria-current="page"' : ''}>${ic('home')}<span>Сегодня</span></button>
     <button class="tab" data-act="tab" data-v="job" ${cur === 'job' ? 'aria-current="page"' : ''}>${ic('job')}<span>Заказ</span></button>
@@ -279,9 +279,9 @@
       <p class="login__p">Вход для сотрудников MELBUS</p>
       <label class="field"><span>Телефон</span><input type="tel" inputmode="tel" value="${esc(S.phone)}" data-el="phone" autocomplete="tel"></label>
       <div class="pin" data-el="pin" aria-label="PIN-код"><i></i><i></i><i></i><i></i></div>
+      <p class="login__hint" style="margin-top:auto">Демо: PIN <b>1234</b></p>
       <div class="keys">${[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => `<button class="key" data-act="key" data-v="${n}">${n}</button>`).join('')}
-        <button class="key key--fn" data-act="key" data-v="c">Стереть</button><button class="key" data-act="key" data-v="0">0</button><button class="key key--fn" data-act="key" data-v="ok">Войти</button></div>
-      <p class="login__hint">Демо: PIN <b>1234</b></p></div>`;
+        <button class="key key--fn" data-act="key" data-v="c">Стереть</button><button class="key" data-act="key" data-v="0">0</button><button class="key key--fn" data-act="key" data-v="ok">Войти</button></div></div>`;
   }
 
   function jobCard(j) {
@@ -308,8 +308,8 @@
       <div class="pad"><div class="row row--sb"><h2 class="h">Заказы на сегодня</h2><span class="muted" style="font-size:13px">${S.jobs.length}</span></div>
       ${S.jobs.map(jobCard).join('')}
       <div class="card"><p class="k">Перед выездом</p><div class="grid2"><div><div class="big">60</div><span class="muted" style="font-size:13px">коробок в бусе</span></div><div><div class="big">20</div><span class="muted" style="font-size:13px">одеял и ремней</span></div></div></div>
-      ${started && !ended && allClosed ? '<button class="btn btn--dark btn--block" data-act="day-end">Закончить день</button>' : ''}</div></main>
-      <span class="proto-tag">Прототип · демо-данные</span>${tabs('today')}`;
+      ${started && !ended && allClosed ? '<button class="btn btn--dark btn--block" data-act="day-end">Закончить день</button>' : ''}
+      <p class="proto-tag">Прототип · демо-данные · ⋯ вверху — режим без связи и сброс</p></div></main>${tabs('today')}`;
   }
 
   function vJob() {
@@ -599,10 +599,10 @@
   function itemSheet(id) {
     const j = J(), x = j.items.find((i) => i.id === id);
     sheet(`<div class="row"><img src="${img3d(x.ic)}" alt="" style="width:64px;height:64px;mix-blend-mode:multiply"><div><p class="sheet__t">${esc(x.n)}</p><span class="muted" style="font-size:13px">${esc(x.s)}</span></div></div>
-      <div class="ladder">${x.steps.map((s, i) => `<button class="${i < x.st ? 'done' : ''}${i === x.st ? ' next' : ''}" data-act="item-st" data-v="${id}" data-i="${i}"><i>${i < x.st ? tick.replace('<svg', '<svg style="width:14px;height:14px;stroke:#10161D;stroke-width:2.8;fill:none"') : i + 1}</i>${esc(s)}</button>`).join('')}</div>
+      <div class="ladder">${x.steps.map((s, i) => `<button class="${i < x.st ? 'is-done' : ''}${i === x.st ? ' is-next' : ''}" data-act="item-st" data-v="${id}" data-i="${i}"><i>${i < x.st ? tick.replace('<svg', '<svg style="width:14px;height:14px;stroke:#10161D;stroke-width:2.8;fill:none"') : i + 1}</i>${esc(s)}</button>`).join('')}</div>
       <p class="k">Фото</p>${photoGrid('item-' + id, 0, [], 3)}
       ${x.dmg?.length ? x.dmg.map((d) => `<div class="approved" style="background:var(--red-bg);border-color:#F3C9BF"><svg viewBox="0 0 24 24">${P.warn}</svg><div><b>Повреждение · ${hm(d.t)}</b><small>${esc(d.text)}</small></div><span></span></div>`).join('') : ''}
-      <button class="btn btn--red btn--block" data-act="damage" data-v="${id}">${ic('warn')}Отметить повреждение</button>`);
+      <div class="grid2"><button class="btn btn--red" data-act="damage" data-v="${id}">${ic('warn')}Повреждение</button><button class="btn btn--dark" data-act="sheet-close">Готово</button></div>`);
   }
   function damageSheet(itemId) {
     const j = J(); const x = itemId ? j.items.find((i) => i.id === itemId) : null;
@@ -712,12 +712,17 @@
         act(`Повреждение${x ? ' · ' + x.n : ''}: ${text}`, j.id); j.photos.dmg = []; save(); closeSheet();
         toast(isOff() ? 'Сохранено · уйдёт менеджеру, когда появится связь' : 'Менеджер получил: фото и описание'); render(false); return;
       }
-      case 'x-inc': case 'x-dec': { const sel = (S.route.sel ||= {}); sel[v] = Math.max(0, (sel[v] || 0) + (a === 'x-inc' ? 1 : -1)); S.route.signed = false; save(); render(false); return; }
+      case 'x-inc': case 'x-dec': {
+        const sel = (S.route.sel ||= {}), was = Object.values(sel).some((q) => q > 0);
+        sel[v] = Math.max(0, (sel[v] || 0) + (a === 'x-inc' ? 1 : -1)); S.route.signed = false; save(); render(false);
+        if (!was && a === 'x-inc') app.querySelector('[data-sig="extra"]')?.scrollIntoView({ behavior: 'smooth', block: 'center' });   // первая работа — сразу к подписи
+        return;
+      }
       case 'x-approve': {
         const sel = S.route.sel || {}; let total = 0;
         EXTRAS.forEach((x) => { const q = sel[x.id] || 0; if (q) { j.extras.push({ id: x.id, n: x.n + (q > 1 ? ` × ${q}` : ''), sum: q * x.p, t: now() }); total += q * x.p; } });
         act(`Доп. работа согласована · +${zl(total)} · подпись клиента`, j.id); S.route.sel = {}; S.route.signed = false; save(); buzz(true);
-        toast(`Согласовано в ${hm(now())} · +${zl(total)}`); render(false); return;
+        toast(`Согласовано в ${hm(now())} · +${zl(total)}`); render(false); app.querySelector('.view')?.scrollTo({ top: 0, behavior: 'smooth' }); return;
       }
       case 'rate': j.accept.rate = +v; save(); app.querySelectorAll('.stars button').forEach((s, i) => s.classList.toggle('on', i < +v)); return;
       case 'pay': j.accept.pay = v; save(); app.querySelectorAll('.pay button').forEach((p) => p.setAttribute('aria-pressed', String(p.dataset.v === v))); refreshDock(); return;

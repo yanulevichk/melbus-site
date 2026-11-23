@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#10161D">
+<title>Пульт MELBUS (прототип)</title>
+<link rel="icon" href="/brand/mark-dark.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600&family=Unbounded:wght@200;300;400&display=swap">
+<link rel="stylesheet" href="crm.css">
+</head>
+<body>
+<!-- Прототип внутренней CRM MELBUS «Пульт» (23.11.2026). Демо-данные, без сервера. Спецификация: docs/crm/SYSTEM.md -->
+<div class="app">
+  <aside class="side" id="side" aria-label="Меню">
+    <a class="side__logo" href="#/today" aria-label="Пульт MELBUS — сегодня"><img src="/brand/melbus-dark.svg" alt="MELBUS" width="138" height="30"><span>Пульт</span></a>
+    <nav class="side__nav" id="nav"></nav>
+    <div class="side__foot">
+      <div class="me"><span class="ava ava--me">ОР</span><div><b>Ольга Р.</b><small>Менеджер · онлайн</small></div></div>
+      <p class="proto"><b>Прототип · демо-данные</b><small>Клиенты, телефоны и суммы — вымышленные. Ничего не сохраняется.</small></p>
+    </div>
+  </aside>
+  <div class="main">
+    <header class="top">
+      <button class="ib top__burger" data-act="menu" aria-label="Меню"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+      <div class="search">
+        <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>
+        <input id="q" type="search" placeholder="Клиент, телефон, M-1142, MB-7F3K2" autocomplete="off" aria-label="Поиск">
+        <kbd>/</kbd>
+        <div class="search__res" id="qres" hidden></div>
+      </div>
+      <div class="top__right">
+        <span class="pill-proto">Прототип · демо-данные</span>
+        <button class="btn btn--tape top__add" data-act="new-lead"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>Заявка</span></button>
+        <button class="ib bell" data-act="bell" aria-label="Уведомления"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></svg><i class="bell__dot"></i></button>
+        <div class="notif" id="notif" hidden></div>
+      </div>
+    </header>
+    <main class="view in" id="view"></main>
+  </div>
+</div>
+<div class="scrim" id="scrim" hidden></div>
+<aside class="drawer" id="drawer" aria-hidden="true"><div class="drawer__in" id="drawerIn"></div></aside>
+<div class="modal" id="modal" hidden role="dialog" aria-modal="true"><div class="modal__in" id="modalIn"></div></div>
+<div class="lb" id="lb" hidden role="dialog" aria-modal="true" aria-label="Фото">
+  <button class="ib lb__x" data-lbx aria-label="Закрыть"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  <button class="ib lb__nav lb__nav--l" data-lbn="-1" aria-label="Предыдущее"><svg class="i" viewBox="0 0 24 24"><path d="M14 6l-6 6 6 6"/></svg></button>
+  <figure><img id="lbImg" alt=""><figcaption id="lbCap"></figcaption></figure>
+  <button class="ib lb__nav lb__nav--r" data-lbn="1" aria-label="Следующее"><svg class="i" viewBox="0 0 24 24"><path d="M10 6l6 6-6 6"/></svg></button>
+</div>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+<script src="data.js"></script>
+<script src="crm.js"></script>
+</body>
+</html>

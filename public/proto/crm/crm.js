@@ -151,8 +151,9 @@
   function photosOf(j) {
     const r = rng(j.id + 'p'), out = [];
     Object.entries(STAGE_PH).forEach(([si, keys]) => {
-      si = +si; if (j.stage < si || (j.stage === si && si !== 3)) { if (!(j.stage === si && si <= 3)) return; }
-      if (!D.PKG_STAGES[j.pkg].includes(si)) return;
+      si = +si;
+      const has = j.stage >= 10 || j.stage > si || (j.stage === si && si >= 1 && si <= 3);
+      if (!has || !D.PKG_STAGES[j.pkg].includes(si)) return;
       const t = (j.times[si] || '').split('–')[0] || '—';
       keys.forEach((k, i) => {
         const [src, cap] = D.PHOTOS[k];
@@ -206,17 +207,17 @@
 
   const view = $('#view');
   let cur = { page: 'today', arg: '' };
-  function render(keepScroll) {
+  function render(soft) {
     const [, page = 'today', arg = ''] = (location.hash || '#/today').split('/');
     cur = { page, arg: decodeURIComponent(arg) };
     $$('[data-nav]').forEach((a) => a.classList.toggle('on', a.dataset.nav === page || (page === 'job' && a.dataset.nav === 'jobs')));
     const fn = PAGES[page] || PAGES.today;
     view.innerHTML = fn(cur.arg);
-    view.classList.remove('in'); void view.offsetWidth; view.classList.add('in');
-    if (!keepScroll) view.scrollTo?.({ top: 0 }); if (!keepScroll) window.scrollTo({ top: 0 });
+    if (!soft) { view.classList.remove('in'); void view.offsetWidth; view.classList.add('in'); window.scrollTo({ top: 0 }); }
+    else view.classList.remove('in');
     (AFTER[page] || (() => {}))(cur.arg);
     closeSide(); setCounts();
-    document.title = `${(NAV.find((n) => n.page === page) || [, ''])[1] || ''} Пульт MELBUS — прототип`.trim();
+    document.title = `${(NAV.find((n) => n[0] === page) || [, page === 'job' ? cur.arg.split('/')[0] : ''])[1]} · Пульт MELBUS (прототип)`;
   }
   window.addEventListener('hashchange', () => render());
 
@@ -250,13 +251,13 @@
     { kind: 'sign', t: 'Доп. работа ждёт подписи', d: 'M-1142 · «Повесить телевизор на новом месте» · 250 zł. Без подписи бригада не начинает.', act: ['Открыть', '#/job/M-1142/extra'] },
   ];
   const feedRow = (f, isNew) => `<li class="${isNew ? 'is-new' : ''}"><time>${f.at}</time>${f.who ? ava(f.who, 'ava--s') : '<span class="ava ava--s ava--sys">M</span>'}<p><b>${f.who ? S(f.who).name : 'Система'}</b> ${f.t} <a href="#/job/${f.job}" class="mono">${f.job}</a></p></li>`;
-  PAGES_TODAY: 0;
   const PAGES = {};
   PAGES.today = () => {
     const today = D.jobs.filter((j) => j.day === '2026-11-23');
+    const tl = D.leads.filter((l) => /^\d\d:\d\d$/.test(l.at));
     const up = D.jobs.filter((j) => j.day > '2026-11-23').sort((a, b) => (a.day + a.t0 > b.day + b.t0 ? 1 : -1)).slice(0, 5);
     const k = [
-      ['Заявки сегодня', D.leads.filter((l) => /^\d\d:\d\d$/.test(l.at)).length, '4 с сайта · 1 Instagram · 1 WhatsApp', 'leads'],
+      ['Заявки сегодня', tl.length, Object.entries(tl.reduce((a, l) => ((a[l.src] = (a[l.src] || 0) + 1), a), {})).map(([k, n]) => `${k} ${n}`).join(' · '), 'leads'],
       ['Оферты ждут ответа', D.offers.filter((o) => ['sent', 'viewed'].includes(o.status)).length, '1 истекает завтра', 'offers'],
       ['Переезды сегодня', today.length, '3 идут · 1 после обеда', 'schedule'],
       ['Выручка недели', zl(18640), '+14 % к прошлой неделе', 'finance'],
@@ -317,7 +318,7 @@
   function openLead(id) {
     const l = Ld(id);
     drawer(`<div class="dr__h"><div><p class="muted">${l.id} · ${l.src} · ${l.at}</p><h2>${esc(l.name)}</h2></div><button class="ib" data-close>${ico('x')}</button></div>
-      <div class="dr__seg">${D.COLS.slice(0, 5).map(([k, t]) => `<button class="${k === l.col ? 'on' : ''}" data-dcol="${k}">${t}</button>`).join('')}</div>
+      <div class="dr__seg">${D.COLS.map(([k, t]) => `<button class="${k === l.col ? 'on' : ''}" data-dcol="${k}">${t}</button>`).join('')}</div>
       <dl class="kv"><div><dt>Телефон</dt><dd><a href="tel:${l.phone.replace(/\s/g, '')}">${l.phone}</a></dd></div><div><dt>Язык</dt><dd>${l.lang}</dd></div><div><dt>Пакет</dt><dd>${pkgTag(l.pkg)}</dd></div><div><dt>Цена по форме</dt><dd><b>${l.pkg === 'taxi' ? '150 zł/ч · мин. 2 ч' : '≈ ' + zl(l.est)}</b></dd></div><div><dt>Дата</dt><dd>${l.date}</dd></div><div><dt>Что</dt><dd>${l.rooms}</dd></div></dl>
       <div class="dr__rt">${routeOfLead(l.route)}</div>
       <h3>Видео квартиры</h3>
@@ -333,41 +334,39 @@
     });
   }
   // перетаскивание мышью (общая механика для канбана и расписания)
-  function dnd(root, { item, target, onDrop, onClick }) {
-    let d = null;
+  let drag = null;
+  function dnd(root, cfg) {
     root.addEventListener('pointerdown', (e) => {
-      const el = e.target.closest(item);
+      const el = e.target.closest(cfg.item);
       if (!el || e.button !== 0 || e.target.closest('button') || e.pointerType === 'touch') return;
-      d = { el, x: e.clientX, y: e.clientY, on: false, ox: 0, oy: 0 };
-    });
-    window.addEventListener('pointermove', (e) => {
-      if (!d) return;
-      if (!d.on) {
-        if (Math.hypot(e.clientX - d.x, e.clientY - d.y) < 6) return;
-        d.on = true; const r = d.el.getBoundingClientRect(); d.ox = d.x - r.left; d.oy = d.y - r.top;
-        d.g = d.el.cloneNode(true); d.g.classList.add('ghost'); d.g.style.width = r.width + 'px'; document.body.append(d.g);
-        d.el.classList.add('is-drag'); document.body.classList.add('dragging');
-      }
-      d.g.style.transform = `translate(${e.clientX - d.ox}px, ${e.clientY - d.oy}px) rotate(-2deg)`;
-      const t = document.elementFromPoint(e.clientX, e.clientY)?.closest(target);
-      $$(target, root).forEach((x) => x.classList.toggle('is-over', x === t));
-      d.t = t;
-    });
-    window.addEventListener('pointerup', () => {
-      if (!d) return;
-      const { el, on, t, g } = d; d = null;
-      if (!on) return;
-      g.remove(); el.classList.remove('is-drag'); document.body.classList.remove('dragging');
-      $$(target, root).forEach((x) => x.classList.remove('is-over'));
-      root.dataset.justDragged = '1'; setTimeout(() => delete root.dataset.justDragged, 50);
-      if (t) onDrop(el, t);
+      drag = { root, cfg, el, x: e.clientX, y: e.clientY, on: false };
     });
     root.addEventListener('click', (e) => {
       if (root.dataset.justDragged) return;
-      const el = e.target.closest(item); if (!el || e.target.closest('button')) return;
-      onClick(el, e);
+      const el = e.target.closest(cfg.item); if (!el || e.target.closest('button')) return;
+      cfg.onClick(el, e);
     });
   }
+  window.addEventListener('pointermove', (e) => {
+    const d = drag; if (!d) return;
+    if (!d.on) {
+      if (Math.hypot(e.clientX - d.x, e.clientY - d.y) < 6) return;
+      d.on = true; const r = d.el.getBoundingClientRect(); d.ox = d.x - r.left; d.oy = d.y - r.top;
+      d.g = d.el.cloneNode(true); d.g.classList.add('ghost'); d.g.style.width = r.width + 'px'; document.body.append(d.g);
+      d.el.classList.add('is-drag'); document.body.classList.add('dragging');
+    }
+    d.g.style.transform = `translate(${e.clientX - d.ox}px, ${e.clientY - d.oy}px) rotate(-2deg)`;
+    const t = document.elementFromPoint(e.clientX, e.clientY)?.closest(d.cfg.target);
+    $$(d.cfg.target, d.root).forEach((x) => x.classList.toggle('is-over', x === t));
+    d.t = t;
+  });
+  window.addEventListener('pointerup', () => {
+    const d = drag; drag = null; if (!d || !d.on) return;
+    d.g.remove(); d.el.classList.remove('is-drag'); document.body.classList.remove('dragging');
+    $$(d.cfg.target, d.root).forEach((x) => x.classList.remove('is-over'));
+    d.root.dataset.justDragged = '1'; setTimeout(() => { d.root.dataset.justDragged = ''; }, 60);
+    if (d.t) d.cfg.onDrop(d.el, d.t);
+  });
   const AFTER = {};
   AFTER.leads = () => {
     const kb = $('#kb');
@@ -460,7 +459,7 @@
       const [a, b] = t.split('–');
       return `<li class="ln ln--${state}"><span class="ln__n">${state === 'done' ? ico('check') : String(i + 1).padStart(2, '0')}</span><b>${n}</b><small>${!used ? 'не нужен' : state === 'done' ? `${a}–${b}` : state === 'now' ? `идёт с ${a}` : '—'}</small></li>`;
     }).join('');
-    const count = { photos: photos.length, boxes: boxes.length ? `${j.packed || 0}/${boxes.length}` : '—', items: items.length, extra: extra.length };
+    const count = { photos: photos.length, boxes: boxes.length ? `<span data-live="packed-${j.id}">${j.packed || 0}</span>/${boxes.length}` : '—', items: items.length, extra: extra.length };
     return `<div class="jh">
       <div class="jh__top"><a href="#/jobs" class="back">${ico('back')}Заказы</a><div class="jh__st">${st(j.status)}${j.status === 'in_progress' ? `<span class="stg stg--live">${D.STAGES[j.stage]}</span>` : ''}</div></div>
       <div class="jh__main">
@@ -483,7 +482,7 @@
   const JT = {};
   JT.overview = (j, { m, extra }) => `<div class="cols cols--job">
     <section class="card"><div class="card__h"><h2>Лента событий</h2><span class="muted">из приложения бригады</span></div>
-      ${j.stage < 0 && !j.deposit ? empty('Событий пока нет — заказ ещё не начат') : `<ul class="tl-ev">${eventsOf(j).map((e) => `<li class="${e.live ? 'is-live' : ''} ${e.sys ? 'is-sys' : ''}"><time>${e.at}</time>${e.who ? ava(e.who, 'ava--s') : '<span class="ava ava--s ava--sys">M</span>'}<p><b>${e.who ? S(e.who).name : 'Система'}</b> ${e.t}</p></li>`).join('')}</ul>`}</section>
+      ${j.stage < 0 && !j.deposit ? empty('Событий пока нет — заказ ещё не начат') : `<ul class="tl-ev" data-live="ev-${j.id}">${eventsOf(j).map((e) => `<li class="${e.live ? 'is-live' : ''} ${e.sys ? 'is-sys' : ''}"><time>${e.at}</time>${e.who ? ava(e.who, 'ava--s') : '<span class="ava ava--s ava--sys">M</span>'}<p><b>${e.who ? S(e.who).name : 'Система'}</b> ${e.t}</p></li>`).join('')}</ul>`}</section>
     <div class="stack">
       <section class="card"><div class="card__h"><h2>План / факт</h2>${j.stage >= 10 ? '<span class="st st--done">итог</span>' : j.stage >= 0 ? '<span class="st st--live">идёт</span>' : ''}</div>${pf(j, m)}</section>
       ${j.note ? `<section class="card"><div class="card__h"><h2>Заметки для бригады</h2></div><p>${esc(j.note)}</p></section>` : ''}
@@ -778,7 +777,8 @@
       const cr = $('[data-live="crews"]'); if (cr) cr.innerHTML = CREWS.map(crewCard).join('');
       const fd = $('[data-live="feed"]'); if (fd && ev) { fd.insertAdjacentHTML('afterbegin', feedRow(ev, true)); while (fd.children.length > 7) fd.lastElementChild.remove(); }
     }
-    if (cur.page === 'job' && cur.arg.startsWith('M-1142') && ev && !document.querySelector('.drawer.open, #modal:not([hidden]), .pop') && !/INPUT|TEXTAREA/.test(document.activeElement?.tagName)) render(true);
+    $$(`[data-live="packed-${a.id}"]`).forEach((e) => { e.textContent = a.packed; });
+    if (cur.page === 'job' && ev) { const ul = $(`[data-live="ev-${ev.job}"]`); if (ul) ul.insertAdjacentHTML('afterbegin', `<li class="is-live is-new"><time>${ev.at}</time>${ava(ev.who, 'ava--s')}<p><b>${S(ev.who).name}</b> ${ev.t}</p></li>`); }
   }, 3500);
 
   render();
