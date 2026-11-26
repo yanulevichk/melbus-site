@@ -27,6 +27,8 @@ EDL = [
 ]
 T_HUD, T_END, T_PLUS = 0.8, 8.4, 7.6
 TAG = 'Курьер · маршруты GLS · Варшава'
+BADGE = 'ИЩЕМ КУРЬЕРОВ · ВАРШАВА'
+T_HIRE = 9.4            # «Миссия выполнена» сменяется на «Ищем курьеров»
 PAY, SUB, CTA = '7000–8000 zł', 'пн–пт · доставка посылок GLS', 'НАПИШИ В WHATSAPP'
 
 def parcels(t):
@@ -72,7 +74,11 @@ def main():
     clips = {i: load_clip(os.path.join(clips_dir, f'c{i}.mp4')) for i in range(1, 7)}
     city, route = build_map()
     K = dict(stroke=5, pad=(16, 14))
-    L_m1 = text_layer('МИССИЯ 01', font(ON, 46), GOLD, stroke=4, pad=(12, 10))
+    L_m1 = text_layer('ВАКАНСИЯ · МИССИЯ 01', font(ON, 46), GOLD, stroke=4, pad=(12, 10))
+    L_badge = text_layer(BADGE, fit(BADGE, UB, 44, 900), INK, plate=(*GOLD, 255), pad=(30, 18))
+    L_hire1 = text_layer('ИЩЕМ', fit('КУРЬЕРОВ', UB, 150, 1000, 7), GOLD, stroke=7, pad=(20, 16))
+    L_hire2 = text_layer('КУРЬЕРОВ', fit('КУРЬЕРОВ', UB, 150, 1000, 7), GOLD, stroke=7, pad=(20, 16))
+    L_join = text_layer('ТЕПЕРЬ ТВОЯ ОЧЕРЕДЬ', font(ON, 44), WHITE, stroke=4, pad=(12, 10))
     L_m2 = text_layer('РАЗВЕЗИ СВОЙ РАЙОН', fit('РАЗВЕЗИ СВОЙ РАЙОН', UB, 84, 980, 6), WHITE, stroke=6, pad=(16, 14))
     L_tag = text_layer(TAG, font(ON, 38), GOLD, stroke=4, pad=(12, 10))
     hints = {e[5]: text_layer(e[5], font(ON, 46), WHITE, stroke=4, pad=(12, 10)) for e in EDL if e[5]}
@@ -142,11 +148,11 @@ def main():
             hd.rectangle((MX + MW * 3 // 4 + 6, MY + MH + 8, MX + MW, MY + MH + 22), fill=(*GOLD, 255))
             # часы и счётчик посылок справа сверху
             n = parcels(t)
-            c = txt(game_clock(t), 46, WHITE); hud.alpha_composite(c, (W - 50 - c.width, 262))
+            c = txt(game_clock(t), 46, WHITE); hud.alpha_composite(c, (W - 50 - c.width, 322))
             pop = 1 + .25 * (1 - eout((t - T_PLUS) / .25)) if t >= T_PLUS else 1
             c = txt('ПОСЫЛКИ %d/120' % n, 40, GREEN if n >= 120 else WHITE)
-            paste(hud, c, W - 50 - c.width / 2, 362, pop)
-            hd.rectangle((W - 420, 408, W - 60, 426), fill=(0, 0, 0, 200)); hd.rectangle((W - 420, 408, W - 420 + int(360 * n / 120), 426), fill=(*GREEN, 255))
+            paste(hud, c, W - 50 - c.width / 2, 422, pop)
+            hd.rectangle((W - 420, 468, W - 60, 486), fill=(0, 0, 0, 200)); hd.rectangle((W - 420, 468, W - 420 + int(360 * n / 120), 486), fill=(*GREEN, 255))
             # подсказка задания и подпись
             if e[5]: paste(hud, hints[e[5]], W / 2, 1450, 1 + .12 * (1 - eout(since / .18)), clamp(since / .08))
             paste(hud, L_tag, W / 2, 1512)
@@ -157,14 +163,22 @@ def main():
         # ---------- финал
         if t >= T_END:
             k = t - T_END
-            paste(img, L_done1, W / 2, 330, 1 + 1.4 * (1 - eout(k / .18)), clamp(k / .06))
-            paste(img, L_done2, W / 2, 480, 1 + 1.4 * (1 - eout((k - .12) / .18)), clamp((k - .12) / .06))
+            if t < T_HIRE + .1:
+                o = 1 - clamp((t - T_HIRE) / .1)
+                paste(img, L_done1, W / 2, 390, 1 + 1.4 * (1 - eout(k / .18)), clamp(k / .06) * o)
+                paste(img, L_done2, W / 2, 535, 1 + 1.4 * (1 - eout((k - .12) / .18)), clamp((k - .12) / .06) * o)
+            if t >= T_HIRE:
+                h = t - T_HIRE
+                paste(img, L_join, W / 2, 322, 1, clamp(h / .1))
+                paste(img, L_hire1, W / 2, 405, 1 + 1.4 * (1 - eout(h / .18)), clamp(h / .06))
+                paste(img, L_hire2, W / 2, 545, 1 + 1.4 * (1 - eout((h - .1) / .18)), clamp((h - .1) / .06))
             if k >= .8:
-                paste(img, L_rew, W / 2, 640, 1, clamp((k - .8) / .1))
-                paste(img, L_pay, W / 2, 750, 1 + .5 * (1 - eout((k - .8) / .2)), clamp((k - .8) / .08))
-            if k >= 1.6: paste(img, L_sub, W / 2, 870, 1 + .2 * (1 - eout((k - 1.6) / .2)), clamp((k - 1.6) / .08))
+                paste(img, L_rew, W / 2, 660, 1, clamp((k - .8) / .1))
+                paste(img, L_pay, W / 2, 760, 1 + .5 * (1 - eout((k - .8) / .2)), clamp((k - .8) / .08))
+            if k >= 1.6: paste(img, L_sub, W / 2, 872, 1 + .2 * (1 - eout((k - 1.6) / .2)), clamp((k - 1.6) / .08))
             if k >= 2.4: paste(img, L_cta, W / 2, 1440, (1 + .4 * (1 - eout((k - 2.4) / .2))) * (1 + .035 * (1 - eout(beat / .5))), clamp((k - 2.4) / .08))
             paste(img, L_tag, W / 2, 1540, 1, clamp((k - 2.4) / .1))
+        paste(img, L_badge, W / 2, 255, 1 + .5 * (1 - eout(t / .25)), eout(t / .15))
         paste(img, L_vis, 110, 1610, 1, .9)
         if still is not None: img.convert('RGB').save(out, quality=90); return
         enc.stdin.write(img.convert('RGB').tobytes())
