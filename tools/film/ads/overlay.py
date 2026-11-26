@@ -1,6 +1,6 @@
 """
 Надписи и озвучка поверх готового ролика рекламы «Ищем водителей» (1080×1920).
-  python3 overlay.py <видео> <выход> <заголовок через |> [--voice файл.mp3] [--sub "подстрочник цены"] [--noprice] [--py Y]
+  python3 overlay.py <видео> <выход> <заголовок через |> [--voice файл.mp3] [--sub "подстрочник цены"] [--noprice] [--price "7000–8000 zł"] [--py Y] [--badge ...] [--foot ...]
 Шрифты: Unbounded 800 и Onest 600 (TTF собираются из woff2 проекта, путь — в FONTS).
 """
 import sys, os, subprocess, json
@@ -18,6 +18,7 @@ sub = a[a.index('--sub') + 1] if '--sub' in a else 'пн–пт · в 15:00 св
 noprice = '--noprice' in a
 BADGE = a[a.index('--badge') + 1] if '--badge' in a else 'ИЩЕМ ВОДИТЕЛЕЙ · ВАРШАВА'
 FOOT = a[a.index('--foot') + 1] if '--foot' in a else 'Доставка посылок · Варшава'
+PRICE = a[a.index('--price') + 1] if '--price' in a else '7000–8000 zł'
 PY = int(a[a.index('--py') + 1]) if '--py' in a else 1185      # высота блока цены
 tmp = out + '.layers'; os.makedirs(tmp, exist_ok=True)
 
@@ -44,8 +45,8 @@ if head.strip():
 # 3 — цена
 L3 = layer()
 if not noprice:
-    f = font(UB, 92); w, h = text_c(ImageDraw.Draw(layer()), 0, '6500–8000 zł', f, TEAL)
-    plate(L3, PY, w + 80, h + 70, GRAPH + (235,), 22); text_c(ImageDraw.Draw(L3), PY, '6500–8000 zł', f, TEAL)
+    f = font(UB, 92); w, h = text_c(ImageDraw.Draw(layer()), 0, PRICE, f, TEAL)
+    plate(L3, PY, w + 80, h + 70, GRAPH + (235,), 22); text_c(ImageDraw.Draw(L3), PY, PRICE, f, TEAL)
 f = font(ON, 38); yy = PY + 115 if not noprice else PY + 135
 w, h = text_c(ImageDraw.Draw(layer()), 0, sub, f, WHITE)
 plate(L3, yy, w + 48, h + 34, GRAPH + (215,), 14); text_c(ImageDraw.Draw(L3), yy, sub, f, WHITE)
