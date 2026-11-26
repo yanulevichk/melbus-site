@@ -24,12 +24,12 @@ EDL = [
     (4.8, 5.6, 4, 0.1, 1.6, '11:25', 'ещё адрес'),
     (5.6, 6.8, 5, 0.2, 1.3, '13:05', 'вручил'),
     (6.8, 8.0, 6, 1.7, 1.0, '14:40', 'кузов пустой'),
-    (8.0, 8.4, 6, 2.9, 1.0, '15:00', ''),            # такт в темноте: двери закрыты, горит только лента
-    (8.4, 12.0, 7, 0.0, 1.0, '15:00', ''),
+    (8.0, 8.4, 6, 2.9, 1.0, '', ''),            # такт в темноте: двери закрыты, горит только лента
+    (8.4, 12.0, 7, 0.0, 1.0, '', ''),
 ]
-FREEZE_AT = 10.4          # с этой секунды — стоп-кадр под условия
+FREEZE_AT = 10.0          # с этой секунды — стоп-кадр под условия
 BADGE = 'КУРЬЕР · МАРШРУТЫ GLS · ВАРШАВА'
-FINAL = [(9.2, 'СВОБОДЕН'), (10.0, '6500–8000 zł'), (10.4, 'пн–пт · доставка посылок GLS'), (10.8, 'НАПИШИ В WHATSAPP')]
+FINAL = [(8.8, 'НУЖЕН КУРЬЕР'), (9.6, '7000–8000 zł'), (10.0, 'пн–пт · доставка посылок GLS'), (10.8, 'НАПИШИ В WHATSAPP')]
 
 def font(p, s): return ImageFont.truetype(p, s)
 def clamp(v, a=0.0, b=1.0): return max(a, min(b, v))
@@ -80,8 +80,8 @@ def main():
         if s not in clocks: clocks[s] = text_layer(s, F_clock, WHITE, stroke=6, pad=(20, 20))
         return clocks[s]
     caps = {e[6]: text_layer(e[6].upper(), font(UB, 46), TEAL, plate=(*GRAPH, 235), pad=(26, 14)) for e in EDL if e[6]}
-    L_free = text_layer('СВОБОДЕН', fit('СВОБОДЕН', UB, 150, 980, 5), TEAL, stroke=5, pad=(20, 20))
-    L_pay = text_layer(FINAL[1][1], fit(FINAL[1][1], UB, 104, 960), WHITE, plate=(*GRAPH, 240), pad=(36, 22))
+    L_free = text_layer(FINAL[0][1], fit(FINAL[0][1], UB, 150, 980, 5), TEAL, stroke=5, pad=(20, 20))
+    L_pay = text_layer(FINAL[1][1], fit(FINAL[1][1], UB, 124, 990), WHITE, stroke=5, pad=(20, 20))
     L_sub = text_layer(FINAL[2][1], fit(FINAL[2][1], ON, 46, 940), WHITE, plate=(*GRAPH, 240), pad=(28, 14))
     L_cta = text_layer(FINAL[3][1], fit(FINAL[3][1], UB, 56, 900), GRAPH, plate=(*TEAL, 255), pad=(1080, 26))
     L_vis = text_layer('Визуализация', font(ON, 26), (255, 255, 255, 170), pad=(8, 6))
@@ -128,18 +128,17 @@ def main():
         paste(img, L_badge, W / 2, 255, 1 + .5 * (1 - eout(t / .25)), eout(t / .15))
         final = t >= 8.0
         cs = e[5]
-        if since < .14:                                         # цифры «прокручиваются»
+        if cs and since < .14:                                  # цифры «прокручиваются»
             cs = '%02d:%02d' % (rnd.randrange(5, 15), rnd.randrange(0, 60))
         cy = 470 if not final else 520
-        paste(img, clock(cs), W / 2, cy, (1.0 if not final else 1.12) * (1 + .22 * (1 - eout(since / .18))), 1.0,
-              0 if final else (-2 if ei % 2 else 2))
+        if cs: paste(img, clock(cs), W / 2, cy, 1 + .22 * (1 - eout(since / .18)), 1.0, -2 if ei % 2 else 2)
         if e[6]: paste(img, caps[e[6]], W / 2, 665, 1 + .3 * (1 - eout((since - .06) / .16)), clamp((since - .04) / .08))
         if t >= FINAL[0][0]:
-            k = t - FINAL[0][0]; paste(img, L_free, W / 2, 760, 1 + 1.2 * (1 - eout(k / .16)), clamp(k / .06), -3)
+            k = t - FINAL[0][0]; paste(img, L_free, W / 2, 500, 1 + 1.2 * (1 - eout(k / .16)), clamp(k / .06), -3)
         if t >= FINAL[1][0]:
-            k = t - FINAL[1][0]; paste(img, L_pay, W / 2, 1010, 1 + .4 * (1 - eout(k / .18)), clamp(k / .08))
+            k = t - FINAL[1][0]; paste(img, L_pay, W / 2, 690, 1 + .4 * (1 - eout(k / .18)), clamp(k / .08))
         if t >= FINAL[2][0]:
-            k = t - FINAL[2][0]; paste(img, L_sub, W / 2, 1130, 1 + .3 * (1 - eout(k / .18)), clamp(k / .08))
+            k = t - FINAL[2][0]; paste(img, L_sub, W / 2, 830, 1 + .3 * (1 - eout(k / .18)), clamp(k / .08))
         if t >= FINAL[3][0]:
             k = t - FINAL[3][0]
             band = L_cta.crop((int(L_cta.width / 2 - 560 * eout(k / .22)), 0, int(L_cta.width / 2 + 560 * eout(k / .22)), L_cta.height))
