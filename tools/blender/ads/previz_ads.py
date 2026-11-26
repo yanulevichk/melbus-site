@@ -1,11 +1,11 @@
 """
 ЧЕРНОВЫЕ СЦЕНЫ РЕКЛАМЫ «ИЩЕМ КУРЬЕРА» (вертикаль 9:16, 24 к/с) — превиз для Higgsfield.
 Шесть роликов: 8 «Пустое кресло», 9 «Выбери персонажа», 10 «Окна небоскрёба»,
-11 «Бус из коробок», 12 «Гигантский бус», 13 «Лови ключи».
+11 «Бус из коробок», 12 «Гигантский бус», 13 «Лови ключи», 14 «Один день за 12 секунд».
 
 Запуск:
   blender -b -noaudio --factory-startup -P tools/blender/ads/previz_ads.py -- <сцена> <out_dir> [W H] [k n] [--notext]
-  <сцена> = 8|9|10|11|12|13;  k n — рендерить только кадры, где кадр % n == k (для параллельных процессов)
+  <сцена> = 8|9|10|11|12|13|14;  k n — рендерить только кадры, где кадр % n == k (для параллельных процессов)
   --notext — без надписей (чистый кадр для генерации; надписи потом накладываются при монтаже)
 Кадры: <out_dir>/f####.png
 """
@@ -773,6 +773,131 @@ def scene13():
         thrower.rotation_euler = (0, -.25 * arm, math.pi)
     return 7.0, apply
 
+# =====================================================================================
+# 14 — «ОДИН ДЕНЬ ЗА 12 СЕКУНД» (пять планов «с телефона», жёсткие склейки, часы на экране)
+# =====================================================================================
+def cargo_shell(x0, parcels=True):
+    """Бус с открытым кузовом (нос в +X): пол, борта, крыша, распашные задние двери на петлях."""
+    r = empty('shell', (x0, 0, 0)); W, D = M['paint'], M['dark']
+    box('sfloor', 3.5, 1.9, .06, M['mid'], (-.9, 0, .55), r, 0)
+    for s in (1, -1): box('swall', 3.5, .05, 1.8, W, (-.9, s * .975, 1.48), r, 0)
+    box('sroof', 3.5, 2.0, .05, W, (-.9, 0, 2.405), r, 0)
+    box('sbulk', .05, 1.9, 1.8, M['light'], (.825, 0, 1.48), r, 0)
+    box('scab', 1.9, 2.0, 1.3, W, (1.8, 0, 1.2), r, .1)
+    box('sskirt', 5.3, 2.02, .14, D, (-.02, 0, .45), r, .03)
+    box('sstripe', 3.5, .01, .09, M['teal'], (-.9, -1.006, .72), r, 0)
+    for wx in (1.8, -1.55):
+        for s in (1, -1): cyl('wheel', .37, .26, D, (wx, s * .9, .37), r, 'y')
+    doors = []
+    for s in (1, -1):
+        h = empty('hinge', (-2.66, s * .975, 0), r)
+        box('sdoor', .04, .94, 1.8, W, (-.03, -s * .48, 1.48), h, .01)
+        doors.append((h, s))
+    if parcels:
+        for ix in range(3):
+            for iy in (-.6, 0, .6):
+                for iz in range(3):
+                    b = box('pcl', .42, .5, .36, M['white'], (.45 - ix * .5, iy, .77 + iz * .37), r, .012)
+                    box('tape', .422, .06, .362, M['teal_m'], (0, 0, 0), b, 0)
+    return r, doors
+
+def set_doors(doors, k):
+    """k = 1 — распахнуты на 115°, k = 0 — закрыты."""
+    for h, s in doors: h.rotation_euler = (0, 0, -s * math.radians(115) * k)
+
+def no_parcel(fig):
+    for d in _desc(fig):
+        if d.name.split('.')[0] in ('parcel', 'tape'): d.scale = (0, 0, 0); d.hide_render = True
+
+def scene14():
+    sn = sun(5, (.6, -.55, -.32)); render_setup(wstr=1.0, haze=.002)
+    bg = MAIN_WORLD.node_tree.nodes['Background'].inputs[1]
+    X = [0, 300, 600, 900, 1200]; T = [0, 2.2, 4.6, 7.2, 9.4, 12.0]
+    # --- план 1: 05:30, темно, бус у бордюра, водитель с кофе
+    street(-60, 60); buildings(-60, 60, 10, 1, 12, 26, 1, night=True); buildings(-60, 60, -10, -1, 12, 26, 2, night=True)
+    v1 = make_van('van1'); v1['root'].location = (0, 4.9, 0)
+    c1 = make_figure(M['clay'], 'stand', None, True); no_parcel(c1)
+    c1.location = (3.9, 7.4, .16); c1.rotation_euler = (0, 0, math.radians(-25))
+    cyl('cup', .04, .11, M['white'], (.46, .285, 1.215), c1, 'z', 16)
+    lamp_post(1, 8.6, 1, True); light('POINT', 900, (1, 7.3, 5.6), color=(1, .82, .6))
+    light('SPOT', 2500, (2.9, 4.9, 1.0), (0, math.radians(84), 0), (1, .95, .85), .3)
+    CHK.append(('курьер/бус 1', meshes(c1), meshes(v1['root'])))
+    # --- план 2: 06:40, загрузка посылок через задние двери
+    street(X[1] - 40, X[1] + 40); buildings(X[1] - 40, X[1] + 40, 10, 1, 10, 20, 3)
+    s2, d2 = cargo_shell(X[1]); set_doors(d2, 1)
+    c2 = make_figure(M['clay'], 'stand', None, True); no_parcel(c2); c2.location = (X[1] - 3.55, 0, 0)
+    p2 = box('parcel2', .36, .44, .3, M['white'], (0, 0, 0), None, .015); box('tape', .362, .06, .302, M['teal_m'], (0, 0, 0), p2, 0)
+    P2A, P2B = Vector((X[1] - 3.11, 0, 1.13)), Vector((X[1] - 1.05, 0, .745))
+    CHK.append(('посылка/кузов 2', [p2], meshes(s2))); CHK.append(('курьер/кузов 2', meshes(c2), meshes(s2)))
+    # --- план 3: 10:15, вручение у двери
+    box('ground3', 40, 40, .1, M['walk'], (X[2], 0, -.05), None, 0)
+    WM = mat('wall3', (.55, .53, .5), .85)
+    box('wallL', 6, .3, 6, WM, (X[2] - 3.5, 3, 3), None, 0); box('wallR', 6, .3, 6, WM, (X[2] + 3.5, 3, 3), None, 0)
+    box('wallT', 1.0, .3, 3.9, WM, (X[2], 3, 4.05), None, 0)
+    box('hall', 3, 3, .05, M['mid'], (X[2], 4.7, 0), None, 0); box('hallback', 3, .1, 2.6, M['light'], (X[2], 6.2, 1.3), None, 0)
+    h3 = empty('hinge3', (X[2] - .5, 3, 0)); box('door3', .98, .05, 2.08, M['graph'], (.5, 0, 1.05), h3, .01)
+    box('intercom', .12, .03, .2, M['metal'], (X[2] + .8, 2.83, 1.4), None, 0)
+    c3 = make_figure(M['clay'], 'stand', None, True); c3.rotation_euler = (0, 0, math.pi / 2)
+    cu3 = make_figure(M['clay'], 'stand', None, False); cu3.location = (X[2] + .1, 4.75, .03); cu3.rotation_euler = (0, 0, -math.pi / 2)
+    light('POINT', 300, (X[2], 4.6, 2.3), color=(1, .9, .75))
+    stat3 = named('wallL', 'wallR', 'wallT', 'door3', 'hall', 'hallback') + meshes(cu3)
+    CHK.append(('курьер/дверь 3', meshes(c3) + [o for o in _desc(c3) if o.name.split('.')[0] == 'parcel'], stat3))
+    CHK.append(('клиент/дверь 3', meshes(cu3), named('door3', 'wallL', 'wallR', 'wallT')))
+    # --- план 4: 14:40, пустой кузов изнутри, двери закрываются
+    street(X[3] - 40, X[3] + 40); buildings(X[3] - 40, X[3] + 40, 10, 1, 10, 20, 5); buildings(X[3] - 40, X[3] + 40, -10, -1, 10, 20, 6)
+    s4, d4 = cargo_shell(X[3], parcels=False)
+    c4 = make_figure(M['clay'], 'stand', None, True); no_parcel(c4); c4.location = (X[3] - 4.3, 0, 0)
+    CHK.append(('курьер/двери 4', meshes(c4), meshes(s4)))
+    # --- план 5: 15:00, идёт домой, бус остаётся позади
+    street(X[4] - 60, X[4] + 90); buildings(X[4] - 60, X[4] + 90, 10, 1, 12, 26, 7); buildings(X[4] - 60, X[4] + 90, -10, -1, 12, 26, 8)
+    for i in range(8): tree(X[4] - 20 + i * 13, 9.0, .9)
+    v5 = make_van('van5'); v5['root'].location = (X[4] - 1.5, 4.9, 0)
+    c5 = make_figure(M['clay'], 'stand', None, True); no_parcel(c5)
+    CHK.append(('курьер/бус 5', meshes(c5), meshes(v5['root'])))
+    # --- надписи
+    hud('КУРЬЕР НА БУСЕ · ВАРШАВА', .8, .056, 'g', .05, None, plate='teal')
+    for i, (clock, cap) in enumerate([('05:30', 'кофе — и поехали'), ('06:40', 'загрузил свой район'), ('10:15', 'адрес за адресом'),
+                                      ('14:40', 'кузов пустой'), ('15:00', 'ты свободен')]):
+        hud(clock, .6, .15, 'w', T[i] + .04, T[i + 1] if i < 4 else None, plate='dark')
+        hud(cap, .46, .05, 't', T[i] + .12, T[i + 1] if i < 4 else None, plate='dark')
+    hud('6500–8000 zł', -.22, .12, 't', 10.0, None, plate='dark')
+    hud('пн–пт · выходные свободны', -.34, .042, 'w', 10.25, None, plate='dark')
+    hud('НАПИШИ В WHATSAPP', -.52, .058, 'g', 10.6, None, plate='teal')
+    K = [
+        [(0.0, (9.6, 9.3, 1.35), (3.6, 6.6, 1.25), 24), (2.2, (7.2, 8.6, 1.5), (3.7, 6.9, 1.35), 26)],
+        [(2.2, (X[1] - 5.6, -2.3, 1.55), (X[1] - 2.6, 0, 1.2), 22), (4.6, (X[1] - 4.9, -1.9, 1.5), (X[1] - 2.2, 0, 1.1), 24)],
+        [(4.6, (X[2] - 1.7, -2.6, 1.62), (X[2], 2.4, 1.35), 22), (7.2, (X[2] - 1.35, -.9, 1.6), (X[2] + .05, 3.2, 1.4), 24)],
+        [(7.2, (X[3] - .35, .08, 1.42), (X[3] - 4.3, 0, 1.4), 15), (9.4, (X[3] - .2, .05, 1.42), (X[3] - 4.3, 0, 1.42), 16)],
+        [(9.4, (X[4] + 1.2, 8.0, 1.05), (X[4] + 6.0, 7.5, 1.3), 24), (12.0, (X[4] + 2.6, 7.95, 1.15), (X[4] + 10.5, 7.5, 1.35), 26)],
+    ]
+    ENV = [(.35, .12, (.5, .6, 1), (.4, -.3, -.5), .9), (2.6, .75, (1, .8, .62), (.85, .35, -.3), .55),
+           (5.0, 1.4, (1, .95, .88), (.45, .6, -.6), .5), (5.0, 1.4, (1, .95, .88), (.8, -.3, -.55), .5),
+           (6.0, 1.1, (1, .78, .55), (-.9, .12, -.3), .55)]
+    def apply(t):
+        i = max(j for j in range(5) if t >= T[j] - 1e-6)
+        e, w, c, d, ex = ENV[i]
+        sn.data.energy = e; sn.data.color = c; bg.default_value = 1.5 * w
+        sn.rotation_euler = Vector(d).normalized().to_track_quat('-Z', 'Y').to_euler()
+        sc.view_settings.exposure = ex
+        cam_path(t, K[i], amp=.018)
+        bob = lambda sp: .018 * abs(math.sin(t * sp))
+        # 1: отпивает кофе — лёгкий наклон корпуса
+        c1.rotation_euler = (0, -.05 * eio(seg(t, .5, 1.1)) + .05 * eio(seg(t, 1.3, 1.9)), math.radians(-25))
+        # 2: посылка из рук — в кузов
+        k = eio(seg(t, 2.9, 3.9))
+        p2.location = P2A.lerp(P2B, k) + Vector((0, 0, .14 * math.sin(math.pi * k)))
+        # 3: курьер подходит, дверь открывается
+        k3 = eio(seg(t, 4.6, 6.3))
+        c3.location = (X[2], lerp(-.6, 2.25, k3), bob(9) * (1 - seg(t, 6.0, 6.3)))
+        h3.rotation_euler = (0, 0, math.radians(85) * eio(seg(t, 5.1, 5.85)))
+        # 4: двери закрываются по очереди, внутри темнеет
+        k4a, k4b = 1 - eio(seg(t, 7.7, 8.4)), 1 - eio(seg(t, 8.5, 9.2))
+        for (h, s), kk in zip(d4, (k4a, k4b)): h.rotation_euler = (0, 0, -s * math.radians(115) * kk)
+        if i == 3: bg.default_value = 1.5 * w * (.25 + .75 * (k4a + k4b) / 2)
+        # 5: идёт домой
+        c5.location = (X[4] + lerp(3.6, 8.2, seg(t, 9.4, 12.0)), 7.5, .16 + bob(9))
+    return 12.0, apply
+
 # ---------------- проверка столкновений (ADS_CHECK=1 — без рендера) ----------------
 from mathutils.bvhtree import BVHTree
 def meshes(objs):
@@ -815,7 +940,7 @@ def run_checks(t):
     return hits
 
 # ---------------- запуск ----------------
-DUR, APPLY = {8: scene8, 9: scene9, 10: scene10, 11: scene11, 12: scene12, 13: scene13}[SCENE]()
+DUR, APPLY = {8: scene8, 9: scene9, 10: scene10, 11: scene11, 12: scene12, 13: scene13, 14: scene14}[SCENE]()
 N = int(DUR * FPS)
 os.makedirs(OUT, exist_ok=True)
 for o in _desc(HUD):
