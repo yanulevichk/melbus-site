@@ -8,6 +8,8 @@
 <title>Ваш переезд · MELBUS</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600&family=Unbounded:wght@200;300;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/proto/os/os.css" />
+<script src="/proto/os/os.js"></script>
 <!-- Страница переезда клиента (прототип, 23.11.2026; MELBUS OS — docs/crm/SYSTEM.md, раздел 10). В рабочей версии — /t/<токен>,
      4 языка, данные из базы в реальном времени. Здесь — демо: кнопка «Демо: следующий шаг» двигает переезд вперёд. -->
 <style>
@@ -32,7 +34,7 @@
   .top__when { margin-top: 10px; color: #C3CCD5; font-size: 15px; }
   /* статус */
   .now { margin: -1px 0 0; background: var(--g); color: #fff; padding: 0 20px 26px; }
-  .now__card { border: 1px solid #2C3742; border-radius: 14px; padding: 18px; background: var(--g2); display: grid; gap: 14px; }
+  .now__card { border: 1px solid #2C3742; border-radius: 8px; padding: 18px; background: var(--g2); display: grid; gap: 14px; }
   .now__line { display: flex; align-items: center; gap: 12px; }
   .pulse { width: 12px; height: 12px; border-radius: 50%; background: var(--t); box-shadow: 0 0 0 0 rgba(20,220,213,.6); animation: pulse 1.8s infinite; flex: none; }
   @keyframes pulse { 70% { box-shadow: 0 0 0 12px rgba(20,220,213,0); } 100% { box-shadow: 0 0 0 0 rgba(20,220,213,0); } }
@@ -44,7 +46,7 @@
   /* блоки */
   section { padding: 26px 20px 4px; }
   section h2 { font-size: 22px; margin-bottom: 14px; }
-  .card { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
+  .card { background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 16px; }
   /* лента шагов */
   .tl { list-style: none; margin: 0; padding: 0; }
   .tl li { position: relative; display: grid; grid-template-columns: 26px 1fr auto; gap: 12px; padding: 0 0 18px; }
@@ -70,18 +72,18 @@
   .call { display: inline-flex; align-items: center; justify-content: center; height: 48px; padding: 0 18px; border-radius: 3px; background: var(--t); color: var(--g); font-weight: 600; text-decoration: none; border: 0; cursor: pointer; }
   /* коробки */
   .rooms { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 12px; scrollbar-width: none; }
-  .rooms button { flex: none; display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 14px; border: 1px solid var(--line); border-radius: 999px; background: #fff; cursor: pointer; font-size: 14px; }
+  .rooms button { flex: none; display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 14px; border: 1px solid var(--line); border-radius: 3px; background: #fff; cursor: pointer; font-size: 14px; }
   .rooms button i { width: 10px; height: 10px; border-radius: 3px; background: var(--c); }
   .rooms button[aria-pressed="true"] { border-color: var(--g); background: var(--g); color: #fff; }
   .boxes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .box { background: #fff; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; cursor: pointer; text-align: left; padding: 0; transition: transform .3s var(--ease), box-shadow .3s; }
+  .box { background: #fff; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; cursor: pointer; text-align: left; padding: 0; transition: transform .3s var(--ease), box-shadow .3s; }
   .box:active { transform: scale(.98); }
   .box img { width: 100%; aspect-ratio: 4/3; object-fit: cover; display: block; background: var(--s); }
   .box__b { padding: 10px 12px 12px; border-top: 4px solid var(--c); }
   .box__n { font: 500 14px Onest, sans-serif; }
   .box__code { display: block; color: var(--st); font-size: 11px; letter-spacing: .06em; margin-top: 1px; }
   .box__c { font-size: 13px; color: var(--m); margin-top: 2px; }
-  .st { display: inline-block; margin-top: 8px; font-size: 12px; padding: 3px 8px; border-radius: 999px; background: var(--p); color: var(--m); }
+  .st { display: inline-block; margin-top: 8px; font-size: 12px; padding: 3px 8px; border-radius: 3px; background: var(--p); color: var(--m); }
   .st.ok { background: rgba(7,126,121,.1); color: var(--d); }
   /* доп. работы */
   .ask { border-color: var(--t); box-shadow: 0 0 0 3px rgba(20,220,213,.15); display: grid; gap: 12px; }
@@ -104,14 +106,25 @@
   .demo button.ghost { background: transparent; color: #fff; border: 1px solid #3A4652; }
   .top__demo { display: inline-block; margin: 18px 0 0; font-size: 11px; padding: 3px 8px; border-radius: 4px; background: rgba(255,255,255,.1); color: #C3CCD5; }
   /* окно фото */
-  dialog { border: 0; padding: 0; border-radius: 16px; max-width: min(520px, 94vw); width: 100%; }
+  dialog { border: 0; padding: 0; border-radius: 8px; max-width: min(520px, 94vw); width: 100%; }
   dialog::backdrop { background: rgba(16,22,29,.7); }
   dialog img { width: 100%; display: block; aspect-ratio: 4/3; object-fit: cover; }
   .dlg { padding: 16px; display: grid; gap: 6px; }
   .dlg h3 { font-size: 20px; }
   .reveal { animation: rv .6s var(--ease) both; }
   @keyframes rv { from { opacity: 0; transform: translateY(10px); } }
-  @media (prefers-reduced-motion: reduce) { .pulse, .reveal { animation: none; } .prog i { transition: none; } }
+  /* 28.11.2026 — «живой» слой сайта (/proto/os/): полоса шапки протягивается, зерно на графите, фото коробок шторкой */
+  .top, .now { isolation: isolate; }
+  .top > :not(.os-grain), .now > :not(.os-grain) { position: relative; z-index: 1; }
+  .top::after { z-index: 1; transform-origin: left; transform: scaleX(0); animation: os-tape 1.2s var(--os-out) .55s forwards; }
+  .box { overflow: hidden; }
+  .box img.os-img { will-change: clip-path, transform; }
+  dialog[open] { animation: dlg .5s var(--os-out) both; }
+  dialog[open] img { animation: os-shut 1s var(--os-out) both; }
+  @keyframes dlg { from { opacity: 0; transform: translateY(18px) scale(.98); } }
+  .price__tot .os-num { font-variant-numeric: tabular-nums; }
+  .os-static.os-tape::after { animation: none; transform: none; }
+  @media (prefers-reduced-motion: reduce) { .pulse, .reveal, .top::after, dialog[open], dialog[open] img { animation: none; } .top::after { transform: none; } .prog i { transition: none; } }
 </style>
 </head>
 <body>
@@ -223,6 +236,33 @@
     const extra = askState === 'ok' ? 250 : 0, base = 3890, dep = 778;
     $('price').innerHTML = `<div class="price__row"><span>Переезд «Под ключ» (фикс)</span><b>3 890 zł</b></div>${extra ? `<div class="price__row"><span>Доп. работа: повесить ТВ</span><b>+250 zł</b></div>` : ''}<div class="price__row"><span>Задаток (оплачен 19 нояб.)</span><b>−778 zł</b></div>
       <div class="price__tot"><span style="font-size:15px;font-family:Onest">${st >= 9 ? 'Оплачено' : 'К оплате бригаде'}</span><span>${(base + extra - dep).toLocaleString('ru')} zł</span></div><small>${st >= 9 ? 'Фактура VAT отправлена на e-mail · PDF' : 'Терминал у бригады: BLIK, карта или наличные'}</small>`;
+    alive();
+  }
+  // «живой» слой как на сайте: заголовки по строкам + полоса-скотч, фото коробок шторкой, итог крутится барабанами
+  let firstRun = true, lastTot = '', lastAsk = '', lastFilter = filter;
+  const seenBox = new Set();
+  function alive() {
+    if (!window.OS) return;
+    const tot = document.querySelector('.price__tot span:last-child');
+    // перерисовка не должна заново «играть» то, что клиент уже видел: те же коробки и тот же блок согласия — без анимации
+    const askKey = $('ask').hidden ? '' : askState || 'wait';
+    if (!firstRun && askKey === lastAsk) $('ask').querySelectorAll('h2').forEach((h) => { h.dataset.osDone = h.dataset.osTaped = '1'; h.classList.add('os-tape', 'os-static'); });
+    document.querySelectorAll('#boxes .box').forEach((b) => {
+      const i = b.dataset.i, ready = !b.disabled;
+      if (!firstRun && filter === lastFilter && seenBox.has(i + ready)) { b.classList.remove('reveal'); const im = b.querySelector('img'); if (im) im.dataset.osImg = '1'; }
+      seenBox.add(i + ready);
+    });
+    lastAsk = askKey; lastFilter = filter;
+    if (firstRun) {
+      OS.grain('.top, .now');
+      OS.magnetic('.call, .btn--go');
+      OS.enter(document.body, { heads: '.top h1, .wrap > section > h2', tape: '.wrap > section > h2', imgs: '.box img', drums: '.price__tot span:last-child' });
+    } else {
+      OS.enter(document.body, { heads: '#ask > h2', tape: '#ask > h2', imgs: '.box img', drums: '.none' });
+      if (tot) OS.drum(tot, tot.textContent, lastTot);
+    }
+    lastTot = tot ? tot.textContent.trim() : '';
+    firstRun = false;
   }
   $('rooms').addEventListener('click', (e) => { const b = e.target.closest('[data-r]'); if (b) { filter = b.dataset.r; render(); } });
   $('boxes').addEventListener('click', (e) => {
