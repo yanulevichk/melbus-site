@@ -34,8 +34,8 @@
   const stage = hero.querySelector('.stage'), canvas = hero.querySelector('canvas'), g = canvas.getContext('2d', { alpha: false });
   const caps = [...hero.querySelectorAll('[data-cap]')], outro = hero.querySelector('[data-outro]');
   const intro = hero.querySelector('[data-intro]'), bar = hero.querySelector('[data-bar]');
-  const N = 442, INTRO = 0.17, OUTRO = 0.9;   // 19.11.2026: 442 настоящих кадра (tools/film/hero-frames.json)
-  const CUTS = new Set([170, 336, 366]);                 // склейки фильма: здесь соседние кадры не смешиваем (иначе «двоение»)
+  const N = 602, INTRO = 0.17, OUTRO = 0.9;   // 28.11.2026: 602 кадров — настоящие + дорисованные RIFE (tools/film/hero-frames.json)
+  const CUTS = new Set([261, 449, 483]);                 // склейки фильма: здесь соседние кадры не смешиваем (иначе «двоение»)
   const MASK = dark ? '#0B1015' : '#F4F6F8';
   const isMobile = () => matchMedia('(max-aspect-ratio: 3/4), (max-width: 700px)').matches;
 

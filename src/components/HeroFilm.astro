@@ -13,7 +13,7 @@ interface Props { locale: Locale; tone?: 'dark' | 'light' }
 const { locale: L, tone = 'dark' } = Astro.props;
 const pricing = href(L, 'pricing');
 ---
-<section class:list={['hf', `hf--${tone}`]} data-hf data-tone={tone} data-base="/scenes/hero" data-n="442" aria-label={H.posterAlt[L]}>
+<section class:list={['hf', `hf--${tone}`]} data-hf data-tone={tone} data-base="/scenes/hero" data-n="602" aria-label={H.posterAlt[L]}>
   <div class="hf__stage" data-hf-stage>
     <picture class="hf__poster">
       <source media="(max-aspect-ratio: 3/4), (max-width: 700px)" srcset="/scenes/hero/poster-m.webp" width="608" height="1080" />
