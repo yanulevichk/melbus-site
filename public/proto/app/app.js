@@ -464,6 +464,11 @@
     if (keepToast) app.append(keepToast);
     const view = app.querySelector('.view');
     if (view) { if (anim === 'fwd' || anim === 'back') view.classList.add(anim === 'back' ? 'in-back' : 'in-fwd'); else view.scrollTop = keepScroll; }
+    // 28.11.2026: «живой» слой как на сайте (/proto/os/) — только при переходе на экран, не при каждом нажатии
+    if (window.OS && anim !== false) {
+      OS.grain('.hello, .jhead, .done');
+      OS.enter(app, { heads: '.hello__t, .view h1.h, .done__t', imgs: '', rise: '.view .card, .view .job, .view .item, .view .xitem', drums: '.timer b:not([data-jobclock]), .sum .tot b, .big, .stats b, .daybox__n' });
+    }
     if (S.route.name === 'stage' && ST[flow(J())[S.route.i]]?.kind === 'accept') sigPad('acc', J().accept.sig, (v2) => { J().accept.sig = v2; save(); refreshDock(); });
     if (S.route.name === 'extra') sigPad('extra', S.route.signed, (v2) => { S.route.signed = v2; refreshDock(); });
   }
@@ -763,6 +768,7 @@
         <div><b>${S.log.filter((l) => /^Коробка/.test(l.text)).length}</b><span>сканов коробок</span></div><div><b>${S.day.pauses.length}</b><span>перерывов</span></div></div>
         <button class="btn btn--tape btn--block" data-act="done-close">Готово</button></div>`;
     stopCam(); app.insertAdjacentHTML('beforeend', html); buzz(true);
+    if (window.OS) { OS.grain('.done'); OS.enter(app.querySelector('.done'), { heads: '.done__t', drums: '.stats b' }); }
   }
 
   /* ---------- часы в шапке ---------- */

@@ -213,11 +213,14 @@
     view.innerHTML = fn(cur.arg);
     if (!soft) { view.classList.remove('in'); void view.offsetWidth; view.classList.add('in'); window.scrollTo({ top: 0 }); }
     else view.classList.remove('in');
+    // «живой» слой сайта (/proto/os/): заголовок по строкам + полоса-скотч, фото шторкой, цифры барабанами
+    if (!soft && window.OS) OS.enter(view, { heads: '.tl', tape: '.tl, .card__h h2', imgs: '.ph-t img, .vn__img img, .vid > img', drums: '.kpi b, .jh__price b, .kv__profit dd' });
     (AFTER[page] || (() => {}))(cur.arg);
     closeSide(); setCounts();
     document.title = `${(NAV.find((n) => n[0] === page) || [, page === 'job' ? cur.arg.split('/')[0] : ''])[1]} · Пульт MELBUS (прототип)`;
   }
   window.addEventListener('hashchange', () => render());
+  if (window.OS) { OS.magnetic('.btn--tape'); OS.grain('.side'); }
 
   /* ---------- СЕГОДНЯ ---------- */
   const CREWS = [

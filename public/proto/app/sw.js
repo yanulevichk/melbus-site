@@ -1,8 +1,8 @@
 /* Прототип «MELBUS Бригада»: офлайн-оболочка. Кэшируем только свои файлы (и иконки/логотип), чтобы приложение
    открывалось без сети. Обновление — сменить VERSION. */
-const VERSION = 'brigada-proto-v1';
+const VERSION = 'brigada-proto-v2';   // v2 (28.11.2026): общий «живой» слой /proto/os/
 const FILES = [
-  '/proto/app/', '/proto/app/index.html', '/proto/app/app.css', '/proto/app/app.js', '/proto/app/manifest.webmanifest',
+  '/proto/app/', '/proto/app/index.html', '/proto/app/app.css', '/proto/app/app.js', '/proto/app/manifest.webmanifest', '/proto/os/os.css', '/proto/os/os.js',
   '/icon-192.png', '/icon-512.png', '/apple-touch-icon.png', '/brand/melbus-dark.svg', '/brand/melbus-light.svg', '/brand/mark-dark.svg',
 ];
 self.addEventListener('install', (e) => { e.waitUntil(caches.open(VERSION).then((c) => c.addAll(FILES)).then(() => self.skipWaiting())); });
@@ -12,7 +12,7 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (e) => {
   const u = new URL(e.request.url);
   if (e.request.method !== 'GET' || u.origin !== location.origin) return;
-  const own = u.pathname.startsWith('/proto/app/') || u.pathname.startsWith('/img/icons/') || FILES.includes(u.pathname);
+  const own = u.pathname.startsWith('/proto/app/') || u.pathname.startsWith('/proto/os/') || u.pathname.startsWith('/img/icons/') || FILES.includes(u.pathname);
   if (!own) return;
   // свои файлы: сначала сеть (свежая версия), без сети — из кэша; картинки иконок кэшируем по мере открытия
   e.respondWith(fetch(e.request).then((r) => {
